@@ -96,8 +96,33 @@ game itself (another galaxy, other players). Fixed on the way:
 | You won / You lost | DLOG 5041 / 5051 (5040 / 5050 b&w) | close: beside shot 163 (frame at (200, 57)), PICT 3530 / 3540 |
 | Name a Star | NameAStar @10244c, DLOG 4050 | close: beside shot 164; the field starts empty ("Winner!" was typed) |
 | Armageddon question | ALRT 3240-3244 | close: beside shot 167 (frame, text rows, the black-and-white PICT 3020, buttons) |
-Still to do: List All Explored Stars (DLOG 6040: 20-pixel rows drawn by its own list routine, a sort pop-up, CNTL 6040; asked Jake for a
-capture).
+| List All Explored Stars | ListExploredStars @10000c, InitStarsList @1001a2, MakeOneListedStar @1005d0; DLOG / DITL 6040 (424 x 303), CNTL / MENU 6040 | close: `stars405`, beside Jake's System 7 capture (index 6): the list frame at (13, 26)-(375, 248) to the pixel, 20-pixel rows, the star's small icon (the map's picture number: the red ones in the capture are the mined-out planets), the name at 35, temperature 135, gravity 210 ("0.24G"), metal 285 with commas, "No Climate Info." for a star seen owned but never explored; Sort By (Metal, Quality, Gravity, Owner; kept in the preferences as the program's +0x8e), Go To Star, OK. It was missing from the Galaxy menu (the item sat inside a comment): back in MENU 133's place. Left: the temperature ignores "Temp. in Celsius", as the planet pane does |
+
+## Jake's System 7 captures of 20 Nov, window by window (21 Nov)
+
+Each window opened in the remake (Playwright, 1280 x 960 halved) and put beside its capture, then the parts zoomed x 2. The captures' INDEX.md
+labels from 12 on were a few places off (from thumbnails): corrected in the private repo (You won is 70, Name a Star 71, the filled Master Points
+73, Hall of Fame 74, the Victory summary 75). Found and fixed:
+- **Buttons, every 4.0.5 (and 3.0.1) dialog:** System 7's white round rects with a black line, not the remake's raised grey 7.5 buttons (both
+  versions' captures: 4.0.5 System 7 set, shot 015; 3.0.1 shot 015). Pressed: black. Dimmed: grey (Hall's Details, Auto Play's Config…).
+  The pop-up menus a white box with its shadow and the triangle. panel.css, `html.mac75 .dl20` and `.origdlg`.
+- **Edit fields** (Dip, Name a Star): the item's rectangle with the Dialog Manager's frame 3 pixels out; Dip's amount opens selected, black to
+  the field's right edge (capture 4).
+- **Auto Play:** Config… dimmed unless "Have computer play for me." is chosen (doAutoPlayDialog: HiliteControl 0 for item 3, else 255);
+  the seconds on a System 7.5 scroll bar (`sbar405`, shared with Preferences).
+- **Compare Players and the skills list:** placed as the other dialogs (place405 now takes the classic page's origDialog windows), no
+  dimming; the chart's words in Geneva 9 (they were 9 CSS pixels of Chicago: a theme `chartFont`); the skills list's rows 16 high, the
+  skill at 150 (InitSkillsList). Left: its scroll bar; its order is the galaxy's +0x318 table (a random order dealt at the start,
+  DoGameSolidificationStuff, which also picks each computer's face), which the remake does not keep.
+- Checked the same: Master Points, Hall of Fame / Shame (empty), Preferences, Surrender, Organize, List All Fleets, You won (5041), Name a
+  Star (4050), the eliminated and won bubbles. Left: the Hall's "All editions…" (the remake's own, not in the capture: a question for Jake),
+  Surrender's names look a size smaller, the battle frames (12-59) and the filled Halls / Summary not yet compared.
+- **Shot 204's players list without Jake: answered.** DrawIconRect @11537c sorts the players before drawing: those still in by Total
+  Money (the player record's +0, last turn's income) from the most down, then those out from the latest out (+0x2dc). Jake, losing, is
+  below seven richer rivals, scrolled out of sight; shot 200 (2000) has him fifth already (every Total Money starts with rand(1, 100)
+  added). The remake drew 3.0.1's order (by face); 4.0.5 now sorts as the program (`order405`). In shot 200 four computers have more Total
+  Money than a Novice Jake, so they started as Novice too: the rules' computer start (COMPUTER_START, FUN_004768cc) makes them Novice only
+  with Diabolical computers, so that lost game was most likely a Diabolical one (not confirmed from the shots).
 
 ## Seen in the lost game's shots, not built yet (20 Nov)
 
@@ -105,8 +130,8 @@ capture).
   Happened..." (PerformEndTurn @c000c, DoOneTurn; shots 194-201), the same checker bar as before. Seen on the way: the bitmap fonts draw
   the digit 1 with a gap after it ("201 0", "$1 00,000"); the shots don't (a font matter, js/os/pixel-fonts.css: for Jake).
 - **The players list's second line: done (20 Nov, late)**, beside shot 204: known once best buddies (rules-405 `p.knows405`) or all of them
-  when you are out or the game is over. Report 0x419 (a rival telling you) is not modelled. Open: shot 204's list starts with Willy, not
-  you; why (scrolled, or you left out once out of colonies?) is unchecked.
+  when you are out or the game is over. Report 0x419 (a rival telling you) is not modelled. Shot 204's list starting with Willy: the
+  program's order by Total Money (above, "Jake's System 7 captures").
 - (the original note) **The players list's second line** (shot 204): read in `DrawIconRect` @11537c: for a rival whose home you know (the header's +0x77c,
   -1 until then, set by `SetCompAttrs`), the name 4 higher and under it "%d.%d, %d°": their home's gravity relative to yours (x 100 / your
   +0x32, rounded to tenths) and its temperature (`CalcDisplayTemp`, F or C). Known when you become best buddies (`ConformPlayerAlliances`

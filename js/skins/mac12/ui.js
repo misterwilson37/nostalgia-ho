@@ -257,7 +257,7 @@ function menuLayout405(M, o) {
       named(p('Options', 'Hall Of Fame…'), 'Hall of Fame…'), named(p('Options', 'Hall Of Shame…'), 'Hall of Shame…'), '-', p('Options', 'Preferences…')],
     Ships: M.Ships,
     Galaxy: [
-      keyed(p('Galaxy', 'Compare Players…'), 'Y'), keyed(p('Galaxy', 'Graph History…'), 'H'), it('Statistics…', () => stats405(), { ghost: () => noGame() || !A().me().st405 }), // (a game begun before the counters: dimmed) p('Galaxy', 'List All Explored Stars…'), '-',
+      keyed(p('Galaxy', 'Compare Players…'), 'Y'), keyed(p('Galaxy', 'Graph History…'), 'H'), it('Statistics…', () => stats405(), { ghost: () => noGame() || !A().me().st405 }), p('Galaxy', 'List All Explored Stars…'), '-', // (Statistics: a game begun before the counters is dimmed; MENU 133's order)
       p('Galaxy', 'Dip Into Savings…'), M.Galaxy.find(x => x !== '-' && x[5] === 'A'), '-',
       p('Galaxy', 'Alliances…'), p('Galaxy', 'Give Money/Metal…'), p('Galaxy', 'Surrender To…'), p('Galaxy', 'Send Message…'), '-', p('Galaxy', 'Armageddon')],
     Window: [
@@ -559,6 +559,57 @@ function stars6040() {
   const fr = lang() === 'fr';
   return list6030(L.title, rows, L.go, (sid) => { a.closeModal(); a.UI.sel = sid; a.centerOn(sid); a.renderPanel(); a.draw(); },
     { head: fr ? [2, 13, 22, 299] : [2, 13, 18, 300], go: fr ? [264, 229, 283, 353] : [264, 255, 284, 352], first: true });
+}
+// 4.0.5's List All Explored Stars (ListExploredStars @10000c, InitStarsList @1001a2, MakeOneListedStar @1005d0; DLOG / DITL 6040, 424 x 303):
+// "List of All Explored Stars:" (13, 2); the list (user item 4, (13, 26)-(375, 248), framed; inset a pixel, its scroll bar 15 in from the
+// right) of 20-pixel rows, one column; the Sort By pop-up (CNTL 6040, (20, 264)-(234, 284), its title 64 wide, MENU 6040 Metal, Quality,
+// Gravity, Owner; the choice is the preferences' +0x8e, kept between openings); Go To Star (229, 264) and OK (321, 264, default).
+// The stars: those the player's record has explored or seen owned (+0 or +0xe from 2000), not gone nova (+0x72), sorted by name and then
+// swap-sorted by the menu: metal and quality down, gravity and owner up, the unexplored last. A row (MakeOneListedStar: five fields of 20,
+// 100, 75, 75, 75): the star's small icon (its record's +0xc, the map's picture: 4.0.5 numbers its small icons as its planets), the name,
+// then "%d.%1.1d°F", "%d.%2.2dG" (100 x the star's gravity over your home's) and the metal with commas; a star never explored has STR#
+// "No Climate Info." across 150. Chicago 12. A double click, or Go To Star, selects the star and centres the map on it (SelectNewStar,
+// CenterOnStar). Checked beside Jake's System 7 capture (index 6, 20 Nov): the frame at (13, 26), the columns at 35, 135, 210, 285.
+let EX405 = null;
+function stars405() {
+  const a = A(), el = a.el, p = a.me(), X = a.exploredData ? a.exploredData() : null; if (!X) return false;
+  const L = X.L, P = a.Prefs || {}, menu = L.sortBy || ['Metal', 'Quality', 'Gravity', 'Owner'];
+  let mode = P.starSort405 != null ? P.starSort405 : EX405 != null ? EX405 : (L.sortDefault != null ? L.sortDefault : 1);
+  const rec = X.rec, ex = (s) => !!rec(s).explored, ownerOf = X.ownerOf;
+  const order = () => {
+    const arr = X.swapSort(X.seen.filter(s => !s.nova), (x, y) => x.name < y.name);
+    const val = [(s) => ex(s) ? Math.max(0, rec(s).metal || 0) : -1, (s) => ex(s) ? X.q(s) : -1, (s) => ex(s) ? Math.round(rec(s).g * 100) : 0x7fff, (s) => ownerOf(s) < 0 ? 0x15 : ownerOf(s)][mode];
+    return X.swapSort(arr, mode >= 2 ? (x, y) => val(x) < val(y) : (x, y) => val(x) > val(y));
+  };
+  const icon = (s) => { const b = (a.starLook(s.id) || {}).base || '', m = /^dos:i(\d+)$/.exec(b), im = m && a.IMG['dos:s' + m[1]]; return im && im.src ? im : null; };
+  let list = order(), pick = list.length ? 0 : -1;
+  const box = el('div', { class: 'lst301 ex405', role: 'listbox', 'aria-label': L.title.replace(/:$/, ''), style: at20([27, 14, 247, 359]) });
+  const cell = (t, l, w) => raw('span', t, { style: `position:absolute;left:${l}px;top:0;width:${w}px;overflow:hidden;white-space:nowrap` });
+  const go = () => { const s = list[pick]; if (!s) return; a.closeModal(); a.UI.sel = s.id; a.UI.selFleet = null; a.centerOn(s.id); a.renderPanel(); a.draw(); };
+  const show = () => {
+    box.textContent = '';
+    list.forEach((s, i) => {
+      const k = rec(s), im = icon(s), kids = [im ? el('img', { src: im.src, alt: '', style: 'position:absolute;left:2px;top:2px;width:16px;height:16px;image-rendering:pixelated' }) : null, cell(s.name, 21, 99)];
+      if (k.explored) {
+        const t10 = Math.round(10 * (72 + (k.t - p.homeT))), gr = Math.trunc(100 * k.g / Math.max(0.01, p.homeG));
+        kids.push(cell(cfmt('%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10)), 121, 74), cell(cfmt('%d.%2.2dG', Math.trunc(gr / 100), gr % 100), 196, 74), cell(H().niceNum(Math.max(0, Math.round(k.metal || 0))), 271, 74));
+      } else kids.push(cell(L.noClimate || 'No Climate Info.', 121, 149));
+      box.append(el('div', { class: 'li405' + (i === pick ? ' sel' : ''), role: 'option', 'aria-selected': i === pick ? 'true' : 'false', 'aria-label': s.name,
+        onclick: () => { pick = i; show(); }, ondblclick: () => { pick = i; go(); } }, ...kids));
+    });
+  };
+  const sel = el('select', { class: 'pop12', 'aria-label': L.sortLabel || 'Sort By:', style: at20([264, 84, 283, 218]), // (the box as the capture shows it: 84..218 and its shadow)
+   
+    onchange: (e) => { mode = +e.target.value; EX405 = mode; P.starSort405 = mode; if (a.savePrefs) a.savePrefs(); list = order(); pick = list.length ? 0 : -1; box.scrollTop = 0; show(); } },
+    ...menu.map((t, i) => el('option', { value: i, selected: i === mode ? 'selected' : false }, t)));
+  show();
+  a.modal('', dlog20(424, 303, txt20(L.title, [2, 13, 23, 191]),
+    el('div', { style: at20([26, 13, 248, 375]) + ';border:1px solid #000;box-sizing:border-box;background:#fff' }), box, listBar20(box, [26, 359, 248, 375], 20),
+    txt20(L.sortLabel || 'Sort By:', [265, 20, 284, 84]), sel,
+    ok20(L.go || 'Go To Star', [264, 229, 284, 311], go),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([264, 321, 284, 403]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: L.title.replace(/:$/, '') });
+  return true;
 }
 // an alert over what is open (the dialog stays under it), in the program's words; its picture 3020 is the skin's
 // Mac 2.0.1's alerts (ALRT size and DITL: text, picture and button rectangles, from the resource fork; made by audit/mac-2.0.1 of the private repo): an alert is drawn at those rectangles,
@@ -1949,16 +2000,8 @@ function prefs405() {
   const full = ck('Fully Animated Battles', R(194, 16, 210, 192), P.fullAnim !== false), grp = ck('Groups Shoot Together', R(194, 200, 210, 392), P.groupsTogether !== false);
   const sync = () => { imp.i.disabled = rev.i.disabled = !show.i.checked; }; show.i.addEventListener('change', sync); sync();
   const pw = el('input', { type: 'password', disabled: 'disabled', title: 'The remake keeps no password', style: at20(R(116, 298, 132, 437)) });
-  // the two scroll bars (CNTL 4040, 4060): System 7.5's, a click on an arrow a step, on the grey to that place
-  const bar = (r, C, key) => {
-    const c0 = C || { min: 1, max: 10, def: 5 }, W = r[3] - r[1], cv = el('canvas', { width: 2 * W, height: 32, role: 'slider', tabindex: 0, 'aria-valuemin': c0.min, 'aria-valuemax': c0.max, style: at20(r) + ';image-rendering:pixelated;touch-action:none' });
-    const o = { v: P[key] != null ? P[key] : c0.def, c: c0, cv };
-    o.draw = () => { const x = cv.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); const m = { on: true, value: o.v - c0.min, max: c0.max - c0.min }; if (COLOUR3) drawBar75(x, 0, 0, false, W, m); else drawBar(x, 0, 0, false, W, 16, m); cv.setAttribute('aria-valuenow', o.v); if (o.onset) o.onset(); };
-    const set = (v) => { o.v = Math.max(c0.min, Math.min(c0.max, Math.round(v))); o.draw(); };
-    cv.addEventListener('pointerdown', (e) => { const b = cv.getBoundingClientRect(), h = (e.clientX - b.left) * W / b.width; if (h < 16) set(o.v - 1); else if (h >= W - 16) set(o.v + 1); else set(c0.min + (h - 24) / (W - 48) * (c0.max - c0.min)); });
-    cv.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') set(o.v - 1); if (e.key === 'ArrowRight') set(o.v + 1); });
-    return o;
-  };
+  // the two scroll bars (CNTL 4040, 4060): System 7.5's (sbar405)
+  const bar = (r, C, key) => { const c0 = C || { min: 1, max: 10, def: 5 }; return sbar405(r, c0, P[key] != null ? P[key] : c0.def); };
   const bs = bar(R(174, 156, 190, 286), O.battleSpeed, 'battleSpeed'), po = bar(R(238, 158, 254, 288), O.poll, 'poll');
   const pv = raw('span', '', { class: 'dt20', style: at20(R(238, 334, 254, 354)) + ';text-align:right' });
   po.onset = () => { pv.textContent = String(po.v); };
@@ -2122,8 +2165,21 @@ function dip405() {
     ok20('Cancel', [134, 78, 154, 136], () => a.closeModal())),
     { cls: 'mac12 dl20w', label: 'Dip Into Savings' });
   const q = document.querySelector('.dl20 .dt20'); if (q) q.style.lineHeight = '16px';
-  setTimeout(() => { f.focus(); f.select(); }, 0);
+  setTimeout(() => { f.focus(); f.select(); allSel405(f); }, 0);
   return true;
+}
+// a field whose whole text is selected shows black to its right edge, as TextEdit's in the program's dialog (panel.css .all405), until a key or a click
+function allSel405(f) { f.classList.add('all405'); const off = () => f.classList.remove('all405'); f.addEventListener('keydown', off, { once: true }); f.addEventListener('pointerdown', off, { once: true }); f.addEventListener('blur', off, { once: true }); }
+// a dialog's scroll bar as 4.0.5 sets them (Preferences' CNTL 4040 and 4060, Auto Play's 4020): System 7.5's in colour (drawBar75), a click on an
+// arrow a step, on the grey to that place, the keyboard's arrows; r [top, left, bottom, right], c { min, max }, v0 the value; o.onset after each change
+function sbar405(r, c0, v0) {
+  const W = r[3] - r[1], cv = A().el('canvas', { width: 2 * W, height: 32, role: 'slider', tabindex: 0, 'aria-valuemin': c0.min, 'aria-valuemax': c0.max, style: at20(r) + ';image-rendering:pixelated;touch-action:none' });
+  const o = { v: v0, c: c0, cv };
+  o.draw = () => { const x = cv.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); const m = { on: true, value: o.v - c0.min, max: c0.max - c0.min }; if (COLOUR3) drawBar75(x, 0, 0, false, W, m); else drawBar(x, 0, 0, false, W, 16, m); cv.setAttribute('aria-valuenow', o.v); if (o.onset) o.onset(); };
+  const set = (v) => { o.v = Math.max(c0.min, Math.min(c0.max, Math.round(v))); o.draw(); };
+  cv.addEventListener('pointerdown', (e) => { const b = cv.getBoundingClientRect(), h = (e.clientX - b.left) * W / b.width; if (h < 16) set(o.v - 1); else if (h >= W - 16) set(o.v + 1); else set(c0.min + (h - 24) / (W - 48) * (c0.max - c0.min)); });
+  cv.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') set(o.v - 1); if (e.key === 'ArrowRight') set(o.v + 1); });
+  return o;
 }
 // 4.0.5's Auto Play (doAutoPlayDialog @10417e: DLOG 4020, 409 x 231). "Auto Play Options:" (12, 8); four radio buttons, the player's mode
 // (2 "Have computer play for me.", 1 "Just mark me done every turn.", 3 "Mark me done until something interesting happens.", else "I'll play
@@ -2134,18 +2190,23 @@ function autoPlay405(mode0) {
   const a = A(), el = a.el, P = a.Prefs, secs0 = P.autoSecs != null ? P.autoSecs : 2;
   const opts = [['Have computer play for me.', [35, 12, 53, 236]], ['Just mark me done every turn.', [61, 12, 79, 275]], ['Mark me done until something interesting happens.', [88, 12, 106, 377]], ['I’ll play my own turns, thank you.', [116, 12, 134, 300]]];
   let mode = mode0 != null ? mode0 : 3;
-  const radios = opts.map(([w, r], i) => { const b = el('input', { type: 'radio', name: 'ap405', checked: i === mode ? 'checked' : false, onchange: () => { mode = i; } });
+  const radios = opts.map(([w, r], i) => { const b = el('input', { type: 'radio', name: 'ap405', checked: i === mode ? 'checked' : false, onchange: () => { mode = i; dimCfg(); } });
     return el('label', { style: at20(r) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' }, b, raw('span', w)); });
   const num = raw('span', String(secs0), { class: 'dt20', style: at20([172, 12, 188, 33]) });
-  const sl = el('input', { type: 'range', min: 0, max: 15, value: secs0, style: at20([172, 103, 188, 233]), 'aria-label': 'Seconds', oninput: (e) => { num.textContent = e.target.value; } });
+  const sb = sbar405([172, 103, 188, 233], { min: 0, max: 15 }, secs0), sl = { get value() { return sb.v; } }; // (CNTL 4020: the System 7.5 scroll bar, Jake's System 7 capture 10)
+  sb.cv.setAttribute('aria-label', 'Seconds'); sb.onset = () => { num.textContent = String(sb.v); };
   const ok = () => {
     P.autoSecs = +sl.value; a.savePrefs(); a.closeModal();
     if (mode < 3) a.runAutoPlay({ turns: Infinity, computer: mode === 0, won: mode === 2, lost: mode === 2, news: mode === 2, every: P.autoSecs });
   };
   const cfg = H().rules(G()).autoPlaySettings ? ok20('Config…', [34, 292, 54, 357], () => { P.autoSecs = +sl.value; a.savePrefs(); a.closeModal(); config405(() => autoPlay405(mode)); }) : null;
+  // (Config…, item 9, is hilited 0 only while item 3, "Have computer play for me.", is chosen, else 255: dimmed; Jake's capture 10)
+  function dimCfg() { if (cfg) cfg.disabled = mode !== 0; }
+  dimCfg();
   a.modal('', dlog20(409, 231, el('button', { type: 'button', class: 'ok20 def20', style: at20([192, 332, 212, 390]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK')),
-    txt20('Auto Play Options:', [8, 12, 24, 140]), ...radios, cfg, txt20('Under auto play, event messages disappear after:', [152, 12, 168, 358]), num, sl, txt20('Seconds', [172, 38, 188, 94])),
+    txt20('Auto Play Options:', [8, 12, 24, 140]), ...radios, cfg, txt20('Under auto play, event messages disappear after:', [152, 12, 168, 358]), num, sb.cv, txt20('Seconds', [172, 38, 188, 94])),
     { cls: 'mac12 dl20w', label: 'Auto Play Options' });
+  sb.draw();
   return true;
 }
 // DoConfigAutoPlayDialog @10440e: DLOG 4021, 345 x 162. "Configure Computer's Auto Play Style:" (10, 10); Friendly (10, 40) to Aggressive (250, 40)
@@ -3555,6 +3616,22 @@ function scrollBar75s(q, x, l, t, b, max, val, ox, oy) {
   R(l + 1, tp, 10, 12, '#aaaaaa'); R(l + 1, tp, 10, 1, '#555555'); R(l + 1, tp + 1, 1, 10, '#ccccff'); R(l + 10, tp + 1, 1, 10, '#333366'); R(l + 1, tp + 11, 10, 1, '#333366');
   R(l + 4, tp + 2, 4, 1, '#9999cc'); [3, 6, 9].forEach(k => R(l + 4, tp + k, 4, 1, '#ccccff')); [4, 5, 7, 8].forEach(k => R(l + 4, tp + k, 4, 1, '#666699'));
 }
+// 4.0.5's order of the players' pane (DrawIconRect @11537c, its first loops): a swap sort over the players, the ones still in first, by Total
+// Money (the player record's +0: last turn's income, rules-405 p.tm) from the most down, then the ones out (the galaxy's +0x2dc: the year out, 1
+// for this year) from the latest out; the values carried with a swap as the program does. So the list starts with the richest player, not
+// you: Jake's lost game, shot 204 (2160, losing), shows seven richer rivals and him below them, scrolled out of sight (shot 203 the same).
+function order405(g) {
+  const n = g.players.length, idx = g.players.map((pl, i) => i);
+  const out = (i) => { const pl = g.players[i]; return pl.alive ? 0 : (pl.outYear != null ? pl.outYear : g.year); }, tm = (i) => g.players[i].tm || 0;
+  for (let a = 0; a < n - 1; a++) {
+    let s15 = out(idx[a]), v6 = tm(idx[a]);
+    for (let b = a + 1; b < n; b++) {
+      const s12 = out(idx[b]), v7 = tm(idx[b]);
+      if ((s15 === 0 && s12 === 0 && v6 < v7) || (s15 !== 0 && s12 === 0) || (s15 !== 0 && s12 !== 0 && s15 < s12)) { const t = idx[a]; idx[a] = idx[b]; idx[b] = t; v6 = v7; s15 = s12; }
+    }
+  }
+  return idx;
+}
 function lowBox301(B) {
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), col = COL301(), S5 = STR301(1005), S1 = STR301(1001);
   // (the window's foot: 331 on the 640 x 480 screen; on a taller one GrowMapWin runs the players' and budget's rects and scroll bars to the
@@ -3570,7 +3647,7 @@ function lowBox301(B) {
   const prow = V4 ? Math.trunc((FT - 1 - 166) / RH) : Math.trunc((FT - 1 - 167 - 3) / 18);
   // (the remake's faces are picked from the twenty, not numbered 0 to n - 1 as 3.0.1's are: the order is the players sorted by face, a player with
   // none, the human, after them)
-  const ranked = g.players.map((pl, i) => i).sort((i, j) => ((g.players[i].face ?? 99) - (g.players[j].face ?? 99)) || i - j);
+  const ranked = V4 ? order405(g) : g.players.map((pl, i) => i).sort((i, j) => ((g.players[i].face ?? 99) - (g.players[j].face ?? 99)) || i - j);
   const early = g.year < 2010 && !V4;
   const order = g.players.map((pl, i) => ({ pl, i, at: early ? (i === a.ME ? 0 : -1) : ranked.indexOf(i) }));
   const nP = early ? 1 : g.players.length;
@@ -4610,9 +4687,10 @@ function afterTurn12(go) {
 }
 // 4.0.5's dialogs where System 7 puts them (every DLOG's position word is 0x300A, alertPositionMainScreen): the window with its 8-pixel frame
 // centred across the screen, a fifth of the height left under the menu bar above it, both rounded down; shots 033 (89, 48), 163 (top 56),
-// 164 (171, 65). No dimming behind them (the shots). The remake's own windows stay as they are.
+// 164 (171, 65). No dimming behind them (the shots). The remake's own windows stay as they are; the classic page's drawings of the program's
+// windows (origDialog: Compare Players 6050, the skills list 6100) are placed the same (Jake's System 7 captures 8 and 9).
 function place405(win) {
-  const m = document.getElementById('main'), d = win && win.querySelector(':scope > .wbody > .dl20, :scope > .dl20, .dl20, .bw12w');
+  const m = document.getElementById('main'), d = win && win.querySelector(':scope > .wbody > .dl20, :scope > .dl20, .dl20, .bw12w, .origdlg');
   if (!m || !d || !document.documentElement.classList.contains('mac75')) return;
   const k = MACS.s || 1, r = m.getBoundingClientRect(), W = r.width / k, H = r.height / k + 20, top0 = r.top / k - 20;
   const w = win.offsetWidth, h = win.offsetHeight; // (the frame included: 8 a side)
@@ -4620,7 +4698,7 @@ function place405(win) {
   win.style.position = 'fixed'; win.style.margin = '0';
   win.style.left = (r.left / k + Math.trunc((W - w) / 2)) + 'px'; win.style.top = (top0 + 20 + Math.trunc((H - 20 - h) / 5)) + 'px';
 }
-if (V4) new MutationObserver((ms) => { for (const mu of ms) for (const n of mu.addedNodes) if (n.nodeType === 1) { const w = n.matches('.win.dl20w') ? n : n.querySelector && n.querySelector('.win.dl20w'); if (w) requestAnimationFrame(() => place405(w)); } }).observe(document.body, { childList: true, subtree: true });
+if (V4) new MutationObserver((ms) => { for (const mu of ms) for (const n of mu.addedNodes) if (n.nodeType === 1) { const q = '.win.dl20w, .win:has(> .wbody > .origdlg)', w = n.matches(q) ? n : n.querySelector && n.querySelector(q); if (w) requestAnimationFrame(() => place405(w)); } }).observe(document.body, { childList: true, subtree: true });
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
   document.documentElement.classList.add('mac301'); if (V4) document.documentElement.classList.add('mac405');
@@ -4635,6 +4713,8 @@ if (V3) {
     battleWindow: (b, k) => (own() ? battleWindow(b, k) : false),
     // (the program's own battle window with modern conveniences on too: Jake, 18 Nov, the remake's looked wrong in this skin)
     battleWindowAlways: true,
+    // (Compare Players' chart: its words in Geneva 9, as Jake's System 7 capture 8 of 4.0.5 shows them; the bitmap face, 12 CSS pixels to its 9)
+    chartFont: G9,
     // (3.0.1 works the battles out during the update without showing them: DoBattleStage passes 0 to DoOneBattle; each is shown as its
     // report is announced, GoToNextAnnouncement @161bc8 -> DoMessageAction @161e44 -> ReviewBattle, with Review Event Battles on (Stup
     // +0x46, default 1). Jake, 18 Nov: "Year XXXX", then the battle as its card comes up. 1.2 and 2.0.1 keep afterTurn12.)
@@ -4654,6 +4734,7 @@ if (V3) {
       if (V4 && name === 'surrender') return surrender405();
       if (V4 && name === 'dip') return dip405();
       if (V4 && name === 'autoplay') return autoPlay405();
+      if (V4 && name === 'stars') return stars405();
       return false;
     },
     // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,

@@ -3622,7 +3622,7 @@ function openCompare() {
   const x = cv.getContext('2d');
   x.setTransform(dpr, 0, 0, dpr, 0, 0); x.imageSmoothingEnabled = false;
   const fg = cs.color || '#000', fam = cs.fontFamily || 'sans-serif', px = C.style === 'mac' ? 9 : 11;
-  x.strokeStyle = x.fillStyle = fg; x.font = `${px}px ${fam}`; x.lineWidth = 1;
+  x.strokeStyle = x.fillStyle = fg; x.font = (C.style === 'mac' && T.chartFont) || `${px}px ${fam}`; x.lineWidth = 1; // (a skin's own face for the chart's words: the Mac skins' bitmap Geneva 9)
   const c = L.chart; let left = Math.round(c[0] * U[0]), top = Math.round(c[1] * U[1]), right = Math.round((c[0] + c[2]) * U[0]), bottom = Math.round((c[1] + c[3]) * U[1]);
   if (C.deflate) { left += C.deflate[0]; right -= C.deflate[0]; top += C.deflate[1]; bottom -= C.deflate[1]; }
   const mac = C.style === 'mac', x0 = mac ? left + 50 : left, y0 = mac ? bottom - 14 : bottom, n = info.n;

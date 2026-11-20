@@ -298,3 +298,39 @@ html.mac301lay.mac75 #rep301 .rep12box .rbar12 canvas { display: block; }
 html.mac301lay.mac75 #rep301 .rep12box canvas.grow12 { position: absolute; right: -1px; bottom: -1px; width: 16px; height: 16px; image-rendering: pixelated; }
 /* (3.0.1's End Turn at the map's (3, 2): the map's box starts a column and a row sooner on the System 7.5 screen) */
 html.mac75.macfam #msg.et301 { top: 3px; left: 4px; }
+/* 4.0.5's List All Explored Stars (stars405): 20-pixel rows, the fields placed by MakeOneListedStar; the chosen row inverted (InvertRect) */
+.lst301.ex405 .li405 { position: relative; height: 20px; line-height: 20px; cursor: default; }
+.lst301.ex405 .li405.sel { background: #000; color: #fff; }
+.lst301.ex405 .li405.sel img { filter: invert(1); }
+/* 4.0.5's List All Explored Stars (stars405): 20-pixel rows, the fields placed by MakeOneListedStar; the chosen row inverted (InvertRect) */
+.lst301.ex405 .li405 { position: relative; height: 20px; line-height: 20px; cursor: default; }
+.lst301.ex405 .li405.sel { background: #000; color: #fff; }
+.lst301.ex405 .li405.sel img { filter: invert(1); }
+/* The program's dialogs under System 7.5 (3.0.1 and 4.0.5, html.mac75): the system's own controls are System 7's, not the remake's raised
+   7.5 look (js/os/system75.css). Jake's captures: 4.0.5's System 7 set of 20 Nov (Master Points, the Halls, Preferences, Dip, Surrender,
+   Explored Stars, Organize, Auto Play, List All Fleets) and its shot 015, 3.0.1's shot 015: a white round rect with a black line, black with
+   white words while pressed, grey when dimmed; the pop-up menus a white box with its one-pixel shadow and the black triangle; a selected
+   field's text black with white letters. */
+html.mac75 .dl20 button.ok20 { background: #fff !important; color: #000 !important; border: 1px solid #000 !important; box-shadow: none !important; }
+html.mac75 .dl20 button.ok20:active:not(:disabled) { background: #000 !important; color: #fff !important; }
+html.mac75 .dl20 button.ok20:disabled { color: #999 !important; border-color: #999 !important; opacity: 1; }
+html.mac75 .dl20 button.ok20:focus-visible { outline-offset: 1px; }
+html.mac75 .dl20 select { appearance: none; -webkit-appearance: none; box-sizing: border-box; border: 1px solid #000; border-radius: 0; box-shadow: 1px 1px 0 #000; padding: 0 22px 0 14px;
+  font: 15px/1 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: 0; color: #000; cursor: default; outline: none;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h11L5.5 6z'/%3E%3C/svg%3E") no-repeat right 6px center; }
+html.mac75 .dl20 input[type=text]::selection, html.mac75 .dl20 input[type=number]::selection { background: #000; color: #fff; }
+/* a dialog's edit text (Dip's amount, Name a Star's name; capture 4 of 20 Nov, x 4): the item's rectangle, framed a pixel wide two pixels
+   outside it (the Dialog Manager's frame, 3 out); the text from the rectangle's left; the whole of it selected when it opens, black to its
+   right edge (.all405, taken off at the first key or click) */
+html.mac75 .dl20 input[type=text], html.mac75 .dl20 input[type=password] { box-sizing: border-box; border: 0 !important; border-radius: 0 !important; padding: 0 1px !important; margin: 0;
+  background: #fff !important; color: #000; box-shadow: none !important; outline: 1px solid #000 !important; outline-offset: 2px !important; font: 15px/16px 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif; }
+html.mac75 .dl20 input[type=text].all405 { background: #000 !important; color: #fff; }
+html.mac75 .dl20 input[type=password]:disabled { opacity: 1; }
+/* the classic page's drawings of the program's windows in the Mac skins (origDialog: Compare Players, the skills list): System 7's buttons too */
+html.mac75 .origdlg button { background: #fff !important; color: #000 !important; border: 1px solid #000 !important; box-shadow: none !important; border-radius: 5px !important; }
+html.mac75 .origdlg button:active { background: #000 !important; color: #fff !important; }
+/* 4.0.5's skills list (ListPlayerSkills @1026d0, InitSkillsList @1027c8: List Manager cells 16 high, the name then the skill in fields of 150;
+   Jake's System 7 capture 9) */
+html.mac405 .origdlg.skills .skillist { padding: 0; }
+html.mac405 .origdlg.skills .skillrow { height: 16px; line-height: 16px; padding: 0 0 0 2px; }
+html.mac405 .origdlg.skills .skillrow span:first-child { flex: 0 0 150px; }
