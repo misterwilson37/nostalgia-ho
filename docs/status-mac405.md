@@ -70,7 +70,9 @@ against. "close" lists what is still off.
 |---|---|---|---|
 | Build / Design Ships | `BuildDesignShips` @f0d8e, DLOG / DITL 6000 (500 x 318, its 45 items read from the resource fork) | close | `build405` (js/skins/mac12/ui.js), beside shot 015: the types list on white (the one shown on black), its scroll bar, the picture, name, class, costs, the five System 7.5 scroll bars, Savings and Metal (no dollar sign) with their coins and bars (PICT 4050 / 4052 / 4060: DRAWSHIPMONEYCHIPS, DRAWMETALCHIPS), Built, In Service, # To Build with + and -, Build & Continue, Scrap All, Max Out, Cancel, OK; bought at OK or Build & Continue (as the Windows 4.0.5's, the same program). Left: the window opens centred, the original at its DLOG place (7, 29). |
 
-Not started: the other windows from the menus (shots 014, 016-024), New Game and start-up (001-007, 188-192), battles (033-157, 204-246),
+| List of All Fleets | DLOG / DITL 6030 (486 x 296, the same items as 3.0.1's) | close | 3.0.1's window (`fleets301`), beside shot 016: now with the list's own scroll bar (`listBar20`: System 7.5's, inactive pale grey with outlined arrows when the list fits, as the shot). Left: the window's place (centred). |
+
+Not started: the other windows from the menus (shots 014, 017-024), New Game and start-up (001-007, 188-192), battles (033-157, 204-246),
 won (163-165), armageddon (167-187), lost (247-251). The 3.0.1 skin's versions show meanwhile.
 
 ## Found on the way (other versions)

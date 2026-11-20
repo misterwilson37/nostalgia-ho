@@ -1408,6 +1408,16 @@ function fixStep() {
 const at20 = (r) => `position:absolute;left:${r[1]}px;top:${r[0]}px;width:${r[3] - r[1]}px;height:${r[2] - r[0]}px`;
 const dlog20 = (w, h, ...items) => A().el('div', { class: 'dl20', style: `position:relative;width:${w}px;height:${h}px` }, ...items);
 const txt20 = (t, r) => raw('span', t, { class: 'dt20', style: at20(r) });
+// A List Manager list's scroll bar (3.0.1, 4.0.5: 16 wide inside the list's frame at its right; System 7.5's colour bar in a colour skin,
+// shot 016, the plain one in black and white): r = [top, left, bottom, right] in the window, the list's place in it; arrows a row, the grey a page
+function listBar20(listEl, r, rowH) {
+  const L = r[2] - r[0], c = A().el('canvas', { width: 32, height: 2 * L, 'aria-hidden': 'true', style: at20(r) + ';image-rendering:pixelated;touch-action:none' });
+  const draw = () => { const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); x.imageSmoothingEnabled = false; const max = Math.max(0, listEl.scrollHeight - listEl.clientHeight), o = { on: true, value: max ? listEl.scrollTop : 0, max }; if (COLOUR3) drawBar75(x, 0, 0, true, L, o); else drawBar(x, 0, 0, true, L, 16, o); };
+  listEl.classList.add('nosb12'); listEl.addEventListener('scroll', draw);
+  c.addEventListener('pointerdown', (e) => { const b = c.getBoundingClientRect(), v = (e.clientY - b.top) * L / b.height; listEl.scrollTop += v < 16 ? -rowH : v >= L - 16 ? rowH : v < L / 2 ? -listEl.clientHeight : listEl.clientHeight; draw(); });
+  new MutationObserver(draw).observe(listEl, { childList: true }); requestAnimationFrame(draw);
+  return c;
+}
 const ok20 = (t, r, fn) => A().el('button', { type: 'button', class: 'ok20', onclick: fn, style: at20(r) + ';min-width:0;padding:0' }, raw('span', t));
 // DLOG 4060 (doPollingTimeDialog @1227b4, DITL 4060, CNTL 4060: the setup +0x3e in ticks / 60 as seconds, 1 to 30 (SetCtlMin 1, SetCtlMax $1e), the number
 // in the text at (56, 99); OK only, no Cancel: the value is kept when the slider is let go and OK is pressed)
@@ -2105,7 +2115,7 @@ function fleets301() {
   const sel = el('select', { 'aria-label': 'Sort By', style: at20([265, 80, 285, 213]), onchange: (e) => { mode = +e.target.value; list = sorted(mode); cur = 0; show(); } },
     el('option', { value: 1 }, M[1]), el('option', { value: 2 }, M[2]));
   show();
-  a.modal('', dlog20(486, 296, txt20('List of All Fleets:', [2, 13, 22, 145]), txt20('Sort By:', [267, 13, 285, 78]), el('div', { style: at20([26, 13, 252, 468]) + ';border:1px solid #000;box-sizing:border-box' }), box, sel,
+  a.modal('', dlog20(486, 296, txt20('List of All Fleets:', [2, 13, 22, 145]), txt20('Sort By:', [267, 13, 285, 78]), el('div', { style: at20([26, 13, 252, 468]) + ';border:1px solid #000;box-sizing:border-box' }), box, V3 ? listBar20(box, [26, 452, 252, 468], 16) : null, sel,
     ok20('Go To Fleet', [264, 260, 284, 342], go),
     el('button', { type: 'button', class: 'ok20 def20', style: at20([264, 364, 284, 446]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
     { cls: 'mac12 dl20w', label: 'List of All Fleets' });
@@ -3837,8 +3847,13 @@ const AR75 = ['', '', '      E', '     EFE', '    EFFFE', '   EFFFFFE', '  EFFFF
 const C75 = { E: '#333366', F: '#9999cc' };
 function drawBar75(x, ox, oy, vertical, L, o, ax, ay) {
   const R = (a0, p0, w, h, col) => { x.fillStyle = col; if (vertical) x.fillRect(ox + a0, oy + p0, w, h); else x.fillRect(ox + p0, oy + a0, h, w); };
-  R(0, 0, 16, L, '#000'); R(1, 1, 14, L - 2, '#dddddd');
+  const idle = !(o.max > 0); // (nothing to scroll: pale grey, the arrows outlined in grey, no thumb: shot 016's list)
+  R(0, 0, 16, L, '#000'); R(1, 1, 14, L - 2, idle ? '#eeeeee' : '#dddddd');
   if (o.on === false) return;
+  if (idle) {
+    const obox = (p0, down) => AR75.forEach((row, i) => { for (let j = 0; j < row.length; j++) if (row[j] === 'E') R(1 + j, down ? p0 + 13 - i : p0 + i, 1, 1, '#777777'); });
+    obox(1, false); R(1, 15, 14, 1, '#000'); R(1, L - 16, 14, 1, '#000'); obox(L - 15, true); return;
+  }
   const box = (p0, down, press) => {
     R(1, p0, 14, 14, press ? '#999999' : '#dddddd'); R(1, p0, 13, 1, '#fff'); R(1, p0, 1, 13, '#fff'); R(1, p0 + 13, 14, 1, '#777777'); R(14, p0, 1, 14, '#777777');
     AR75.forEach((row, i) => { for (let j = 0; j < row.length; j++) if (row[j] !== ' ') R(1 + j, down ? p0 + 13 - i : p0 + i, 1, 1, C75[row[j]]); });
