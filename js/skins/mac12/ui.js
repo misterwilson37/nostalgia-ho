@@ -1954,7 +1954,9 @@ function chat301() {
   const prompt = raw('span', '', { class: 'dt20', style: at20([7, 154, 24, 355]) });
   const left = cells20(1, 4, [], {}), right = cells20(5, 4, [], {});
   const choices = (k) => {
-    if (k === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) && !isNaN(+o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+    // (4.0.5's groups: Everyone ICON 1402, Your Allies and Your Buddies 4018, matched pixel for pixel in Jake's shot 022)
+    const GI4 = { all: 'dos:i1402', allies: 'dos:i4018', buddies: 'dos:i4018' };
+    if (k === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) && !isNaN(+o[0]) ? hat(pl(o[0])) : V4 ? GI4[o[0]] || null : null, off: !!o[2] }));
     if (k === 1) return C.actions.map((x, i) => ({ id: i, i, name: x.label, icon: 'dos:i' + (3000 + i) }));
     const part = act().parts[k - 2], kind = part[1];
     return C.list(g, ME, kind, a.UI.sel).map(o => ({ id: String(o[0]), name: o[1], icon: kind === 'players' && pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
