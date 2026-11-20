@@ -1013,8 +1013,8 @@ function vScroll(target, l, t, h) {
   const a = window.HOAPI, bar = a.el('div', { class: 'dd-vs', 'aria-hidden': 'true' }), up = a.el('span', { class: 'a u' }), dn = a.el('span', { class: 'a d' }), th = a.el('span', { class: 'th' });
   bar.append(up, th, dn); bar.style.left = du(l); bar.style.top = du(t); bar.style.height = du(h);
   // (the Windows program's: Windows' bar, 17 across, 16-pixel arrows with their black lines and a thumb of a fixed 15 + 1: wBar's, as boxes; js/skins/dos/win31/frame.css)
-  const w = winOn(), A = w ? 16 : 9, trk = h - 2 * A, upd = () => {
-    const tot = target.scrollHeight, vis = target.clientHeight, max = Math.max(0, tot - vis), k = vis ? tot / vis : 1, th0 = w ? 16 : Math.max(8, Math.min(trk, Math.round(trk / Math.max(1, k))));
+  const w = winOn(), A = w ? 16 : 14, trk = h - 2 * A, upd = () => { // (DOS: 14-row arrow boxes and a fixed 13-row thumb, v20dos-orig-turn2)
+    const tot = target.scrollHeight, vis = target.clientHeight, max = Math.max(0, tot - vis), k = vis ? tot / vis : 1, th0 = w ? 16 : 13;
     th.style.height = du(th0); th.style.top = du(A + (max ? Math.round(target.scrollTop / max * (trk - th0)) : 0));
   };
   const step = (d) => { target.scrollTop += d; upd(); };

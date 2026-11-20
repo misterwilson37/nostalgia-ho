@@ -103,7 +103,7 @@ html.dosframe #msg .clock.pic { padding: 0; }
 .dd-btn:active { box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #555; }
 .dd-btn.def { outline: calc(2 * var(--du)) solid #000; outline-offset: calc(-1 * var(--du)); }
 .dd-slider { background: #aaa; border: calc(1 * var(--du)) solid #000; box-sizing: border-box; cursor: pointer; }
-.dd-slider .arr { position: absolute; top: 0; bottom: 0; width: calc(15 * var(--du)); background: #aaa; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-1 * var(--du)) calc(-1 * var(--du)) 0 #555; }
+.dd-slider .arr { position: absolute; top: 0; bottom: 0; width: calc(15 * var(--du)); background: #aaa; box-shadow: inset calc(-1 * var(--du)) calc(-1 * var(--du)) 0 #555, inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff; }
 .dd-slider .arr.l { left: 0; } .dd-slider .arr.r { right: 0; }
 .dd-slider .arr::after { content: ""; position: absolute; top: calc(3 * var(--du)); border: calc(4 * var(--du)) solid transparent; }
 .dd-slider .arr.l::after { left: calc(2 * var(--du)); border-right-color: #000; border-left-width: 0; }
@@ -288,3 +288,12 @@ html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-vis
 .dd .dd-title.teal { cursor: default; touch-action: none; }
 /* (the report bubble keeps a focus mark for the keyboard, in the program's own dotted style, not the remake's gold ring: v20dos-orig-turn2's bubble has a plain black frame) */
 html.dosframe .card:focus-visible { outline: calc(1 * var(--du)) dotted #000; outline-offset: calc(-3 * var(--du)); }
+
+/* the program's own scroll bar, from v20dos-orig-turn2's pixels: 8 wide; black lines round it, the track #aaa with a black right line;
+   each arrow box and the thumb cover that right line: a white top row and left column under a #555 bottom row and right column, #aaa inside;
+   the arrow boxes 14 rows, the arrows the BIOS's (a stem 2 wide, a head 4 wide and 2 rows: rows 1-2 going up, 4-5 going down); the thumb
+   a fixed 13 rows. (The Windows program's bar: win31/frame.js.) */
+html:not(.os-win31) .dd-vs .a, html:not(.os-win31) .dd-vs .th { right: calc(-1 * var(--du)); box-shadow: none; background: linear-gradient(#555, #555) 100% 0 / calc(1 * var(--du)) 100% no-repeat, linear-gradient(#555, #555) 0 100% / 100% calc(1 * var(--du)) no-repeat, linear-gradient(#fff, #fff) 0 0 / calc(1 * var(--du)) 100% no-repeat, linear-gradient(#fff, #fff) 0 0 / 100% calc(1 * var(--du)) no-repeat, #aaa; }
+html:not(.os-win31) .dd-vs .a { height: calc(14 * var(--du)); }
+html:not(.os-win31) .dd-vs .a::after { border: 0; left: calc(1 * var(--du)); top: calc(3 * var(--du)); bottom: auto; width: calc(4 * var(--du)); height: calc(8 * var(--du)); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='8' shape-rendering='crispEdges'%3E%3Crect x='1' width='2' height='8'/%3E%3Crect y='1' width='4' height='2'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; image-rendering: pixelated; }
+html:not(.os-win31) .dd-vs .a.d::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='8' shape-rendering='crispEdges'%3E%3Crect x='1' width='2' height='8'/%3E%3Crect y='4' width='4' height='2'/%3E%3C/svg%3E"); }
