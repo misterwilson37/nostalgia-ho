@@ -175,7 +175,7 @@ function menuLayout301() {
   const fleetHere = () => { const s = selStar(), f = selFleet(); return s && f && f.star === s.id ? f : null; };
   const abandonMarked = () => { const t = H().rules(g()).evacuateToggle, s = selStar(); return !!(t && s && t.marked(g(), s.id)); };
   const hideInfo = () => { INFO301 = !INFO301; document.documentElement.classList.toggle('mac301noinfo', !INFO301); A().resize(); A().renderPanel(); A().draw(); };
-  return {
+  const M = {
     File: [
       it('New…', () => A().newGameDialog(), { key: 'N' }),
       it('Open…', () => A().openSavedGames(), { key: 'O' }),
@@ -233,6 +233,37 @@ function menuLayout301() {
       it(() => (INFO301 ? S(11) : S(12)), hideInfo, { ghost: noGame, key: 'I' }),
       '-',
       it('Clean Up Windows', () => {}, { ghost: noGame })],
+  };
+  return V4 ? menuLayout405(M, { pick: (L, name) => L.find(x => x !== '-' && x[0] === name), cmd, out, gone }) : M;
+}
+// Mac 4.0.5's menus (MENU 129-134 of its resource fork, HOLANG.mac405En.MENU; Jake's shots 011-013, 022-024, 166, 251): 3.0.1's commands
+// in 4.0.5's words and order. File: New Game, Open Game, Begin Game (network: dimmed), Close Game, Save Game (the remake saves by itself:
+// dimmed), End Turn, End Turn and Switch Players, Page Setup, Print, Quit. Options: Auto Play, Sound, Master Point List, Hall of Fame, Hall
+// of Shame, Preferences. Galaxy: Compare Players (Y), Graph History (H), Statistics (dimmed: the engine keeps no counters yet, as the
+// Windows 4.0.5 skin's), List All Explored Stars, Dip Into Savings, Abandon Planet, Alliances, Give Money/Metal, Surrender To, Send Message,
+// Armageddon (no Fix Spending). Window: Tech Spending, Report, Chat (network: dimmed), Zoom In, Zoom Out, Hide Information, Clean Up Windows.
+function menuLayout405(M, o) {
+  const p = (menu, name) => o.pick(M[menu], name), keyed = (x, key) => x && [x[0], x[1], x[2], x[3], x[4], key];
+  const named = (x, label) => x && [label, x[1], x[2], x[3], x[4], x[5]];
+  return {
+    File: [
+      named(p('File', 'New…'), 'New Game…'), named(p('File', 'Open…'), 'Open Game…'), it('Begin Game', () => {}, { ghost: o.gone, key: 'B' }), '-',
+      named(p('File', 'Close…'), 'Close Game'), it('Save Game', () => {}, { ghost: o.gone, key: 'S' }), '-',
+      p('File', 'End Turn'), named(p('File', 'End Turn & Switch Players'), 'End Turn and Switch Players'), '-',
+      p('File', 'Page Setup…'), p('File', 'Print…'), '-', p('File', 'Quit')],
+    Edit: M.Edit,
+    Options: [
+      p('Options', 'Auto Play…'), '-', p('Options', 'Sound'), '-',
+      it('Master Point List…', o.cmd(/master point/i), { ghost: () => !Object.keys(ITEMS).some(n => /master point/i.test(n)) }),
+      named(p('Options', 'Hall Of Fame…'), 'Hall of Fame…'), named(p('Options', 'Hall Of Shame…'), 'Hall of Shame…'), '-', p('Options', 'Preferences…')],
+    Ships: M.Ships,
+    Galaxy: [
+      keyed(p('Galaxy', 'Compare Players…'), 'Y'), keyed(p('Galaxy', 'Graph History…'), 'H'), it('Statistics…', () => {}, { ghost: () => true }), p('Galaxy', 'List All Explored Stars…'), '-',
+      p('Galaxy', 'Dip Into Savings…'), M.Galaxy.find(x => x !== '-' && x[5] === 'A'), '-',
+      p('Galaxy', 'Alliances…'), p('Galaxy', 'Give Money/Metal…'), p('Galaxy', 'Surrender To…'), p('Galaxy', 'Send Message…'), '-', p('Galaxy', 'Armageddon')],
+    Window: [
+      p('Window', 'Tech Spending Window'), p('Window', 'Report Window'), it('Chat Window', () => {}, { ghost: () => true, key: '3' }), '-',
+      p('Window', 'Zoom In'), p('Window', 'Zoom Out'), M.Window.find(x => x !== '-' && x[5] === 'I'), '-', p('Window', 'Clean Up Windows')],
   };
 }
 // Mac 2.0.1's menus: MENU 129 (File), 131 (Options) and 133 (Galaxy) as that program has them (the rest are 1.2's, in the same words), from the resource fork
