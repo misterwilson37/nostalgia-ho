@@ -6,12 +6,18 @@
 // skin (js/skins/mac4c) is this one with the pictures of its "Ho! 4.0
 // Color Picts" file (assets/skins/mac4c, same names).
 //
-// It is the Mac 3.0.1 skin (js/skins/mac3/ui.js, itself the DOS skin on
-// the classic page) with these hooks in place of 3.0.1's (window.HOMAC4).
-// 4.0 is the program the Windows 95 4.0.5 was ported from, and numbers its
-// icons as that one numbers its bitmaps, so where each picture goes follows
-// the Windows 4.0.5 skin (js/skins/w95/ui.js, read from SPACEHO.EXE) until
-// the Mac code says otherwise.
+// 4.0.5's main screen is 3.0.1's: ResetWindows @8477a places the map window,
+// its 226-pixel information column and the floating windows along the foot
+// exactly as 3.0.1's @f4b9a does, with one window more (Chat, in the middle).
+// So this skin runs the Mac skins' code (js/skins/mac12/ui.js) as version
+// 4.0.5 (window.HOMAC4V: its 3.0.1 path, with 4.0.5's own routines where
+// they differ, docs/status-mac405.md), and keeps here what is 4.0.5's own:
+// its pictures, planets, report pictures, ship parts, title and End Turn
+// button (window.HOMAC4, applied last by js/skins/mac3/pictures.js).
+// 4.0 numbers its icons as the Windows 4.0.5 numbers its bitmaps (the
+// Windows program was ported from it), so where each picture goes follows
+// the Windows 4.0.5 skin (js/skins/w95/ui.js) until the Mac code says otherwise.
+window.HOMAC4V = true;
 (function () {
 'use strict';
 const P = 'dos:'; // the DOS skin's name for a skin's pictures
@@ -30,182 +36,6 @@ const images = {
 };
 for (let n = 0; n < 16; n++) { images['bad' + n + '_0'] = 'i' + (2000 + n); images['bad' + n + '_1'] = 'i' + (2500 + n); }
 
-
-// ---------- the floating windows ----------
-// 4.0.5's Window menu shows three floating windows (windoids, WDEF 1000 and
-// 1500 "TOOLWDEF": a thin title bar with a close box and no title text):
-// Tech Spending (225 x 96, the vertical research bars), Report (250 x 96,
-// growable: the reports, a picture and a line each, 32 pixels a row) and
-// Chat (250 x 96, growable). All three open at start; Clean Up Windows puts
-// them back along the map's edge (Tech at the left, Chat in the middle, Report
-// at the right; ResetWindows @8477a), and Hide Information takes away the
-// 226-pixel information column at the left of the map window (the panel here).
-// Where they were put and whether they are open is kept for each skin
-// ("ho5.win.mac4", "ho5.win.mac4c"). The contents are the classic page's own:
-// its Technology box, the turn's reports and the chat lines (docs/405-windows.md,
-// "Floating windows"). On a phone the windows are stacked panels under the map.
-const WIN_KEY = 'ho5.win.' + (colour ? 'mac4c' : 'mac4');
-const WIN_KEYS = ['tech', 'report', 'chat'];
-const WIN_LABEL = { tech: 'Tech Spending', report: 'Report', chat: 'Chat' };
-const WIN_SIZE = { tech: [225, 96], report: [250, 96], chat: [250, 96] }; // ResetWindows' sizes
-const TH = () => window.HOTHEME, api = () => TH() && TH().api, game = () => { const a = api(); return a && a.G; };
-let ws = null, layer = null, wins = {}, techBox = null, chatFeat = null, infoOn = true, zTop = 10, hist = { g: null, by: {} };
-const phone = () => window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-function wsGet() {
-  if (ws) return ws;
-  let s = null; try { s = JSON.parse(localStorage.getItem(WIN_KEY) || 'null'); } catch (e) { s = null; }
-  const num = (v) => (typeof v === 'number' && isFinite(v) ? v : null);
-  ws = {};
-  for (const k of WIN_KEYS) { const t = (s && s[k]) || {}; ws[k] = { open: t.open !== false, x: num(t.x), y: num(t.y), w: num(t.w), h: num(t.h) }; }
-  return ws;
-}
-function wsSave() { try { localStorage.setItem(WIN_KEY, JSON.stringify(wsGet())); } catch (e) { /* (not kept) */ } }
-const winOpen = (k) => wsGet()[k].open;
-const chatHere = () => { try { return !!(chatFeat && chatFeat()); } catch (e) { return false; } };
-const winHere = (k) => k !== 'chat' || chatHere();
-// ResetWindows: Tech at the left edge, Report at the right (252 from it), Chat between
-function cleanPlace(k, W) {
-  const sz = WIN_SIZE[k], x = k === 'tech' ? 2 : k === 'report' ? W - sz[0] - 2 : Math.round((W - sz[0]) / 2);
-  return { x: Math.max(0, x), y: 6 };
-}
-function mapBox() { const m = document.getElementById('mapwrap'); return m ? { w: m.clientWidth, h: m.clientHeight } : { w: 800, h: 500 }; }
-function winRect(k) {
-  const st = wsGet()[k], m = mapBox(), d = cleanPlace(k, m.w), sz = WIN_SIZE[k];
-  const w = k === 'tech' ? sz[0] : Math.max(120, Math.min(st.w || sz[0], m.w - 4)), h = k === 'tech' ? null : Math.max(60, Math.min(st.h || sz[1], m.h - 20));
-  let x = st.x == null ? d.x : st.x, y = st.y == null ? d.y : st.y;
-  x = Math.max(30 - w, Math.min(x, m.w - 30)); y = Math.max(0, Math.min(y, Math.max(0, m.h - 14)));
-  return { x, y, w, h };
-}
-function mkWin(k) {
-  const a = api(), el = a.el;
-  const close = el('button', { type: 'button', class: 'mwclose', 'aria-label': 'Close', title: 'Close', onclick: () => setOpen(k, false) });
-  const bar = el('div', { class: 'mwbar' }, close, el('span', { class: 'mwtitle' }, WIN_LABEL[k]));
-  const body = el('div', { class: 'mwbody' });
-  const w = el('section', { class: 'mwin mw-' + k, 'data-win': k, 'aria-label': WIN_LABEL[k] }, bar, body);
-  const st = () => wsGet()[k];
-  const front = () => { w.style.zIndex = String(++zTop); };
-  w.addEventListener('pointerdown', front);
-  let drag = null;
-  bar.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.mwclose') || layer.classList.contains('stack') || e.button > 0) return;
-    const r = winRect(k); drag = { px: e.clientX, py: e.clientY, x: r.x, y: r.y };
-    try { bar.setPointerCapture(e.pointerId); } catch (x) { /* (no capture) */ }
-    e.preventDefault();
-  });
-  bar.addEventListener('pointermove', (e) => {
-    if (!drag) return;
-    const s = st(); s.x = Math.round(drag.x + e.clientX - drag.px); s.y = Math.round(drag.y + e.clientY - drag.py);
-    place(k);
-  });
-  const end = () => { if (!drag) return; drag = null; const r = winRect(k); const s = st(); s.x = r.x; s.y = r.y; wsSave(); place(k); };
-  bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
-  if (k !== 'tech') { // the growable ones: a grow box at the lower right
-    const grow = el('i', { class: 'mwgrow', 'aria-hidden': 'true' });
-    let gd = null;
-    grow.addEventListener('pointerdown', (e) => { const r = winRect(k); gd = { px: e.clientX, py: e.clientY, w: r.w, h: r.h }; try { grow.setPointerCapture(e.pointerId); } catch (x) { /* (no capture) */ } e.preventDefault(); e.stopPropagation(); });
-    grow.addEventListener('pointermove', (e) => { if (!gd) return; const s = st(); s.w = Math.round(gd.w + e.clientX - gd.px); s.h = Math.round(gd.h + e.clientY - gd.py); place(k); });
-    const gend = () => { if (!gd) return; gd = null; const r = winRect(k); const s = st(); s.w = r.w; s.h = r.h; wsSave(); place(k); };
-    grow.addEventListener('pointerup', gend); grow.addEventListener('pointercancel', gend);
-    w.append(grow);
-  }
-  w._body = body; front();
-  return w;
-}
-function place(k) {
-  const w = wins[k]; if (!w) return;
-  if (layer.classList.contains('stack')) { w.style.left = w.style.top = w.style.width = w.style.height = ''; return; }
-  const r = winRect(k);
-  w.style.left = r.x + 'px'; w.style.top = r.y + 'px'; w.style.width = r.w + 'px'; w.style.height = r.h == null ? '' : r.h + 'px';
-}
-function setOpen(k, on) {
-  wsGet()[k].open = on; wsSave();
-  const a = api(); if (on && wins[k]) wins[k].style.zIndex = String(++zTop);
-  if (a && a.G) a.renderPanel(); applyWins();
-}
-// Clean Up Windows: every window back at its place and size, open ones stay open
-function cleanUp() {
-  for (const k of WIN_KEYS) { const s = wsGet()[k]; s.x = s.y = s.w = s.h = null; }
-  wsSave(); applyWins();
-}
-function setInfo(on) {
-  infoOn = on; document.documentElement.classList.toggle('mw-noinfo', !on);
-  const a = api(); if (a) { a.resize(); if (a.G) a.draw(); }
-}
-function ensureLayer() {
-  const a = api(), stack = phone(), host = document.getElementById(stack ? 'main' : 'mapwrap');
-  if (!host) return false;
-  if (!layer) layer = a.el('div', { class: 'mw-layer' });
-  layer.classList.toggle('stack', stack);
-  if (layer.parentNode !== host) host.append(layer);
-  return true;
-}
-// the turn's reports (and chat lines), kept for this game as the Report window keeps its list
-function history() {
-  const a = api(), G = a.G, me = a.me(), key = a.ME + ':' + G.turn;
-  if (hist.g !== G) hist = { g: G, by: {} };
-  hist.by[key] = { year: G.year, ms: (me.inbox || []).slice() };
-  const keys = Object.keys(hist.by).sort((x, y) => hist.by[x].year - hist.by[y].year || (x < y ? -1 : 1)).filter(x => x.split(':')[0] === String(a.ME));
-  return keys.slice(-12).map(x => hist.by[x]);
-}
-function iconSrc(m) {
-  const a = api(), T = TH(); let icon = m.icon;
-  if (T.messageLook) { const t = T.messageLook(m, { icon, sound: m.sound }, { G: a.G, ME: a.ME, starLook: a.starLook }); if (t) icon = t.icon; }
-  return (icon && a.A.img[icon]) || (a.A.img[P + 'i' + (a.me().female ? 1905 : 1405)]);
-}
-function listRows(items, cur) {
-  const a = api(), el = a.el, G = a.G, out = [];
-  for (const [m, isCur] of items) {
-    const go = () => {
-      if (m.battle) { a.openBattle(m.battle); return; }
-      if (m.star != null) { a.UI.sel = m.star; a.centerOn(m.star); a.renderPanel(); a.draw(); }
-    };
-    out.push(el('li', { class: 'mwrow' + (isCur ? ' cur' : '') + (m.battle || m.star != null ? ' click' : ''), tabindex: m.battle || m.star != null ? 0 : null, onclick: go,
-      onkeydown: (e) => { if (e.key === 'Enter' && (m.battle || m.star != null)) go(); } },
-    el('img', { src: iconSrc(m), alt: '', draggable: 'false' }), el('span', null, a.degText(HO.say(G, m.text)))));
-  }
-  return out;
-}
-function fillReport(body) {
-  const a = api(), el = a.el, rows = [];
-  const hs = history(), UI = a.UI;
-  hs.forEach((h, i) => {
-    const last = i === hs.length - 1;
-    if (hs.length > 1) rows.push(el('li', { class: 'mwyear' }, String(h.year)));
-    rows.push(...listRows(h.ms.map((m, j) => [m, last && j === UI.msgIdx])));
-  });
-  const ul = el('ul', { class: 'mwlist' }, ...(rows.length ? rows : [el('li', { class: 'mwnone' }, 'No reports this turn.')]));
-  body.replaceChildren(ul);
-  const c = ul.querySelector('.cur'); ul.scrollTop = c ? Math.max(0, c.offsetTop - ul.clientHeight / 2) : ul.scrollHeight; // ScrollReportToCurrentDate
-}
-function fillChat(body) {
-  const a = api(), el = a.el, items = [];
-  for (const h of history()) for (const m of h.ms) if (m.chat) items.push([m, false]);
-  const ul = el('ul', { class: 'mwlist' }, ...(items.length ? listRows(items) : [el('li', { class: 'mwnone' }, 'No messages yet.')]));
-  body.replaceChildren(ul, el('button', { type: 'button', class: 'mwsend', onclick: () => a.openChat() }, 'Send a message…'));
-  ul.scrollTop = ul.scrollHeight;
-}
-// build, place and fill all three for the game on the screen
-function applyWins() {
-  const a = api(); if (!a || !ensureLayer()) return;
-  const G = a.G;
-  layer.hidden = !G;
-  document.documentElement.classList.toggle('mw-noinfo', !infoOn);
-  if (!G) return;
-  for (const k of WIN_KEYS) {
-    if (!wins[k]) { wins[k] = mkWin(k); layer.append(wins[k]); }
-    else if (wins[k].parentNode !== layer) layer.append(wins[k]);
-    const on = winOpen(k) && winHere(k);
-    wins[k].hidden = !on;
-    if (!on) continue;
-    place(k);
-    if (k === 'tech') { if (techBox && wins.tech._body.firstChild !== techBox) wins.tech._body.replaceChildren(techBox); }
-    else if (k === 'report') fillReport(wins.report._body);
-    else fillChat(wins.chat._body);
-  }
-}
-let phoneWas = null;
-window.addEventListener('resize', () => { const p = phone(); if (phoneWas !== null && p !== phoneWas) { phoneWas = p; applyWins(); } else { phoneWas = p; for (const k of WIN_KEYS) place(k); } });
-
 window.HOMAC4 = {
   dir: colour ? 'assets/skins/mac4c/' : 'assets/skins/mac4/',
   // its sounds: SOUNDS.mac4 (mac4c) in js/skins.js
@@ -216,16 +46,6 @@ window.HOMAC4 = {
   endTurnPic: PIC(5500), // the round End Turn button (pressed: 5501)
   endTurnYear: [17, 32, 27, 15, 60], // its black window, where 4.0 writes the year
   endTurnKey: '⌘T', // File menu: End Turn ⌘T
-  // The floating windows (above): the Technology box leaves the panel for the
-  // Tech Spending window, whose bars stand up as 4.0.5's do (vertical log bars)
-  techBars: 'vertical',
-  panel(box, parts) {
-    techBox = parts.tech || null;
-    if (techBox) { if (techBox.parentNode) techBox.remove(); techBox.classList.add('mw-techbars'); }
-    applyWins();
-  },
-  afterMsg() { applyWins(); }, // the Report and Chat windows follow the reports
-  menus(M) { const it = (M.Galaxy || []).find(x => x[0] === 'Send a message…'); chatFeat = it ? it[2] : null; },
   // Planets, numbered as the Windows 4.0.5 picks them (js/skins/w95):
   // size by gravity against your home's, 1000-1006 explored (+100 mined
   // out, +200 icy, +250 hot), 1050-1056 yours losing money (+50 icy, +100
@@ -278,7 +98,8 @@ window.HOMAC4 = {
     const face = (q) => q && !q.human ? 'bad' + q.face + '_' + (q.female ? 1 : 0) : P + own;
     const tech = ['Range', 'Speed', 'Weapon', 'Shield', 'Mini'].findIndex(n => new RegExp('Your ' + n + '\\w* Tech').test(t));
     if (!t.trim()) return R(own, 2001);
-    if (/^Spaceward Ho! by/.test(t)) return R('i3115', 7001);
+    if (/^Spaceward Ho! (by|Version)/.test(t)) return R('i3115', 7001); // (4.0.5's "Spaceward Ho! Version 4.0.3 by Peter Commons.": shot 008)
+    if (/^Artwork by/.test(t)) return R('i3116', 7001); // (shot 008)
     if (m.hint) return R('i3170', 7001); // a help message, report 24 (GetIconID @151682: 3170)
     if (/^Click here/.test(t)) return R('i3116', 7001);
     if (tech >= 0) return R('i' + (3100 + tech), 2000);
@@ -388,41 +209,6 @@ window.HOMAC4 = {
     show(7000); setTimeout(tick, 600);
     return true;
   },
-  // The menus, as 4.0's MENU resources 129-134 have them (File, Options,
-  // Ships, Galaxy, Window), holding the remake's own commands: only the
-  // ones this game has show, and any not placed here go at the end
-  // (layoutMenus in js/skins/classic/ui.js). 4.0's Edit menu has nothing
-  // the remake does, so it is left out.
-  menuLayout: {
-    File: [['New Game…', 'Game/New game…'],
-      ['Import a Game…', 'Game/Import a game…'], ['Export This Game…', 'Game/Export this game…'], '-',
-      ['End Turn', () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); }], ['End Turn and Switch Players', 'Game/#1'], '-',
-      ['Quit', 'Game/Quit to title']],
-    Options: [['Auto Play…', 'Game/Auto play…'], ['Auto-Play This Turn', 'Game/Auto-play this turn'], '-',
-      [null, 'View/#4'], [null, 'View/#5'], '-', // Sound
-      ['Master Point List…', 'Game/Master Point List…'], ['Hall of Fame…', 'Game/Hall of Fame…'], ['Hall of Shame…', 'Game/Hall of Shame…'], ['Rank History…', 'Game/Rank history…'], '-',
-      ['Preferences…', 'Game/Preferences…']],
-    Ships: [['Build Ships…', 'Ships/Build ships at selected colony…'], '-',
-      ['List All Fleets…', 'Ships/List all fleets…'], ['Next Fleet', 'Ships/Next fleet'], [null, 'Ships/#3'], ['Scrap Ship Types…', 'Ships/Scrap ship types…'], '-',
-      ['Review Battle…', 'Ships/Review battle…']],
-    Galaxy: [['Compare Players…', 'Galaxy/Compare players…'], ['Graph History…', 'Game/Players and history'], ['List All Explored Stars…', 'Galaxy/List explored stars…'], '-',
-      ['Dip Into Savings…', 'Galaxy/Dip into savings…'], '-',
-      ['Alliances…', 'Galaxy/Players and alliances…'], ['Give Money/Metal…', 'Galaxy/Give money or metal…'], [null, 'Galaxy/#6'], ['Send Message…', 'Galaxy/Send a message…'], '-',
-      [null, 'Galaxy/#7']], // Surrender To…, Armageddon
-    // MENU 134: Tech Spending Window, Report Window, Chat Window (ticked while open), Zoom In, Zoom Out,
-    // Hide Information (Show Information, STR# 6120), Clean Up Windows; Fit Galaxy is the remake's own
-    Window: [
-      ['Tech Spending Window', () => setOpen('tech', !winOpen('tech')), null, () => winOpen('tech'), () => !game()],
-      ['Report Window', () => setOpen('report', !winOpen('report')), null, () => winOpen('report'), () => !game()],
-      ['Chat Window', () => setOpen('chat', !winOpen('chat')), () => chatHere(), () => winOpen('chat'), () => !game()],
-      '-',
-      ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy'],
-      [() => infoOn ? 'Hide Information' : 'Show Information', () => setInfo(!infoOn), null, null, () => !game()],
-      '-',
-      ['Clean Up Windows', () => cleanUp(), null, null, () => !game()],
-    ],
-    Help: [['How to Play', 'Help/How to play'], [null, 'Help/#1']],
-  },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1997): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley and Guy Vardaman.';
@@ -431,11 +217,28 @@ window.HOMAC4 = {
     const n = doc.querySelector('#tnew'), o = doc.querySelector('#tcont');
     if (n) n.textContent = 'New Game';
     if (o) { o.textContent = 'Open Game'; n.before(o); }
-    const im = doc.querySelector('#timport'); if (im) im.textContent = 'Import a Game…';
+    const im = doc.querySelector('#timport'); if (im) im.textContent = 'Import…'; // (short: it takes Quit's 74-pixel place in DITL 1200's row, Jake 20 Nov)
     // inside the start-up window, under the splash
     const b = doc.querySelector('#titlescreen .tbtns'), w = doc.querySelector('#titlescreen .tsplash .wbody');
     if (b && w) w.append(b);
+    // DITL 1200's licence lines (shot 001: "Licensed to:" at 2, the owner's name in red at 76, 16-pixel lines under the splash's rule): the
+    // signed-in player's name, with a small Sign out; blank for no one signed in (Jake, 20 Nov)
+    const C = window.HOCLOUD && HOCLOUD.supported ? HOCLOUD : null, fr = doc.querySelector('#titlescreen .tsplash #tframe');
+    if (C && fr && !doc.querySelector('.lic405')) {
+      const nm = doc.createElement('span'), out = doc.createElement('button'), lic = doc.createElement('div');
+      nm.className = 'lic405n'; nm.setAttribute('translate', 'no');
+      out.type = 'button'; out.className = 'lic405o'; out.textContent = 'Sign out'; // (the remake's own word for it, as the Account window's button)
+      out.addEventListener('click', () => { C.flushSave && C.flushSave(); C.signOut().catch(() => {}); });
+      const lab = doc.createElement('span'); lab.className = 'lic405l'; lab.textContent = 'Licensed to:';
+      lic.className = 'lic405'; lic.append(lab, nm, out); fr.after(lic);
+      const set = () => { const u = C.user; lic.classList.toggle('on', !!u); nm.textContent = u ? u.name : ''; };
+      C.onChange(set); set();
+    }
+    // How to play: the remake's own, under the window (DITL 1200's third button is Quit; Import a Game… takes its place)
+    const hp = doc.querySelector('#thelp'), sp = doc.querySelector('#titlescreen .tsplash');
+    if (hp && sp) { const c = hp.cloneNode(true); c.id = 'thelp405'; c.className = 'quiet thelp405'; c.addEventListener('click', () => hp.click()); sp.after(c); }
   },
 };
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/pictures.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();
+// the Mac code (js/skins/mac12/ui.js, as 4.0.5 with window.HOMAC4V), which loads js/skins/mac3/pictures.js, which applies HOMAC4 last
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac12/ui.js' + (window.HO_BUILD || '') + '"><\/script>');

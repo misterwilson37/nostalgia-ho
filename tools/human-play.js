@@ -103,9 +103,8 @@ function pageHelpers() {
     // with the map fitted (its fit(): no pan, no zoom)
     mapPos(sid, fid) {
       const G = load(), cv = document.querySelector('#map'), r = cv.getBoundingClientRect();
-      const mapW = r.width, mapH = r.height, pad = 30;
-      const s = Math.min((mapW - pad * 2) / G.W, (mapH - pad * 2 - 30) / G.H);
-      const ox = (mapW - G.W * s) / 2, oy = (mapH - 30 - G.H * s) / 2 + 4;
+      // (the skin's own view, as its fit() left it: HOVIEW; it fits the stars' extent since 20 Nov 2026, no longer the galaxy's rectangle)
+      const v = window.HOVIEW().view, s = v.s, ox = v.ox, oy = v.oy;
       const st = G.stars[sid], x = ox + st.x * s, y = oy + st.y * s;
       const out = { x: r.left + x, y: r.top + y };
       if (fid != null) {
@@ -236,7 +235,7 @@ async function playOne(browser, rules, url) {
     await form.locator('select[name=start]').selectOption('abundant');
     await form.locator('select[name=o_cstart]').selectOption('abundant');
   }
-  await form.locator('button[type=submit]').click();
+  await form.locator('button[type=submit]').first().click();
   await sleep(300);
   const fails = [], notes = [];
   const fail = (t) => fails.push(t);

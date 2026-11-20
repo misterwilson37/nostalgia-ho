@@ -152,8 +152,12 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
 - Starting money and ships: answered, not a bug. Jake's game (shots 010 on: $100,000, 20,000 metal, Income $51,0xx, Pop 750,000, two
   Scouts and a Colony Ship) is a Novice game; FUN_004427a4 gives each skill its start, and `js/rules-405.js` SKILLS already has them
   (the remake's default is Normal: $25,000, 5,000). `tools/skins/w95-compare.js` now starts Novice games (`&skill=novice`).
-- The 405 ruleset has no `rs.fleetDesc`, so reports and every skin write "one Scout"; 4.0.5 writes "one Rudolph (1/1) Scout",
-  "32 Storm (8/8) Fighters" (as `fleetDesc301`). The w95 skin words its own fleet rows meanwhile (screen.js `fleetRow`).
+- ~~The 405 ruleset has no `rs.fleetDesc`~~ Done 19 Nov (Mac 4.0.5 round): `fleetDescAt` in `js/rules-405.js`, from Windows
+  FUN_00401b6e (its three sprintf formats; "Decoy" only where the caller asks, the owner's views) and Mac MakeFleetDescription @f0c26
+  (the same, cut at 39 characters: `rules-mac405.js`). Reports and every skin now name fleets "one Rudolph (1/1) Scout"; the w95 rows
+  go through it (screen.js `fleetRow` keeps its own wording only for a ruleset without one). The game is unchanged: over 60 turns, 405
+  and mac405, patched and not, the state differs only in the arrivals' stored labels (`arr301[].label`), which moves the digests:
+  405 a2373d0f6c4bd7b4 -> 5781574657a4a191, mac405 aa5282296ab6c4da -> a3844690ba4003fa.
 - Dip Into Savings, confirmed (FUN_00469757, Galaxy menu Ctrl+D): one sum, once. Dialog 358 asks "You currently have $%s in savings.
   You can take out up to $%s. How much would you like?" (the most is savings less the borrowing limit, player +0x10 - +0x18, which is
   negative, so a dip can go into debt; the field starts at that most); OK takes the sum from savings (+0x10) and adds it to this turn's
@@ -176,3 +180,6 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
 ## Open questions
 
 (Kept in step with what Jake answers.)
+
+- **20 Nov (Mac 4.0.5 round):** the 405 rules now keep 4.0.5's Statistics counters (`p.st405`, docs/status-mac405.md); the w95 skin's
+  Statistics (dialog 355) can be built on them. Digests: 405 d9ff9858e51b92af, mac405 9fc3fa9801f815ff (the field only).

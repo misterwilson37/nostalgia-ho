@@ -13,11 +13,15 @@
 // MENU, DITL and STR# lines, paired with 2.0.1's: js/languages.js windows12,
 // and the rows of js/ui-text.js marked 1.2F).
 // The Mac 3.0.1 skins (js/skins/mac3, window.HOMAC3) load it too, and take from it only what 3.0.1 shares with 2.0.1: window.HOMAC301 below.
-window.HOMAC_VERSION = window.HOMAC3 ? '3.0.1' : window.HOMAC2 ? '2.0.1' : '1.2'; // (the Mac 2.0.1 skins, js/skins/mac2, load this file: 2.0.1 is 1.2's program with additions)
+// The Mac 4.0.5 skins (js/skins/mac4, window.HOMAC4V) run its 3.0.1 path: 4.0.5's main screen is 3.0.1's (ResetWindows @8477a = 3.0.1's
+// @f4b9a, with the Chat window added); where 4.0.5's own routine differs, V4 below (docs/status-mac405.md says which part rests on what).
+window.HOMAC_VERSION = window.HOMAC4V ? '4.0.5' : window.HOMAC3 ? '3.0.1' : window.HOMAC2 ? '2.0.1' : '1.2'; // (the Mac 2.0.1 skins, js/skins/mac2, load this file: 2.0.1 is 1.2's program with additions)
 (function () {
 'use strict';
 const V2 = window.HOMAC_VERSION === '2.0.1';
-const V3 = window.HOMAC_VERSION === '3.0.1';
+const V4 = window.HOMAC_VERSION === '4.0.5';
+const V3 = window.HOMAC_VERSION === '3.0.1' || V4; // (3.0.1's path: 4.0.5 takes it too, with V4 where it differs)
+const COLOUR3 = !!(window.HOMAC3_COLOUR || window.HOMAC4_COLOUR); // (a colour 3.0.1 or 4.0.5)
 let HOMAC_RE20 = null;
 const A = () => window.HOAPI;
 // ---------- the Mac's screen, made as big as the window allows (Jake, 17 November 2026: "scale the whole Mac", every Mac skin) ----------
@@ -33,7 +37,7 @@ const MACS = { s: 1, need: 480 };
 // (quarter steps since 18 Nov: 3.0.1's panel is the tallest, and in half steps a laptop's screen left it at x1.5 with a band to spare, Jake's report)
 function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerHeight / Math.max(480, MACS.need)); return u0 >= 1.25 ? Math.floor(u0 * 4) / 4 : 1; }
 function measureMac() {
-  const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1) return; // (only in the Mac's layout: the page's own panel is wider, so taller)
+  const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1 || document.documentElement.classList.contains('mac75')) { if (MACS.need !== 480 && document.documentElement.classList.contains('mac75')) { MACS.need = 480; setMacScale(); } return; } // (only in the Mac's layout: the page's own panel is wider, so taller)
   const z = MACS.s, pr = p.getBoundingClientRect(), last = p.lastElementChild.getBoundingClientRect();
   const t3 = document.documentElement.classList.contains('mac301lay') && document.getElementById('tech301'); // (3.0.1's bottom row: Tech Spending's height too)
   const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 16 + (m ? m.getBoundingClientRect().height / z : 20) + (t3 ? t3.getBoundingClientRect().height / z : 0)); // (the content's foot, the panel's padding above and below, the menu bar)
@@ -171,7 +175,7 @@ function menuLayout301() {
   const fleetHere = () => { const s = selStar(), f = selFleet(); return s && f && f.star === s.id ? f : null; };
   const abandonMarked = () => { const t = H().rules(g()).evacuateToggle, s = selStar(); return !!(t && s && t.marked(g(), s.id)); };
   const hideInfo = () => { INFO301 = !INFO301; document.documentElement.classList.toggle('mac301noinfo', !INFO301); A().resize(); A().renderPanel(); A().draw(); };
-  return {
+  const M = {
     File: [
       it('New…', () => A().newGameDialog(), { key: 'N' }),
       it('Open…', () => A().openSavedGames(), { key: 'O' }),
@@ -194,11 +198,11 @@ function menuLayout301() {
       it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { ghost: noGame, checked: () => A().Sound.on }),
       it('I’ll Update Turns', () => {}, { ghost: () => noGame() || humans() < 2, checked: () => true }),
       '-',
-      it('Preferences…', () => A().openPrefs(), { ghost: noGame }),
+      it('Preferences…', () => (V4 ? prefs405() : A().openPrefs()), { ghost: noGame }),
       it('Hall Of Fame…', () => A().openHall('fame')),
       it('Hall Of Shame…', () => A().openHall('shame'))],
     Ships: [
-      it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) build301(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
+      it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) (V4 ? build405 : build301)(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
       '-',
       it('List All Fleets…', () => A().openFleetList(), { ghost: noGame, key: 'L' }),
       it(() => (noGame() || fleetHere() ? S(7) : S(8)), () => { const s = selStar(); if (fleetHere()) organize301(s.id); }, { ghost: () => noGame() || !fleetHere(), key: 'G' }),
@@ -207,14 +211,14 @@ function menuLayout301() {
       it(() => (lastBattle() ? S(5).replace('%s', selStar().name) : S(6)), () => { const b = lastBattle(); if (b) A().openBattle(b.id); }, { ghost: () => noGame() || !lastBattle(), key: 'R' })],
     Galaxy: [
       it('Compare Players…', () => A().openCompare(), { ghost: noGame }),
-      it('Graph History…', () => A().openPlayers(), { ghost: noGame }),
+      it('Graph History…', () => (V4 ? graph405() : A().openPlayers()), { ghost: noGame }),
       it('List All Explored Stars…', () => A().openStarList(), { ghost: noGame }),
       '-',
       it('Fix Spending', cmd(/^fix spending/i), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' }),
       it('Dip Into Savings…', () => A().openDip(), { ghost: noGame, key: 'D' }),
       it(() => (mine() ? (abandonMarked() ? S(15) : S(16)) : 'Abandon Planet…'), () => { if (mine()) A().evacuateClick(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'A' }),
       '-',
-      it('Alliances…', () => alliances301(), { ghost: () => noGame() || early() || out() }),
+      it('Alliances…', () => (V4 ? alliances405() : alliances301()), { ghost: () => noGame() || early() || out() }),
       it('Give Money/Metal…', () => A().openGive(), { ghost: () => noGame() || early() }),
       it('Surrender To…', () => A().openSurrender(), { ghost: () => noGame() || early() || out() }),
       it('Send Message…', () => A().openChat(), { ghost: () => noGame() || early(), key: 'M' }),
@@ -229,6 +233,36 @@ function menuLayout301() {
       it(() => (INFO301 ? S(11) : S(12)), hideInfo, { ghost: noGame, key: 'I' }),
       '-',
       it('Clean Up Windows', () => {}, { ghost: noGame })],
+  };
+  return V4 ? menuLayout405(M, { pick: (L, name) => L.find(x => x !== '-' && x[0] === name), cmd, out, gone }) : M;
+}
+// Mac 4.0.5's menus (MENU 129-134 of its resource fork, HOLANG.mac405En.MENU; Jake's shots 011-013, 022-024, 166, 251): 3.0.1's commands
+// in 4.0.5's words and order. File: New Game, Open Game, Begin Game (network: dimmed), Close Game, Save Game (the remake saves by itself:
+// dimmed), End Turn, End Turn and Switch Players, Page Setup, Print, Quit. Options: Auto Play, Sound, Master Point List, Hall of Fame, Hall
+// of Shame, Preferences. Galaxy: Compare Players (Y), Graph History (H), Statistics, List All Explored Stars, Dip Into Savings, Abandon Planet, Alliances, Give Money/Metal, Surrender To, Send Message,
+// Armageddon (no Fix Spending); Statistics from the rules' counters (p.st405). Window: Tech Spending, Report, Chat (network: dimmed), Zoom In, Zoom Out, Hide Information, Clean Up Windows.
+function menuLayout405(M, o) {
+  const p = (menu, name) => o.pick(M[menu], name), keyed = (x, key) => x && [x[0], x[1], x[2], x[3], x[4], key];
+  const named = (x, label) => x && [label, x[1], x[2], x[3], x[4], x[5]];
+  return {
+    File: [
+      named(p('File', 'New…'), 'New Game…'), named(p('File', 'Open…'), 'Open Game…'), it('Begin Game', () => {}, { ghost: o.gone, key: 'B' }), '-',
+      named(p('File', 'Close…'), 'Close Game'), it('Save Game', () => {}, { ghost: o.gone, key: 'S' }), '-',
+      p('File', 'End Turn'), named(p('File', 'End Turn & Switch Players'), 'End Turn and Switch Players'), '-',
+      p('File', 'Page Setup…'), p('File', 'Print…'), '-', p('File', 'Quit')],
+    Edit: M.Edit,
+    Options: [
+      p('Options', 'Auto Play…'), '-', p('Options', 'Sound'), '-',
+      it('Master Point List…', o.cmd(/master point/i), { ghost: () => noGame() || !(A().hasHall && A().hasHall(G())) || (H().rules(G()).hall || {}).master === false || !Object.keys(ITEMS).some(n => /master point/i.test(n)) }), // (only where the rules keep the list, as the classic menu: a 3.0.1 game in this skin has none)
+      named(p('Options', 'Hall Of Fame…'), 'Hall of Fame…'), named(p('Options', 'Hall Of Shame…'), 'Hall of Shame…'), '-', p('Options', 'Preferences…')],
+    Ships: M.Ships,
+    Galaxy: [
+      keyed(p('Galaxy', 'Compare Players…'), 'Y'), keyed(p('Galaxy', 'Graph History…'), 'H'), it('Statistics…', () => stats405(), { ghost: () => noGame() || !A().me().st405 }), // (a game begun before the counters: dimmed) p('Galaxy', 'List All Explored Stars…'), '-',
+      p('Galaxy', 'Dip Into Savings…'), M.Galaxy.find(x => x !== '-' && x[5] === 'A'), '-',
+      p('Galaxy', 'Alliances…'), p('Galaxy', 'Give Money/Metal…'), p('Galaxy', 'Surrender To…'), p('Galaxy', 'Send Message…'), '-', p('Galaxy', 'Armageddon')],
+    Window: [
+      p('Window', 'Tech Spending Window'), p('Window', 'Report Window'), it('Chat Window', () => {}, { ghost: () => true, key: '3' }), '-',
+      p('Window', 'Zoom In'), p('Window', 'Zoom Out'), M.Window.find(x => x !== '-' && x[5] === 'I'), '-', p('Window', 'Clean Up Windows')],
   };
 }
 // Mac 2.0.1's menus: MENU 129 (File), 131 (Options) and 133 (Galaxy) as that program has them (the rest are 1.2's, in the same words), from the resource fork
@@ -529,7 +563,7 @@ function stars6040() {
 // an alert over what is open (the dialog stays under it), in the program's words; its picture 3020 is the skin's
 // Mac 2.0.1's alerts (ALRT size and DITL: text, picture and button rectangles, from the resource fork; made by audit/mac-2.0.1 of the private repo): an alert is drawn at those rectangles,
 // the words being the paragraphs the page gives (the same lines) in the order of the DITL's text items
-if (window.HOMAC2_COLOUR || (V3 && window.HOMAC3_COLOUR)) document.documentElement.classList.add('col20'); // (the colour Mac's bevelled dialog frame: panel.css, html.col20; 3.0.1's too, Jake's captures 015, 018)
+if (window.HOMAC2_COLOUR || (V3 && COLOUR3)) document.documentElement.classList.add('col20'); // (the colour Mac's bevelled dialog frame: panel.css, html.col20; 3.0.1's too, Jake's captures 015, 018)
 const ALERTS20 = {"128":[432,160,[["b",[123,312,143,402],"OK"],["t",[13,84,45,406],"Sorry ^0 requires the follow things to be able to run:"],["t",[58,110,74,380],"• ^1 CPU or better"],["t",[74,110,90,380],"• System Software ^2 or later"],["t",[90,110,106,380],"• ^3"]]],"2000":[230,172,[["b",[143,91,163,220],"Return To Finder"],["t",[26,26,128,224],"Sorry, but this is a development version of Spaceward Ho! 2.0 that's past it's prime. To get a newer copy, call Delta Tao Software, Inc. at (408) 730-9336."]]],"2010":[282,200,[["b",[169,156,189,253],"Play in B/W"],["p",[117,26,191,100],3010],["t",[13,13,48,279],"Sorry, but Spaceward Ho! 2.0 requires 32-bit Color Quickdraw to run in color."],["t",[52,13,106,278],"You can obtain Color Quickdraw from any Apple dealer for a nominal charge."]]],"3000":[240,228,[["b",[195,169,215,227],"OK"],["t",[39,26,71,227],"^0"],["t",[117,26,149,226],"File: ^1"],["t",[78,26,110,227],"Error Type: ^2"],["t",[156,26,172,225],"Error Code: ^3"],["t",[13,91,29,166],"File Error"]]],"3001":[237,210,[["b",[182,169,202,227],"OK"],["t",[39,26,71,227],"^0"],["t",[78,26,110,227],"Error Type: ^2"],["t",[117,26,133,225],"Error Code: ^3"],["t",[13,78,30,200],"Memory Error"],["t",[143,26,175,226],"Please quit Spaceward Ho! and start again."]]],"3010":[235,159,[["b",[130,169,150,227],"OK"],["p",[78,13,152,87],3020],["t",[13,13,65,229],"Sorry, but that is not the correct password for “^0”. Please try again."]]],"3020":[240,149,[["b",[117,169,137,227],"OK"],["t",[13,13,48,236],"Sorry, but this galaxy is already full. No more players can join."],["p",[65,13,139,87],3020]]],"3030":[232,180,[["b",[143,156,163,214],"OK"],["p",[91,26,165,100],3010],["t",[13,26,77,223],"Sorry, but Spaceward Ho! 2.0 can't read galaxy files created with versions 1.0 - 1.1.2."]]],"3040":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please name your new ship type."],["p",[60,10,134,84],3020]]],"3050":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please set your new ship type’s tech levels."],["p",[60,10,134,84],3020]]],"3060":[301,206,[["b",[162,207,182,265],"OK"],["t",[13,13,80,290],"Sorry, but the name you just typed in doesn’t match any of those in this game. And since the game has  progressed past the year 2000, it’s too late to join…"],["p",[120,17,194,91],3020],["t",[92,13,112,284],"Maybe you typed your name in wrong?"]]],"3070":[335,210,[["b",[143,223,163,292],"Continue"],["b",[143,117,163,186],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, all of the ^1 currently registered players have finished their first turn. "],["t",[52,13,92,328],"Should we continue with the game, or wait for more human players to join?"]]],"3080":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,98,232],"All currently registered players have ended their first turn. We’re waiting for the game administrator to give his okay to continue…"]]],"3090":[236,132,[["t",[10,14,74,223],"^0’s Star System “^1” has had a revolution, and is now under your control."],["b",[100,157,120,215],"OK"]]],"3100":[236,132,[["t",[10,14,74,223],"^0 has offerred ^1 units of metal for ^2 dollars."],["b",[100,157,120,215],"OK"]]],"3110":[236,132,[["t",[10,14,74,223],"You have found an additional ^0 units of metal on ^0."],["b",[100,157,120,215],"OK"]]],"3120":[236,132,[["t",[10,14,74,223],"Your fleet of ^0 ^1 unexpectedly disappeared in hyperspace on their way to ^2."],["b",[100,157,120,215],"OK"]]],"3130":[236,132,[["t",[10,14,74,223],"^0 has gone nova.  Everything there has been destroyed."],["b",[100,157,120,215],"OK"]]],"3140":[236,132,[["t",[10,14,74,223],"Your Terraforming Technology has reached level ^0."],["b",[100,157,120,215],"OK"]]],"3150":[236,132,[["t",[10,14,74,223],"^0 has turned all his planets over to your control.  "],["b",[100,157,120,215],"OK"]]],"3160":[236,132,[["t",[10,14,74,223],"You have destroyed the Star System ^0, previously owned by ^1."],["b",[100,157,120,215],"OK"]]],"3170":[236,132,[["t",[10,14,74,223],"You have stolen ^0 Technology from ^1.  Your Tech level is now ^2."],["b",[100,157,120,215],"OK"]]],"3180":[233,177,[["b",[143,143,163,210],"OK"],["t",[13,13,84,224],"Sorry, your turn can’t be saved. Although you are in the year ^0, the game has already been updated to ^1…"],["p",[91,13,165,87],3020]]],"3190":[237,161,[["b",[104,156,124,214],"OK"],["p",[65,26,139,100],3020],["t",[13,26,66,224],"The game has been updated to the year ^0. Click “OK” to go to the next turn…"]]],"3200":[234,185,[["b",[143,156,163,214],"OK"],["t",[13,13,93,232],"Sorry, but the file was busy and your new auto play setting was not changed. Please try again shortly."],["p",[104,13,178,87],3020]]],"3210":[335,210,[["b",[143,222,163,299],"Force End"],["b",[143,117,163,194],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, ^1 of the ^2 players haven’t finished their turn yet. "],["t",[52,13,92,328],"Do you really want to force an end of turn, or do you want to wait for them to finish?"]]],"3220":[238,201,[["b",[154,156,174,214],"OK"],["p",[102,26,176,100],3020],["t",[13,26,84,230],"Sorry, but the file way busy and the turn could not be marked “done”. Please try again in a moment."]]],"3230":[286,190,[["b",[145,188,165,257],"Continue"],["b",[145,110,165,168],"Wait"],["p",[99,13,173,87],3020],["t",[13,13,52,268],"^0, do you want to play alone, or wait for more humans to join?"],["t",[64,13,84,264],"(Computer Opponents: ^1)"]]],"3240":[230,182,[["b",[125,156,145,214],"OK"],["t",[13,13,80,220],"Auto play has been turned off, but your current turn has already been marked “done.” Update may occur at any time."],["p",[86,13,160,87],3020]]],"3250":[216,137,[["b",[78,143,98,201],"OK"],["t",[13,26,45,211],"Please unlock this disk and try again."],["p",[52,26,126,100],3020]]],"3260":[228,159,[["b",[117,156,137,214],"OK"],["t",[13,13,65,222],"Please enter both your name and a company name or address."],["p",[65,13,139,87],3020]]],"3270":[227,184,[["b",[156,156,176,214],"OK"],["t",[13,13,102,223],"The game has been updated to the next turn. You made some changes since ending your turn that you didn’t save. These changes have now been lost."],["p",[104,13,178,87],3020]]],"3280":[329,258,[["b",[208,182,228,240],"OK"],["p",[182,26,256,100],3020],["t",[13,26,49,320],"Sorry, but Spaceward Ho! allows you to have only 20 ship types at one time. "],["t",[52,26,119,320],"If you would like to create another ship type, scrap an old type by checking the “Scrap” box for it in the “List Ship Types…” Dialog."],["t",[130,26,178,325],"The ship will be scrapped during the turn update and you can create a new type next turn…"]]],"3290":[231,174,[["b",[143,156,163,214],"OK"],["t",[13,13,81,227],"Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location."],["p",[91,13,165,87],3020]]],"3300":[240,200,[["b",[156,156,176,214],"OK"],["t",[13,13,46,223],"There are no colonists aboard that colony ship."],["p",[117,26,191,100],3020],["t",[56,14,106,223],"To refill it, you must either wait one turn or abandon the colony."]]],"3310":[259,249,[["b",[192,156,212,214],"OK"],["t",[14,13,68,252],"Sorry, but the battle information on that battle is no longer available."],["p",[140,13,214,87],3020],["t",[70,13,134,251],"Battle reports that are more that 500 years old are automatically deleted to keep the game file size small."]]],"3320":[235,192,[["b",[156,156,176,214],"OK"],["t",[13,13,98,224],"Sorry, but the game file was busy, and the battle information could not be read for this battle. Please try again in a moment."],["p",[104,13,178,87],3020]]],"3330":[240,200,[["b",[171,156,191,214],"OK"],["p",[119,13,193,87],3020],["t",[13,13,61,234],"Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. "],["t",[67,13,117,234],"You can tell this because there are no arrows on either end of the dragged line."]]],"3340":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,82,228],"Sorry, there’s already a star named  “^0.” Please pick another name."]]],"5000":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,26,124,98],"Don't Save"],["b",[104,156,124,214],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before closing the current game?"]]],"5010":[240,200,[["b",[156,156,176,214],"OK"],["p",[117,13,191,87],3020],["t",[13,13,107,230],"^0^1^2^3"]]],"5020":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,78,124,150],"Don't Save"],["b",[200,200,220,258],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before updating the turn?"]]],"5030":[305,234,[["b",[195,234,215,292],"OK"],["t",[13,13,99,297],"Oops! Something kinda funny has happened in TheHo 2.0. Please write down the following problem with as much information as you can on what you think led up to it. Then let us know. Thanks."],["t",[104,13,185,295],"^0^1^2^3"]]],"5040":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3030]]],"5041":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3530]]],"5050":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,203,188],3040],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5051":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,204,188],3540],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5060":[282,177,[["b",[143,193,163,272],"Let ’em Die"],["b",[143,104,163,181],"Cancel"],["p",[91,13,165,87],3020],["t",[13,13,83,263],"Warning! You are not spending enough money to support some of your colonies. Do you really want to abandon them?"]]],"5070":[232,153,[["b",[104,156,124,214],"OK"],["t",[13,13,64,224],"Sorry, but the file was busy. Please try again in a few seconds."],["p",[65,13,139,87],3020]]],"5080":[262,153,[["b",[104,182,124,240],"Revert"],["b",[104,117,124,175],"Cancel"],["p",[65,13,139,87],3020],["t",[13,13,62,254],"Do you really want to revert to the saved version of the game? All changes will be lost…"]]],"5090":[228,191,[["b",[143,143,163,201],"OK"],["p",[104,13,178,87],3020],["t",[13,13,72,219],"Sorry, but this game was created with a newer version of Spaceward Ho! "]]]};
 // 1.2F's own alerts (ALRT and DITL from its resource fork: size, items' rectangles, French words, pictures), for the 1.2 skin in French: the
 // abandon question (5060 "Qu'elles meurent!"), "Merci de baptiser…" (3040), eliminated (5050), as Jake's captures 025, 081 and 165 show them.
@@ -1184,10 +1218,16 @@ function status20(text, max) {
 function turnProgress(g, go) {
   const a = A(), el = a.el, W = PASSES[lang()], n = g.players.length;
   const steps = [W[0]];
+  if (V4) { // (4.0.5: PerformEndTurn @c000c, DoOneTurn: "Processing Year %d..." for each ten years of the turn, then "Seeing What Happened...": shots 194-201)
+    steps.length = 0; const yp = (g.opts && +g.opts.yearsPerTurn) || 10;
+    for (let y = 10; y <= yp; y += 10) { steps.push(`Processing Year ${g.year + y}...`); steps.push(`Processing Year ${g.year + y}...`); }
+    steps.push('Seeing What Happened...', 'Seeing What Happened...');
+  } else {
   for (let i = 1; i <= n; i++) steps.push(fill(W[1], i));
   steps.push(W[2]);
   for (let i = 1; i <= n; i++) steps.push(fill(W[3], i));
   steps.push(W[4]);
+  }
   const st = status20(steps[0], steps.length), txt = st.txt, bar = st;
   a.modal('', st.box, { cls: 'small mac12 dl20w', label: steps[0] });
   let i = 0;
@@ -1242,10 +1282,10 @@ function bars(panel, B) {
 function aboutBox() {
   const a = A(), el = a.el, im = a.IMG['dos:p1001'], pl = a.IMG['dos:p4010'];
   const body = el('div', { class: 'about12', onclick: () => a.closeModal() }, im ? el('img', { src: im.src, alt: 'Spaceward Ho!' }) : null, pl ? el('img', { src: pl.src, alt: '' }) : null);
-  a.modal('', body, { cls: 'mac12 about', label: V3 ? 'About Spaceward Ho! 3.0…' : V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…' });
+  a.modal('', body, { cls: 'mac12 about', label: V4 ? 'About Spaceward Ho! 4.0…' : V3 ? 'About Spaceward Ho! 3.0…' : V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…' });
   // (3.0.1's DoAppleMenu @f3b48: the colour box, DLOG 1100, plays sound 10000, "Move 'em out!"; the black-and-white one, 1101, none. Its
   // licensee's plate, PICT 4010, is drawn by the program (GetLicensePict) and isn't in the resources: not drawn here)
-  if (V3 && window.HOMAC3_COLOUR) a.Sound.play(10000);
+  if (V3 && COLOUR3) a.Sound.play(10000);
 }
 
 // DLOG 6060 "Organize “<type>” Fleets…" (OrganizeFleets @113896): the fleets of the selected fleet's design at the star as piles of ship
@@ -1404,6 +1444,16 @@ function fixStep() {
 const at20 = (r) => `position:absolute;left:${r[1]}px;top:${r[0]}px;width:${r[3] - r[1]}px;height:${r[2] - r[0]}px`;
 const dlog20 = (w, h, ...items) => A().el('div', { class: 'dl20', style: `position:relative;width:${w}px;height:${h}px` }, ...items);
 const txt20 = (t, r) => raw('span', t, { class: 'dt20', style: at20(r) });
+// A List Manager list's scroll bar (3.0.1, 4.0.5: 16 wide inside the list's frame at its right; System 7.5's colour bar in a colour skin,
+// shot 016, the plain one in black and white): r = [top, left, bottom, right] in the window, the list's place in it; arrows a row, the grey a page
+function listBar20(listEl, r, rowH) {
+  const L = r[2] - r[0], c = A().el('canvas', { width: 32, height: 2 * L, 'aria-hidden': 'true', style: at20(r) + ';image-rendering:pixelated;touch-action:none' });
+  const draw = () => { const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); x.imageSmoothingEnabled = false; const max = Math.max(0, listEl.scrollHeight - listEl.clientHeight), o = { on: true, value: max ? listEl.scrollTop : 0, max }; if (COLOUR3) drawBar75(x, 0, 0, true, L, o); else drawBar(x, 0, 0, true, L, 16, o); };
+  listEl.classList.add('nosb12'); listEl.addEventListener('scroll', draw);
+  c.addEventListener('pointerdown', (e) => { const b = c.getBoundingClientRect(), v = (e.clientY - b.top) * L / b.height; listEl.scrollTop += v < 16 ? -rowH : v >= L - 16 ? rowH : v < L / 2 ? -listEl.clientHeight : listEl.clientHeight; draw(); });
+  new MutationObserver(draw).observe(listEl, { childList: true }); requestAnimationFrame(draw);
+  return c;
+}
 const ok20 = (t, r, fn) => A().el('button', { type: 'button', class: 'ok20', onclick: fn, style: at20(r) + ';min-width:0;padding:0' }, raw('span', t));
 // DLOG 4060 (doPollingTimeDialog @1227b4, DITL 4060, CNTL 4060: the setup +0x3e in ticks / 60 as seconds, 1 to 30 (SetCtlMin 1, SetCtlMax $1e), the number
 // in the text at (56, 99); OK only, no Cancel: the value is kept when the slider is let go and OK is pressed)
@@ -1439,7 +1489,7 @@ function autoPlay20() {
 // icon 32 x 32 (ICN#, at the cell's centre less (16, 21)) with its name under it (a 13 pixel strip, Geneva 9, centred, condensed when too wide), the picked cell inverted;
 // no scroll bars. cells: [{ icon: 'dos:i3000', name, id, off }]
 function cells20(cols, rows, cells, o) {
-  const a = A(), el = a.el, W = 45, box = el('div', { class: 'cl20', role: 'listbox', style: `position:relative;width:${cols * W}px;height:${rows * W}px;border:0` });
+  const a = A(), el = a.el, W = (o && o.W) || 45, box = el('div', { class: 'cl20', role: 'listbox', style: `position:relative;width:${cols * W}px;height:${rows * W}px;border:0` });
   let sel = o && o.sel != null ? o.sel : null;
   const draw = () => {
     box.textContent = '';
@@ -1447,7 +1497,7 @@ function cells20(cols, rows, cells, o) {
     cells.forEach((c, i) => {
       const x = (i % cols) * W, y = Math.floor(i / cols) * W, im = c.icon && a.IMG[c.icon];
       const d = el('div', { class: 'c20' + (sel === i ? ' sel' : '') + (c.off ? ' off' : ''), role: 'option', 'aria-selected': sel === i ? 'true' : 'false', tabindex: c.off ? -1 : 0, style: `position:absolute;left:${x}px;top:${y}px;width:${W}px;height:${W}px`, onclick: () => { if (c.off || !o || !o.pick) return; sel = i; draw(); o.pick(c, i); } },
-        im ? el('img', { src: im.src, alt: '', style: 'position:absolute;left:6px;top:1px;width:32px;height:32px;image-rendering:pixelated' }) : null,
+        im ? el('img', { src: im.src, alt: '', style: `position:absolute;left:${Math.floor((W - 32) / 2) - 1}px;top:1px;width:32px;height:32px;image-rendering:pixelated` }) : null,
         raw('span', c.name, { class: 'n20', style: 'position:absolute;left:0;right:0;top:33px;height:13px;line-height:13px;text-align:center;white-space:nowrap;overflow:hidden' }));
       box.append(d);
     });
@@ -1653,7 +1703,7 @@ function build301(sid) {
   const mBar = el('canvas', { width: 153, height: 12, style: at20([23, 161, 35, 314]) }), tBar = el('canvas', { width: 77, height: 12, style: at20([22, 370, 34, 447]) });
   const plus = ok20('+', [44, 464, 64, 484], () => change(1)), minus = ok20('-', [68, 464, 88, 484], () => change(-1));
   const scrapB = ok20('Scrap All', [247, 224, 267, 300], () => toggleScrap());
-  const colour = !!window.HOMAC3_COLOUR;
+  const colour = COLOUR3;
   const drawBars = () => {
     const scale = Math.max(10000, p.oInc || 0) * 5, x = mBar.getContext('2d'); x.clearRect(0, 0, 153, 12); x.fillStyle = '#fff'; x.fillRect(0, 0, 153, 12); x.strokeStyle = '#000'; x.strokeRect(0.5, 0.5, 152, 11);
     const w = Math.max(-75, Math.min(75, Math.trunc(money * 75 / scale)));
@@ -1723,6 +1773,124 @@ function build301(sid) {
   refresh();
   return true;
 }
+// 4.0.5's DLOG 6000 "Build / Design Ships" (BuildDesignShips @f0d8e; 500 x 318, DITL 6000 read from the program's resource fork, items
+// as (top, left, bottom, right); Jake's shot 015). Left (9: 2, 2, 269, 139): your types, newest first, each its 120 x 40 picture and
+// "Name (W/S) Class" under it (Geneva 9), the one shown on black, with its scroll bar. The picture (10: 4, 184, 44, 304) on black, the
+// name (11) and the class menu (12, CNTL 6015); Dev. Cost (33/13), Pro. Cost (34/14), Metal Cost (35/15); Range ... Mini (36-40) with
+// "n/most" (16-20) and their scroll bars (21-25, 70 wide). Right: Savings: (43) and the money left (30) with the coins (28: PICT 4050, 4052
+// in debt; DRAWSHIPMONEYCHIPS: at most 36 coins, one a 36th of five times the income, at least $250,000, three piles), Metal: (44, 31)
+// and its bars (29: PICT 4060, one a 2,778 metal, DRAWMETALCHIPS); Built: (41, 26), In Service: (42, 27); # To Build: (45) and its field
+// (7) with + (5) and - (6); Build & Continue (2); Scrap All / Don't Scrap (8), Max Out (32), Cancel (3), OK (1, default, its ring 4).
+// The money and metal shown follow # To Build as it changes (BuildSomeShips / UnbuildSomeShips @f1552 / @f1870, the prototype's price with
+// the first of an unbuilt type); the ships are bought at OK or Build & Continue, which keeps the window open; Cancel buys nothing. The
+// window opens on the type it last showed (the preferences' +0x82), else the newest. (The same program as the Windows 4.0.5's dialog 176:
+// js/skins/w95/screen.js buildDialog, whose rules this follows.)
+function build405(sid) {
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g), star = g.stars[sid];
+  if (!star || star.owner !== a.ME) return false;
+  const types = CLASSES(), K = ['R', 'V', 'W', 'S', 'M'], KW = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'];
+  const live = () => p.designs.filter(d => !d.scrapped && types.includes(d.type));
+  let spec = null, name = '', want = 0;
+  const same = (d) => d.type === spec.type && K.every(k => d[k] === spec[k]);
+  const clampSpec = () => { const L = H().designLimits(g, p, spec.type); for (const k of K) { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo); spec[k] = Math.max(lo, Math.min(hi, spec[k] == null ? hi : spec[k])); } return L; };
+  const pickD = (d) => { spec = { type: d.type, R: d.R, V: d.V, W: d.W, S: d.S, M: d.M }; name = d.name; BUILD301 = d.id; };
+  const fresh = (type) => { spec = { type }; clampSpec(); const d = live().find(same); name = d ? d.name : H().designName(g, p, type); };
+  const d0 = live().find(d => d.id === BUILD301) || live()[live().length - 1];
+  if (d0) pickD(d0); else fresh(types[0] || 'scout');
+  const cur = () => live().find(same) || null;
+  const R = (t, l, b, r) => [t, l, b, r];
+  // the list (9)
+  const list = el('div', { class: 'lst405 nosb12', role: 'listbox', 'aria-label': 'Ship types', style: at20(R(3, 3, 268, 122)) + ';overflow-y:auto;background:#fff' });
+  // its scroll bar (System 7.5's, 16 wide, inside the list's frame at its right: shot 015), the list's place in it; arrows a row of 54, the grey a page
+  const lbar = el('canvas', { width: 32, height: 2 * 267, 'aria-hidden': 'true', style: at20(R(2, 123, 269, 139)) + ';image-rendering:pixelated;touch-action:none' });
+  const drawLbar = () => { const x = lbar.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); const max = Math.max(0, list.scrollHeight - list.clientHeight), v = list.scrollTop, o = { on: true, value: max ? v : 0, max }; if (COLOUR3) drawBar75(x, 0, 0, true, 267, o); else drawBar(x, 0, 0, true, 267, 16, o); };
+  list.addEventListener('scroll', drawLbar);
+  lbar.addEventListener('pointerdown', (e) => { const r = lbar.getBoundingClientRect(), v = (e.clientY - r.top) * 267 / r.height; list.scrollTop += v < 16 ? -54 : v >= 251 ? 54 : v < 133 ? -list.clientHeight : list.clientHeight; drawLbar(); });
+  const unBlack = (c) => { const x = c.getContext('2d'), W = c.width, H2 = c.height; let im; try { im = x.getImageData(0, 0, W, H2); } catch (e) { return; } const D = im.data, seen = new Uint8Array(W * H2), st = [];
+    const dark = (i) => D[i * 4] < 24 && D[i * 4 + 1] < 24 && D[i * 4 + 2] < 24 && D[i * 4 + 3] > 0;
+    for (let i = 0; i < W; i++) { st.push(i, (H2 - 1) * W + i); } for (let j = 0; j < H2; j++) { st.push(j * W, j * W + W - 1); }
+    while (st.length) { const i = st.pop(); if (seen[i] || !dark(i)) continue; seen[i] = 1; D[i * 4 + 3] = 0; const xx = i % W, yy = (i - xx) / W; if (xx > 0) st.push(i - 1); if (xx < W - 1) st.push(i + 1); if (yy > 0) st.push(i - W); if (yy < H2 - 1) st.push(i + W); }
+    x.putImageData(im, 0, 0); };
+  const picCv = (d, w, h, bg) => { const c = el('canvas', { width: w * 2, height: h * 2, style: `display:block;width:${w}px;height:${h}px;background:${bg || 'transparent'}` }); const x = c.getContext('2d'); x.scale(2, 2); const im = a.shipPic ? a.shipPic(d, a.ME) : null; if (im) { const k = Math.min(w / im.width, h / im.height); x.drawImage(im, (w - im.width * k) / 2, (h - im.height * k) / 2, im.width * k, im.height * k); } return c; };
+  const drawList = () => {
+    list.textContent = ''; const c = cur();
+    for (const d of live().slice().reverse()) {
+      const on = c && d.id === c.id, row = el('div', { class: 'tr405' + (on ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''), role: 'option', 'aria-selected': on ? 'true' : 'false', style: `padding:2px 0 3px;text-align:center;background:${on ? '#000' : '#fff'};color:${on ? '#fff' : '#000'};font:12px 'DOS Geneva 9',Geneva,sans-serif;cursor:pointer`, onclick: () => { pickD(d); want = 0; refresh(); } });
+      const pc = picCv(d, 120, 40); if (!on) unBlack(pc); pc.style.margin = '0 auto'; /* (on white, but the type shown on black: shot 015) */ row.append(pc, raw('div', desc0(d), { style: 'white-space:nowrap;overflow:hidden' })); list.append(row);
+    }
+    const sel = list.querySelector('.sel'); requestAnimationFrame(() => { if (sel) sel.scrollIntoView({ block: 'nearest' }); drawLbar(); });
+  };
+  // the picture (10), the name (11), the class (12)
+  const big = el('div', { style: at20(R(4, 184, 44, 304)) + ';background:#000' });
+  const nameIn = el('input', { type: 'text', maxlength: 15, style: at20(R(52, 176, 68, 316)), 'aria-label': 'Name' });
+  const clsSel = el('select', { style: at20(R(78, 156, 98, 332)), 'aria-label': 'Class' }, ...types.map(t => el('option', { value: t }, cls(t))));
+  const T = {}; const tx = (k, r, right) => (T[k] = raw('span', '', { class: 'dt20', style: at20(r) + (right ? ';text-align:right' : '') }));
+  // the five scroll bars (21-25): System 7.5's, 70 x 16
+  const bars = K.map((k, i) => { const c = el('canvas', { width: 140, height: 32, 'aria-label': KW[i], role: 'slider', tabindex: 0, style: at20(R(166 + 20 * i, 260, 182 + 20 * i, 330)) + ';image-rendering:pixelated;touch-action:none' }); return c; });
+  const drawSlider = (c, v, lo, hi, on) => { const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); x.imageSmoothingEnabled = false; if (COLOUR3) drawBar75(x, 0, 0, false, 70, { on: true, value: v - lo, max: on ? hi - lo : 0 }); else drawBar(x, 0, 0, false, 70, 16, { on: true, value: v - lo, max: on ? hi - lo : 0 }); };
+  bars.forEach((c, i) => {
+    const k = K[i];
+    const set = (v) => { const L = H().designLimits(g, p, spec.type), lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo); spec[k] = Math.max(lo, Math.min(hi, v)); const d = cur(); name = d ? d.name : (nameIn.value && !cur() ? nameIn.value : H().designName(g, p, spec.type)); refresh(); };
+    c.addEventListener('pointerdown', (e) => {
+      const r = c.getBoundingClientRect(), h = (e.clientX - r.left) * 70 / r.width, L = H().designLimits(g, p, spec.type), lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo);
+      if (hi <= lo) return; e.preventDefault();
+      if (h < 16) set(spec[k] - 1); else if (h >= 54) set(spec[k] + 1); else set(lo + Math.round((h - 24) / 22 * (hi - lo)));
+    });
+    c.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') set(spec[k] - 1); if (e.key === 'ArrowRight') set(spec[k] + 1); });
+  });
+  // the piles (28, 29)
+  const coins = el('canvas', { width: 126, height: 100, style: at20(R(4, 434, 54, 497)) + ';image-rendering:pixelated' }), mbars = el('canvas', { width: 126, height: 100, style: at20(R(64, 434, 114, 497)) + ';image-rendering:pixelated' });
+  const pile = (c, pic, count) => { const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); x.clearRect(0, 0, 63, 50); const im = a.IMG[pic]; if (!im || !im.width) return; const n = Math.min(36, count), n1 = Math.trunc(n / 2), n2 = Math.trunc(n / 3), n3 = n - n1 - n2, base = 50 - im.height - 7; [[n1, 0, 0], [n2, 14, 3], [n3, 28, 6]].forEach(([m, dx, dy]) => { for (let j = 0; j < m; j++) x.drawImage(im, dx, base + dy - 2 * j); }); };
+  const numIn = el('input', { type: 'text', inputmode: 'numeric', value: '0', style: at20(R(208, 428, 224, 455)), 'aria-label': '# To Build' });
+  const plus = ok20('+', R(196, 460, 216, 480), () => { want = Math.min(999, want + 1); refresh(); }), minus = ok20('-', R(220, 460, 240, 480), () => { want = Math.max(0, want - 1); refresh(); });
+  const scrapB = ok20('Scrap All', R(284, 108, 304, 188), () => { const d = cur(); if (!d) return; if (rs.flagScrapDesign) rs.flagScrapDesign(g, p, d, 'command'); else d.scrap301 = !d.scrap301; a.save(); a.renderPanel(); refresh(); });
+  const maxOut = ok20('Max Out', R(284, 230, 304, 294), () => { const L = H().designLimits(g, p, spec.type); K.forEach(k => { spec[k] = L[k]; }); clampSpec(); const d = cur(); name = d ? d.name : H().designName(g, p, spec.type); refresh(); });
+  const queued = () => { if (!want) return { money: 0, metal: 0 }; const d = cur() || Object.assign({ built: 0, free: false }, spec), c = H().designCost(g, d), proto = d.built === 0 && !d.free && rs.paysPrototype(g, p, d) ? c.proto : 0; return { money: want * c.money + proto, metal: want * c.metal }; };
+  const inService = (did) => g.fleets.filter(f => f.owner === a.ME).reduce((t, f) => t + (f.ships[did] || 0), 0);
+  function refresh() {
+    const L = clampSpec(), d = cur(), c = H().designCost(g, spec);
+    big.textContent = ''; big.append(picCv(Object.assign({ name }, spec), 120, 40, '#000'));
+    if (document.activeElement !== nameIn || !nameIn.dataset.typed) nameIn.value = d ? d.name : name; clsSel.value = spec.type;
+    T.dev.textContent = '$' + nice(c.protoTotal != null ? c.protoTotal : (c.money + (c.proto || 0))); T.pro.textContent = '$' + nice(c.money); T.mc.textContent = nice(c.metal);
+    K.forEach((k, i) => { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo), sat = k === 'R' && spec.type === 'satellite'; T['l' + k].textContent = sat ? '0/0' : `${spec[k]}/${hi}`; drawSlider(bars[i], spec[k], lo, hi, !sat && hi > lo); });
+    const q = queued(), sv = p.savings - q.money, mt = p.metal - q.metal;
+    T.sav.textContent = nice(Math.round(sv)); /* (no dollar sign: shot 015, "169,204") */ T.met.textContent = nice(Math.round(mt));
+    const scale = Math.max(50000, Math.round(H().projected(g, p).income || 0)) * 5;
+    pile(coins, sv < 0 ? 'dos:p4053' : 'dos:p4051', Math.trunc(Math.abs(sv) / Math.trunc((scale + 35) / 36)) + 1); pile(mbars, 'dos:p4061', Math.trunc(Math.max(0, mt) / 2778) + 1);
+    T.built.textContent = d ? String(d.built || 0) : '0'; T.serv.textContent = d ? String(inService(d.id)) : '0';
+    numIn.value = String(want); minus.disabled = want <= 0;
+    scrapB.disabled = !d; scrapB.firstChild.textContent = d && d.scrap301 ? 'Don’t Scrap' : 'Scrap All';
+    drawList();
+  }
+  clsSel.addEventListener('change', () => { fresh(clsSel.value); want = 0; refresh(); });
+  nameIn.addEventListener('input', () => { nameIn.dataset.typed = '1'; name = nameIn.value.slice(0, 15); const d = cur(); if (d && name.trim()) { d.name = name; drawList(); } }); // (the name renames the type shown, as 3.0.1's)
+  numIn.addEventListener('change', () => { let v = parseInt(numIn.value, 10); want = v >= 0 ? Math.min(999, v) : 0; refresh(); });
+  const buy = () => {
+    if (!want) return true;
+    let d = cur();
+    if (!d) { const lim = rs.maxDesigns; if (lim && H().liveDesigns(p) >= lim) { a.toast(H().say(g, H().DATA.alerts[15] || 'Your assembly lines are full.')); return false; }
+      const sp = Object.assign({}, spec); if (name && name.trim()) sp.name = name.trim(); d = H().findOrCreateDesign(g, p, sp); }
+    if (d.scrap301) { a.toast(`${d.name} is marked for scrapping.`); return false; }
+    let made = 0; for (let i = 0; i < want; i++) { if (H().buildShips(g, a.ME, sid, d.id, 1)) made++; else break; }
+    if (made < want) a.toast(made ? `Built ${made} of ${want}: not enough money, metal or people.` : 'Not enough money or metal.');
+    BUILD301 = d.id; want = 0; a.save(); a.renderPanel(); a.draw(); return made > 0 || !want;
+  };
+  const okB = el('button', { type: 'button', class: 'ok20 def20', style: at20(R(284, 420, 304, 478)) + ';min-width:0;padding:0', onclick: () => { if (buy() !== false) a.closeModal(); else refresh(); } }, raw('span', 'OK'));
+  const Lb = (t, r) => txt20(t, r);
+  const box = dlog20(500, 318,
+    el('div', { style: at20(R(2, 2, 269, 139)) + ';border:1px solid #000;box-sizing:border-box;background:#fff' }), list, lbar,
+    big, nameIn, clsSel,
+    Lb('Dev. Cost:', R(102, 160, 118, 239)), tx('dev', R(102, 240, 118, 322)), Lb('Pro. Cost:', R(122, 160, 138, 239)), tx('pro', R(122, 240, 138, 322)), Lb('Metal Cost:', R(142, 160, 158, 238)), tx('mc', R(142, 240, 158, 322)),
+    ...KW.map((w, i) => Lb(w, R(166 + 20 * i, 152, 182 + 20 * i, 213))), ...K.map((k, i) => tx('l' + k, R(166 + 20 * i, 215, 182 + 20 * i, 257))), ...bars,
+    Lb('Savings:', R(6, 344, 23, 400)), tx('sav', R(26, 344, 42, 432)), coins, Lb('Metal:', R(66, 344, 82, 390)), tx('met', R(86, 344, 102, 432)), mbars,
+    Lb('Built:', R(132, 348, 148, 386)), tx('built', R(132, 388, 148, 427)), Lb('In Service:', R(156, 348, 172, 421)), tx('serv', R(156, 424, 172, 463)),
+    Lb('# To Build:', R(208, 348, 224, 423)), numIn, plus, minus,
+    ok20('Build & Continue', R(252, 368, 272, 479), () => { buy(); refresh(); }),
+    scrapB, maxOut, ok20('Cancel', R(284, 348, 304, 406), () => a.closeModal()), okB);
+  a.modal('', box, { cls: 'mac12 dl20w', label: 'Build / Design Ships' });
+  refresh();
+  return true;
+}
 // ALRT 5010 (3.0.1: 240 x 200; "^0^1^2^3" at (8, 12, 116, 236), PICT 3020 at (117, 13), OK at (156, 156)): the program's alert of a line
 function alert5010(text) {
   const a = A(), el = a.el, im = a.IMG['dos:p3020'];
@@ -1766,6 +1934,176 @@ function give301() {
   return true;
 }
 
+// 4.0.5's DLOG 6150 "Preferences" (482 x 297, DITL 6150, read from the resource fork; no capture of it). Wired to the remake's settings as
+// the Windows 4.0.5's dialog 350 (js/skins/w95/screen.js prefsDialog, the same program): Show Event Messages, But Only The Most Important
+// Ones, Review Event Battles, Give Helpful Game Play Hints, Battle Speed (its scroll bar, Fast to Slow), Fully Animated Battles, Polling
+// Time (and its seconds), Temp. in Celsius; kept as chosen with nothing to act on: Automatically Sort Planet List, Groups Shoot Together,
+// Show Fleets Paths; Your Password dimmed (the remake keeps none). The remake's own options: "Remake options…" (the classic window).
+function prefs405() {
+  const a = A(), el = a.el, P = a.Prefs, O = (a.verOpts && a.verOpts()) || {};
+  const R = (t, l, b, r) => [t, l, b, r];
+  const ck = (label, r, on) => { const i = el('input', { type: 'checkbox' }); i.checked = !!on; const lb = el('label', { class: 'chk20', style: at20(r) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' }, i, raw('span', label)); return { lb, i }; };
+  const sort = ck('Automatically Sort Planet List', R(44, 16, 60, 232), P.sortPlanets !== false), show = ck('Show Event Messages', R(64, 16, 80, 189), P.showMsgs !== false);
+  const imp = ck('But Only The Most Important Ones', R(84, 28, 100, 271), !!P.important), rev = ck('Review Event Battles', R(104, 28, 120, 216), a.prefReview ? a.prefReview() : !!P.review);
+  const hint = ck('Give Helpful Game Play Hints', R(124, 16, 140, 250), !!P.hints), paths = ck('Show Fleets Paths', R(44, 290, 60, 483), P.fleetPaths !== false), cel = ck('Temp. in Celsius (not °F)', R(64, 290, 80, 470), !!P.celsius);
+  const full = ck('Fully Animated Battles', R(194, 16, 210, 192), P.fullAnim !== false), grp = ck('Groups Shoot Together', R(194, 200, 210, 392), P.groupsTogether !== false);
+  const sync = () => { imp.i.disabled = rev.i.disabled = !show.i.checked; }; show.i.addEventListener('change', sync); sync();
+  const pw = el('input', { type: 'password', disabled: 'disabled', title: 'The remake keeps no password', style: at20(R(116, 298, 132, 437)) });
+  // the two scroll bars (CNTL 4040, 4060): System 7.5's, a click on an arrow a step, on the grey to that place
+  const bar = (r, C, key) => {
+    const c0 = C || { min: 1, max: 10, def: 5 }, W = r[3] - r[1], cv = el('canvas', { width: 2 * W, height: 32, role: 'slider', tabindex: 0, 'aria-valuemin': c0.min, 'aria-valuemax': c0.max, style: at20(r) + ';image-rendering:pixelated;touch-action:none' });
+    const o = { v: P[key] != null ? P[key] : c0.def, c: c0, cv };
+    o.draw = () => { const x = cv.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); const m = { on: true, value: o.v - c0.min, max: c0.max - c0.min }; if (COLOUR3) drawBar75(x, 0, 0, false, W, m); else drawBar(x, 0, 0, false, W, 16, m); cv.setAttribute('aria-valuenow', o.v); if (o.onset) o.onset(); };
+    const set = (v) => { o.v = Math.max(c0.min, Math.min(c0.max, Math.round(v))); o.draw(); };
+    cv.addEventListener('pointerdown', (e) => { const b = cv.getBoundingClientRect(), h = (e.clientX - b.left) * W / b.width; if (h < 16) set(o.v - 1); else if (h >= W - 16) set(o.v + 1); else set(c0.min + (h - 24) / (W - 48) * (c0.max - c0.min)); });
+    cv.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') set(o.v - 1); if (e.key === 'ArrowRight') set(o.v + 1); });
+    return o;
+  };
+  const bs = bar(R(174, 156, 190, 286), O.battleSpeed, 'battleSpeed'), po = bar(R(238, 158, 254, 288), O.poll, 'poll');
+  const pv = raw('span', '', { class: 'dt20', style: at20(R(238, 334, 254, 354)) + ';text-align:right' });
+  po.onset = () => { pv.textContent = String(po.v); };
+  const okFn = () => {
+    P.sortPlanets = sort.i.checked; P.showMsgs = show.i.checked; P.important = imp.i.checked; P.review = rev.i.checked; P.hints = hint.i.checked;
+    P.fullAnim = full.i.checked; P.groupsTogether = grp.i.checked; P.fleetPaths = paths.i.checked;
+    P.battleSpeed = O.battleSpeed && bs.v === O.battleSpeed.def ? null : bs.v; P.poll = O.poll && po.v === O.poll.def ? null : po.v;
+    if (cel.i.checked !== !!P.celsius) { P.celsius = cel.i.checked; P.temp = null; }
+    a.savePrefs(); a.closeModal(); a.renderPanel(); a.draw();
+  };
+  a.modal('', dlog20(482, 297, txt20('Preferences', R(0, 188, 15, 286)), txt20('After Every Turn Update:', R(24, 8, 40, 191)), txt20('On The Star Map:', R(24, 282, 40, 444)),
+    sort.lb, show.lb, imp.lb, rev.lb, hint.lb, paths.lb, cel.lb, txt20('Your Password:', R(92, 282, 108, 418)), pw,
+    txt20('When Reviewing Battles:', R(154, 8, 169, 180)), txt20('Battle Speed:', R(174, 16, 190, 111)), txt20('Fast', R(174, 116, 190, 150)), bs.cv, txt20('Slow', R(174, 292, 190, 335)), full.lb, grp.lb,
+    txt20('When Checking To See If All Players Have Ended Their Turn:', R(218, 6, 234, 400)), txt20('Polling Time:', R(238, 22, 254, 112)), txt20('Fast', R(238, 118, 254, 151)), po.cv, txt20('Slow', R(238, 294, 254, 329)), pv, txt20('Seconds', R(238, 358, 254, 433)),
+    (() => { const b = ok20('Remake options…', R(266, 8, 286, 150), () => { a.closeModal(); a.openPrefs(); }); b.classList.add('ios-bremake'); return b; })(), // (the class the test tools know the remake's options button by, as the w95 skin's)
+    ok20('Cancel', R(266, 324, 286, 382), () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20(R(266, 400, 286, 458)) + ';min-width:0;padding:0', onclick: okFn }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Preferences' });
+  bs.draw(); po.draw();
+  return true;
+}
+// 4.0.5's DLOG 6160 "Statistics" (DoStatisticsDlg @52080; 359 x 236, DITL 6160; Jake's shot 019): "Cumulative Statistics:" (12, 12),
+// six lines at (16, 44 + 24k) with their numbers (LongToNiceString) at (204, ...): the player's counters (js/rules-405.js p.st405).
+function stats405() {
+  const a = A(), el = a.el, st = a.me().st405; if (!st) return false;
+  const L = [['Total Population Gained:', st.g], ['Total Population Killed:', st.k], ['Enemy Population Killed:', st.ek], ['Total # of Ships Built:', st.b], ['Total # of Ships Destroyed:', st.d], ['Total # of Enemy Ships Destroyed:', st.ed]];
+  a.modal('', dlog20(359, 236, txt20('Cumulative Statistics:', [12, 12, 28, 216]),
+    ...L.map(([t], k) => txt20(t, k === 5 ? [164, 16, 196, 182] : [44 + 24 * k, 16, 60 + 24 * k, 197])),
+    ...L.map(([, v], k) => txt20(nice(v), [44 + 24 * k, 204, 60 + 24 * k, 334])),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([200, 288, 220, 346]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Statistics' });
+  return true;
+}
+// 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
+// SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
+// legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
+// 2-pixel black frame, the axis a sixth up from the foot, the years every max(100, span / 4) under it; a line per chosen series, one point
+// a turn, 100 turns across (the same program as the Windows 4.0.5's Graph History: js/skins/w95/screen.js graphDialog, whose reading of
+// the record this follows). The icons (247, 4, 294, 456): ten cells of 45, ICON 3110, 3162, 3117, 4011, 4017, 3100-3104, black behind
+// a chosen one, their names under them (Geneva 9); their colours' lines under the row (295, 4, 302, 456); a click flips one (the
+// preferences' +0x7e, kept in this browser). Colours: Income #996633, Metal #dd0000, Ship Money #330099 (shot 018); the others as the
+// Windows program's table. Ship Power: not in the remake's history (its line stays empty).
+const GRAPH405 = {
+  pics: [3110, 3162, 3117, 4011, 4017, 3100, 3101, 3102, 3103, 3104],
+  names: ['Net Income', 'Metal', 'Ship Money', 'Ship Power', 'Population', 'Range', 'Speed', 'Weapons', 'Shields', 'Mini'],
+  colors: ['#996633', '#dd0000', '#330099', '#1fb814', '#562c05', '#800000', '#ff6402', '#0000d5', '#404040', '#000000'],
+  fmt: ['$%s', '%sM', '$%s', '%sP', '%s'], start: [100000, 50000, 100000, 10000, 1000000],
+  get mask() { try { const v = localStorage.getItem('ho5.mac4.graph'); return v == null ? 7 : +v || 0; } catch (e) { return 7; } },
+  set mask(v) { try { localStorage.setItem('ho5.mac4.graph', String(v)); } catch (e) {} },
+};
+function graph405() {
+  const a = A(), el = a.el, g = G(), p = a.me();
+  const h = (p.hist || []).filter(e => e && e.y != null);
+  let sr = null;
+  if (h.length) {
+    const end = h[h.length - 1].y, first = Math.max(h[0].y, end - 990), rows = h.filter(e => e.y >= first);
+    const val = [(e) => e.inc, (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, () => null, (e) => e.pop];
+    const max = GRAPH405.start.slice();
+    val.forEach((f, i) => rows.forEach(e => { const v = f(e); if (v == null) return; const m = v < 1 ? v * -5 : v; if (m > max[i]) max[i] = Math.ceil(m / 50000) * 50000; }));
+    const pts = [];
+    for (let i = 0; i < 10; i++) pts.push(rows.map(e => { const b = Math.round((e.y - first) / 10); if (i < 5) { const v = val[i](e), q = Math.trunc(max[i] / 127); return [b, v == null || !q ? 0 : Math.max(-128, Math.min(127, Math.trunc(v / q)))]; } const t = e.hx && e.hx.tr ? e.hx.tr[i - 5] : null; return [b, t == null ? 0 : t * 127 / 100]; }));
+    sr = { first, end, n: Math.round((end - first) / 10), max, pts };
+  }
+  const W = 484, Hh = 223, K = 2, cv = el('canvas', { width: W * K, height: Hh * K, style: at20([20, 4, 243, 488]), 'aria-label': 'History graph', role: 'img' });
+  const icons = GRAPH405.pics.map((pic, i) => {
+    const im = a.IMG['dos:i' + pic];
+    const c = el('div', { role: 'button', tabindex: 0, 'aria-label': GRAPH405.names[i], style: `position:absolute;left:${4 + 45 * i}px;top:248px;width:45px;height:46px;cursor:pointer;text-align:center;font:12px 'DOS Geneva 9',Geneva,sans-serif;line-height:10px;overflow:hidden` },
+      im ? el('img', { src: im.src, alt: '', style: 'display:block;margin:1px auto 0;width:32px;height:32px;image-rendering:pixelated' }) : null, raw('span', GRAPH405.names[i], { style: 'display:inline-block;white-space:nowrap;transform-origin:center' }));
+    const flip = () => { GRAPH405.mask = GRAPH405.mask ^ (1 << i); paint(); };
+    c.addEventListener('click', flip); c.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } });
+    return c;
+  });
+  const lines = el('canvas', { width: 452 * K, height: 7 * K, 'aria-hidden': 'true', style: at20([295, 4, 302, 456]) });
+  const kfmt = (n) => nice(n);
+  function paint() {
+    const m = GRAPH405.mask;
+    icons.forEach((c, i) => { const on = !!(m & (1 << i)); c.style.background = on ? '#000' : '#fff'; c.style.color = on ? '#fff' : '#000'; c.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    const y = lines.getContext('2d'); y.setTransform(K, 0, 0, K, 0, 0); y.clearRect(0, 0, 452, 7); GRAPH405.colors.forEach((col, i) => { y.fillStyle = col; y.fillRect(45 * i + 4, 2, 37, 2); });
+    const x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.clearRect(0, 0, W, Hh);
+    const L = 80, T0 = 0, R = W, B = Hh;
+    x.fillStyle = '#cccccc'; x.fillRect(L, T0, R - L, B - T0); x.fillStyle = '#000'; x.fillRect(L, T0, R - L, 2); x.fillRect(L, B - 2, R - L, 2); x.fillRect(L, T0, 2, B - T0); x.fillRect(R - 2, T0, 2, B - T0);
+    const d0 = Math.round(B - Hh / 6), cH = d0 - T0 - 13, col = Math.trunc((R - L) / 100);
+    x.fillRect(L, d0, R - L, 2); x.fillRect(L - 3, T0 + 13, 4, 1);
+    x.font = G9; x.textBaseline = 'alphabetic';
+    let ink = '#000';
+    if (sr) for (let e = 0; e < 5; e++) if (m & (1 << e)) { ink = GRAPH405.colors[e]; x.fillStyle = ink; x.textAlign = 'right'; x.fillText(GRAPH405.fmt[e].replace('%s', kfmt(sr.max[e])), L - 4, T0 + 9 + e * 10); }
+    if (sr) {
+      let step = Math.trunc((sr.end - sr.first) / 4); if (step < 101) step = 100; step -= step % 10;
+      x.textAlign = 'center';
+      for (let yr = sr.first; yr <= sr.end; yr += step) { const px = R - 20 - (Math.trunc((sr.end - yr) / 10) + 1) * col; x.fillStyle = '#000'; x.fillRect(px, d0 - 2, 1, 5); x.fillText(String(yr), px, d0 + 14); }
+      for (let i = 0; i < 10; i++) {
+        if (!(m & (1 << i))) continue;
+        for (const [pen, dy] of [['#fff', 1], [GRAPH405.colors[i], 0]]) {
+          x.strokeStyle = pen; x.lineWidth = 2; x.beginPath(); let on = false;
+          for (const [b, v] of sr.pts[i]) { if (!(v > 0)) continue; const px = R - (sr.n + 1 - b) * col - 19, py = d0 - Math.trunc(v * cH / 127) + dy; if (!on) { x.moveTo(px, py); on = true; } else x.lineTo(px, py); }
+          x.stroke();
+        }
+      }
+    }
+  }
+  a.modal('', dlog20(531, 303, txt20('Select an icon to see recent recorded history:', [1, 4, 18, 456]), cv,
+    el('div', { style: at20([247, 4, 295, 456]) + ';border:1px solid #000;box-sizing:border-box' }), ...icons, lines,
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([266, 468, 286, 522]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Graph History' });
+  paint();
+  requestAnimationFrame(() => icons.forEach((c) => { const sp = c.querySelector('span'); if (!sp) return; const w = sp.scrollWidth; if (w > 44) sp.style.transform = `scaleX(${44 / w})`; })); // (a name wider than its cell condensed, as the list draws it: shot 018)
+  return true;
+}
+// 4.0.5's DLOG 6110 "Alliances" (DoAlliancesDlg @10349a, SetAllianceLists @103880; 472 x 302, DITL 6110; Jake's shot 020): "Click on a
+// player's icon to move it horizontally ..." (4, 4) and "Their icon represents what their current opinion of you is." (36, 4); three lists
+// (80, 4 / 160 / 316, each 152 x 182, cells three across), headed "I Really Like Them" (60, 16), "I Like Them" (60, 200), "I Don't Like
+// Them" (60, 336): a player is in the first if you count them a best buddy and an ally, the second an ally only, else the third, in the
+// players' order (the header's +0x318), out players left off. Each one's icon is their opinion of you: ICON 4021 if they count you a
+// best buddy, 4020 an ally, 4019 neither. A click moves a player one column (not liked -> liked -> really liked -> not liked); on
+// yourself, a beep. OK keeps it (your allies and best buddies), Cancel (272, 332) leaves it. Only with alliances on and you in the game.
+function alliances405() {
+  const a = A(), el = a.el, g = G(), ME = a.ME, me = a.me();
+  if (!me.alive || me.surrendered || !(g.opts && g.opts.alliances)) { if (a.beep) a.beep(); return true; }
+  const order = (H().rules(g).giveWindow && H().rules(g).giveWindow.order) ? H().rules(g).giveWindow.order(g) : g.players;
+  const ps = order.filter(q => q.alive && !q.surrendered);
+  const ally = new Set(me.allies || []), bud = new Set((me.buddies || []).filter(x => ally.has(x)));
+  const opinion = (q) => q.id === ME ? 4021 : (q.buddies || []).includes(ME) && (q.allies || []).includes(ME) ? 4021 : (q.allies || []).includes(ME) ? 4020 : 4019;
+  const R = [[80, 4, 262, 156], [80, 160, 262, 312], [80, 316, 262, 468]];
+  const lists = R.map(r => { const c = cells20(3, 4, [], { pick: (x) => tap(x.id) }); c.el.setAttribute('style', c.el.getAttribute('style') + ';' + at20([r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 16]) + ';overflow-y:auto'); return c; }); // (three 45-pixel cells and the list's scroll bar: shot 020)
+  const draw = () => {
+    const by = [[], [], []];
+    for (const q of ps) by[q.id === ME || bud.has(q.id) ? 0 : ally.has(q.id) ? 1 : 2].push({ icon: 'dos:i' + opinion(q), name: q.name, id: q.id });
+    by.forEach((L, i) => lists[i].set(L, null));
+  };
+  function tap(id) {
+    if (id === ME) { if (a.beep) a.beep(); return; }
+    if (bud.has(id)) { bud.delete(id); ally.delete(id); } else if (!ally.has(id)) ally.add(id); else bud.add(id);
+    draw();
+  }
+  const ok = () => { for (const q of g.players) if (q.id !== ME) { H().setPact(g, ME, q.id, 'ally', ally.has(q.id)); H().setPact(g, ME, q.id, 'buddy', bud.has(q.id)); } a.closeModal(); a.save(); a.renderPanel(); a.draw(); };
+  draw();
+  a.modal('', dlog20(472, 302, txt20('Click on a player’s icon to move it horizontally to specify whether you would or would not like to ally with that player.', [4, 4, 37, 425]),
+    txt20('Their icon represents what their current opinion of you is.', [36, 4, 52, 464]),
+    txt20('I Really Like Them', [60, 16, 75, 137]), txt20('I Like Them', [60, 200, 75, 279]), txt20('I Don’t Like Them', [60, 336, 75, 458]),
+    ...R.map(r => el('div', { style: at20(r) + ';border:1px solid #000;box-sizing:border-box;background:#fff' })), ...lists.map(c => c.el), ...lists.map((c, i) => listBar20(c.el, [R[i][0], R[i][3] - 16, R[i][2], R[i][3]], 45)),
+    ok20('Cancel', [272, 332, 292, 390], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([272, 404, 292, 462]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Alliances' });
+  return true;
+}
 // DLOG 6110 "Alliances" (DoAlliancesDlg @1432a4, InitAllianceLists @1434b6, SetAllianceLists @143600; 443 x 300, DITL 6110; Jake's capture
 // 073): the line "Click on a player's icon…" (5, 7), "I Like Them" (43, 97) and "I Don't Like Them" (43, 268) over the columns, "They Like
 // Me" (88, 8) and "They Don't Like Me" (171, 7) beside the rows; four lists (63, 52) (63, 236) (157, 52) (157, 236), each 182 x 92, four
@@ -1822,7 +2160,9 @@ function chat301() {
   const prompt = raw('span', '', { class: 'dt20', style: at20([7, 154, 24, 355]) });
   const left = cells20(1, 4, [], {}), right = cells20(5, 4, [], {});
   const choices = (k) => {
-    if (k === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) && !isNaN(+o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+    // (4.0.5's groups: Everyone ICON 1402, Your Allies and Your Buddies 4018, matched pixel for pixel in Jake's shot 022)
+    const GI4 = { all: 'dos:i1402', allies: 'dos:i4018', buddies: 'dos:i4018' };
+    if (k === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) && !isNaN(+o[0]) ? hat(pl(o[0])) : V4 ? GI4[o[0]] || null : null, off: !!o[2] }));
     if (k === 1) return C.actions.map((x, i) => ({ id: i, i, name: x.label, icon: 'dos:i' + (3000 + i) }));
     const part = act().parts[k - 2], kind = part[1];
     return C.list(g, ME, kind, a.UI.sel).map(o => ({ id: String(o[0]), name: o[1], icon: kind === 'players' && pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
@@ -1983,7 +2323,7 @@ function fleets301() {
   const sel = el('select', { 'aria-label': 'Sort By', style: at20([265, 80, 285, 213]), onchange: (e) => { mode = +e.target.value; list = sorted(mode); cur = 0; show(); } },
     el('option', { value: 1 }, M[1]), el('option', { value: 2 }, M[2]));
   show();
-  a.modal('', dlog20(486, 296, txt20('List of All Fleets:', [2, 13, 22, 145]), txt20('Sort By:', [267, 13, 285, 78]), el('div', { style: at20([26, 13, 252, 468]) + ';border:1px solid #000;box-sizing:border-box' }), box, sel,
+  a.modal('', dlog20(486, 296, txt20('List of All Fleets:', [2, 13, 22, 145]), txt20('Sort By:', [267, 13, 285, 78]), el('div', { style: at20([26, 13, 252, 468]) + ';border:1px solid #000;box-sizing:border-box' }), box, V3 ? listBar20(box, [26, 452, 252, 468], 16) : null, sel,
     ok20('Go To Fleet', [264, 260, 284, 342], go),
     el('button', { type: 'button', class: 'ok20 def20', style: at20([264, 364, 284, 446]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
     { cls: 'mac12 dl20w', label: 'List of All Fleets' });
@@ -2113,7 +2453,7 @@ function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as 
   x.textBaseline = 'alphabetic'; x.fillStyle = '#000'; x.strokeStyle = '#000'; x.lineWidth = 1;
   const api = {
     c, x,
-    text(t, h0, v, font, o) { c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t; /* (what the box says, for a reader or a test: the canvas has no text of its own) */ x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = (o && o.color) || '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
+    text(t, h0, v, font, o) { c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t; /* (what the box says, for a reader or a test: the canvas has no text of its own) */ x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = (o && o.color) || '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; if (o && o.shadow) { /* (drawn first one pixel down and right in the shadow's colour, then in its own: 4.0.5's panes) */ x.fillStyle = o.shadow; x.fillText(t, at + 1, v + 1); x.fillStyle = o.color || '#000'; } x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
     width(t, font) { x.font = font || G9; return x.measureText(t).width; },
     hline(h0, h1, v) { x.fillStyle = '#000'; x.fillRect(h0, v, h1 - h0, 1); },
     vline(h0, v0, v1) { x.fillStyle = '#000'; x.fillRect(h0, v0, 1, v1 - v0); },
@@ -2321,7 +2661,7 @@ function reportsBox12() {
     const t = el('span', { class: 'rt' }); t.append(a.degText(H().say(g, m.text))); li.append(t);
     list.append(li);
   });
-  if (V3) { // (3.0.1's layout gives the list its own window: js/skins/mac12/panel.css #rep301)
+  if (V3 && !document.documentElement.classList.contains('mac75')) { // (3.0.1's layout gives the list its own window: js/skins/mac12/panel.css #rep301; on the System 7.5 screen, html.mac75, its scroll bar and grow box too, below)
     const box3 = el('section', { class: 'box rep12box' }, list), key3 = g.turn + ':' + ms.length;
     setTimeout(() => { if (REP12.key === key3 && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key3; }, 0);
     list.addEventListener('scroll', () => { REP12.top = list.scrollTop; });
@@ -2335,7 +2675,8 @@ function reportsBox12() {
   grow.rect(0, 0, 16, 16, '#000'); grow.rect(1, 1, 15, 15, '#fff'); grow.x.strokeStyle = '#000'; grow.x.strokeRect(3.5, 3.5, 6, 6); grow.x.strokeRect(5.5, 5.5, 7, 7); grow.rect(6, 6, 12, 12, '#fff'); grow.x.strokeRect(5.5, 5.5, 7, 7);
   const vals = () => { const max = Math.max(0, Math.ceil((list.scrollHeight - list.clientHeight) / 32)); return { v: Math.min(max, Math.round(list.scrollTop / 32)), max }; };
   let press = null, ghost = null, timer = 0, drag = null;
-  const L = () => Math.max(34, Math.round(list.clientHeight) - 15);
+  const L = () => Math.max(34, Math.round(list.clientHeight) - 15 + (BAR75() ? 2 : 0)); // (System 7.5's: from the title bar's black row to the grow box's, html.mac75)
+  if (BAR75()) { const x = grow.x; x.setTransform(grow.x.getTransform()); drawGrow75(x); }
   const paint = () => { const o = vals(); bar.setAttribute('aria-valuenow', o.v); bar.setAttribute('aria-valuemax', o.max); paintBar(bb, true, L(), { on: true, value: o.v, max: o.max, press, ghost }); };
   const go = (d) => { list.scrollTop = Math.max(0, list.scrollTop + d); paint(); };
   bar.addEventListener('pointerdown', (e) => {
@@ -2352,7 +2693,7 @@ function reportsBox12() {
   bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
   bar.addEventListener('keydown', (e) => { const d = { ArrowUp: -32, ArrowDown: 32, PageUp: -64, PageDown: 64 }[e.key]; if (d) { e.preventDefault(); go(d); } });
   const body = el('div', { class: 'rep12body' }, list, bar, grow.c);
-  const box = el('section', { class: 'box rep12box' }, titleBar12(226), body);
+  const box = V3 ? el('section', { class: 'box rep12box' }, body) : el('section', { class: 'box rep12box' }, titleBar12(226), body); // (3.0.1, 4.0.5: the windoid's title bar is frame75's)
   // (kept where the player scrolled it while the reports are the same; a new turn opens it at the current year's first)
   const key = g.turn + ':' + ms.length;
   setTimeout(() => { if (REP12.key === key && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key; paint(); }, 0);
@@ -2538,7 +2879,7 @@ function techBox301() {
 }
 // 3.0.1's words: its STR# lists (English 3.0.1; in French 3.0.1F's), js/lang-data.js
 const STR301 = (id) => { const L = window.HOLANG && (lang() === 'fr' ? HOLANG.mac301Fr : HOLANG.mac301En); return (L && L[String(id)]) || []; };
-const COL301 = () => !!window.HOMAC3_COLOUR;
+const COL301 = () => COLOUR3;
 // The 3.0.1 skins draw these panes for any ruleset played in them: 3.0.1's own keeps a colony's terraform / mine split as rs.bars (per mille
 // of the two, -1 finished); any other the remake's s.terra, with a part finished as the 1.2 panes see it (colonyBars)
 function bars301(s) {
@@ -2556,7 +2897,41 @@ const cfmt = (t, ...v) => { let i = 0; return t.replace(/%(\.\*)?(\d*)(?:\.(\d+)
 // Total Money (+8, "$%s"). Then plain, right-aligned at the right edge less 1: the metal's change ((+0x24) "(up %s)" / "(down %s)", 1005.7
 // and .8, in full), the interest (+0x14, the program's own "(Int: %s)", LongToNiceShortString) and Total Money's change ((+0xc) "(up $%s)" /
 // "(down $%s)", 1005.5 and .6, short). A line along the bottom less 2, and one down the right edge less 1.
+// 4.0.5's words (HOLANG.mac405En: its STR# lists by number; English only, as the program is)
+const STR405 = (id) => { const L = window.HOLANG && HOLANG.mac405En; return (L && L[String(id)]) || []; };
+// Mac 4.0.5's DrawIncomeRect @113340, the same three rows as 3.0.1's in its own words and look: Geneva (TextFont 3) bold, on a colour
+// screen (depth 4 or more) the pane painted grey first (RGBForeColor, #cccccc in Jake's shot 012) and on a 1-bit one erased; every
+// string drawn twice, white (ForeColor 30) one pixel down and right, then black (33) on it. Left, right-aligned at 87: "Metal:",
+// "Savings:", "Net Income:" (STR# 6070.4, .2, .3) on baselines 10, 20, 30; at 90 the metal (player +0x1c, LongToNiceString), the savings
+// (+0x10, "$%s" 6070.9; ForeColor 205, red, below zero) and the net income (+8, "$%s"). Then plain (TextFace 0), right-aligned at the
+// pane's right less 1: the metal's change ("(up %s)" / "(down %s)", .7 / .8, in full), the interest (+0x14, "(Int: $%s)" .10,
+// LongToNiceShortString) and the net income's change ("(up $%s)" / "(down $%s)", .5 / .6, short). A line along the bottom less 2 and one
+// down the right edge less 1, as 3.0.1's. (The remake's p.net301 is the +8 the rules keep: equal to HO.projected's net each turn.)
+// (4.0.5's panes in the Mac's own Geneva 9, plain and bold: the bitmap faces the DOS skin carries, js/skins/dos/style.css, at 12 CSS pixels a 9-point
+// line as the battle window's GEN93; the 3.0.1 panes' G9 / G9B fall back to the system's Geneva or Verdana)
+const G9M = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif", G9MB = "12px 'DOS Geneva 9 Bold', Geneva, Verdana, sans-serif";
+function incomeBox405() {
+  const a = A(), g = G(), p = a.me(), S = STR405(6070), col = COL301();
+  const q = qdCanvas(226, 34, S[3] || 'Metal:');
+  if (col) q.rect(0, 0, 226, 32, '#ccc');
+  const sh = { shadow: '#fff' };
+  const L = (t, v) => q.text(t, 0, v, G9MB, Object.assign({ right: 87 }, sh));
+  const V = (t, v, color) => q.text(t, 90, v, G9MB, Object.assign({ color }, sh));
+  const R = (t, v) => q.text(t, 0, v, G9M, Object.assign({ right: 225 }, sh));
+  L(S[3] || 'Metal:', 10); L(S[1] || 'Savings:', 20); L(S[2] || 'Net Income:', 30);
+  V(H().niceNum(Math.round(p.metal)), 10);
+  V(fill(S[8] || '$%s', H().niceNum(Math.round(p.savings))), 20, p.savings < 0 && col ? '#dd0000' : null);
+  V(fill(S[8] || '$%s', H().niceNum(Math.round(p.net301 || 0))), 30);
+  const ch = (which) => { const c = (p.chg && p.chg[which]) || 0, up = c >= 0, n = Math.abs(Math.round(c));
+    return which === 'metal' ? fill(S[up ? 6 : 7] || (up ? '(up %s)' : '(down %s)'), H().niceNum(n)) : fill(S[up ? 4 : 5] || (up ? '(up $%s)' : '(down $%s)'), H().niceShort(n)); };
+  R(ch('metal'), 10);
+  R(fill(S[9] || '(Int: $%s)', H().niceShort(Math.round(p.oInterest || 0))), 20);
+  R(ch('income'), 30);
+  q.hline(0, 227, 32); q.vline(225, 0, 34);
+  return a.el('section', { class: 'box info12 info301 info405' }, q.c);
+}
 function incomeBox301() {
+  if (V4) return incomeBox405();
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), S = STR301(1005), col = COL301();
   const q = qdCanvas(226, 34, S[3] || 'Reserve Metal:');
   if (col) q.rect(0, 0, 226, 32, '#bbb');
@@ -2615,16 +2990,18 @@ function pieChart301(q, h, v, s, T, X) {
 // (left under 112, right from it) less (count < 56, >= 168) or with (else) an oval as tall as the planet and as wide as how far the count is from 56,
 // 112 or 168 or 224; then through the oval into the window.
 const GRAT = { c: 0, stars: Array.from({ length: 14 }, () => ({ v: 0, h: 0 })), timer: null };
-const OVAL301 = { h: 132, v: 4, d: 56 }, inOval301 = (h, v) => { const r = OVAL301.d / 2, dx = h + 0.5 - (OVAL301.h + r), dy = v + 0.5 - (OVAL301.v + r); return dx * dx + dy * dy <= r * r; };
+// (4.0.5's region starts at 108 and its planet at 139, 4: Jake's shots 008, 027, 158; 3.0.1's at 96 and 132)
+const GREG = { l: V4 ? 108 : 96, r: V4 ? 226 : 224 };
+const OVAL301 = { h: V4 ? 139 : 132, v: 4, d: 56 }, inOval301 = (h, v) => { const r = OVAL301.d / 2, dx = h + 0.5 - (OVAL301.h + r), dy = v + 0.5 - (OVAL301.v + r); return dx * dx + dy * dy <= r * r; };
 function gratuitous301(x, s, idle) {
   const a = A(), p = a.me(), col = COL301(), IMG = a.IMG;
   GRAT.c = (GRAT.c + 1) % 224;
   const c = GRAT.c, off = c % 112, sid = s.id;
   if ((c & 3) === 3) GRAT.stars.forEach((st) => {
-    const put = (fill) => { const h = 96 + st.h, v = st.v; if (h >= 96 && h < 224 && v >= 0 && v < 65 && !inOval301(h, v)) { x.fillStyle = fill; x.fillRect(h, v, 1, 1); } };
+    const put = (fill) => { const h = GREG.l + st.h, v = st.v; if (h >= GREG.l && h < GREG.r && v >= 0 && v < 65 && !inOval301(h, v)) { x.fillStyle = fill; x.fillRect(h, v, 1, 1); } };
     put('#000');
     if (idle) st.h -= 1;
-    if (st.h < 0) { st.h = 127; st.v = 1 + Math.floor(Math.random() * 64); }
+    if (st.h < 0) { st.h = GREG.r - GREG.l - 1; st.v = 1 + Math.floor(Math.random() * 64); }
     put('#fff');
   });
   const r = Math.trunc(100 * Math.max(s.g, p.homeG) / Math.max(0.01, Math.min(s.g, p.homeG)));
@@ -2685,7 +3062,60 @@ function gratuitousTick() {
 // Rules at 65 and 67 and down 225. A click on your colony's pane while one part is not finished is DoPieClick @d3028: the beep if the other is finished;
 // else, while the button is down, the angle round the pie (PtToAngle, 1 to 359; across 12 o'clock it stops at the end it came from) sets terraforming
 // to (angle - 1) x 1000 / 358 and mining to the rest, and the pie and the budget bars are drawn again.
+// Mac 4.0.5's DrawPlanetRect @113ab0: 226 x 68, erased or on a colour screen painted grey (#cccccc) to 108, or to the whole width when you have
+// no information (the info year below 2000), or to 98 when your colony's slider is there; the rest black, DoGratuitousGraphics' stars and the
+// planet's picture (3.0.1's routine, as gratuitous301: here for every star you know, not only your finished colonies). Every string twice, white
+// one pixel down and right, then black: the star's name in Chicago 12 centred at 43 on 11; then Geneva 9: "You have no information about this
+// planet." at (3, 22); else "Pop:", "Temp:", "Gravity:", "Metal:" (STR# 6070.13-16) right-aligned at 40 on 32, 42, 52, 62 and at 45 the figures
+// (the temperature by CreateTempString, °F or °C); yours: "Income:" (6070.12) at (5, 22) and the colony's income at 45 ("$%s"), its people on 32;
+// another's or nobody's: "Owner:" (6170.6) right-aligned at 40 on 22, the owner or "No One" (6170.30) at 45, "Uninhabited" / "Unknown" (6070.21,
+// .22) at 45 on 32. No Info Date or Battle Date (3.0.1's). Three rules along the bottom (65, 66, 67) and one down the right. Your colony with
+// both terraforming and mining unfinished (star +0x18f0, +0x18f2 not -1) has DrawVSliderBar @11448c at (98, 0): PICT 900 (colour 901, 10 x 67)
+// and the thumb PICT 902 (903, 8 x 4) at (99, 1 + terraforming x 62 / 1000); ClickVSliderControl @110180 sets terraforming to
+// clamp(v - 2, 0, 62) x 1000 / 62 and mining to the rest while the button is down, and draws the budget bars again.
+function planetBox405() {
+  const a = A(), g = G(), p = a.me(), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR405(6070), S7 = STR405(6170), col = COL301();
+  const q = qdCanvas(226, 68, s ? s.name : '');
+  const box = a.el('section', { class: 'box planet12 planet301 planet405' }, q.c);
+  const yours = !!s && s.owner === a.ME, k = s ? H().know(g, p, sid) : null, info = !!s && (yours || !!(k && k.explored));
+  const B = yours ? bars301(s) : null, slider = !!B && B[0] !== -1 && B[1] !== -1;
+  const sh = { shadow: '#fff' }, T = (t, h0, v, o) => q.text(t, h0, v, (o && o.font) || G9M, Object.assign({}, sh, o));
+  if (col) q.rect(0, 0, !info ? 225 : slider ? 98 : 108, 65, '#ccc');
+  if (s) {
+    T(s.name, 0, 11, { font: SYS3, center: 43 }); // (Chicago 12: the battle window's bitmap face)
+    if (!info) T(S[19] || 'You have no information about this planet.', 3, 22);
+    else {
+      const src = yours ? s : k, L = (t, v) => T(t, 0, v, { right: 40 }), at = (t, v) => T(t, 45, v);
+      L(S[12] || 'Pop:', 32); L(S[13] || 'Temp:', 42); L(S[14] || 'Gravity:', 52); L(S[15] || 'Metal:', 62);
+      const t10 = Math.round(10 * (72 + (src.t - p.homeT))), gr = Math.trunc(100 * src.g / Math.max(0.01, p.homeG));
+      at(cfmt(S7[2] || '%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10)), 42);
+      at(cfmt(S7[4] || '%d.%2.2dG', Math.trunc(gr / 100), gr % 100), 52);
+      at(H().niceNum(Math.round(src.metal)), 62);
+      if (yours) { T(S[11] || 'Income:', 5, 22); at(fill(S[8] || '$%s', H().niceNum(Math.round(H().planetIncome(g, p, s)))), 22); at(H().niceNum(H().popNum(g, s.pop)), 32); }
+      else { L(S7[5] || 'Owner:', 22); at(k.owner >= 0 ? g.players[k.owner].name : (S7[29] || 'No One'), 22); at(k.owner >= 0 ? (S[21] || 'Unknown') : (S[20] || 'Uninhabited'), 32); }
+      q.rect(108, 0, 226, 65, '#000');
+      q.c.dataset.planet = String(s.id); gratuitous301(q.x, s, false); if (!GRAT.timer) GRAT.timer = setInterval(gratuitousTick, 1000 / 6);
+      if (slider) {
+        const IMG = a.IMG, bar = IMG['dos:p901'], th = IMG['dos:p903'], off = Math.max(0, Math.min(62, Math.trunc(B[0] * 62 / 1000)));
+        q.x.imageSmoothingEnabled = false;
+        if (bar && bar.width) q.x.drawImage(bar, 98, 0); else q.rect(98, 0, 108, 67, '#888');
+        if (th && th.width) q.x.drawImage(th, 99, 1 + off); else q.rect(99, 1 + off, 107, 5 + off, '#fff');
+        q.c.style.touchAction = 'none';
+        q.c.addEventListener('pointerdown', (ev) => {
+          const pt0 = q.at(ev); if (pt0.h < 98 || pt0.h >= 108) return;
+          ev.preventDefault();
+          const move = (e) => { const v = q.at(e).v, t = Math.trunc(Math.max(0, Math.min(62, Math.trunc(v) - 2)) * 1000 / 62); if (t !== bars301(s)[0]) { setBars301(s, t, 1000 - t); const c = planetBox405(); box.replaceWith(c); } };
+          const up = (e) => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); move(e); a.save(); a.renderPanel(); };
+          window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); move(ev);
+        });
+      }
+    }
+  }
+  q.hline(0, 226, 65); q.hline(0, 226, 66); q.hline(0, 226, 67); q.vline(225, 0, 68);
+  return box;
+}
 function planetBox301() {
+  if (V4) return planetBox405();
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR301(1005), S4 = STR301(4000), col = COL301();
   const q = qdCanvas(226, 68, s ? s.name : '');
   const box = a.el('section', { class: 'box planet12 planet301' }, q.c);
@@ -2758,8 +3188,11 @@ function planetBox301() {
 const FLT301 = { top: 0 };
 const GRAY = [0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55];
 const orPat = (x, rows, colour) => { const t = document.createElement('canvas'); t.width = t.height = 8; const c = t.getContext('2d'); c.fillStyle = colour; rows.forEach((r, v) => { for (let h = 0; h < 8; h++) if (r & (0x80 >> h)) c.fillRect(h, v, 1, 1); }); return x.createPattern(t, 'repeat'); };
+// (4.0.5's STR# 6170 has 3.0.1's STR# 4000 lines at four places less: "There are no fleets at this planet." 6170.7 = 4000.11 ... "Scrap: %s"
+// 6170.17 = 4000.21, the same words; DrawSelectedFleetInfo @114c12 reads them there)
+const FLEETWORDS = () => (V4 ? [0, 0, 0, 0].concat(STR405(6170)) : STR301(4000));
 function fleetInfo301(g, f) {
-  const S = STR301(4000), star = (i) => g.stars[i].name, sp = H().fleetSpeed(g, f), L = [];
+  const S = FLEETWORDS(), star = (i) => g.stars[i].name, sp = H().fleetSpeed(g, f), L = [];
   if (f.scrap301) L.push([S[11] || 'Fleet to be scrapped for metal.']);
   else if (f.dest == null) L.push([S[12] || 'Stationed at:', star(f.star)]);
   else {
@@ -2773,49 +3206,67 @@ function fleetInfo301(g, f) {
   const ds = H().fleetDesigns(g, f), col = ds.some(d => d.type === 'colony');
   let third;
   if (col) third = (f.colonists || 0) > 0 ? (S[18] || 'Full') : (S[19] || 'Empty');
-  else { let m = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) m += f.ships[k] * H().designCost(g, d).metal; } third = cfmt(S[20] || 'Scrap: %s', H().niceNum(Math.trunc(m * 3 / 4))); }
+  else {
+    let m = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) m += f.ships[k] * H().designCost(g, d).metal; }
+    // (4.0.5, DrawSelectedFleetInfo @114c12: 7/8 once the player has improved the recycling program, player +0x5c bit 0x10; else 3/4)
+    const own = g.players[f.owner], rec = V4 && own && own.flags && own.flags.recycle;
+    third = cfmt(S[20] || 'Scrap: %s', H().niceNum(rec ? Math.trunc(m * 7 / 8) : Math.trunc(m * 3 / 4)));
+  }
   L.push([cfmt(S[16] || 'Fuel: %d/%d', Math.round(f.fuel || 0), H().fleetMaxRange(g, f)), cfmt(S[17] || 'Speed: %d', sp), third]);
   return L;
 }
 function fleetBox301() {
-  const a = A(), g = G(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR301(4000), col = COL301();
+  const a = A(), g = G(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = FLEETWORDS(), col = COL301();
+  // (4.0.5 draws every line of the pane twice, white one pixel down and right, then black, on its grey (DrawSelectedFleetInfo @114c12,
+  // DrawOneFleet @1148d6), in the Mac's Geneva 9)
+  const T4 = V4 ? { shadow: '#fff' } : null, F9 = V4 ? G9M : G9, BG = col ? (V4 ? '#ccc' : RGB301.grey) : '#fff';
   const Y0 = 68, q = qdCanvas(226, 65, 'Fleets'), x = q.x, Y = (v) => v - Y0;
   const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
   const others = s && (s.owner === a.ME || here.length) ? g.fleets.filter(f => f.star === s.id && f.to == null && f.owner !== a.ME && !f.newThisTurn) : [];
   const total = here.length + others.length;
   FLT301.top = Math.max(0, Math.min(FLT301.top, total - 4));
+  // RecalcFleetsAtNewStar (3.0.1 @15078c, 4.0.5 @110644, the same start): the selected fleet is dropped when it isn't at the star, and the
+  // first of yours there becomes the selected one (Jake's 4.0.5 shots 008, 027, 065: the star's first fleet highlighted)
+  // (the patch's firstShip, Jake 20 Nov 2026: a ship that can move first, Scout, Fighter, Dreadnought, Tanker, Colony Ship, then the rest,
+  // the satellites last; ties keep the list's order)
+  const SHIP_FIRST = { scout: 0, fighter: 1, dread: 2, tanker: 3, colony: 4, bio: 5, decoy: 6 };
+  const firstOf = (list) => { if (!H().fixed(g, 'firstShip')) return list[0]; const k = (f) => { if (f.sat) return 99; const d = H().fleetDesigns(g, f)[0]; return d && d.type === 'satellite' ? 99 : d && SHIP_FIRST[d.type] != null ? SHIP_FIRST[d.type] : 50; }; return list.map((f, i) => [f, i]).sort((p, q) => k(p[0]) - k(q[0]) || p[1] - q[1])[0][0]; };
+  if (here.length && !here.some(f => f.id === a.UI.selFleet)) a.UI.selFleet = firstOf(here).id;
   const sel = here.find(f => f.id === a.UI.selFleet);
   // DrawSelectedFleetInfo
-  q.rect(1, Y(68), 225, Y(89), col ? RGB301.grey : '#fff');
+  q.rect(1, Y(68), 225, Y(89), BG);
   if (sel) {
-    const L = fleetInfo301(g, sel);
-    q.text(L[0][0], 4, Y(76)); if (L[0][1]) q.text(L[0][1], 71, Y(76));
-    q.text(L[1][0], 4, Y(86)); q.text(L[1][1], 71, Y(86)); q.text(L[1][2], 126, Y(86));
+    const L = fleetInfo301(g, sel), t = (w, h0, v) => q.text(w, h0, v, F9, T4);
+    t(L[0][0], 4, Y(76)); if (L[0][1]) t(L[0][1], 71, Y(76));
+    t(L[1][0], 4, Y(86)); t(L[1][1], 71, Y(86)); t(L[1][2], 126, Y(86));
   }
   // DrawFleetRect: the list
-  q.rect(0, Y(90), 214, Y(130), col ? RGB301.grey : '#fff');
+  q.rect(0, Y(90), 214, Y(130), BG);
   const rows = [];
   here.forEach((f) => rows.push({ f }));
   others.forEach((f) => rows.push({ f, other: true }));
   rows.slice(FLT301.top, FLT301.top + 4).forEach((r, i) => {
     const top = Y(90 + 10 * i), f = r.f, selRow = !r.other && sel && f.id === sel.id;
     x.save(); x.beginPath(); x.rect(0, top, 214, 10); x.clip();
-    q.rect(0, top, 214, top + 10, selRow ? '#000' : col ? RGB301.grey : '#fff');
+    q.rect(0, top, 214, top + 10, selRow ? '#000' : BG);
     let t;
     if (r.other) t = rs.otherFleetRow ? (rs.otherFleetRow(langView(g), f) || '') : '';
     else t = H().fleetText(g, f);
-    const style = (r.other || f.newThisTurn ? 'italic ' : '') + (!r.other && f.dest != null ? 'bold ' : '') + '9px Geneva, Verdana, sans-serif';
-    q.text(t, 3, top + 8, style, { cond: q.width(t, style) > 214, color: selRow ? (col ? RGB301.grey : '#fff') : '#000' });
+    const style = (r.other || f.newThisTurn ? 'italic ' : '') + (!r.other && f.dest != null ? 'bold ' : '') + (V4 ? (!r.other && f.dest != null ? G9MB : G9M) : '9px Geneva, Verdana, sans-serif');
+    q.text(t, 3, top + 8, style, Object.assign({ cond: q.width(t, style) > 214, color: selRow ? (col ? BG : '#fff') : '#000' }, V4 && !selRow ? T4 : null));
     if (!r.other && f.scrap301) { x.fillStyle = orPat(x, GRAY, selRow ? (col ? '#000' : '#fff') : (col ? RGB301.grey : '#fff')); x.fillRect(0, top, 214, 10); }
     x.restore();
   });
-  if (!total) q.text(S[10] || 'There are no fleets at this planet.', 3, Y(99));
+  if (!total) q.text(S[10] || 'There are no fleets at this planet.', 3, Y(99), F9, T4);
   q.hline(0, 227, Y(89)); q.vline(225, 0, 65);
   q.rect(0, Y(130), 226, Y(133), '#000'); // DrawDragBarRect
   // the scroll bar (an OS control), 214..226 x 89..131: arrows at its ends, the thumb when there is more than fits
+  if (V4 && COLOUR3) scrollBar75s(q, x, 215, Y(89), Y(131), Math.max(0, total - 4), FLT301.top, 1, 108); // (4.0.5's: 216..227 x 129..170 on the screen, shot 008)
+  else {
   q.rect(214, Y(89), 226, Y(130), '#fff'); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(214.5, Y(89) + 0.5, 11, 41);
   [[Y(89), 1], [Y(119), -1]].forEach(([t0, d]) => { x.strokeRect(214.5, t0 + 0.5, 11, 11); x.beginPath(); const cy = t0 + 6; x.moveTo(217, cy + 2 * d); x.lineTo(220, cy - 2 * d); x.lineTo(223, cy + 2 * d); x.closePath(); x.stroke(); });
   if (total > 4) { x.fillStyle = orPat(x, GRAY, '#000'); x.fillRect(215, Y(101), 10, 18); const ty = Y(101) + Math.round(10 * FLT301.top / (total - 4)); q.rect(215, ty, 225, ty + 8, '#fff'); x.strokeRect(214.5, ty + 0.5, 11, 7); }
+  }
   q.c.addEventListener('click', (ev) => {
     const pt = q.at(ev), v = pt.v + Y0;
     if (pt.h >= 214) { if (v < 101) FLT301.top--; else if (v >= 119) FLT301.top++; else return; a.renderPanel(); return; }
@@ -2860,45 +3311,83 @@ const hPercBar = (pm) => { for (let x = 0; x < 78; x++) if (HLOG[x] >= pm) retur
 //   DoHBarClick: a drag on a bar sets its share (the ruleset's rs.dragShare, the others moved as it says); a click on the heading switches
 //     the scale. ("Sort" is not built.)
 const LOW301 = { pTop: 0, bTop: 0 };
-function scrollBar301(q, x, l, t, b, max, val) { // an OS scroll bar, drawn plainly: arrows at the ends, the grey track and its thumb when it scrolls
+function scrollBar301(q, x, l, t, b, max, val, oy) { // an OS scroll bar, drawn plainly: arrows at the ends, the grey track and its thumb when it scrolls
+  if (V4 && COLOUR3) return scrollBar75s(q, x, l, t, b, max, val, 1, oy == null ? 206 : oy); // (the canvas's place on the 640 x 480 screen: its dots as the screen's; the players and budget pane's from (1, 206))
   q.rect(l, t, l + 12, b, '#fff'); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(l + 0.5, t + 0.5, 11, b - t - 1);
   [[t, 1], [b - 12, -1]].forEach(([t0, d]) => { x.strokeRect(l + 0.5, t0 + 0.5, 11, 11); x.beginPath(); const cy = t0 + 6; x.moveTo(l + 3, cy + 2 * d); x.lineTo(l + 6, cy - 2 * d); x.lineTo(l + 9, cy + 2 * d); x.closePath(); x.stroke(); });
   if (max > 0) { const tr = b - t - 24; x.fillStyle = orPat(x, GRAY, '#000'); x.fillRect(l + 1, t + 12, 10, tr); const ty = t + 12 + Math.round((tr - 8) * val / max); q.rect(l + 1, ty, l + 11, ty + 8, '#fff'); x.strokeRect(l + 0.5, ty + 0.5, 11, 7); }
 }
+// 4.0.5's 12-pixel scroll bars (the panes': players, colonies, fleets), System 7.5's colour bar copied from Jake's shot 008: the frame black
+// both sides, an arrow box 10 rows (#dddddd, the arrow #9999cc edged #333366, a #777777 last row and column), black dividers, the track's
+// #777777 dots on #dddddd aligned to the screen, a 12-row thumb (#555555, #ccccff, #aaaaaa, a #9999cc / #666699 grip, #333366); with nothing to
+// scroll, #eeeeee with the arrows outlined in #777777 and no thumb.
+const AR75S = [' ', '    E', '   EFE', '  EEFFE', ' EFFFFFE', 'EEEEFFEEE', '   EFFE', '   EFFE', '   EEEE'];
+function scrollBar75s(q, x, l, t, b, max, val, ox, oy) {
+  const on = max > 0, R = (h, v, w, hh, c) => q.rect(h, v, h + w, v + hh, c);
+  R(l, t, 12, b - t, '#000'); R(l + 1, t + 1, 10, b - t - 2, on ? '#dddddd' : '#eeeeee');
+  const box = (t0, down) => {
+    R(l + 1, t0, 10, 10, on ? '#dddddd' : '#eeeeee'); if (on) { R(l + 10, t0, 1, 10, '#777777'); R(l + 1, down ? t0 + 9 : t0 + 9, 10, 1, '#777777'); }
+    AR75S.forEach((row, i) => { for (let j = 0; j < row.length; j++) { const ch = row[j]; if (ch === ' ' || (!on && ch === 'F')) continue; R(l + 1 + j, down ? t0 + 9 - i : t0 + i, 1, 1, on ? (ch === 'E' ? '#333366' : '#9999cc') : '#777777'); } });
+  };
+  box(t + 1, false); R(l + 1, t + 11, 10, 1, on ? '#000' : '#777777'); R(l + 1, b - 12, 10, 1, on ? '#000' : '#777777'); box(b - 11, true);
+  if (!on) return;
+  for (let v = t + 12; v < b - 12; v++) for (let h = l + 1; h < l + 11; h++) { const gx = h + ox, gy = v + oy; if ((gy & 1) ? (gx & 3) === 0 : (gx & 3) === 2) R(h, v, 1, 1, '#777777'); }
+  const T = b - t - 36; if (T < 0) return;
+  const tp = t + 12 + Math.round(T * Math.max(0, Math.min(1, val / max)));
+  R(l + 1, tp, 10, 12, '#aaaaaa'); R(l + 1, tp, 10, 1, '#555555'); R(l + 1, tp + 1, 1, 10, '#ccccff'); R(l + 10, tp + 1, 1, 10, '#333366'); R(l + 1, tp + 11, 10, 1, '#333366');
+  R(l + 4, tp + 2, 4, 1, '#9999cc'); [3, 6, 9].forEach(k => R(l + 4, tp + k, 4, 1, '#ccccff')); [4, 5, 7, 8].forEach(k => R(l + 4, tp + k, 4, 1, '#666699'));
+}
 function lowBox301(B) {
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), col = COL301(), S5 = STR301(1005), S1 = STR301(1001);
-  const Y0 = 166, q = qdCanvas(226, 165, ''), x = q.x, Y = (v) => v - Y0, bg = col ? RGB301.grey : '#fff';
+  // (the window's foot: 331 on the 640 x 480 screen; on a taller one GrowMapWin runs the players' and budget's rects and scroll bars to the
+  // map window's foot, eff60c (4.0.5 @120306), so the pane grows with the window: html.mac75)
+  const pnl = document.getElementById('panel'), FT = document.documentElement.classList.contains('mac75') && pnl ? Math.max(331, Math.floor(pnl.getBoundingClientRect().height / (MACS.s || 1))) : 331;
+  const Y0 = 166, q = qdCanvas(226, FT - 166, ''), x = q.x, Y = (v) => v - Y0, bg = col ? (V4 ? '#ccc' : RGB301.grey) : '#fff'; // (4.0.5's grey: #cccccc, shot 008)
+  // 4.0.5 (Jake's shot 008, at 640 x 480): the players' rect 0..78 with its scroll bar 78..90, 22 pixels a row from 166, the icon at (10, row + 7),
+  // the name at (29, row + 19), the check mark (2, row + 15) (4, row + 19) (7, row + 12), every player from the start (2000 shows all seven);
+  // the budget from 90 (DrawBudgetRect @115252: DrawHBarControl at the rect's left - 1)
+  const PW = V4 ? 78 : 67, RH = V4 ? 22 : 18, BL = V4 ? 90 : 79, SH = V4 ? { shadow: '#fff' } : null;
   // DrawIconRect
-  q.rect(0, Y(166), 67, Y(331), bg);
-  const prow = Math.trunc((330 - 167 - 3) / 18);
+  q.rect(0, Y(166), PW, Y(FT), bg);
+  const prow = V4 ? Math.trunc((FT - 1 - 166) / RH) : Math.trunc((FT - 1 - 167 - 3) / 18);
   // (the remake's faces are picked from the twenty, not numbered 0 to n - 1 as 3.0.1's are: the order is the players sorted by face, a player with
   // none, the human, after them)
   const ranked = g.players.map((pl, i) => i).sort((i, j) => ((g.players[i].face ?? 99) - (g.players[j].face ?? 99)) || i - j);
-  const order = g.players.map((pl, i) => ({ pl, i, at: g.year < 2010 ? (i === a.ME ? 0 : -1) : ranked.indexOf(i) }));
-  const nP = g.year < 2010 ? 1 : g.players.length;
+  const early = g.year < 2010 && !V4;
+  const order = g.players.map((pl, i) => ({ pl, i, at: early ? (i === a.ME ? 0 : -1) : ranked.indexOf(i) }));
+  const nP = early ? 1 : g.players.length;
   LOW301.pTop = Math.max(0, Math.min(LOW301.pTop, nP - prow));
   order.forEach(({ pl, i, at }) => {
-    const r = at - (g.year < 2010 ? 0 : LOW301.pTop); if (at < 0 || r < 0 || r >= prow) return;
-    const top = Y(167 + 18 * r);
-    const ic = a.IMG['dos:s' + ((i === a.ME ? 1000 : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0))];
+    const r = at - (early ? 0 : LOW301.pTop); if (at < 0 || r < 0 || r >= prow) return;
+    const top = V4 ? Y(166 + RH * r) + 4 : Y(167 + 18 * r); // (4.0.5: the icon at row + 7, the 3.0.1 code's + 3)
+    const ic = a.IMG['dos:s' + ((i === a.ME ? (V4 ? 1406 : 1000) : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0))]; // (4.0.5 numbers its small icons as its planets: you are 1406, shot 008)
     if (ic && ic.width) x.drawImage(ic, 9, top + 3, 16, 16);
     if (i !== a.ME && pl.alive && H().isAllied(g, a.ME, i)) { const h = a.IMG['dos:s5000']; if (h && h.width) x.drawImage(h, 9, top + 3, 16, 16); }
-    q.text(pl.name, 28, top + 16, G9, { cond: q.width(pl.name) > 39 });
+    q.text(pl.name, V4 ? 29 : 28, top + (V4 ? 15 : 16), G9, Object.assign({ cond: q.width(pl.name) > (V4 ? 48 : 39) }, SH));
     if (!pl.alive || pl.surrendered) { x.strokeStyle = '#000'; x.lineWidth = 2; x.beginPath(); x.moveTo(10, top + 4); x.lineTo(25, top + 19); x.moveTo(25, top + 4); x.lineTo(10, top + 19); x.stroke(); x.lineWidth = 1; }
-    if (!pl.human || (g.done || []).includes(i)) { x.strokeStyle = '#000'; x.beginPath(); x.moveTo(1.5, top + 11.5); x.lineTo(3.5, top + 15.5); x.lineTo(7.5, top + 7.5); x.stroke(); }
+    if (!pl.human || (g.done || []).includes(i)) {
+      if (V4) [[7, 8], [7, 9], [6, 10], [2, 11], [6, 11], [3, 12], [5, 12], [3, 13], [5, 13], [4, 14], [4, 15]].forEach(([h, v]) => q.rect(h, top + v, h + 1, top + v + 1, '#000')); // (shot 008's pixels)
+      else { x.strokeStyle = '#000'; x.beginPath(); x.moveTo(1.5, top + 11.5); x.lineTo(3.5, top + 15.5); x.lineTo(7.5, top + 7.5); x.stroke(); }
+    }
   });
-  scrollBar301(q, x, 67, Y(165), Y(331), Math.max(0, nP - prow), LOW301.pTop);
+  scrollBar301(q, x, PW, Y(165), Y(FT), Math.max(0, nP - prow), LOW301.pTop);
   // DrawBudgetRect, DrawHBarControl
-  q.rect(79, Y(166), 214, Y(331), bg); q.rect(214, Y(181), 225, Y(331), bg);
-  const L = 79, x0 = L + 45, sc = a.budgetScale(), log = sc.id === 'log';
-  x.font = G9; const sw = q.width('Sort');
-  x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.roundRect(x0 - sw - 7 + 0.5, Y(169) + 0.5, (x0 - 2) - (x0 - sw - 7) - 1, 10, 3); x.stroke();
-  q.text('Sort', x0 - sw - 4, Y(178));
-  const pc100 = S1[10] || '100%'; q.text(pc100, L + 123 - q.width(pc100), Y(178)); q.text(S1[6] || '0%', x0, Y(178));
-  q.hline(x0, 215, Y(181));
-  q.text(log ? (S5[22] || 'Log') : (S5[23] || 'Linear'), log ? L + 74 : L + 68, Y(178));
+  q.rect(BL, Y(166), 214, Y(FT), bg); q.rect(214, Y(V4 ? 166 : 181), 225, Y(FT), bg); if (V4 && col) q.rect(225, Y(166), 226, Y(FT), '#fff');
+  const L = BL, x0 = L + 45, sc = a.budgetScale(), log = sc.id === 'log';
+  x.font = G9;
+  const pc100 = S1[10] || '100%';
+  if (V4) { // (4.0.5's heading: "100%" ending at the rect's left + 128, with its shadow, and the ticks; no Sort, no "0%", no scale's name: shot 008)
+    q.text(pc100, 0, Y(178), G9, Object.assign({ right: L + 128 }, SH)); q.hline(x0 - 1, 215, Y(181));
+  } else {
+    const sw = q.width('Sort');
+    x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.roundRect(x0 - sw - 7 + 0.5, Y(169) + 0.5, (x0 - 2) - (x0 - sw - 7) - 1, 10, 3); x.stroke();
+    q.text('Sort', x0 - sw - 4, Y(178));
+    q.text(pc100, L + 123 - q.width(pc100), Y(178)); q.text(S1[6] || '0%', x0, Y(178));
+    q.hline(x0, 215, Y(181));
+    q.text(log ? (S5[22] || 'Log') : (S5[23] || 'Linear'), log ? L + 74 : L + 68, Y(178));
+  }
   for (let k = 1; k <= 10; k++) { const tx = x0 + (log ? hPercBar(100 * k) : Math.trunc(77 * k / 10)); q.vline(tx, Y(179), Y(181)); }
-  const ents = B.ents || [], brow = Math.trunc((330 - 167 - 15) / 14);
+  const ents = B.ents || [], brow = Math.trunc((FT - 1 - 167 - 15) / 14);
   // 3.0.1's slots: Ships first, then Tech, then the colonies
   const slots = ents.filter(e => e.key === 'savings').concat(ents.filter(e => e.key === 'tech'), ents.filter(e => e.star != null));
   LOW301.bTop = Math.max(0, Math.min(LOW301.bTop, slots.length - brow));
@@ -2906,11 +3395,16 @@ function lowBox301(B) {
   const lenOf = (pm) => pm < 1 ? 0 : log ? hPercBar(pm) : Math.trunc((pm * 77 + 999) / 1000);
   let y = Y(181);
   const tb = []; // (where the bars are, in the canvas's pixels: for a test tool, data-bars)
-  slots.slice(LOW301.bTop, LOW301.bTop + brow).forEach((e) => {
+  // 4.0.5 (DrawHBarControl @50a80): Ships and Tech always on top; at the third slot a rule down the bars' left, then 7 lower a rule across to
+  // the rect's right, and the colonies below it, scrolled by their own bar (shot 008: the rule at 256, the colonies' bar from 257)
+  const shown = V4 ? slots.slice(0, 2).concat(slots.slice(2).slice(LOW301.bTop, LOW301.bTop + brow - 2)) : slots.slice(LOW301.bTop, LOW301.bTop + brow);
+  let sepY = null;
+  shown.forEach((e, k) => {
+    if (V4 && k === 2) { q.vline(L + 44, y, y + 14); y += 7; q.hline(L + 44, 226, y); sepY = y; }
     const pm = Math.round(e.get() * 1000), len = Math.min(77, lenOf(pm)), st = e.star != null ? g.stars[e.star] : null;
     const inc = st ? H().planetIncome(g, p, st) : 0, abandoning = !!(st && st.abandon301);
     const ratio = st ? Math.trunc(100 * Math.max(st.g, p.homeG) / Math.max(0.01, Math.min(st.g, p.homeG))) : 0;
-    q.vline(123, y, y + 15);
+    q.vline(L + 44, y, y + 15);
     let top = y + 7, bottom = y + 14;
     if (!col) {
       top -= 1; bottom += 1;
@@ -2934,24 +3428,26 @@ function lowBox301(B) {
     const name = e.key === 'savings' ? (S5[25] || 'Ships') : e.key === 'tech' ? (S5[24] || 'Tech') : st.name;
     tb.push({ x: x0, y: y + 3, w: 77, h: 13, vert: false, frac: len / 77, label: name });
     const lc = !col ? '#000' : !st || inc >= 0 ? css16(CT301[5]) : css16(ratio <= 256 ? CT301[1] : CT301[2]);
-    const w = q.text(name, 0, y + 14, G9, { right: L + 43, color: lc });
+    const w = q.text(name, 0, y + 14, G9, Object.assign({ right: L + 43, color: lc }, SH));
     if (st && a.UI.sel === st.id) q.rect(L + 43 - w, y + 15, L + 43, y + 16, lc);
     if (abandoning) q.text('Abandoning', L + 48, y + 14, G9, { color: lc });
     else if (st) { const bb = bars301(st); if (bb[0] === -1 && bb[1] === -1) q.text('$' + H().niceNum(Math.round(inc)), L + 48, y + 14, G9, { color: lc }); }
     y += 14;
   });
-  q.vline(123, y, Y(331));
-  q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = '165';
-  scrollBar301(q, x, 214, Y(181), Y(331), Math.max(0, slots.length - brow), LOW301.bTop);
+  q.vline(L + 44, y, Y(FT));
+  if (V4 && sepY == null) { q.vline(L + 44, y, y + 14); y += 7; q.hline(L + 44, 226, y); sepY = y; }
+  q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = String(FT - 166);
+  if (V4) scrollBar301(q, x, 213, sepY + 1, Y(FT), Math.max(0, slots.length - 2 - (brow - 2)), LOW301.bTop);
+  else scrollBar301(q, x, 214, Y(181), Y(FT), Math.max(0, slots.length - brow), LOW301.bTop);
   // DoHBarClick: a drag on a bar, a click on the heading; the scroll bars; a click on a colony's name selects it (FollowStarNameClick)
   q.c.style.touchAction = 'none';
   q.c.addEventListener('pointerdown', (ev) => {
     const pt = q.at(ev), v = pt.v + Y0;
-    if (pt.h >= 67 && pt.h < 79) { LOW301.pTop += v < (165 + 331) / 2 ? -1 : 1; a.renderPanel(); return; }
-    if (pt.h >= 214) { LOW301.bTop += v < (181 + 331) / 2 ? -1 : 1; a.renderPanel(); return; }
-    if (pt.h < 79) return;
+    if (pt.h >= PW && pt.h < PW + 12) { LOW301.pTop += v < (165 + FT) / 2 ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h >= (V4 ? 213 : 214) && (!V4 || v > 181 + 35)) { LOW301.bTop += v < (V4 ? (181 + 35 + FT) / 2 : (181 + FT) / 2) ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h < BL) return;
     if (v < 181) { if (pt.h >= x0 && a.flipBarScale) a.flipBarScale(); return; }
-    const e = slots[LOW301.bTop + Math.floor((v - 181) / 14)]; if (!e) return;
+    const e = V4 ? (v < 181 + 28 ? slots[Math.floor((v - 181) / 14)] : v >= 181 + 35 ? slots[2 + LOW301.bTop + Math.floor((v - 181 - 35) / 14)] : null) : slots[LOW301.bTop + Math.floor((v - 181) / 14)]; if (!e) return;
     if (pt.h < x0 - 1) { if (e.star != null) { a.UI.sel = e.star; if (a.centerOn) a.centerOn(e.star); a.renderPanel(); a.draw(); } return; }
     ev.preventDefault();
     const lk = rs.barLocked ? rs.barLocked(g, p, e.key) : null; if (lk) { a.beep(); return; }
@@ -2966,7 +3462,7 @@ function lowBox301(B) {
     const up = (e2) => { window.removeEventListener('pointermove', later); window.removeEventListener('pointerup', up); if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; set(e2); a.save(); a.renderPanel(); };
     window.addEventListener('pointermove', later); window.addEventListener('pointerup', up); set(ev);
   });
-  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); if (pt.h < 79) LOW301.pTop += ev.deltaY > 0 ? 1 : -1; else LOW301.bTop += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); if (pt.h < BL) LOW301.pTop += ev.deltaY > 0 ? 1 : -1; else LOW301.bTop += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
   const box = a.el('section', { class: 'box low301' }, q.c);
   return box;
 }
@@ -2989,7 +3485,7 @@ function special301(t) {
   if (k === 1065 || k === 1066) return 'cross';
   if ((k >= 1034 && k <= 1061) || (k >= 1077 && k <= 1082)) {
     const caps = hit.re.exec(t).slice(1), pl = g.players.find(p0 => caps.includes(p0.name));
-    if (pl) return 'dos:s' + ((pl.id === A().ME ? 1000 : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0));
+    if (pl) return 'dos:s' + ((pl.id === A().ME ? (V4 ? 1406 : 1000) : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0));
   }
   return null;
 }
@@ -3008,6 +3504,7 @@ function reportsBox301() {
 function panel301(panel, B) {
   const a = A(), el = a.el;
   const low = lowBox301(B || {});
+  { const de = document.documentElement, on = !NARROW301.matches && !!document.getElementById('main'); de.classList.toggle('mac301lay', on); de.classList.toggle('mac75', on); } // (before the boxes: the Report Window's scroll bar follows html.mac75)
   const rep = reportsBox301();
   panel.innerHTML = '';
   const tech = techBox301();
@@ -3022,8 +3519,94 @@ function panel301(panel, B) {
   } else {
     if (t3) t3.remove(); if (r3) r3.remove();
     panel.append(planetBox301(), fleetBox301(), incomeBox301(), low, tech, rep);
-  }
+  }  frame75();
 }
+// ---------- the System 7.5 screen (html.mac75; js/skins/mac12/panel.css): 3.0.1's and 4.0.5's windows as Jake's shots show them ----------
+// The map window's title bar and the windoids' (Tech Spending, Report Window) are System 7.5's window definition, read pixel by pixel in Jake's
+// 4.0.5 shot 008 (3.0.1's shot 012 the same): colour, interior rows of the title bar: a #ccccff row, #eeeeee with a #ccccff left column and a
+// #9999cc right one, #777777 stripes on rows 3-13 (every other row) but for the close box (11 x 11 from the interior's x 8), the zoom box (11 x 11
+// ending 8 from the right) and the title (Chicago 12, centred in the window, stripes stopped 6 pixels each side); a #9999cc foot row. A windoid's
+// 9 rows: #9999cc, then #eeeeee / #888888 stripes, a 7 x 7 close box (black frame, white) at x 7, #9999cc. Black and white (no capture of 4.0.5
+// in black and white): the same shapes in black on white.
+const TB75 = { title: '', obs: null, on: null };
+function tbBox75(x, cx0, l, t, zoom) { // the close and zoom boxes' colours: dark top-left frame, light inner top-left, grey face, dark inner bottom-right
+  const R = (h, v, w, hh, c) => { x.fillStyle = c; x.fillRect(l + h, t + v, w, hh); };
+  if (!COLOUR3) { R(0, 0, 11, 11, '#000'); R(1, 1, 9, 9, '#fff'); if (zoom) { R(1, 1, 6, 6, '#000'); R(1, 1, 5, 5, '#fff'); } return; }
+  R(0, 0, 11, 11, '#ccccff'); R(0, 0, 11, 1, '#333366'); R(0, 0, 1, 11, '#333366'); R(2, 2, 7, 7, '#aaaaaa'); R(9, 2, 1, 8, '#333366'); R(2, 9, 8, 1, '#333366');
+  if (zoom) { R(6, 2, 1, 5, '#333366'); R(2, 6, 5, 1, '#333366'); }
+}
+function drawTb75(cv, W, title) {
+  const K = QK(); if (cv.width !== W * K || cv.height !== 17 * K) { cv.width = W * K; cv.height = 17 * K; }
+  const x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.imageSmoothingEnabled = false;
+  const C = COLOUR3, R = (h, v, w, hh, c) => { x.fillStyle = c; x.fillRect(h, v, w, hh); };
+  R(0, 0, W, 17, C ? '#eeeeee' : '#fff'); if (C) { R(0, 0, W, 1, '#ccccff'); R(0, 0, 1, 16, '#ccccff'); R(W - 1, 0, 1, 17, '#9999cc'); R(0, 16, W, 1, '#9999cc'); }
+  x.font = SYS; const tw = title ? Math.ceil(x.measureText(title).width) : 0, tx = Math.floor((W + 2 - tw) / 2) - 1; // (centred in the window, its frame counted)
+  const gaps = [[7, 20], [W - 20, W - 7]]; if (tw) gaps.push([tx - 6, tx + tw + 6]);
+  for (let v = 3; v <= 13; v += 2) { let h = 1; gaps.slice().sort((a2, b) => a2[0] - b[0]).forEach(([g0, g1]) => { if (g0 > h) R(h, v, g0 - h, 1, C ? '#777777' : '#000'); h = Math.max(h, g1); }); if (W - 1 > h) R(h, v, W - 1 - h, 1, C ? '#777777' : '#000'); }
+  tbBox75(x, 0, 8, 3, false); tbBox75(x, 0, W - 19, 3, true);
+  if (tw) { x.fillStyle = '#000'; x.textBaseline = 'alphabetic'; x.fillText(title, tx, 13); }
+}
+function drawWd75(cv, W) {
+  const K = QK(); if (cv.width !== W * K || cv.height !== 9 * K) { cv.width = W * K; cv.height = 9 * K; }
+  const x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0);
+  const C = COLOUR3, R = (h, v, w, hh, c) => { x.fillStyle = c; x.fillRect(h, v, w, hh); };
+  R(0, 0, W, 9, C ? '#eeeeee' : '#fff');
+  if (C) { R(0, 0, W, 1, '#9999cc'); R(0, 8, W, 1, '#9999cc'); }
+  for (let v = 2; v <= 6; v += 2) { R(0, v, 6, 1, C ? '#888888' : '#000'); R(15, v, W - 15, 1, C ? '#888888' : '#000'); }
+  R(7, 1, 7, 7, '#000'); R(8, 2, 5, 5, '#fff');
+}
+function frame75() {
+  const de = document.documentElement, on = V3 && de.classList.contains('mac301lay');
+  de.classList.toggle('mac75', on); de.classList.toggle('mac405', V4);
+  // (the frame changes the map's box: the first view, fitted before it, is fitted again once it is in place, so a home star near the foot
+  // isn't left under the windows there: real-play's 4k select-colony failures, 19-20 Nov)
+  if (TB75.on !== on) { TB75.on = on; requestAnimationFrame(() => { const a = A(); if (a && a.G) { a.UI.fitted = false; a.resize(); a.renderPanel(); } }); }
+  const main = document.getElementById('main'); let mw = document.getElementById('mapwin301');
+  if (!on) { if (mw) mw.remove(); const ck = document.getElementById('clock405'); if (ck) ck.remove(); return; }
+  if (!mw) { mw = A().el('div', { id: 'mapwin301', 'aria-hidden': 'true' }, A().el('canvas', { class: 'tb75' })); main.prepend(mw); }
+  const t = document.getElementById('title');
+  if (t && !TB75.obs) { TB75.obs = new MutationObserver(() => frame75()); TB75.obs.observe(t, { childList: true, characterData: true, subtree: true }); }
+  const S = MACS.s || 1, W = Math.round(mw.clientWidth / S);
+  if (W > 0) drawTb75(mw.firstChild, W, t ? t.textContent : '');
+  ['tech301', 'rep301'].forEach((id) => {
+    const w = document.getElementById(id); if (!w) return;
+    let c = w.querySelector(':scope > canvas.wd75'); if (!c) { c = A().el('canvas', { class: 'wd75', 'aria-hidden': 'true' }); w.prepend(c); }
+    drawWd75(c, id === 'tech301' ? 225 : 250);
+  });
+  const cn = document.querySelector('#mapwrap .mapcorner12');
+  if (cn && BAR75() && !cn.querySelector('canvas')) { const c = A().el('canvas', { width: 64, height: 64, 'aria-hidden': 'true' }); const x = c.getContext('2d'); x.setTransform(4, 0, 0, 4, 0, 0); drawGrow75(x); cn.append(c); }
+  if (V4) clock405();
+}
+// 4.0.5's clock (DrawTimeClock @115af2; EndTurnButtonShowing @111944: shown whenever the turn is open, reports read or not): PICT 5500, the time
+// the turn has taken (no time limit: hours and minutes, "%d:%02d") in its black window, green (0, 187, 0) in Geneva 9, and a seconds hand 23
+// pixels long from (28, 30), two pixels wide, orange (255, 153, 0), turning 6 degrees a second (shots 008, 031: "0:00" and "0:02").
+// A click on it ends the turn (ClickInMapWindow). Pressed: PICT 5501. In black and white (no capture): the hand black, the time white.
+const CK405 = { turn: null, t0: 0, last: '' };
+function clock405() {
+  const a = A(), g = G(), wrap = document.getElementById('mapwrap'); if (!wrap) return;
+  let b = document.getElementById('clock405');
+  const open = !!(g && !g.over && !document.querySelector('#msg .waiting') && document.documentElement.classList.contains('mac75'));
+  if (!open) { if (b) b.hidden = true; return; }
+  if (!b) {
+    b = a.el('button', { id: 'clock405', type: 'button', 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn' }, a.el('canvas', { width: 60 * 4, height: 61 * 4 }));
+    b.addEventListener('click', () => { const c = document.querySelector('#msg .clock'); if (c) c.click(); else a.doEndTurn(); });
+    b.addEventListener('pointerdown', () => { b.dataset.down = '1'; CK405.last = ''; clock405(); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, () => { delete b.dataset.down; CK405.last = ''; clock405(); }));
+    wrap.append(b);
+  }
+  b.hidden = false;
+  if (CK405.turn !== g.turn) { CK405.turn = g.turn; CK405.t0 = Date.now(); }
+  const secs = Math.floor((Date.now() - CK405.t0) / 1000), txt = Math.floor(secs / 3600) + ':' + String(Math.floor(secs / 60) % 60).padStart(2, '0'), ang = (secs % 60) * 6;
+  const key = txt + '|' + ang + '|' + (b.dataset.down || ''); if (key === CK405.last) return; CK405.last = key;
+  const cv = b.firstChild, x = cv.getContext('2d'); x.setTransform(4, 0, 0, 4, 0, 0); x.clearRect(0, 0, 60, 61); x.imageSmoothingEnabled = false;
+  const im = a.IMG[b.dataset.down ? 'dos:p5501' : 'dos:p5500'] || a.IMG['dos:p5500']; if (im && im.complete) x.drawImage(im, 0, 0);
+  x.font = G9; x.fillStyle = COLOUR3 ? 'rgb(0,187,0)' : '#fff'; const w = Math.ceil(x.measureText(txt).width); x.fillText(txt, Math.floor(29.5 - w / 2), 43);
+  const r = ang * Math.PI / 180, ex = 28 + Math.trunc(Math.sin(r) * 23), ey = 30 - Math.trunc(Math.cos(r) * 23);
+  x.fillStyle = COLOUR3 ? 'rgb(255,153,0)' : '#000'; // (QuickDraw's Line with a 2 x 2 pen: every point of the line, the pen's square to its right and below)
+  const n = Math.max(Math.abs(ex - 28), Math.abs(ey - 30)); for (let i = 0; i <= n; i++) { const px = Math.round(28 + (ex - 28) * i / n), py = Math.round(30 + (ey - 30) * i / n); x.fillRect(px, py, 2, 2); }
+}
+if (V4) setInterval(() => { if (document.getElementById('clock405') || (G() && document.documentElement.classList.contains('mac75'))) clock405(); }, 250);
+window.addEventListener('resize', () => { if (V3 && G()) { frame75(); if (document.documentElement.classList.contains('mac75')) A().renderPanel(); } }); // (the players and budget pane follows the window's height)
 const NARROW301 = window.matchMedia('(max-width: 760px)');
 NARROW301.addEventListener('change', () => { if (window.HOMAC301 && A() && A().G) { A().renderPanel(); A().resize(); } });
 
@@ -3167,7 +3750,7 @@ function battleWindow(b, k) {
   // saturation and value; the pair beside it hue + 7500, value $afc8; the outer pair hue + 15000, value $61a8 (DrawLaserBlast @d3e20 through Pack12's
   // HSV2RGB; in the captures, Sue's Sword (3/3) fighters' bolt is yellow-orange over olive and green, Jake's Conan (5/5) lime over green and teal)
   // (3.0.1's DrawLaserBlast is the same size as 2.0.1's, 764 bytes, and its colour bolt the same in the captures: the colour skin's too)
-  const COL = (!!window.HOMAC2_COLOUR && V2) || (!!window.HOMAC3_COLOUR && V3);
+  const COL = (!!window.HOMAC2_COLOUR && V2) || (COLOUR3 && V3);
   const hsv = (h, v) => { h = (h % 65535) / 65535 * 6; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, gg, bb] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return 'rgb(' + [r, gg, bb].map(u => Math.round(u * 255)).join(',') + ')'; };
   // (the hue's value is word 2 of the shooting group's record, DrawLaserBlast's first argument at all three of HaveGroupShoot's calls. A ship group's is its design's weapons (CalcOneGroup); the planet's group gets
   // param_7 = *(short *)(battle + 0xac), which DoBattleStage @d0004 sets to the star owner's weapons tech / 100 (player + 0x30: SpendTechMoney's tech array at +0x2c is range, speed, weapons, shields, mini): the owner's weapons level)
@@ -3464,12 +4047,51 @@ function drawBar(x, ox, oy, vertical, L, t, o) {
     }
   }
 }
+// System 7.5's colour scroll bar (the colour 3.0.1 and 4.0.5 on the System 7.5 screen, html.mac75), copied from Jake's 4.0.5 shot 008 (the map's
+// bars): 16 across with its black frame both sides; an arrow box 14 long (a white first row and column, #dddddd, the arrow #9999cc edged
+// #333366, a #777777 last row and column), black dividers, the track #dddddd with #777777 dots aligned to the screen as the desktop's
+// pattern, the thumb 16 long (#555555 edge, #ccccff and #aaaaaa, a grip of #9999cc then #666699 / #ccccff lines, #333366 far edges).
+const AR75 = ['', '', '      E', '     EFE', '    EFFFE', '   EFFFFFE', '  EFFFFFFFE', ' EEEEFFFEEEE', '    EFFFE', '    EFFFE', '    EFFFE', '    EEEEE'];
+const C75 = { E: '#333366', F: '#9999cc' };
+function drawBar75(x, ox, oy, vertical, L, o, ax, ay) {
+  const R = (a0, p0, w, h, col) => { x.fillStyle = col; if (vertical) x.fillRect(ox + a0, oy + p0, w, h); else x.fillRect(ox + p0, oy + a0, h, w); };
+  const idle = !(o.max > 0); // (nothing to scroll: pale grey, the arrows outlined in grey, no thumb: shot 016's list)
+  R(0, 0, 16, L, '#000'); R(1, 1, 14, L - 2, idle ? '#eeeeee' : '#dddddd');
+  if (o.on === false) return;
+  if (idle) {
+    const obox = (p0, down) => AR75.forEach((row, i) => { for (let j = 0; j < row.length; j++) if (row[j] === 'E') R(1 + j, down ? p0 + 13 - i : p0 + i, 1, 1, '#777777'); });
+    obox(1, false); R(1, 15, 14, 1, '#000'); R(1, L - 16, 14, 1, '#000'); obox(L - 15, true); return;
+  }
+  const box = (p0, down, press) => {
+    R(1, p0, 14, 14, press ? '#999999' : '#dddddd'); R(1, p0, 13, 1, '#fff'); R(1, p0, 1, 13, '#fff'); R(1, p0 + 13, 14, 1, '#777777'); R(14, p0, 1, 14, '#777777');
+    AR75.forEach((row, i) => { for (let j = 0; j < row.length; j++) if (row[j] !== ' ') R(1 + j, down ? p0 + 13 - i : p0 + i, 1, 1, C75[row[j]]); });
+  };
+  box(1, false, o.press === 'lo'); R(1, 15, 14, 1, '#000'); R(1, L - 16, 14, 1, '#000'); box(L - 15, true, o.press === 'hi');
+  if (!(o.max > 0)) return;
+  for (let p0 = 16; p0 < L - 16; p0++) for (let a0 = 1; a0 < 15; a0++) {
+    const gx = (vertical ? a0 : p0) + (ax || 0), gy = (vertical ? p0 : a0) + (ay || 0);
+    if ((gy & 1) ? (gx & 3) === 0 : (gx & 3) === 2) R(a0, p0, 1, 1, '#777777');
+  }
+  const T = L - 48; // (the thumb, 16 long, between the dividers)
+  if (T < 0) return;
+  const thumb = (tp, ghost) => {
+    if (ghost) { for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) if ((i === 0 || j === 0 || i === 15 || j === 15) && (i + j) % 2 === 0) R(i, tp + j, 1, 1, '#000'); return; }
+    R(1, tp, 14, 16, '#aaaaaa'); R(1, tp, 14, 1, '#555555'); R(1, tp + 1, 13, 1, '#ccccff'); R(1, tp + 1, 1, 14, '#ccccff'); R(14, tp + 1, 1, 15, '#333366'); R(1, tp + 15, 14, 1, '#333366');
+    R(5, tp + 3, 6, 1, '#9999cc'); for (let k = 4; k <= 12; k++) R(5, tp + k, 6, 1, k % 2 ? '#666699' : '#ccccff');
+  };
+  thumb(16 + Math.round(T * Math.max(0, Math.min(1, o.value / o.max))), false);
+  if (o.ghost != null) thumb(o.ghost, true);
+}
+// the map window's grow box (System 7.5, colour: shot 008, 14 x 14 inside the bars' frames)
+const GROW75 = ['GGGGGGGGGGGGGG', 'GGGGGGGGGGGGGG', 'GGEEEEEEGGGGGG', 'GGEHHHHHEEEEGG', 'GGEHIIIEHHHHGG', 'GGEHIIIEJJJEGG', 'GGEHIIIEJJJEGG', 'GGEHEEEEJJJEGG', 'GGGEHJJJJJJEGG', 'GGGEHJJJJJJEGG', 'GGGEHJJJJJJEGG', 'GGGEHEEEEEEEGG', 'GGGGGGGGGGGGGG', 'GGGGGGGGGGGGGG'];
+function drawGrow75(x) { const P = { G: '#eeeeee', E: '#333366', H: '#ccccff', I: '#bbbbbb', J: '#aaaaaa' }; x.fillStyle = '#000'; x.fillRect(0, 0, 16, 16); GROW75.forEach((r, i) => { for (let j = 0; j < 14; j++) { x.fillStyle = P[r[j]]; x.fillRect(1 + j, 1 + i, 1, 1); } }); }
+const BAR75 = () => COLOUR3 && document.documentElement.classList.contains('mac75');
 function paintBar(b, vertical, L, o) {
   const k = Math.max(1, Math.round(window.devicePixelRatio || 1)), cw = vertical ? BAR12 : L, ch = vertical ? L : BAR12, c = b.c;
   if (c.width !== cw * k || c.height !== ch * k) { c.width = cw * k; c.height = ch * k; }
   c.style.width = cw + 'px'; c.style.height = ch + 'px';
   const x = c.getContext('2d'); x.setTransform(k, 0, 0, k, 0, 0); x.imageSmoothingEnabled = false;
-  drawBar(x, 0, 0, vertical, L, BAR12, o);
+  if (BAR75() && BAR12 === 16) drawBar75(x, 0, 0, vertical, L, o); else drawBar(x, 0, 0, vertical, L, BAR12, o);
 }
 function ensureBars() {
   if (MB.wrap && MB.wrap.isConnected) return true;
@@ -3738,7 +4360,7 @@ function menus12(M, ho) {
   for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
   // (View's sound and music, Help's How to play and the manual stay reachable)
   // (3.0.1's About box: DLOG 1100 / 1101, PICT 1000 / 1001, which the skins have as p1001)
-  ho.unshift([V3 ? 'About Spaceward Ho! 3.0…' : V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
+  ho.unshift([V4 ? 'About Spaceward Ho! 4.0…' : V3 ? 'About Spaceward Ho! 3.0…' : V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
   // (each command is the remake's own: a window it opens is tagged at once, which is what keeps 1.2's own windows out of the remake's look;
   // the Ho! menu's own items too: Skin and OS look, Sounds, Language, Temperatures)
   const tagged = (x) => { const f = x[1], y = x.slice(); y[1] = (...a) => { const r = f(...a); tagRemakeWindows(); return r; }; return y; };
@@ -3760,9 +4382,9 @@ function afterTurn12(go) {
 }
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
-  document.documentElement.classList.add('mac301');
+  document.documentElement.classList.add('mac301'); if (V4) document.documentElement.classList.add('mac405');
   // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
-  try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); } } catch (e) { /* (an old browser draws with the fallbacks) */ }
+  try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); if (V4) { document.fonts.load("12px 'DOS Geneva 9 Bold'"); document.fonts.load("12px 'DOS Geneva 9'").then(() => { const a = A(); if (a && a.G) a.renderPanel(); }); } } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
@@ -3781,7 +4403,7 @@ if (V3) {
     window(name, ...x) {
       if (!G() || !own()) return false;
       if (name === 'fleets') return fleets301();
-      if (name === 'build') return build301(x[0]);
+      if (name === 'build') return V4 ? build405(x[0]) : build301(x[0]);
       if (name === 'give') return give301();
       if (name === 'chat') return chat301();
       if (name === 'organize' || name === 'group') return organize301(x[0]);

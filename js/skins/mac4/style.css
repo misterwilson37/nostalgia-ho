@@ -1,5 +1,5 @@
 /* Spaceward Ho! — Mac 4.0.5 skin (black and white): the Mac 3.0.1 skin's
-   page, with 4.0's art. Its windows, menus and
+   page and arrangement (js/skins/mac12/panel.css: 4.0.5's ResetWindows is 3.0.1's), with 4.0's art. Its windows, menus and
    controls are the "System 7" OS look (js/os/system7.css), drawn as 4.0's
    resources draw them; the start-up window and message frame are 4.0's own. */
 @import url("../mac3/style.css");
@@ -18,57 +18,26 @@
 .tsplash .wtitle { display: none; }
 .tsplash .wbody { padding: 0 0 10px; gap: 10px; }
 .tsplash #tframe { background: #fff; }
-.tsplash .tbtns { margin: 0; gap: 26px; }
-.tsplash .tbtns button { font: 12px Chicago, Charcoal, Geneva, var(--ui) !important; padding: 2px 10px !important; min-width: 75px; }
-.tsplash .tbtns #tnew { outline: 3px solid #000; outline-offset: 1px; }
-
-/* ---------- the floating windows (js/skins/mac4/ui.js; the look of their bars is the OS look's, js/os) ----------
-   Windoids over the map: Tech Spending (the Technology box, its bars standing up), Report and Chat (a list of
-   32-pixel rows, a picture and a line each). Hide Information takes the panel away. On a phone they are stacked
-   panels under the map. */
-.mw-layer { position: absolute; inset: 0; z-index: 6; pointer-events: none; font: 10px/12px Geneva, var(--ui); }
-.mw-layer[hidden] { display: none; }
-.mwin { position: absolute; pointer-events: auto; display: flex; flex-direction: column; min-width: 0; overflow: hidden; box-sizing: border-box; }
-.mwin[hidden] { display: none; }
-.mwbar { flex: none; display: flex; align-items: center; position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
-.mwbar .mwclose { flex: none; padding: 0 !important; min-width: 0 !important; min-height: 0 !important; width: 9px !important; height: 9px !important; border-radius: 0 !important; font-size: 0; cursor: pointer; } /* (over the OS look's button rule) */
-.mwtitle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* (the windoid's WDEF draws no title) */
-.mwbody { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
-.mw-tech .mwbody { min-height: 96px; touch-action: none; }
-.mwgrow { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; cursor: nwse-resize; touch-action: none; }
-.mwlist { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-height: 0; overflow-y: auto; touch-action: pan-y; }
-.mwrow { display: flex; align-items: center; gap: 6px; min-height: 32px; padding: 1px 4px; }
-.mwrow img { width: 30px; height: 30px; flex: none; object-fit: contain; image-rendering: pixelated; }
-.mwrow span { min-width: 0; overflow-wrap: anywhere; }
-.mwrow.click { cursor: pointer; }
-.mwrow.cur span { font-weight: bold; }
-.mwyear, .mwnone { padding: 2px 4px; }
-.mwyear { font-weight: bold; }
-.mwsend { flex: none; margin: 2px 4px 14px; min-height: 18px !important; font: 10px Geneva, var(--ui) !important; padding: 0 6px !important; }
-/* the Technology box in its window: six bars standing up, each named under it */
-.mw-techbars { display: flex !important; justify-content: space-around; gap: 2px; flex: 1 1 auto; margin: 0 !important; padding: 4px 0 3px !important; border: 0 !important; box-shadow: none !important; background: none !important; }
-.mw-techbars h3 { display: none; }
-.mw-techbars .barrow { display: grid; grid-template-rows: 1fr auto; grid-template-columns: 1fr; width: 37px; gap: 2px; margin: 0; align-items: stretch; justify-items: center; }
-.mw-techbars .track { grid-row: 1; width: 20px; height: auto; min-height: 60px; cursor: ns-resize; }
-.mw-techbars .fill { inset: auto 0 0 0; width: auto !important; }
-.mw-techbars .blabel { grid-row: 2; white-space: normal; text-align: center; overflow: visible; font-size: 9px; line-height: 10px; letter-spacing: -.2px; }
-.mw-techbars .bval { display: none; }
-.mw-techbars .grid { display: none; }
-/* Hide Information: the map has the whole width */
-html.mw-noinfo #panel { display: none; }
-html.mw-noinfo #main { grid-template-columns: 1fr; }
-/* the route bar (a fleet being sent) stays above the windows */
-#routebar { z-index: 8; }
-/* the stacked panels (a phone) */
-.mw-layer.stack { position: static; order: 3; display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 12px; pointer-events: auto; font-size: 12px; line-height: 15px; }
-.mw-layer.stack .mwin { position: static; width: auto !important; height: auto !important; }
-.mw-layer.stack .mwbar { height: auto; min-height: 16px; }
-.mw-layer.stack .mwtitle { position: static; width: auto; height: auto; overflow: visible; clip: auto; text-align: center; font: bold 12px Chicago, Charcoal, Geneva, var(--ui); }
-.mw-layer.stack { background: var(--plat, #fff); border-top: 1px solid #000; }
-.mw-layer.stack .mwtitle { background: var(--plat, #fff); flex: none; margin: 0 auto; padding: 0 8px; }
-.mw-layer.stack .mwgrow { display: none; }
-.mw-layer.stack .mwlist { max-height: 180px; }
-.mw-layer.stack .mwrow { font-size: 12px; }
-.mw-layer.stack .mw-tech .mwbody { min-height: 120px; }
-.mw-layer.stack .mwsend { margin-bottom: 4px; min-height: 28px !important; font-size: 12px !important; }
-@media (max-width: 760px) { #main { grid-template-rows: 58vh min-content min-content; } html.mw-noinfo #main { grid-template-columns: 1fr; } }
+/* DITL 1200 as Jake's shot 001 shows it: the 304 x 200 splash, a black rule, then three buttons 74 wide and 18 high on one row, from 12, 115
+   and 210, Open Game the default (its 3-pixel ring). The remake has no Quit: Import a Game… takes its place; How to play goes under the
+   window. Open Game keeps its place when there is no game to open (left blank). The licence lines between ("Licensed to:" and the owner's
+   name in red) are the owner's own, so they are left out. */
+#titlescreen .tsplash #tframe { display: block; border-bottom: 1px solid #000; }
+#titlescreen .tsplash .wbody { padding: 0 0 14px; gap: 0; align-items: stretch; background: #fff; }
+#titlescreen .tsplash .tbtns { display: block; width: 304px; max-width: 100%; align-self: center; margin: 0; padding: 0; position: relative; height: 18px; }
+#titlescreen .tsplash .tbtns > button { position: absolute; top: 0; width: 74px; height: 18px; min-width: 0; box-sizing: border-box; font: 12px Chicago, var(--ui) !important; padding: 0 !important; line-height: 16px; white-space: nowrap; overflow: hidden; border: 1px solid #000; border-radius: 5px; background: #fff; color: #000; }
+#titlescreen .tsplash .tbtns #tcont { left: 12px; outline: 3px solid #000; outline-offset: 1px; border-radius: 5px; }
+#titlescreen .tsplash .tbtns #tcont[hidden] { display: block; visibility: hidden; }
+#titlescreen .tsplash .tbtns #tnew { left: 115px; }
+#titlescreen .tsplash .tbtns #tcont[hidden] + #tnew { outline: 3px solid #000; outline-offset: 1px; } /* (no game to open: New Game is the one Return presses) */
+#titlescreen .tsplash .tbtns #timport { left: 210px; }
+#titlescreen .tsplash .tbtns #thelp { position: static; display: none; }
+.tcard .thelp405 { display: block; margin: 10px auto 0; }
+/* the licence lines (shot 001): the band under the rule, 55 rows to the buttons; "Licensed to:" at 2, the signed-in name in red at 76 on the
+   first line (Chicago), Sign out small under it; empty with no one signed in */
+#titlescreen .tsplash .lic405 { position: relative; height: 55px; width: 304px; align-self: center; font: 15px 'DOS Chicago 12', Chicago, var(--ui); color: #000; }
+#titlescreen .tsplash .lic405 > * { visibility: hidden; }
+#titlescreen .tsplash .lic405.on > * { visibility: visible; }
+#titlescreen .tsplash .lic405l { position: absolute; left: 2px; top: 3px; }
+#titlescreen .tsplash .lic405n { position: absolute; left: 80px; top: 3px; right: 2px; color: #d00000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#titlescreen .tsplash .lic405o { position: absolute; left: 80px; top: 22px; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; min-width: 0 !important; font: 12px 'DOS Geneva 9', Geneva, var(--ui) !important; color: #555; text-decoration: underline; cursor: pointer; }

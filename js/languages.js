@@ -1537,8 +1537,9 @@ function patchedWindows(T, rs, out, extra) {
 // (1/1) Scouts", "one Columbus (1/1) Scout"; the language's say.fleet, used for a report's blank and a fleet row, puts the same
 // parts in its order and class words, the words of its battle window's group lines: W, as the window is made), cut at 40
 // characters, the Pascal string's cap
-const FLEET_EN = /^(one|\d+) (.*) \((-?\d+)\/(-?\d+)\) (Scout|Fighter|Colony Ship|Satellite)s?$/;
-const FLEET_TYPE = { Scout: 'scout', Fighter: 'fighter', 'Colony Ship': 'colony', Satellite: 'satellite' };
+// (4.0.5's classes too, js/rules-405.js CLASS_NAMES: Dreadnought, Tanker, Biological and, in its owner's views, Decoy)
+const FLEET_EN = /^(one|\d+) (.*) \((-?\d+)\/(-?\d+)\) (Scout|Dreadnought|Fighter|Tanker|Colony Ship|Satellite|Biological|Decoy)s?$/;
+const FLEET_TYPE = { Scout: 'scout', Dreadnought: 'dread', Fighter: 'fighter', Tanker: 'tanker', 'Colony Ship': 'colony', Satellite: 'satellite', Biological: 'bio', Decoy: 'decoy' };
 function fleetSay(W) {
   const describe = DOS.describe20({ words: W }, 40);
   // (inSentence: a report's blank. The German window's "Ein Columbus (1/1) Späher" opens with a capital, and so does a row; in a
@@ -1601,7 +1602,8 @@ if (W405) {
     mac ? (E.DATA.reports || []).slice(39, 69) : [], ['Spaceward Ho! Version 4.0.5 by Peter Commons.', 'Spaceward Ho! Version 4.0.3 by Peter Commons.']);
 
   const make = (lang, rs, mac) => lazyLang(() => {
-    const out = buildText(lang, rs, { lines: lines(rs, mac), hints: () => rs.hintTexts, nearest: '301',
+    // (fleet: the fleet descriptions, "one Intrépide (1/1) Scout", in the language's words, as 3.0.1's: rs.fleetDesc writes them in English)
+    const out = buildText(lang, rs, { lines: lines(rs, mac), hints: () => rs.hintTexts, nearest: '301', fleet: true,
       battlePanel: (w) => w ? DOS.battlePanel20({ dots: mac ? '…' : '...', cols: 'mac', shade: true, words: w }) : rs.battlePanel });
     // French: 3.0.1F's windows' words over the interface's, for what 4.0.5 shares with 3.0.1
     // (the same English), as in a 3.0.1 game (rule 4; HO.windowWords)

@@ -195,12 +195,20 @@ const hall = Object.assign({}, W.hall, { rank, date, loser: () => 'Loser:' });
 // the missing colon and the technology names are right on the Mac (above).
 const MAC_SLIPS = ['poorestOut', 'designs30', 'refuelCheck', 'scrapRange', 'star0', 'keptStarNames', 'translations', 'iosFillings'];
 const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
+  // (Jake, 20 Nov 2026: RecalcFleetsAtNewStar @110644 takes the star's first fleet, often a satellite; js/skins/mac12/ui.js fleetBox301)
+  { id: 'firstShip', title: 'Choosing a star selects a ship, not its satellite',
+    text: 'Choosing a star selected the first fleet in its list, often a satellite, which can’t move, so it took another click to get a ship that could. The patch selects a ship first: a Scout, then a Fighter, Dreadnought, Tanker or Colony Ship, the satellite last. A click on a fleet’s row still selects that fleet.' },
   { id: 'welcomeVersion', title: 'The welcome report gives the right version',
     text: 'The first report of a game said “Spaceward Ho! Version 4.0.3”: the string was never updated for 4.0.5. The patch says 4.0.5.' },
 ]);
 
 // Mac 4.0.5 plays 4.0.5's game (js/rules-405.js), with the differences above
 E.registerRules('mac405', Object.assign({}, W, {
+  // CONFIRMED (MakeFleetDescription @f0c26: the description cut at 39 characters, @f0d50); another player's fleet at a star
+  // (RecalcFleetsAtNewStar @110644): "%.*s’s %.*s" (STR# 6170.36), the owner's name and the description as the others see it (the
+  // decoy a Fighter: MakeFleetDescription's flag 0), in a 64-byte Pascal slot (63 characters at most)
+  fleetDesc: W.fleetDescAt(39),
+  otherFleetRow: (G, f) => { const d = E.fleetDesigns(G, f), P = G.players[f.owner]; if (d.length !== 1) return null; return `${P ? P.name : ''}’s ${W.fleetDescAt(39, false)(G, f, d[0], E.fleetCount(f))}`.slice(0, 63); },
   // CONFIRMED (ComparePlayers @10078c, GetComparisonValue @1009b2, DLOG/DITL 6050 "Compare Players" 478 x 292, STR# 6140.5, .7, .9): the Mac's own
   // window for 4.0.5's Compare Players, laid out as 3.0.1's; the year 2000 says "Sorry, no comparisons in the year 2000." (STR# 6140.5, though the first
   // comparison is in 2010), a player out "You were elminated in %d." (.9, misspelt) with the galaxy's year for state 1, else the year kept

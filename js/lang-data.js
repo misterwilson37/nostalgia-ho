@@ -15813,6 +15813,4177 @@ null
 "6080": "",
 "7000": ""
 }
+},
+"mac405En": {
+"DITL": {
+"128": [
+[
+"button",
+"OK"
+],
+[
+"text",
+"Sorry ^0 requires the follow things to be able to run:"
+],
+[
+"text",
+"• ^1 CPU or better"
+],
+[
+"text",
+"• System Software ^2 or later"
+],
+[
+"text",
+"• ^3"
+]
+],
+"500": [
+[
+"button",
+"OK"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"999"
+],
+[
+"edit",
+"999"
+],
+[
+"edit",
+"999"
+],
+[
+"edit",
+"999"
+],
+[
+"edit",
+"999"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"text",
+"Set Computer/Auto-Play Attributes:"
+],
+[
+"text",
+"Up Front Tech Percent (0-100)"
+],
+[
+"text",
+"Income Per Colony"
+],
+[
+"text",
+"Defending Domination Percent"
+],
+[
+"text",
+"% cols defended"
+],
+[
+"text",
+"(attacking) Domination Percentage"
+],
+[
+"text",
+"Tech Spending (should add to 1000)"
+],
+[
+"text",
+"Aggressiveness (0 to 10)"
+],
+[
+"text",
+"Attack Style (1 reg., 2. sat., 3 pounce)"
+],
+[
+"text",
+"Desire for Metal (0 to 100) - may change"
+],
+[
+"text",
+"Savings (# * totalMoney = desired s.)"
+],
+[
+"text",
+"% of Metal for Def (will change for all but def. player)"
+],
+[
+"text",
+"Friendliness"
+],
+[
+"text",
+"Friends( pl 1-4):"
+],
+[
+"text",
+"Scrap Obs."
+],
+[
+"text",
+"New Type Obs."
+],
+[
+"text",
+"Min Attack Fleet Size:"
+]
+],
+"501": [
+[
+"button",
+"OK"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"text",
+"Static Text"
+],
+[
+"text",
+"Static Text"
+],
+[
+"text",
+"Static Text"
+],
+[
+"text",
+"Gravity * 100:"
+],
+[
+"text",
+"Temperature * 10:"
+],
+[
+"text",
+"$ Per Turn"
+],
+[
+"text",
+"# Turns To Break Even:"
+],
+[
+"text",
+"Done Terraforming Turn:"
+],
+[
+"text",
+"Positive Income Turn:"
+]
+],
+"502": [
+[
+"button",
+"Done"
+],
+[
+"button",
+"Review"
+],
+[
+"edit",
+"1"
+],
+[
+"edit",
+"6"
+],
+[
+"edit",
+"2"
+],
+[
+"edit",
+"1"
+],
+[
+"edit",
+"1"
+],
+[
+"edit",
+"1"
+],
+[
+"edit",
+"1"
+],
+[
+"edit",
+"6"
+],
+[
+"edit",
+"2"
+],
+[
+"edit",
+"1"
+],
+[
+"edit",
+"1"
+],
+[
+"edit",
+"1"
+],
+[
+"edit",
+"0"
+],
+[
+"edit",
+"2"
+],
+[
+"edit",
+"2"
+],
+[
+"edit",
+"3"
+],
+[
+"edit",
+"3"
+],
+[
+"text",
+"Number"
+],
+[
+"text",
+"Range"
+],
+[
+"text",
+"Speed"
+],
+[
+"text",
+"Weapons"
+],
+[
+"text",
+"Shields"
+],
+[
+"text",
+"Player 1"
+],
+[
+"text",
+"Player 2"
+],
+[
+"text",
+"Population"
+],
+[
+"text",
+"Pop Wpns"
+],
+[
+"text",
+"Pop Shds"
+],
+[
+"text",
+"Die Roll"
+],
+[
+"text",
+"Type (0-5)"
+]
+],
+"1100": [
+[
+"pict",
+1002
+],
+[
+"pict",
+4010
+],
+[
+"pict",
+1001
+],
+[
+"pict",
+7080
+]
+],
+"1101": [
+[
+"pict",
+1003
+],
+[
+"pict",
+4010
+],
+[
+"pict",
+1001
+],
+[
+"pict",
+7081
+]
+],
+"1150": [
+[
+"text",
+"Peter & Joe would like to take the opportunity to thank everyone who has helped make Spaceward Ho! the really cool game it is today…"
+],
+[
+"pict",
+3520
+],
+[
+"text",
+"Ed Logg\nJack Robson\nEd Rotberg\nEric Snider\nKon & Bal"
+],
+[
+"text",
+"The Amazing Timmer\nDennis, Tim, & the DTS Gang\nMike, Ben, Dan, Rob & Clint"
+],
+[
+"text",
+"And thanks to everyone on comp.sys.mac.games and AOL,"
+],
+[
+"text",
+"Everyone who called us up or sent us a letter,"
+],
+[
+"text",
+"And everyone else who made comments and suggestions."
+]
+],
+"1151": [
+[
+"text",
+"Peter & Joe would like to take the opportunity to thank everyone who has helped make Spaceward Ho! the really cool game it is today…"
+],
+[
+"pict",
+3020
+],
+[
+"text",
+"Ed Logg\nJack Robson\nEd Rotberg\nEric Snider\nKon & Bal"
+],
+[
+"text",
+"The Amazing Timmer\nDennis, Tim, & the DTS Gang\nMike, Ben, Dan, Rob & Clint"
+],
+[
+"text",
+"And thanks to everyone on comp.sys.mac.games and AOL,"
+],
+[
+"text",
+"Everyone who called us up or sent us a letter,"
+],
+[
+"text",
+"And everyone else who made comments and suggestions."
+]
+],
+"1200": [
+[
+"button",
+"Open Game"
+],
+[
+"button",
+"New Game"
+],
+[
+"button",
+"Quit"
+],
+[
+"user",
+null
+],
+[
+"pict",
+1002
+],
+[
+"pict",
+4010
+]
+],
+"1201": [
+[
+"button",
+"Open Game"
+],
+[
+"button",
+"New Game"
+],
+[
+"button",
+"Quit"
+],
+[
+"user",
+null
+],
+[
+"pict",
+1003
+],
+[
+"pict",
+4010
+]
+],
+"1500": [
+[
+"text",
+"Save “^0” before quitting?"
+],
+[
+"button",
+"Cancel"
+],
+[
+"button",
+"No"
+],
+[
+"button",
+"Yes"
+]
+],
+"2000": [
+[
+"button",
+"Return To Finder"
+],
+[
+"text",
+"Sorry, but this is a development version of Spaceward Ho! 4.0 that’s past its prime. To get a newer copy, call Delta Tao Software, Inc. at (408) 730-9336."
+]
+],
+"2010": [
+[
+"button",
+"Play in B/W"
+],
+[
+"pict",
+3010
+],
+[
+"text",
+"Sorry, but Spaceward Ho! 2.0 requires 32-bit Color Quickdraw to run in color."
+],
+[
+"text",
+"You can obtain Color Quickdraw from any Apple dealer for a nominal charge."
+]
+],
+"3000": [
+[
+"button",
+"OK"
+],
+[
+"text",
+"^0"
+],
+[
+"text",
+"File Name: ^1"
+],
+[
+"text",
+"Error Type: ^2"
+],
+[
+"text",
+"Secret Error Code: ^3"
+],
+[
+"text",
+"An Error Has Occurred:"
+],
+[
+"icon",
+1
+]
+],
+"3020": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"Dost thou truly wish to abandon Hope? All is not yet lost!"
+],
+[
+"pict",
+3020
+]
+],
+"3030": [
+[
+"button",
+"Jump Ship"
+],
+[
+"button",
+"Don’t Jump"
+],
+[
+"text",
+"Abandon Ship? Abandon Ship!\nAll hands abandon ship!\nWomen and children first!"
+],
+[
+"pict",
+3020
+]
+],
+"3080": [
+[
+"button",
+"No, thanks."
+],
+[
+"button",
+"OK"
+],
+[
+"text",
+"The game has already started. Would you like to take over for a computer player?"
+]
+],
+"3090": [
+[
+"text",
+"^0’s Star System “^1” has had a revolution, and is now under your control."
+],
+[
+"button",
+"OK"
+]
+],
+"3100": [
+[
+"text",
+"^0 has offerred ^1 units of metal for ^2 dollars."
+],
+[
+"button",
+"OK"
+]
+],
+"3110": [
+[
+"text",
+"You have found an additional ^0 units of metal on ^0."
+],
+[
+"button",
+"OK"
+]
+],
+"3120": [
+[
+"text",
+"Your fleet of ^0 ^1 unexpectedly disappeared in hyperspace on their way to ^2."
+],
+[
+"button",
+"OK"
+]
+],
+"3130": [
+[
+"text",
+"^0 has gone nova.  Everything there has been destroyed."
+],
+[
+"button",
+"OK"
+]
+],
+"3140": [
+[
+"text",
+"Your Terraforming Technology has reached level ^0."
+],
+[
+"button",
+"OK"
+]
+],
+"3150": [
+[
+"text",
+"^0 has turned all his planets over to your control.  "
+],
+[
+"button",
+"OK"
+]
+],
+"3160": [
+[
+"text",
+"You have stolen ^0 Technology from ^1.  Your Tech level is now ^2."
+],
+[
+"button",
+"OK"
+]
+],
+"3170": [
+[
+"text",
+"You have destroyed the Star System ^0, previously owned by ^1."
+],
+[
+"button",
+"OK"
+]
+],
+"3180": [
+[
+"button",
+"Yes"
+],
+[
+"text",
+">Greetings, Professor Falkein.\n\n>Would you like to play a game\n of Galaxial Thermonuclear War?"
+]
+],
+"3240": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"Do you really want to launch the armageddon device? It’ll blow up half of the galaxy!"
+],
+[
+"pict",
+3020
+]
+],
+"3241": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"Do you really want to launch the armageddon device? Isn’t life too short as it is?"
+],
+[
+"pict",
+3020
+]
+],
+"3242": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"Do you really want to launch the armageddon device? I mean, you’d probably win anyway; why take the chance?"
+],
+[
+"pict",
+3020
+]
+],
+"3243": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"Do you really want to launch the armageddon device? Doing so decreases the difficulty score by half!"
+],
+[
+"pict",
+3020
+]
+],
+"3244": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"Do you really want to launch the armageddon device? Odds are you’ll blow yourself up!"
+],
+[
+"pict",
+3020
+]
+],
+"3250": [
+[
+"button",
+"Party Pooper"
+],
+[
+"button",
+"Abort"
+],
+[
+"text",
+"Are you just doing this because you think you’ll win but it’s really late and so you want to go to bed?"
+],
+[
+"pict",
+3020
+]
+],
+"3251": [
+[
+"button",
+"Not Unsure?"
+],
+[
+"button",
+"Unsure?"
+],
+[
+"text",
+"Aren’t you sure you really don’t want to have nothing to do with not launching the armageddon device?"
+],
+[
+"pict",
+3020
+]
+],
+"3252": [
+[
+"button",
+"Power"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"You’re just doing this ’cause you enjoy the ultimate feeling of power, aren’t you???"
+],
+[
+"pict",
+3020
+]
+],
+"3253": [
+[
+"button",
+"Yeah"
+],
+[
+"button",
+"Abort"
+],
+[
+"text",
+"If you do this, everyone will hate you! It’s such a sissy way to try to win, anyway."
+],
+[
+"pict",
+3020
+]
+],
+"3254": [
+[
+"button",
+"Go For It!"
+],
+[
+"button",
+"Maybe Not"
+],
+[
+"text",
+"Now look, this is NO laughing matter. You just might get yourself killed!"
+],
+[
+"pict",
+3020
+]
+],
+"3255": [
+[
+"button",
+"That’s It!"
+],
+[
+"button",
+"Never mind"
+],
+[
+"text",
+"I get it. You’re losing big time and this is the only way you could possibly win! That’s it isn’t it?"
+],
+[
+"pict",
+3020
+]
+],
+"3260": [
+[
+"button",
+"OK"
+],
+[
+"icon",
+2
+],
+[
+"text",
+"Sorry, but not all of the players have updated to the current turn. Until they have done so, you can’t end your turn. Try again in a few seconds."
+]
+],
+"3280": [
+[
+"button",
+"OK"
+],
+[
+"pict",
+3020
+],
+[
+"text",
+"Sorry, but Spaceward Ho! allows you to have only 20 ship types at one time. "
+],
+[
+"text",
+"If you would like to create another ship type, scrap an old type by checking the “Scrap” box for it in the “List Ship Types…” Dialog."
+],
+[
+"text",
+"The ship will be scrapped during the turn update and you can create a new type next turn…"
+]
+],
+"3330": [
+[
+"button",
+"OK"
+],
+[
+"pict",
+3020
+],
+[
+"text",
+"Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. "
+],
+[
+"text",
+"You can tell this because there are no arrows on either end of the dragged line."
+]
+],
+"3380": [
+[
+"button",
+"Really"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"Do you really, really, REALLY want to surrender?"
+],
+[
+"pict",
+3020
+]
+],
+"3390": [
+[
+"button",
+"Really"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"Do you really, really, REALLY want to surrender to ^0?"
+],
+[
+"pict",
+3020
+]
+],
+"3410": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"pict",
+3020
+],
+[
+"text",
+"Do you really want to abandon a profitable planet?"
+]
+],
+"3420": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"pict",
+3020
+],
+[
+"text",
+"Do you really want to abandon a planet that will be profitable very soon?"
+]
+],
+"3430": [
+[
+"button",
+"OK"
+],
+[
+"text",
+"Sorry, but all of the computer players are already dead so you can’t join."
+],
+[
+"icon",
+2
+]
+],
+"4000": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"edit",
+""
+],
+[
+"edit",
+""
+],
+[
+"user",
+null
+],
+[
+"text",
+""
+],
+[
+"text",
+"Please Identify Yourself:"
+],
+[
+"text",
+"Player Name:"
+],
+[
+"text",
+"Player Password:"
+]
+],
+"4010": [
+[
+"button",
+"Join"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"WWWWWWWWWWWWWWW"
+],
+[
+"text",
+"<password>"
+],
+[
+"radio",
+"Novice"
+],
+[
+"radio",
+"Beginner"
+],
+[
+"radio",
+"Normal"
+],
+[
+"radio",
+"Advanced"
+],
+[
+"radio",
+"Expert"
+],
+[
+"user",
+null
+],
+[
+"radio",
+"Male"
+],
+[
+"radio",
+"Female"
+],
+[
+"user",
+null
+],
+[
+"text",
+"Your Name:"
+],
+[
+"text",
+"Password:"
+],
+[
+"text",
+"Skill Level:"
+],
+[
+"text",
+"Sex:"
+]
+],
+"4020": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"radio",
+"Have computer play for me."
+],
+[
+"radio",
+"Just mark me done every turn."
+],
+[
+"radio",
+"I’ll play my own turns, thank you."
+],
+[
+"radio",
+"Mark me done until something interesting happens."
+],
+[
+"control",
+4020
+],
+[
+"text",
+"15"
+],
+[
+"button",
+"Config…"
+],
+[
+"text",
+"Under auto play, event messages disappear after:"
+],
+[
+"text",
+"Seconds"
+],
+[
+"text",
+"Auto Play Options:"
+]
+],
+"4021": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"control",
+4021
+],
+[
+"control",
+4022
+],
+[
+"text",
+"Configure Computer’s Auto Play Style:"
+],
+[
+"text",
+"Friendly"
+],
+[
+"text",
+"Aggressive"
+],
+[
+"text",
+"Dig In"
+],
+[
+"text",
+"No Defense"
+]
+],
+"4030": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"text",
+"Please Personalize Your Copy of Spaceward Ho! 4.0:"
+],
+[
+"text",
+"Name:"
+],
+[
+"edit",
+""
+],
+[
+"text",
+"Company:"
+],
+[
+"edit",
+""
+],
+[
+"text",
+"Have you told your friends about Spaceward Ho!?"
+],
+[
+"radio",
+"Yes"
+],
+[
+"radio",
+"No"
+],
+[
+"radio",
+"No, but I will"
+]
+],
+"4040": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"button",
+"Cancel"
+],
+[
+"check",
+"Star Map"
+],
+[
+"check",
+"Explored Stars"
+],
+[
+"check",
+"Fleets"
+],
+[
+"check",
+"Alliances"
+],
+[
+"check",
+"Messages"
+],
+[
+"radio",
+"Color"
+],
+[
+"radio",
+"Black & White"
+],
+[
+"text",
+"What Would You Like To Print?"
+],
+[
+"text",
+"How Would You Like It Printed?"
+]
+],
+"4050": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"edit",
+"WWWWWWW"
+],
+[
+"user",
+null
+],
+[
+"text",
+"You won the game, so you get to name a star."
+],
+[
+"text",
+"Star names must be 2 to 7 characters long. "
+],
+[
+"text",
+"New Star Name:"
+],
+[
+"text",
+"(If you’d rather not name a star, click “OK” with the name blank.)"
+]
+],
+"4060": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"Which fleet would you like to group with your ^0? "
+]
+],
+"4070": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"text",
+"You currently have $^0 in ship money. You can take out up to $^1. How much would you like?"
+],
+[
+"edit",
+"Edit Text"
+]
+],
+"4080": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"button",
+"Details"
+],
+[
+"text",
+"Hall Of Fame"
+],
+[
+"text",
+"Name"
+],
+[
+"text",
+"When"
+],
+[
+"text",
+"Difficulty"
+]
+],
+"4090": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"button",
+"Details"
+],
+[
+"text",
+"Hall Of Shame"
+],
+[
+"text",
+"Name"
+],
+[
+"text",
+"When"
+],
+[
+"text",
+"Difficulty"
+]
+],
+"4100": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"text",
+"Humans"
+],
+[
+"text",
+"Comp"
+],
+[
+"text",
+"Style"
+],
+[
+"text",
+"Density"
+],
+[
+"text",
+"Size"
+],
+[
+"text",
+"Int"
+],
+[
+"text",
+"GameDate"
+],
+[
+"text",
+"Allies"
+],
+[
+"text",
+"RealDate"
+],
+[
+"text",
+"Bonus"
+],
+[
+"text",
+"Name"
+],
+[
+"text",
+"Skill"
+],
+[
+"text",
+"Arms."
+],
+[
+"user",
+null
+],
+[
+"text",
+"Summary of Game Victory"
+],
+[
+"text",
+"Winner:"
+],
+[
+"text",
+"Date:"
+],
+[
+"text",
+"Difficulty:"
+],
+[
+"text",
+"# Humans:"
+],
+[
+"text",
+"# Computers:"
+],
+[
+"text",
+"Computer Intelligence:"
+],
+[
+"text",
+"Galaxy Style:"
+],
+[
+"text",
+"# Allies:"
+],
+[
+"text",
+"Game Date:"
+],
+[
+"text",
+"Player Skill:"
+],
+[
+"text",
+"Armageddons:"
+]
+],
+"4110": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"text",
+"Humans"
+],
+[
+"text",
+"Comp"
+],
+[
+"text",
+"Style"
+],
+[
+"text",
+"Density"
+],
+[
+"text",
+"Size"
+],
+[
+"text",
+"Int"
+],
+[
+"text",
+"GameDate"
+],
+[
+"text",
+"Allies"
+],
+[
+"text",
+"RealDate"
+],
+[
+"text",
+"Bonus"
+],
+[
+"text",
+"Name"
+],
+[
+"text",
+"Skill"
+],
+[
+"text",
+"Arms."
+],
+[
+"user",
+null
+],
+[
+"text",
+"Summary of Game Loss"
+],
+[
+"text",
+"Loser:"
+],
+[
+"text",
+"Date:"
+],
+[
+"text",
+"Difficulty:"
+],
+[
+"text",
+"# Humans:"
+],
+[
+"text",
+"# Computers:"
+],
+[
+"text",
+"Computer Intelligence:"
+],
+[
+"text",
+"Galaxy Style:"
+],
+[
+"text",
+"# Allies:"
+],
+[
+"text",
+"Game Date:"
+],
+[
+"text",
+"Player Skill:"
+],
+[
+"text",
+"Armageddons:"
+]
+],
+"4130": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"text",
+"Arkaid"
+],
+[
+"text",
+"Never Explored."
+],
+[
+"text",
+"unknown"
+],
+[
+"text",
+"unknown"
+],
+[
+"text",
+"unknown"
+],
+[
+"text",
+"unknown"
+],
+[
+"text",
+"unknown"
+],
+[
+"text",
+"unknown"
+],
+[
+"text",
+"No battles."
+],
+[
+"text",
+"n/a"
+],
+[
+"user",
+null
+],
+[
+"text",
+"Planet Info For:"
+],
+[
+"text",
+"Population:"
+],
+[
+"text",
+"Temperature:"
+],
+[
+"text",
+"Gravity:"
+],
+[
+"text",
+"Metal:"
+],
+[
+"text",
+"Owner:"
+],
+[
+"text",
+"Info Date:"
+],
+[
+"text",
+"Battle Date:"
+],
+[
+"text",
+"Income:"
+],
+[
+"text",
+"Ships Built This Turn:"
+]
+],
+"5000": [
+[
+"button",
+"Save"
+],
+[
+"button",
+"Don’t Save"
+],
+[
+"button",
+"Cancel"
+],
+[
+"text",
+"^0, do you want to save the changes you’ve made before closing the current game?"
+],
+[
+"icon",
+2
+]
+],
+"5010": [
+[
+"button",
+"OK"
+],
+[
+"pict",
+3020
+],
+[
+"text",
+"^0^1^2^3"
+]
+],
+"5030": [
+[
+"button",
+"OK"
+],
+[
+"text",
+"Oops! Something kinda funny has happened in TheHo 2.0. Please write down the following problem with as much information as you can on what you think led up to it. Then let us know. Thanks."
+],
+[
+"text",
+"^0^1^2^3"
+]
+],
+"5040": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"text",
+"Congratulations! You have conquered the galaxy!"
+],
+[
+"pict",
+3030
+]
+],
+"5041": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"text",
+"Congratulations! You have conquered the galaxy!"
+],
+[
+"pict",
+3530
+]
+],
+"5050": [
+[
+"button",
+"Oh, well…"
+],
+[
+"user",
+null
+],
+[
+"pict",
+3040
+],
+[
+"text",
+"Unfortunately, you have been eliminated from the game…"
+]
+],
+"5051": [
+[
+"button",
+"Oh, well…"
+],
+[
+"user",
+null
+],
+[
+"pict",
+3540
+],
+[
+"text",
+"Unfortunately, you have been eliminated from the game…"
+]
+],
+"6000": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Build & Continue"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"button",
+"+"
+],
+[
+"button",
+"-"
+],
+[
+"edit",
+"999"
+],
+[
+"button",
+"Don’t Scrap"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"edit",
+"Edit Text"
+],
+[
+"control",
+6015
+],
+[
+"text",
+"$99,999,999"
+],
+[
+"text",
+"ProCost"
+],
+[
+"text",
+"MetalCost"
+],
+[
+"text",
+"99/99"
+],
+[
+"text",
+"99"
+],
+[
+"text",
+"99"
+],
+[
+"text",
+"99"
+],
+[
+"text",
+"99"
+],
+[
+"control",
+6010
+],
+[
+"control",
+6011
+],
+[
+"control",
+6012
+],
+[
+"control",
+6013
+],
+[
+"control",
+6014
+],
+[
+"text",
+"999"
+],
+[
+"text",
+"9,999"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"$100,000,000"
+],
+[
+"text",
+"999,999"
+],
+[
+"button",
+"Max Out"
+],
+[
+"text",
+"Dev. Cost:"
+],
+[
+"text",
+"Pro. Cost:"
+],
+[
+"text",
+"Metal Cost:"
+],
+[
+"text",
+"Range"
+],
+[
+"text",
+"Speed"
+],
+[
+"text",
+"Weapons"
+],
+[
+"text",
+"Shields"
+],
+[
+"text",
+"Mini"
+],
+[
+"text",
+"Built:"
+],
+[
+"text",
+"In Service:"
+],
+[
+"text",
+"Savings:"
+],
+[
+"text",
+"Metal:"
+],
+[
+"text",
+"# To Build:"
+]
+],
+"6030": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"button",
+"Go To Fleet"
+],
+[
+"user",
+null
+],
+[
+"control",
+6030
+],
+[
+"text",
+"List of All Fleets:"
+]
+],
+"6040": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"button",
+"Go To Star"
+],
+[
+"user",
+null
+],
+[
+"control",
+6040
+],
+[
+"text",
+"List of All Explored Stars:"
+]
+],
+"6050": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"button",
+"Show Skills"
+],
+[
+"text",
+"Comparison of 99 remaining players in 9999:"
+]
+],
+"6055": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"Select an icon to see recent recorded history:"
+]
+],
+"6056": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"Select an icon to see recently recorded history:"
+]
+],
+"6060": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"button",
+"Group All"
+],
+[
+"button",
+"Divide All"
+],
+[
+"button",
+"Next Type"
+],
+[
+"button",
+"Split All"
+],
+[
+"text",
+"To Organize Fleets:"
+],
+[
+"text",
+"• Click and drag fleets into desired number of piles"
+],
+[
+"text",
+"• Shift-Click selects an entire pile"
+]
+],
+"6070": [
+[
+"button",
+"Send"
+],
+[
+"button",
+"Erase"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"<Modal Command>:"
+],
+[
+"button",
+"Done"
+],
+[
+"text",
+"Message Text:"
+],
+[
+"edit",
+""
+],
+[
+"text",
+"Send Message:"
+],
+[
+"text",
+"To:"
+],
+[
+"text",
+"Content:"
+]
+],
+"6080": [
+[
+"button",
+"Create"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"control",
+6080
+],
+[
+"text",
+"20"
+],
+[
+"check",
+"Alliances"
+],
+[
+"control",
+6060
+],
+[
+"control",
+6050
+],
+[
+"text",
+"999"
+],
+[
+"check",
+"Luck in Battles"
+],
+[
+"check",
+"Automatically end turn for unconnected players"
+],
+[
+"text",
+"Create New Galaxy"
+],
+[
+"text",
+"Galaxy Style:"
+],
+[
+"text",
+"Galaxy Density:"
+],
+[
+"text",
+"Computer Intelligence:"
+],
+[
+"text",
+"Number of Computer Players:"
+],
+[
+"text",
+"Galaxy Size:"
+],
+[
+"text",
+"Base Difficulty Rating:"
+]
+],
+"6100": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"Smart"
+],
+[
+"text",
+"List of all players and their skill levels:"
+],
+[
+"text",
+"Computer Intelligence:"
+]
+],
+"6110": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"I Really Like Them"
+],
+[
+"text",
+"I Like Them"
+],
+[
+"text",
+"I Don’t Like Them"
+],
+[
+"text",
+"Click on a player’s icon to move it horizontally to specify whether you would or would not like to ally with that player."
+],
+[
+"text",
+"Their icon represents what their current opinion of you is."
+]
+],
+"6120": [
+[
+"button",
+"Give"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"edit",
+"0"
+],
+[
+"edit",
+"0"
+],
+[
+"text",
+"Give How Much Money?"
+],
+[
+"text",
+"Give How Much Metal?"
+],
+[
+"text",
+"Give Stuff To:"
+]
+],
+"6130": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"Surrender To:"
+]
+],
+"6140": [
+[
+"button",
+"OK"
+],
+[
+"text",
+"^0^1^2^3"
+],
+[
+"user",
+null
+],
+[
+"pict",
+3020
+]
+],
+"6141": [
+[
+"button",
+"OK"
+],
+[
+"text",
+"^0^1^2^3"
+],
+[
+"user",
+null
+],
+[
+"pict",
+3520
+]
+],
+"6150": [
+[
+"button",
+"OK"
+],
+[
+"button",
+"Cancel"
+],
+[
+"user",
+null
+],
+[
+"check",
+"Show Fleets Paths"
+],
+[
+"check",
+"Automatically Sort Planet List"
+],
+[
+"check",
+"Show Event Messages"
+],
+[
+"check",
+"Review Event Battles"
+],
+[
+"edit",
+""
+],
+[
+"control",
+4040
+],
+[
+"check",
+"Fully Animated Battles"
+],
+[
+"check",
+"Groups Shoot Together"
+],
+[
+"check",
+"Give Helpful Game Play Hints"
+],
+[
+"check",
+"Temp. in Celsius (not °F)"
+],
+[
+"check",
+"But Only The Most Important Ones"
+],
+[
+"control",
+4060
+],
+[
+"text",
+"99"
+],
+[
+"text",
+"Preferences "
+],
+[
+"text",
+"Your Password:"
+],
+[
+"text",
+"Battle Speed:"
+],
+[
+"text",
+"Fast"
+],
+[
+"text",
+"Slow"
+],
+[
+"text",
+"Polling Time:"
+],
+[
+"text",
+"Fast"
+],
+[
+"text",
+"Slow"
+],
+[
+"text",
+"Seconds"
+],
+[
+"text",
+"After Every Turn Update:"
+],
+[
+"text",
+"On The Star Map:"
+],
+[
+"text",
+"When Reviewing Battles:"
+],
+[
+"text",
+"When Checking To See If All Players Have Ended Their Turn:"
+]
+],
+"6160": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"text",
+"4,999,999,999"
+],
+[
+"text",
+""
+],
+[
+"text",
+""
+],
+[
+"text",
+""
+],
+[
+"text",
+""
+],
+[
+"text",
+""
+],
+[
+"text",
+"Cumulative Statistics:"
+],
+[
+"text",
+"Total Population Gained:"
+],
+[
+"text",
+"Total Population Killed:"
+],
+[
+"text",
+"Enemy Population Killed:"
+],
+[
+"text",
+"Total # of Ships Built:"
+],
+[
+"text",
+"Total # of Ships Destroyed:"
+],
+[
+"text",
+"Total # of Enemy Ships Destroyed:"
+]
+],
+"6170": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"You can cancel one research program:"
+]
+],
+"6180": [
+[
+"button",
+"OK"
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"user",
+null
+],
+[
+"text",
+"Master Points:"
+],
+[
+"text",
+"Name"
+],
+[
+"text",
+"Points"
+],
+[
+"text",
+"Rank"
+]
+],
+"7000": [
+[
+"text",
+"Doing Pass 1 for Player 1…"
+],
+[
+"control",
+7000
+]
+],
+"7005": [
+[
+"text",
+"You will take over for a computer player after the current turn has been completed!"
+],
+[
+"text",
+"Please wait a moment…"
+]
+],
+"7010": [
+[
+"button",
+"Skip"
+],
+[
+"user",
+null
+]
+],
+"7011": [
+[
+"button",
+"Skip"
+],
+[
+"user",
+null
+]
+]
+},
+"MENU": {
+"128": [
+"\u0014",
+"About Spaceward Ho! 4.0…",
+"-"
+],
+"129": [
+"File",
+"New Game…\tN",
+"Open Game…\tO",
+"Begin Game\tB",
+"-",
+"Close Game\tW",
+"Save Game\tS",
+"-",
+"End Turn\tT",
+"End Turn and Switch Players\t ",
+"-",
+"Page Setup…",
+"Print…\tP",
+"-",
+"Quit\tQ"
+],
+"130": [
+"Edit",
+"Undo\tZ",
+"-",
+"Cut\tX",
+"Copy\tC",
+"Paste\tV",
+"Clear"
+],
+"131": [
+"Options",
+"Auto Play…",
+"-",
+"Sound",
+"-",
+"Master Point List…",
+"Hall of Fame…",
+"Hall of Shame…",
+"-",
+"Preferences…"
+],
+"132": [
+"Ships",
+"<build/design>\tB",
+"-",
+"List All Fleets…\tL",
+"Organize <type>…\tG",
+"Scrap Current Fleet",
+"-",
+"Review Battle at <star>…\tR"
+],
+"133": [
+"Galaxy",
+"Compare Players…\tY",
+"Graph History…\tH",
+"Statistics…",
+"List All Explored Stars…",
+"-",
+"Dip Into Savings…\tD",
+"Abandon Planet…\tA",
+"-",
+"Alliances…",
+"Give Money/Metal…",
+"Surrender To…",
+"Send Message…\tM",
+"-",
+"Armageddon"
+],
+"134": [
+"Window",
+"Tech Spending Window\t1",
+"Report Window\t2",
+"Chat Window\t3",
+"-",
+"Zoom In\t=",
+"Zoom Out\t-",
+"Hide Information\tI",
+"-",
+"Clean Up Windows"
+],
+"6015": [
+"\u0000",
+"Scout",
+"Dreadnought",
+"Fighter",
+"Tanker",
+"Colony Ship",
+"Satellite",
+"Biological"
+],
+"6030": [
+"\u0000",
+"Ship Power",
+"Ship Class"
+],
+"6040": [
+"\u0000",
+"Metal",
+"Quality",
+"Gravity",
+"Owner"
+],
+"6050": [
+"\u0000",
+"No Time Limit",
+"Fast (30/120)",
+"Medium (60/180)",
+"Slow (90/180)"
+],
+"6060": [
+"\u0000",
+"10",
+"20",
+"30",
+"50"
+]
+},
+"DLOG": {
+"500": "",
+"501": "",
+"502": "",
+"1100": "",
+"1101": "",
+"1150": "",
+"1151": "",
+"1200": "",
+"1201": "",
+"4000": "",
+"4010": "",
+"4020": "",
+"4021": "",
+"4030": "",
+"4040": "",
+"4050": "",
+"4060": "",
+"4070": "",
+"4080": "",
+"4090": "",
+"4100": "",
+"4110": "",
+"4130": "",
+"5040": "",
+"5041": "",
+"5050": "",
+"5051": "",
+"6000": "",
+"6030": "",
+"6040": "",
+"6050": "",
+"6055": "",
+"6056": "",
+"6060": "",
+"6070": "",
+"6080": "",
+"6100": "",
+"6110": "",
+"6120": "",
+"6130": "",
+"6140": "",
+"6141": "",
+"6150": "",
+"6160": "",
+"6170": "",
+"6180": "",
+"7000": "",
+"7005": "",
+"7010": "",
+"7011": ""
+},
+"CNTL": {
+"4020": "",
+"4021": "",
+"4022": "",
+"4040": "",
+"4060": "",
+"6000": "",
+"6010": "",
+"6011": "",
+"6012": "",
+"6013": "",
+"6014": "",
+"6015": "",
+"6016": "Class:",
+"6030": "Sort By:",
+"6040": "Sort By:",
+"6050": "Turn Time Limit:",
+"6060": "Years Per Turn:",
+"6070": "",
+"6071": "",
+"6080": "",
+"6081": "",
+"7000": ""
+},
+"2000": [
+"Tiber"
+],
+"6000": [
+"Failed to write mailbox (network) game file.",
+"Error during turn update.",
+"Could not write battle summary to disk.",
+"Could not create galaxy.",
+"Could not create ally fleet information record.",
+"Could not resize player record for newly colonized star.",
+"Could not load galaxy.",
+"Could not resize player record for newly created fleet.",
+"No memory available to determine fleet path.",
+"Personalization failed.",
+"Could not write updated turn information to disk.",
+"Could not read galaxy information from disk.",
+"Could not read player information from disk.",
+"Could not write updated player information to disk.",
+"Could not read player information from disk.",
+"Could not modify mailbox file to register current request.",
+"Could not create/open game history file.",
+"Could not access game file. Closing game."
+],
+"6010": [
+"Misc. Error",
+"Nil Error Code",
+"Disk Full",
+"File Locked",
+"I/O Error",
+"Volume Locked",
+"Out of Memory",
+"File is Busy",
+"File Not Found",
+"Diskette is Locked",
+"Spaceward Ho! Failure",
+"Server Volume Has Been Disconnected",
+"Duplicate file name. File is already open?"
+],
+"6020": [
+"Spaceward Ho! 4.0 Prefs",
+"Ho! 4.0 Color Picts",
+" History",
+"Ho! Game History",
+"Ho! Resources",
+"Spaceward Ho! 4.0 Demo Prefs",
+"Spaceward Ho! 4.0 Net Prefs"
+],
+"6030": [
+"%.*s: %.*s",
+"Anonymous: %.*s",
+"You: %.*s",
+"Player #%d: %.*s"
+],
+"6040": [
+"Spaceward Ho! Version 4.0.3 by Peter Commons.",
+"Spaceward Ho! DEMO Version 4.0.3 by Peter Commons.",
+"Artwork by Howard Vives and Bob Van de walle.",
+"Your Range Technology has reached level %d.",
+"Your Speed Technology has reached level %d.",
+"Your Weapons Technology has reached level %d.",
+"Your Shield Technology has reached level %d.",
+"Your Miniaturization Technology has reached level %d.",
+"Your Radical researchers have just made another wild discovery!",
+"You have abandoned %.*s.",
+"%.*s has gone nova.",
+"%.*s destroyed your colony at %.*s. You lost %d of your ships. %.*s lost %d. You lost %.*s people.",
+"Year %d:",
+"Your colony at %.*s is not receiving sufficient funds to support itself.",
+"You are not supporting %.*s enough. The people have revolted and now belong to %.*s",
+"Warning: you are terraforming %.*s, a planet that will never become profitable.",
+"You have completely terraformed %.*s.",
+"A volcanic eruption at %.*s has drastically warmed the temperature to %.*s!",
+"Your fleet of %.*s at %.*s has been scrapped for %.*s metal.",
+"Your “%.*s” ship type has been scrapped. %d of this type scrapped for %.*s metal.",
+"Your fleet of %.*s disappeared through a wormhole in space and is lost.",
+"Your %.*s can no longer reach %.*s.",
+"Your fleet of %.*s has arrived at %.*s.",
+"Your fleet of %.*s has stopped at %.*s on the way to %.*s.",
+"%.*s’s fleet of %.*s has arrived at %.*s.",
+"Your fleet of %.*s has eaten %.*s people while refueling at %.*s.",
+"%.*s’s fleet of biologicals has eaten %.*s people while refueling at %.*s.",
+"%.*s has run out of metal.",
+"%.*s has run out of metal. You should probably abandon it.",
+"%.*s has just become a profitable colony.",
+"It’s a baby boom! The population at %.*s has started growing quickly.",
+"%.*s’s population growth rate has slowed.",
+"You have explored %.*s. Gravity: %d.%2.2dG. Temp: %.*s. Metal: %.*s.",
+"%.*s has explored %.*s. Gravity: %d.%2.2dG. Temp: %.*s. Metal: %.*s.",
+"You have colonized %.*s.",
+"You won a battle at %.*s. You lost %d of your ships. %.*s lost %d.",
+"You lost a battle at %.*s. You lost %d of your ships. %.*s lost %d.",
+"%.*s survived an enemy attack from %.*s. You lost %d of your ships. %.*s lost %d. You lost %.*s people.",
+"%.*s says, “I want %.*s.”",
+"%.*s says, “You take %.*s.”",
+"%.*s says, “I like %.*s.”",
+"%.*s says, “I hate %.*s.”",
+"%.*s says, “I own %.*s.”",
+"%.*s says, “I need money.”",
+"%.*s says, “I need metal.”",
+"%.*s says, “Let’s attack %.*s.”",
+"%.*s says, “Thank You!”",
+"%.*s says, “Sorry!”",
+"%.*s says, “#!$@*$&@•™!”",
+"%.*s says, “I like planets that are %d.%2.2dG and %.*s.”",
+"%.*s says, “I saw %.*s at %.*s!”",
+"%.*s says, “Look at %.*s.”",
+"%.*s is cheating.",
+"%.*s says: %.*s",
+"You told %.*s that you want %.*s.",
+"You told %.*s that you don’t want %.*s.",
+"You told %.*s that you like %.*s.",
+"You told %.*s that you hate %.*s.",
+"You told %.*s that you own %.*s.",
+"You told %.*s that you need money.",
+"You told %.*s that you need metal.",
+"You told %.*s, “Let’s attack %.*s.”",
+"You told %.*s, “Thank You!”",
+"You told %.*s, “Sorry!”",
+"You said “#!$@*$&@•™!” to %.*s.",
+"You told %.*s what gravity and temperature you prefer.",
+"You told %.*s you saw %.*s at %.*s.",
+"You told %.*s all about %.*s.",
+"Wow! You seem to be doing really well! Congratulations!",
+"Your message to %.*s: %.*s",
+"You recovered %.*s metal from the battle at %.*s.",
+"%.*s metal has fallen onto %.*s from your recent battle.",
+"Oh no! %.*s people were killed when a heavy meteor shower hit %.*s.",
+"%.*s has just been eliminated from the game.",
+"You have just been eliminated from the game.",
+"%.*s has just won the game.",
+"Congratulations! You won the game. Game difficulty rating was %d.",
+"You are not spending any money on technology research.",
+"The meteor shower destroyed your colony at %.*s.",
+"Oh, no! All the metal on %.*s has suddenly disappeared.",
+"Uh-oh! %.*s has started growing and is turning bright red in hue!",
+"%.*s has just gone supernova. The planet has been obliterated.",
+"The shock wave from the supernova threw %.*s metal at %.*s, killing %.*s people.",
+"Your %.*s technology just jumped to %d.",
+"Eeek! A nasty computer bug has broken into your game and started wreaking havoc!",
+"%.*s has offered to ally with you.",
+"%.*s no longer wants to ally with you.",
+"You have offered to ally with %.*s.",
+"You no longer want to ally with %.*s.",
+"You have formed an alliance with %.*s.",
+"Your alliance with %.*s is gone.",
+"%.*s has offered to be your best buddy.",
+"%.*s no longer wants to be your best buddy. He just wants to be allies.",
+"You have offered to be best buddies with %.*s.",
+"You no longer want to be best buddies with with %.*s. You just want to be allies.",
+"You are now best buddies with %.*s.",
+"Your best buddy relationship with %.*s is gone. You're only allies now.",
+"The amount of energy emanating from %.*s suggests a big battle just took place.",
+"%.*s has just given you $%.*s.",
+"%.*s has just given you %.*s metal.",
+"You just gave %.*s $%.*s.",
+"You just gave %.*s %.*s metal.",
+"%.*s has just surrendered.",
+"%.*s has just surrendered to %.*s.",
+"You have just surrendered.",
+"You have just surrendered to %.*s.",
+"Your mining consortium has just been able to extract an additional %.*s metal from every planet you have.",
+"Weird weather patterns have allowed astronomers to explore certain far away stars.",
+"Your ship technicians have designed a set of new ships with no development cost.",
+"Your ship technicians have designed a decoy ship. It's really weak, but it looks menacing and can help keep your allies in line!",
+"Your mad scientists have created a space monster ship! It's not too powerful, but it doesn't cost any metal!",
+"Your scientists have discovered how to turn your monitor from black and white to color!",
+"Your scientists apologize, but they seem to be having “hardware problems.”",
+"Your scientists realize you already are running in color, shrug, and go back off to work.",
+"Your archaeologists have found ancient scientific documents from a lost civilization. You can now mine more efficiently.",
+"Your sociologists have discovered how to safely increase the maximum population of your planets!",
+"Your climatologists have discovered how to terraform planets more efficiently.",
+"Your military training program has improved. Your generals are now smarter.",
+"You have improved your recycling program. You can now get more metal from scrapped ships.",
+"Your spies have stolen some technological secrets from %.*s!",
+"You have found a wealth of precious metals and have increased your savings by $%.*s",
+"Your radical researchers are hard at work on another discovery!",
+"Warning! Ship money is being used to support %.*s.",
+"Warning! After supporting your planets and paying your interest, you have no money to spend!",
+"Your alliance will win the game next turn if it holds!",
+"Uh-oh! Having to borrow more ship money to pay all your interest!",
+"You don’t have enough money! You’re neglecting your planets! Global warming is taking place!",
+"Due to a lack of funds, one of your fleets can’t be maintained. It is being scrapped.",
+"Oh No! It’s armageddon!",
+"Hmm! The armadeddon device was activated, but there wasn't enough mass in the galaxy to get it to work…",
+"The armageddon device has caused half of the stars to supernova!",
+"%.*s’s armageddon device has just been turned on!",
+"Whew! %.*s’s armageddon device was just turned off.",
+"You just received %.*s metal from someone scrapping a fleet or from a battle over %.*s.",
+"Congratulations, %.*s! Your population now exceeds %.*s!",
+"Your %.*s tech would have just gone up if you hadn’t been playing the demo version!",
+"%.*s has just taken over for the computer player %.*s.",
+"You now have %.*s Range Technology (%d).",
+"You now have %.*s Speed Technology (%d).",
+"You now have %.*s Weapons Technology (%d).",
+"You now have %.*s Shield Technology (%d).",
+"You now have %.*s Miniaturization Technology (%d).",
+"%.*s surrenders to you, giving you $%.*s.",
+"%.*s surrenders to you, giving you %.*s metal.",
+"%.*s surrenders to you, giving you the planet %.*s.",
+"Oh no! The Valdez has sprung a leak! The ecology on %.*s is in shambles! The citizens are suing you for negligence for twice your net worth!"
+],
+"6050": [
+"Range",
+"Speed",
+"Weapons",
+"Shields",
+"Mini",
+"Radical",
+"100%",
+"Tech Spending",
+"Current Levels:"
+],
+"6060": [
+"Sol",
+"Sirius",
+"Canopus",
+"Vega",
+"Rigel",
+"Capella",
+"Procyon",
+"Mira",
+"Altair",
+"Antares",
+"Spica",
+"Pollux",
+"Castor",
+"Deneb",
+"Regulus",
+"Polaris",
+"Algol",
+"Proxima",
+"Alban",
+"Thuban",
+"Mizar",
+"Alcor",
+"Doobie",
+"Merak",
+"Phad",
+"Megrez",
+"Alioth",
+"Alkaid",
+"Mintaka",
+"Alnitak",
+"Atlas",
+"Remus",
+"Alcyon",
+"Electra",
+"Maia",
+"Merope",
+"Taygeta",
+"Sterope",
+"Hadar",
+"Quark",
+"Mimosa",
+"Adhara",
+"Shaula",
+"Nath",
+"Almak",
+"Alshain",
+"Tarazed",
+"Hamal",
+"Izar",
+"Shedir",
+"Menkar",
+"Diphda",
+"Etamin",
+"Acamar",
+"Alhena",
+"Alphard",
+"Arneb",
+"Nihal",
+"Saiph",
+"Markab",
+"Kansas",
+"Enif",
+"Nunki",
+"Kokab",
+"Ain",
+"Ancha",
+"Arkab",
+"Atik",
+"Atria",
+"Shadow",
+"Azha",
+"Baham",
+"Beid",
+"Botein",
+"Caph",
+"Coxa",
+"Cursa",
+"Dabih",
+"Furud",
+"Gedi",
+"Gienah",
+"Heka",
+"Keid",
+"Maaz",
+"Matar",
+"Mirfak",
+"Murzim",
+"Delta",
+"Ozworld",
+"Okda",
+"Phact",
+"Propus",
+"Rana",
+"Risha",
+"Sabik",
+"Petro",
+"Syrma",
+"Tarf",
+"Wasat",
+"Wazn",
+"Yed",
+"Yildun",
+"Zaniah",
+"Zaurac",
+"Zosma",
+"Ylum",
+"Arrakis",
+"Akworld",
+"Colma",
+"Henry",
+"Foundat",
+"Trantor",
+"Barsoom",
+"Rover",
+"Fluffy",
+"Lennon",
+"Gorby",
+"Atlanta",
+"Chicago",
+"Miami",
+"Home",
+"Binar",
+"Nemesis",
+"Harkon",
+"Talos",
+"Aries",
+"Taurus",
+"Gemini",
+"Cancer",
+"Leo",
+"Virgo",
+"Libra",
+"Scorpio",
+"Pisces",
+"Canis",
+"Ursa",
+"Beta",
+"Zeta",
+"Upsilon",
+"Rho",
+"Cepheus",
+"Calvin",
+"Hobbes",
+"Pooh",
+"Tigger",
+"Bambi",
+"Dumbo",
+"Tweety",
+"Bugs",
+"Torino",
+"Denali",
+"Woz",
+"Sauron",
+"Smaug",
+"Thune",
+"Thorin",
+"Gollum",
+"Fazaron",
+"Trellor",
+"Regor",
+"Basil",
+"Ursula",
+"Styx",
+"Lentor",
+"Sooltar",
+"Romula",
+"Vulcan",
+"Paradox",
+"Kessel",
+"Redox",
+"Sith",
+"Yavin",
+"Quatro",
+"Remulak",
+"Kathoon",
+"Thanos",
+"Krypton",
+"Darven",
+"Gotham",
+"Klah",
+"Zaphod",
+"Turin",
+"Vives",
+"Timmer",
+"Argot",
+"Willy",
+"Sirgil",
+"Ender",
+"Wobbler",
+"Quayle",
+"Hope"
+],
+"6070": [
+"Current Year:",
+"Savings:",
+"Net Income:",
+"Metal:",
+"(up $%s)",
+"(down $%s)",
+"(up %s)",
+"(down %s)",
+"$%s",
+"(Int: $%s)",
+"Planet:",
+"Income:",
+"Pop:",
+"Temp:",
+"Gravity:",
+"Metal:",
+"Terra",
+"Mine",
+"Ship",
+"You have no information about this planet.",
+"Uninhabited",
+"Unknown",
+"Tech",
+"Ships",
+"%d.%1.1d, %d°"
+],
+"6080": [
+"Scout",
+"Dreadnought",
+"Fighter",
+"Tanker",
+"Colony Ship",
+"Satellite",
+"Biological",
+"Decoy"
+],
+"6090": [
+"Novice",
+"Beginner",
+"Normal",
+"Advanced",
+"Expert",
+"Master"
+],
+"6100": [
+"Income",
+"Metal",
+"Planets",
+"Ships",
+"Range",
+"Speed",
+"Weapons",
+"Shields",
+"Mini",
+"Best",
+"Average",
+"Worst"
+],
+"6110": [
+"Dumb",
+"Average",
+"Smart",
+"Diabolical",
+"Super Genius"
+],
+"6120": [
+"Show Floating Windows",
+"Hide Floating Windows",
+"Build/Design Ships…",
+"Can’t Build Ships Here…",
+"Review Battle at %s…",
+"No Battles here…",
+"Organize Ships…",
+"No ships to organize…",
+"Scrap Current Fleet",
+"Don’t Scrap Current Fleet",
+"Hide Information",
+"Show Information",
+"Don’t Abandon Planet",
+"Abandon Planet"
+],
+"6130": [
+"Net Income",
+"Metal",
+"Ship Money",
+"Ship Power",
+"Population",
+"Range",
+"Speed",
+"Weapons",
+"Shields",
+"Mini",
+"$%s",
+"%sM",
+"$%s",
+"%sP",
+"%s"
+],
+"6140": [
+"No Climate Info.",
+"Own",
+"Explored",
+"Enemy",
+"Sorry, no comparisons in the year 2000.",
+"Sorry, you can only send ten messages per turn.",
+"Your rankings among the %d remaining players in %d:",
+"You won the game in %d.",
+"You were elminated in %d.",
+"Sorry, you can only give three gifts per turn.",
+"Scrap All",
+"Don’t Scrap"
+],
+"6150": [
+"%d dead %.*s",
+"%d dead %.*ss",
+"Summary of battle",
+"at %s in %d:",
+"Round %d",
+"Congratulations!",
+"You won the battle!",
+"Unfortunately,",
+"you lost the battle…",
+"OK",
+"You have no information.",
+"You were destroyed immediately."
+],
+"6160": [
+"Processing Turns...",
+"Processing Year %d...",
+"Battle Stage...",
+"Seeing What Happened..."
+],
+"6170": [
+"Building Game File in Memory...",
+"%.*s in %.*s in %d",
+"%d.%1.1d°F",
+"%d.%1.1d°C",
+"%d.%2.2dG",
+"Owner:",
+"There are no fleets at this planet.",
+"Fleet to be scrapped for metal.",
+"Stationed at:",
+"Departing to:",
+"%s (Dist %d; Time %d)",
+"Going to %s (D %d; T %d) via %s",
+"Fuel: %d/%d",
+"Speed: %d",
+"Full",
+"Empty",
+"Scrap: %s",
+"more…",
+"you",
+"%.*s stationed at %s.",
+"%.*s leaving %s for %s to arrive in %d.",
+"%.*s to arrive at %s in %d.",
+"%.*s marooned at %s.",
+"Spaceward Ho! 4.0",
+"%s dead",
+"Alliances:",
+"You’re allied with %s.",
+"Fleets:",
+"Stars:",
+"No One",
+"Everyone",
+"Building At:",
+"Viewing At:",
+"one",
+"%.*s’s %.*s",
+"Reading Game File...",
+"Your Allies",
+"Your Buddies",
+"Abandoning"
+],
+"6180": [
+"Sorry, but that is not the correct password for “^0”. Please try again.",
+"Sorry, but Spaceward Ho! 4.0 can't read galaxy files created with versions 1.0 - 3.0.1.",
+"Sorry, but this is a private scratch file. It cannot be opened!",
+"Please name your new ship type.",
+"Sorry, your turn can’t be saved. Although you are in the year ^0, the game has already been updated to ^1…",
+"Sorry, but the file way busy and the turn could not be marked “done.” Please try again in a moment.",
+"Please unlock this disk and try again.",
+"Please enter both your name and a company name or address.",
+"The turn is about to be updated. You have made some changes since ending your turn that will now be lost.",
+"Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location.",
+"There are no colonists aboard that colony ship. To refill it, you must either wait one turn or abandon the colony.",
+"Sorry but the battle information for that battle is no longer available. It isn't in your game history file.",
+"Sorry, there’s already a star named  “^0.” Please pick another name.",
+"Sorry, but you don’t have any metal to build more ships.",
+"Sorry, but you have no specific information about that battle. All you know is that there was one, and it was pretty big.",
+"Sorry, but since you did not fight in that battle, you have no information about it.",
+"Sorry, but this game was created with a newer version of Spaceward Ho!",
+"Sorry, but you have that fleet marked for the scrap heap. It’s not going anywhere!",
+"Whoa! The game you were just playing is no longer the same! A file exists in the same place, but it’s a different game…",
+"You can’t build that ship because you can’t go any further into debt!",
+"Please enter your name and an optional password in the spaces provided.",
+"Sorry, but this setting can’t be changed in the demo version of Spaceward Ho!",
+"Sorry, but the demo version of Spaceward Ho! is not multi-player. This game already has a human player registered.",
+"Give Help.",
+"Sorry, but you have already ended your turn. Although you can look at information, no changes can be made until next turn.",
+"Sorry, but you may only build as many ships as population units in one turn.",
+"Looks like something interesting happened! Better check this out. (Taking you off autoplay.)",
+"Sorry, but someone is already taking over for computer this turn. Wait until next turn.",
+"Sorry, but the game has already begun, and there aren’t any computers to take over for. You can’t join.",
+"Sorry, the game already has the maximum number of players in it. You can’t join.",
+"Sorry, but the game already has the maximum number of humans. You can’t join.",
+"You have no graph history information saved at this time.",
+"Sorry, but someone is already logged into the game with that name.",
+"Sorry, but someone in the game already has that name. Try something else.",
+"Sorry, but another human player must be connected to the game to allow a takeover.",
+"Sorry, but the game is in the process of being updated to the next turn. Try again in a minute.",
+"Sorry, but this game file is missing some information. It can't be opened.",
+"Sorry, but the game is currently in the turn update stage. You will join the game next turn.",
+"Sorry, but this was created with an older version of Spaceward Ho! 4.0 and can't be read."
+],
+"6190": [
+"Peter",
+"Joe",
+"Timmer",
+"Howard",
+"Bob",
+"Ed",
+"Mark",
+"Guy",
+"Ben",
+"Dan",
+"Kon",
+"Robert",
+"Clinton",
+"Mike",
+"Dave",
+"Steve",
+"Rosko",
+"Willy",
+"Jack",
+"Albert"
+],
+"6200": [
+"Christie",
+"Suzy",
+"Ann",
+"Julia",
+"Nancy",
+"Xena",
+"Athena",
+"Heather",
+"Caryl",
+"Jennifer",
+"Kathy",
+"Kate",
+"Jane",
+"Paula",
+"Michelle",
+"Iris",
+"Pam",
+"Liz",
+"Alexis",
+"Grace"
+],
+"6210": [
+"Needle",
+"Explorer",
+"Looker",
+"Columbus",
+"Magellan",
+"Intrepid",
+"Wanderer",
+"Rudolph",
+"Eagle",
+"Sparrow",
+"Ranger",
+"Whisper",
+"Weasel",
+"Enterprise",
+"De Gama"
+],
+"6211": [
+"Big Surprise",
+"HelliMoon",
+"Mass Murder",
+"Watch Out!",
+"Terror",
+"Godzilla",
+"Mammoth",
+"Tyrannosaurus",
+"Galactus",
+"Hercules",
+"Monster X",
+"Nightmare",
+"Brontosaurus",
+"Destructor",
+"Annihilator"
+],
+"6212": [
+"Reliant",
+"Demon",
+"Hurricane",
+"Typhoon",
+"Slasher",
+"Patton",
+"Stingray",
+"Blaster",
+"Talon",
+"Serpent",
+"Dragon",
+"Tornado",
+"Wraith",
+"Storm",
+"Dagger"
+],
+"6213": [
+"Chevron",
+"Union 76",
+"Shell",
+"Exxon",
+"Texaco",
+"Arco",
+"Mobil",
+"BP",
+"Apollo Oil",
+"Diesel",
+"Rotten Robbie",
+"Full Serve",
+"Valdez",
+"Premium",
+"Unleaded"
+],
+"6214": [
+"Spreader",
+"Mother",
+"Expander",
+"Nina",
+"Pinta",
+"Santa Maria",
+"Stork",
+"Freedom",
+"People Mover",
+"Discover",
+"Taurus",
+"Minerva",
+"Egg",
+"Peaceful",
+"Hardy"
+],
+"6215": [
+"Defender",
+"Stopper",
+"Protector",
+"Eye",
+"Armor",
+"Shield",
+"Peach",
+"Washington",
+"Gabriel",
+"Sun Dog",
+"Mercy",
+"Vision",
+"Pebble",
+"Rock",
+"Stone"
+],
+"6216": [
+"Medusa",
+"Slither",
+"Snake",
+"Gobbler",
+"Digester",
+"Big Stomach",
+"Breakfast",
+"Lunch",
+"Dinner",
+"Midnight Snack",
+"Rust Monster",
+"Gelatinous Cube",
+"Compost Pile",
+"Disposal",
+"Trash Compactor"
+],
+"6220": [
+"I Want",
+"You Take",
+"I Like",
+"I Don’t Like",
+"I Own",
+"I Need Money",
+"I Need Metal",
+"Let’s Attack",
+"Thank You",
+"Sorry",
+"#!$@*$&@•™!",
+"My Stats",
+"I Saw",
+"Star Stats",
+"Text Msg."
+],
+"6230": [
+"Planet",
+"Player"
+],
+"6240": [
+"Send Message To Who?",
+"Saying What?",
+"Which Star?",
+"When?",
+"Who?",
+"Where?"
+],
+"6250": [
+"Click here to make this message go away. Click on the clock to end your turn.",
+"Click and Drag from one star to another to move fleets.",
+"Play with the spending bars. Conquer the galaxy. Enjoy.",
+"Ships with higher Speed Tech shoot first.",
+"A dot by a planet means you have ships in orbit there.",
+"Good planets look “prettier” than bad planets when you explore them.",
+"Range is how far your ships can reach.",
+"Satellites can't move, but they shoot just as well as any other ship.",
+"There's a limited amount of metal in the game.",
+"Miniaturization makes ships cost more money, but less metal.",
+"Radical Tech can have a variety of effects.",
+"Be careful with your metal--it can easily run out.",
+"Click and hold for a second to cancel a fleet's movement.",
+"Build Satellites to protect vulnerable planets.",
+"Colonize good planets with Colony ships.",
+"Scout ships have higher Range, but lower Weapons and Shields.",
+"If your Weapons are higher than the opponent's Shields, you'll do lots of damage.",
+"If your Shields are higher than the opponents Weapons, he'll barely hurt you.",
+"Lots of ships can make up for having low Technology.",
+"You get money every turn.",
+"Good planets are close to 1.0 G.",
+"Good planets are close to 72 degrees.",
+"Each player has a different idea of what a good planet is.",
+"If a planet is over 2.5 G or below 0.4 G, it will never make a profit.",
+"Abandon bad planets after you strip-mine them.",
+"Terraforming improves a planet's temperature.",
+"Mining takes metal from a planet and puts it into your reserve.",
+"Ship savings puts money away for shipbuilding.",
+"Savings generates extra income.",
+"If you go into debt, part of your income goes to pay interest.",
+"Order the real version of Spaceward Ho! from Delta Tao at 800-827-9316.",
+"The real version of Spaceward Ho! can handle alliances.",
+"The real version of Spaceward Ho! has supernovas.",
+"Your Technology levels are limited only in the demo version.",
+"The real version of Spaceward Ho! has an Armageddon feature.",
+"Don't spend money on a Technology if you've reached its limits for the Demo version.",
+"The real version of Spaceward Ho! doesn't have Technology limits.",
+"The real version of Spaceward Ho! has more and better graphics.",
+"The real version of Spaceward Ho! can handle up to 20 players.",
+"The real version of Spaceward Ho! has configurable galaxies and opponents."
+],
+"6260": [
+"Search for more metal on your planets",
+"Explore distant stars",
+"Get lots of money immediately",
+"Improve mining efficiency",
+"Improve population maximums",
+"Improve terraforming efficiency",
+"Educate battle generals better",
+"Improve recycling program",
+"Build a decoy ship",
+"Build a biological space monster",
+"Steal technology from another player",
+"Build a set of ships without development cost",
+"Improve range tech dramatically",
+"Improve speed tech dramatically",
+"Improve weapons tech dramatically",
+"Improve shields tech dramatically",
+"Improve mini tech dramatically"
+],
+"6270": [
+"1",
+"2",
+"3",
+"4",
+"5",
+"6",
+"Topping off the Tanks",
+"Fusion Pile",
+"Magneto-Hydrodynamic Power",
+"Allotropic Iron",
+"Gravitic Battery",
+"Quantum Energy Storage",
+"Singularity",
+"Plasma Siphon",
+"Muon Ladder",
+"There and Back",
+"Quark Grinder",
+"Pulsar Radiant",
+"Anti-Matter",
+"Star Harness"
+],
+"6271": [
+"1",
+"Solar Sail",
+"Ion Rocket",
+"Gravitic Slingshot",
+"Fusion Dump Drive",
+"Relativity Drive",
+"Trans-Light",
+"Hyperspace",
+"Rift Drive",
+"Hawking Propulsion System",
+"Hyper-Rift Drive",
+"PowerPC™",
+"Trans-Rift Hyper Drive",
+"Hawking Trans-Hyper Drive",
+"Time Distortion",
+"Quantum Continuum",
+"Already There",
+"Speedy Gonzalez™",
+"Teleportation",
+"Yesterday Drive"
+],
+"6272": [
+"1",
+"2",
+"Mass Driver Cannon",
+"Laser 20",
+"Turbolaser",
+"Maser",
+"Gamma-Ray Laser",
+"Spectrum Cannon",
+"Energy Ball",
+"Nuclear Magnetic Resonance",
+"Phase Disruption",
+"Focused Quark Beam",
+"Hard Pixel",
+"Tachyon Cannon",
+"+5 Rustproof Vorpal",
+"Hyperspace Pulse",
+"Delta Particle Stream",
+"Neutron Compression",
+"Nova Cannon",
+"Galactic Disruption",
+"Advanced Space-Time Annihilation"
+],
+"6273": [
+"1",
+"2",
+"Armored Hull",
+"Mass Repulser",
+"Energy Dispersion",
+"Deflector",
+"Energy Bonded Armor",
+"Anti-Energy",
+"Quark Shell",
+"Delta Wave",
+"Energy Injestor",
+"Refractor Field",
+"Holographic Decoy",
+"Stasis Flicker",
+"Conversion Field",
+"Tao Wave",
+"Gluon Armor",
+"Hide behind a big rock",
+"+5 Blessed Plate Mail",
+"Displacer Field"
+],
+"6274": [
+"Integrated Circuit",
+"Integrated Chip",
+"Large Scale Integration",
+"VLSI",
+"Wonkavision",
+"Ultra-microscopic",
+"Nanoscopic",
+"Advanced Nanoscopic",
+"Really Amazingly Small",
+"Yellow Polka Dot Bikini",
+"Sub-Atomic",
+"Partial Lepton",
+"Quark",
+"Sub-Quark",
+"Micro-Quark",
+"Nano-Quark",
+"Advanced Nano-Quark",
+"Bikini Again (Thought it was funny)",
+"Quantum Superstring",
+"Sub-Quantum Superstring"
+],
+"6280": [
+"Red-neck",
+"Bow-legs",
+"Cowpoke",
+"Deputy",
+"Gunfighter",
+"Town Sheriff",
+"Federal Marshall",
+"Lone Ranger",
+"QuickDraw™ McGraw",
+"Best in the West",
+"Ho! Champion"
+],
+"6300": [
+"Save game file as:",
+"Milky Way",
+"Everyone's Ready",
+"I'm Playing Alone",
+"Current Game: %.*s",
+"Current Player: %.*s",
+"No current player",
+"Game is in year: %d",
+"The game is waiting to start. Humans: %d",
+"You will be taking over for a computer player next turn",
+"No game is currently open.",
+"Computer Players: %d"
+]
 }
 };
 if (typeof module !== 'undefined') module.exports = HOLANG; else root.HOLANG = HOLANG;
