@@ -226,7 +226,9 @@ html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute
 .dd .dd-btn:active { box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #555 !important; }
 .dd .dd-btn.def { border-width: calc(2 * var(--du)) !important; }
 .dd .dd-btn.off, .dd .dd-btn:disabled { color: #777 !important; text-shadow: calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff !important; }
-.dd .dd-btn { font: calc(14 * var(--du))/calc(14 * var(--du)) "DOS Bios", monospace !important; -webkit-font-smoothing: none; }
+/* (the program draws its dialogs' titles and buttons in Chicago 12, proportional, and only the text inside them in the 8x14: checked against audit/dos-2.0.1 captures v20dos-orig-n2, -startup, 20 Nov 2026) */
+.dd .dd-btn { font: calc(15 * var(--du))/calc(14 * var(--du)) "DOS Chicago 12", sans-serif !important; font-synthesis: none; -webkit-font-smoothing: none; }
+.dd-title:not(.teal) { font-family: "DOS Chicago 12", sans-serif; font-size: calc(15 * var(--du)); font-synthesis: none; }
 
 /* Show Skills: the second window over the chart; the player's name and the skill in a second column (measured: 160 apart) */
 .dd-over { z-index: 5; }
