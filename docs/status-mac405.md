@@ -50,7 +50,7 @@ against. "close" lists what is still off.
 | Desktop between the windows | | done | System 7.5's pattern (above). |
 | Map: stars, names, fleets, routes | `DrawGalaxyMap`, `DrawOneColorStarSubProc`, `DrawFleetPaths` | 3.0.1 | not compared yet. |
 | Tech Spending window | `UpdateTechWin` | 3.0.1 | in its windoid now; the bars not compared pixel by pixel. |
-| Menu bar | MBAR 128, `SetMenuItems` | 3.0.1 | the 3.0.1 skin's menus; shots 011-013, 022-024, 166, 251 not compared yet. |
+| Menu bar | MBAR 128, `SetMenuItems` | close | `menuLayout405`: 4.0.5's MENU 129-134 (words, order, keys: Compare ⌘Y, Graph ⌘H; Begin Game, Save Game, Chat Window and Statistics dimmed: network play, the remake's own saving, no engine counters yet). Left: Graph History opens the remake's Players window, not 4.0.5's DLOG 6150. |
 | New game's start | the program's defaults | done | Novice by default in both 4.0.5 skins' New Game (Mac shots 006, 191: the Join window opens on Novice; Windows: playerSkill 0): $100,000, 20,000 metal, two Scouts and a Colony Ship, as shot 008. |
 | Title (start-up window) | DLOG / DITL 1200 | close | the splash, its rule, the buttons 74 x 18 at 12, 115 and 210, Open Game the default (shot 001). The remake has no Quit: Import a Game… there, How to play under the window. The licence lines: "Licensed to:" and the signed-in player's name in red (the remake's account), with a small Sign out; blank when no one is signed in (Jake, 20 Nov). |
 
@@ -72,7 +72,14 @@ against. "close" lists what is still off.
 
 | List of All Fleets | DLOG / DITL 6030 (486 x 296, the same items as 3.0.1's) | close | 3.0.1's window (`fleets301`), beside shot 016: now with the list's own scroll bar (`listBar20`: System 7.5's, inactive pale grey with outlined arrows when the list fits, as the shot). Left: the window's place (centred). |
 
-Not started: the other windows from the menus (shots 014, 017-024), New Game and start-up (001-007, 188-192), battles (033-157, 204-246),
+| Compare Players | (3.0.1's window) | close | beside shot 017 (a 2020 game): the same layout. Left: position. |
+| Give Stuff | DLOG 6120 | close | beside shot 021: the same. |
+| Send Message | DLOG 6070 | close | beside shot 022; Everyone, Your Allies, Your Buddies now 4.0.5's ICON 1402 and 4018 (pixel matches). |
+| Alliances | DLOG 6110 (4.0.5: 472 x 302) | wrong | 4.0.5's has three columns, I Really Like Them / I Like Them / I Don't Like Them, the icons showing each player's opinion of you (shot 020); ours is 3.0.1's two by two. |
+| Graph History | DLOG 6150 | wrong | opens the remake's Players window (shot 018: the history graph with its icon strip). |
+| Statistics | | wrong | dimmed (shot 019: Cumulative Statistics; the engine keeps no counters). |
+
+Not started: the other windows from the menus (shots 014, 023-024: Preferences, Halls, Master Points, Auto Play, Dip, Surrender, Explored Stars, Organize), New Game and start-up (001-007, 188-192), battles (033-157, 204-246),
 won (163-165), armageddon (167-187), lost (247-251). The 3.0.1 skin's versions show meanwhile.
 
 ## Found on the way (other versions)
