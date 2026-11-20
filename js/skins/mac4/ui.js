@@ -221,6 +221,19 @@ window.HOMAC4 = {
     // inside the start-up window, under the splash
     const b = doc.querySelector('#titlescreen .tbtns'), w = doc.querySelector('#titlescreen .tsplash .wbody');
     if (b && w) w.append(b);
+    // DITL 1200's licence lines (shot 001: "Licensed to:" at 2, the owner's name in red at 76, 16-pixel lines under the splash's rule): the
+    // signed-in player's name, with a small Sign out; blank for no one signed in (Jake, 20 Nov)
+    const C = window.HOCLOUD && HOCLOUD.supported ? HOCLOUD : null, fr = doc.querySelector('#titlescreen .tsplash #tframe');
+    if (C && fr && !doc.querySelector('.lic405')) {
+      const nm = doc.createElement('span'), out = doc.createElement('button'), lic = doc.createElement('div');
+      nm.className = 'lic405n'; nm.setAttribute('translate', 'no');
+      out.type = 'button'; out.className = 'lic405o'; out.textContent = 'Sign out'; // (the remake's own word for it, as the Account window's button)
+      out.addEventListener('click', () => { C.flushSave && C.flushSave(); C.signOut().catch(() => {}); });
+      const lab = doc.createElement('span'); lab.className = 'lic405l'; lab.textContent = 'Licensed to:';
+      lic.className = 'lic405'; lic.append(lab, nm, out); fr.after(lic);
+      const set = () => { const u = C.user; lic.classList.toggle('on', !!u); nm.textContent = u ? u.name : ''; };
+      C.onChange(set); set();
+    }
     // How to play: the remake's own, under the window (DITL 1200's third button is Quit; Import a Game… takes its place)
     const hp = doc.querySelector('#thelp'), sp = doc.querySelector('#titlescreen .tsplash');
     if (hp && sp) { const c = hp.cloneNode(true); c.id = 'thelp405'; c.className = 'quiet thelp405'; c.addEventListener('click', () => hp.click()); sp.after(c); }

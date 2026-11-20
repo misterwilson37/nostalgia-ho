@@ -52,7 +52,7 @@ against. "close" lists what is still off.
 | Tech Spending window | `UpdateTechWin` | 3.0.1 | in its windoid now; the bars not compared pixel by pixel. |
 | Menu bar | MBAR 128, `SetMenuItems` | 3.0.1 | the 3.0.1 skin's menus; shots 011-013, 022-024, 166, 251 not compared yet. |
 | New game's start | the program's defaults | done | Novice by default in both 4.0.5 skins' New Game (Mac shots 006, 191: the Join window opens on Novice; Windows: playerSkill 0): $100,000, 20,000 metal, two Scouts and a Colony Ship, as shot 008. |
-| Title (start-up window) | DLOG / DITL 1200 | close | the splash, its rule, the buttons 74 x 18 at 12, 115 and 210, Open Game the default (shot 001). The remake has no Quit: Import a Game… there, How to play under the window. The licence lines ("Licensed to:" and the owner's name and company) are left out: they are the owner's own. |
+| Title (start-up window) | DLOG / DITL 1200 | close | the splash, its rule, the buttons 74 x 18 at 12, 115 and 210, Open Game the default (shot 001). The remake has no Quit: Import a Game… there, How to play under the window. The licence lines: "Licensed to:" and the signed-in player's name in red (the remake's account), with a small Sign out; blank when no one is signed in (Jake, 20 Nov). |
 
 ## Windows, battles, start-up, end of the game
 
@@ -67,9 +67,8 @@ won (163-165), armageddon (167-187), lost (247-251). The 3.0.1 skin's versions s
   round); the 5.0.5 family (classic, Palm, Cozy, Gemini) fitted the galaxy's whole rectangle, which a small galaxy fills only in part:
   `fit()` in js/skins/classic/ui.js now zooms in to the stars' own extent when they leave room (never past the map's closest zoom, and never
   further out than before: Jake, 20 Nov, "fit it if it was smaller than the real estate the screen provided ... we don't need to zoom out
-  automatically"). DOS, Windows 95, Amiga, iOS and Android checked at 1920 x 1080: they fill. **Open question for Jake:** the 5.0.5 family
-  still opens a big galaxy zoomed out to show it whole, as it always has; that is the remake's own (no 5.0.5 evidence for it); taking it
-  out needs 5.0.5's own opening zoom. human-play's copy of the old fit formula (`mapPos`) now reads the skin's own view (HOVIEW).
+  automatically"). DOS, Windows 95, Amiga, iOS and Android checked at 1920 x 1080: they fill. Jake (20 Nov): 5.0.5 keeps its opening
+  unless that leaves a lot of empty space, as every other version: which is what it now does. human-play's copy of the old fit formula (`mapPos`) now reads the skin's own view (HOVIEW).
 - **4.0.5 rules in French, Turkish, German and Spanish (20 Nov):** the fleet descriptions of the 19 Nov change ("one Intrépide (1/1) Scout")
   stayed English; they now go through the same translation as 3.0.1's (js/languages.js `fleetSay`, with 4.0.5's Dreadnought, Tanker,
   Biological and Decoy). Found by ui-lang-audit.

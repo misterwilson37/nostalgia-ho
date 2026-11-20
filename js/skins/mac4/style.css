@@ -24,7 +24,7 @@
    name in red) are the owner's own, so they are left out. */
 #titlescreen .tsplash #tframe { display: block; border-bottom: 1px solid #000; }
 #titlescreen .tsplash .wbody { padding: 0 0 14px; gap: 0; align-items: stretch; background: #fff; }
-#titlescreen .tsplash .tbtns { display: block; width: 304px; max-width: 100%; align-self: center; margin: 55px 0 0; padding: 0; position: relative; height: 18px; }
+#titlescreen .tsplash .tbtns { display: block; width: 304px; max-width: 100%; align-self: center; margin: 0; padding: 0; position: relative; height: 18px; }
 #titlescreen .tsplash .tbtns > button { position: absolute; top: 0; width: 74px; height: 18px; min-width: 0; box-sizing: border-box; font: 12px Chicago, var(--ui) !important; padding: 0 !important; line-height: 16px; white-space: nowrap; overflow: hidden; border: 1px solid #000; border-radius: 5px; background: #fff; color: #000; }
 #titlescreen .tsplash .tbtns #tcont { left: 12px; outline: 3px solid #000; outline-offset: 1px; border-radius: 5px; }
 #titlescreen .tsplash .tbtns #tcont[hidden] { display: block; visibility: hidden; }
@@ -33,3 +33,11 @@
 #titlescreen .tsplash .tbtns #timport { left: 210px; width: auto; min-width: 74px; padding: 0 6px !important; } /* (the remake's own: as wide as its words) */
 #titlescreen .tsplash .tbtns #thelp { position: static; display: none; }
 .tcard .thelp405 { display: block; margin: 10px auto 0; }
+/* the licence lines (shot 001): the band under the rule, 55 rows to the buttons; "Licensed to:" at 2, the signed-in name in red at 76 on the
+   first line (Chicago), Sign out small under it; empty with no one signed in */
+#titlescreen .tsplash .lic405 { position: relative; height: 55px; width: 304px; align-self: center; font: 15px 'DOS Chicago 12', Chicago, var(--ui); color: #000; }
+#titlescreen .tsplash .lic405 > * { visibility: hidden; }
+#titlescreen .tsplash .lic405.on > * { visibility: visible; }
+#titlescreen .tsplash .lic405l { position: absolute; left: 2px; top: 3px; }
+#titlescreen .tsplash .lic405n { position: absolute; left: 80px; top: 3px; right: 2px; color: #d00000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#titlescreen .tsplash .lic405o { position: absolute; left: 80px; top: 22px; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; min-width: 0 !important; font: 12px 'DOS Geneva 9', Geneva, var(--ui) !important; color: #555; text-decoration: underline; cursor: pointer; }
