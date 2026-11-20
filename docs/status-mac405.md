@@ -81,6 +81,16 @@ game itself (another galaxy, other players). Fixed on the way:
   fleet's bold is the bold face, no longer the browser's synthetic bold over it. Its scroll bars are System 7.5's colour bars, as shot 012
   shows.
 
+## Windows added 20 Nov (late), from the DITLs and the code; no captures of them yet
+| Window | Source | Notes |
+|---|---|---|
+| Hall of Fame / Hall of Shame | DLOG 4080 / 4090, doHallOfFameDlg, InitHOFList | 3 columns of 100, rows 15; Details dimmed with no games; "All editions…" opens the remake's every-edition / online window (a modern convenience) |
+| Summary of Game Victory / Loss | DLOG 4100 / 4110, doDetailsDlg | PICT 3500 / 3510; the "Galaxy Style:" row shows size, density and style, as the original |
+| Master Point List | DLOG 6180, doMasterListDlg, DRAWMASTERICON | 3 columns of 136; points as plain digits; the picked player's cicn 3030-3033 by points |
+| Surrender | DLOG 6130, DoSurrenderToDlg, ALRT 3380 / 3390 | the Give window's cells and a last "No One" cell (ICON 1402); Really / Cancel |
+Still to do: List All Explored Stars (DLOG 6040: 20-pixel rows drawn by its own list routine, a sort pop-up, CNTL 6040; asked Jake for a
+capture), Organize (6060), Auto Play, Dip.
+
 ## Seen in the lost game's shots, not built yet (20 Nov)
 
 - **The turn's progress windows:** done (20 Nov): DLOG 7000's "Processing Year 2010..." for each ten years, then "Seeing What
