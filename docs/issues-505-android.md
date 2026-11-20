@@ -24,22 +24,41 @@ the code yet). Per Jake's 19 Nov lesson, every fix must be checked against the d
 
 ## Mac 5.0.5
 
-### M1. Build Ships: unreliable ("sometimes won't build at all") (REPORTED; window SEEN 015-016)
+### M1. Build Ships: the window's numbers are never filled in, so Build does nothing (SEEN 015-016; Jake 20 Nov)
 
-Jake: sometimes it won't build anything; sometimes it says you can build [10] and you can't build any;
-sometimes you must drag random bars before Build works.
+Jake: it says you can build 0 to `<10>` Scouts and you can't build any (shot 016, 3.28.34 PM); on several
+ship types, several times. **Not** tied to population (he checked). It hangs until a slider is moved (he used
+Mini, in case it was money), and then it sometimes catches up; no reliable cure.
 
-- Shot 015 (year 2000, Rho, a new game): the window opens on a Scout with "Built: 999" and "In Service: 999",
-  the layout's placeholder text (PPob 137 `numB`/`numE` are "999", `docs/505-windows.md`), so the window did
-  not fill those two fields. The design-name field is empty. "Number To Build" says `<10>` and "Ship Build
-  Capacity Left: 10".
-- GUESS: two different limits may be shown as one. The original limits a star to as many ships a turn as it
-  has population units (`FUN_1009ab50`, `docs/original-findings.md`) and the money/metal limit is
-  separate; the `<10>` may be one while Build checks the other. The "drag a bar until it works" symptom fits
-  a button that is only re-enabled on a slider change. To read: the Build Ships window's routines
-  (`FUN_10099c84` and its neighbours, `decompiled/mac-5.0.5/`).
-- Wanted from Jake: one failing case with the star, its population, money and metal visible, and what
-  happens on Build (nothing? a beep? an alert?).
+What the shots show (SEEN, compared with the layout, PPob 137 in `docs/505-windows.md`): **every number in
+the cost and count area is the layout's own placeholder text**, unchanged:
+
+| Field | Shown in 015/016 | Placeholder in PPob 137 |
+|---|---|---|
+| Dev / Pro / Metal Cost (`DevC` `ProC` `MetC`) | $100 / $100 / $100 | "$100" each |
+| Built / In Service (`numB` `numE`) | 999 / 999 | "999" |
+| Number To Build maximum (`maxn`) | `<10>` | "<10>" |
+| Cost: Money / Metal (`mony` `metl`) | $100 / 1000 | "$100" / "1000" |
+| Ship Build Capacity Left (`bcap`) | 10 | "10" |
+| Design name (`NAME`) | empty | empty |
+
+The tech sliders *were* set (Range 6, Speed 2, Weapons 2, Shields 2: the player's levels), so the window ran
+part of its set-up, but the routine that works out costs, the maximum and the name never ran. The `<10>` is
+not a limit at all: it's text from the resource file. Moving any tech slider sends message 6004, which
+recomputes, which fits "move a bar and it catches up".
+
+- GUESS (to confirm in the code): the window's "recalculate" is only called from the slider / type / list
+  messages, not when the window opens, or it is called before the fields exist, so the first Build works
+  from an empty state (0 ships, no name). Why it sometimes works without a slider move is the open part:
+  perhaps the design list (`stcv`, LShipTypesDataBrowser) selecting a row triggers it only when a row was
+  already selected.
+- Possibly the same bug as M4: a design created from that empty state would have no name and garbage numbers.
+- To read: LBuildShipsWindow's set-up and its message handler (6004 sliders, 6005 type, 6011/6012 number,
+  6006 Max Out, 900/6014 Build) around `FUN_10099c84` in `decompiled/mac-5.0.5/`; check whether the demo /
+  registration state touches it.
+- Patch: always recalculate when the window opens and before Build; the remake's own window must never
+  show placeholder numbers in either mode (unpatched can keep the "move a slider" quirk only if the code
+  shows it is deterministic).
 
 ### M2. Build Ships: always opens on Scout; earlier designs can't be built again (REPORTED; SEEN 015-016)
 
@@ -141,14 +160,11 @@ group 183610). Android's timing and drawing are in the iOS decompile (`CBattleSt
 - 181523: the message history slid out over the panel.
 - 182211, 182244: the planet line is just "10" / "90" (the people left), not "x/y".
 
-## What I'd like from Jake (only if easy)
+## What I'd like from Jake
 
-1. M1, next time it happens: when Build Ships says you can build some (the `<10>`) but Build does nothing, one
-   screenshot with the Build window open **and** the star's planet box visible (its population), plus money
-   and metal at the top left. Not a deliberate test with no money: just a capture of a real failure, so the
-   numbers can be checked against the code.
+Nothing more for now.
 
-Answered 20 Nov: M3 (24-design warning reached; scrapping did nothing; demo the same), M4 (Mac only), M5
+Answered 20 Nov: M1 (shot 016 is the failure; not population), M3 (24-design warning reached; scrapping did nothing; demo the same), M4 (Mac only), M5
 (Jake wants the modern-conveniences label; List All Fleets is too far away to be useful).
 
 ## Next (when this is picked up)
