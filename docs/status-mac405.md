@@ -91,6 +91,7 @@ game itself (another galaxy, other players). Fixed on the way:
 | Auto Play Options, Config… | DLOG 4020 / 4021, doAutoPlayDialog, DoConfigAutoPlayDialog | four modes ("until something interesting happens": a battle or a message stops it); the seconds 0-15; Config's two sliders on rules autoPlaySettings |
 | Organize Fleets | DLOG 6060, OrganizeFleets | 3.0.1's window at 4.0.5's size and places, with Split All (each pile that held more than one gives half to the next empty pile) |
 | Dip Into Savings | DLOG 4070, DipIntoSavings | an amount, not a share (rules-405 dipAmount; the program takes it at once, the remake at the turn's end, counting a dip already asked for) |
+| Battle window | DoOneBattle @6094e (DLOG 7011's 445 x 300) | close: beside shot 033 the frame (89, 48)-(549, 363), the sides at 5 and 300, the faces (you: ICON 1406), the luck icons (3140 cat, 3142 horseshoe), the captions measured in Geneva 9, Round and Skip all line up; no dimming behind it |
 Still to do: List All Explored Stars (DLOG 6040: 20-pixel rows drawn by its own list routine, a sort pop-up, CNTL 6040; asked Jake for a
 capture).
 
