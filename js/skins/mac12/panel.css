@@ -221,3 +221,48 @@ html.macscale .win .bw12w button.bw12b.done { outline-width: 3px; outline-offset
 html.macfam:is(.os-system6, .os-system7) :is(#menubar, #menubar .logo, #menubar #title, .mbtn, .dropdown button) { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; font-weight: normal; font-synthesis: none; letter-spacing: .58px; -webkit-font-smoothing: none; }
 html.macfam:is(.os-system6, .os-system7) .dropdown { width: max-content; min-width: 0; max-width: none; }
 html.macfam:is(.os-system6, .os-system7) .dropdown button { white-space: nowrap; }
+/* 3.0.1 and 4.0.5 as the original's 640 x 480 System 7.5 screen (html.mac75: js/skins/mac12/ui.js frame75), measured in Jake's 4.0.5 shot 008
+   and 3.0.1's shot 012 (the same ResetWindows): the menu bar's 20 rows; the desktop's pattern (System 7.5's: one black dot in four, the next row
+   offset by two) between the windows; the map window's frame from (1, 21) to (638, 370), its shadow one pixel right and down, its title bar 17
+   rows (22-38) and a black row; the information column from x 2 to 226 (the frame at 1), two black columns, the map from 229 to 637, from y 40
+   to 369; Tech Spending's windoid (1, 371)-(227, 478) and the Report Window's (387, 371)-(638, 478): frame, a 9-row title bar, a black row,
+   96 rows. Width or height beyond 640 x 480 goes to the map window, as the program's GrowMapWin; the windoids keep to the screen's corners. */
+html.mac75 { --m: calc(var(--mac, 1) * 1px); }
+html.mac301lay.mac75 #main { display: block; position: relative; overflow: hidden; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='2' shape-rendering='crispEdges'%3E%3Crect width='4' height='2' fill='%23fff'/%3E%3Crect width='1' height='1'/%3E%3Crect x='2' y='1' width='1' height='1'/%3E%3C/svg%3E") 0 0 / calc(4 * var(--m)) calc(2 * var(--m)); image-rendering: pixelated; }
+html.mac75 #mapwin301 { position: absolute; left: calc(1 * var(--m)); top: calc(1 * var(--m)); right: calc(1 * var(--m)); bottom: calc(109 * var(--m)); box-sizing: border-box; border: var(--m) solid #000; box-shadow: var(--m) var(--m) 0 #000; background: #000; }
+html.mac75 #mapwin301 canvas.tb75 { display: block; width: 100%; height: calc(17 * var(--m)); border-bottom: var(--m) solid #000; image-rendering: pixelated; }
+html.mac301lay.mac75 #panel { position: absolute; left: 1px; top: 20px; width: 226px; bottom: 110px; padding: 0; margin: 0; overflow: hidden; border: 0; background: #000; }
+/* (the map's scroll bars share their outer frames with the window's: the map's box runs from the divider's second column, 228, and the title
+   bar's black row, 39, to the frame's 638 and 370) */
+html.mac301lay.mac75 #mapwrap { position: absolute; left: calc(228 * var(--m)); top: calc(19 * var(--m)); right: calc(1 * var(--m)); bottom: calc(109 * var(--m)); }
+html.mac301lay.mac75 #msg { left: 4px; }
+html.mac75 .mapcorner12 canvas { display: block; width: 16px; height: 16px; image-rendering: pixelated; }
+html.mac75 .mapcorner12:has(canvas) { border: 0; }
+html.mac301lay.mac75 #tech301, html.mac301lay.mac75 #rep301 { position: absolute; bottom: 1px; height: 108px; box-sizing: border-box; border: 1px solid #000; box-shadow: 1px 1px 0 #000; padding: 0; overflow: hidden; }
+html.mac301lay.mac75 #tech301 { left: 1px; width: 227px; background: #ccc; }
+html.mac301lay.mac75 #rep301 { right: 1px; width: 252px; background: #fff; }
+html.mac75 canvas.wd75 { display: block; width: 100%; height: 9px; border-bottom: 1px solid #000; image-rendering: pixelated; }
+html.mac301lay.mac75 #rep301 .rep12box { position: absolute; top: 10px; left: 0; right: 0; bottom: 0; width: auto; border: 0; }
+html.mac301lay.mac75 #tech301 .box { margin: 0; border: 0; box-shadow: none; }
+html.mac75 #menubar #title { display: none; }
+/* 4.0.5's clock (DrawTimeClock @115af2): GrowMapWin puts its region at the map's top left + 1, 61 x 62; always there while the turn is open */
+html.mac75 #clock405 { position: absolute; left: 2px; top: 2px; width: 60px; height: 61px; z-index: 7; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; }
+html.macscale #clock405 { zoom: var(--mac); }
+html.mac75 #clock405 canvas { display: block; width: 60px; height: 61px; image-rendering: pixelated; }
+html.mac75.mac405 #msg .clock { display: none; }
+/* 4.0.5's bubble (DrawAnnounceBubble @151f90): the same 185 x 79 region, the icon at (12, 12), the sentence (MyTextBox, Geneva 9: the bitmap's
+   12 CSS pixels, 10-pixel lines) from (50, 6) to the right edge less 8, "more…" at (50, the foot less 5) */
+html.mac405 #msg .card.bub301 > img.icon, html.mac405 #msg .card.bub301 > .ric301 { left: 12px; top: 12px; }
+html.mac405 #msg .card.bub301 .mtext { left: 50px; top: 6px; right: 8px; }
+html.mac405 #msg .card.bub301 .mtext p { font: 12px/10px 'DOS Geneva 9', Geneva, sans-serif; }
+html.mac405 #msg .card.bub301 .count { left: 50px; bottom: 3px; font: 12px/10px 'DOS Geneva 9', Geneva, sans-serif; }
+/* 4.0.5's Report Window (UpdateReportWin @15039c, DrawMessage @150616): 32-row reports, the icon at the row's left, the sentence from 35,
+   Geneva 9 on 10-pixel lines; its scroll bar at the right (16 wide) */
+html.mac301lay.mac75 #rep301 ul.rep12 { position: absolute; left: 0; top: 0; right: 16px; bottom: 0; height: auto; font: 12px/10px 'DOS Geneva 9', Geneva, sans-serif; background: #fff; }
+html.mac301lay.mac75 #rep301 ul.rep12 li { gap: 3px; height: 32px; min-height: 32px; overflow: hidden; align-items: flex-start; }
+html.mac301lay.mac75 #rep301 ul.rep12 li .rt { padding-top: 0; }
+html.mac301lay.mac75 #rep301 .rep12box .rbar12 { position: absolute; right: -1px; top: -1px; width: 16px; line-height: 0; touch-action: none; }
+html.mac301lay.mac75 #rep301 .rep12box .rbar12 canvas { display: block; }
+html.mac301lay.mac75 #rep301 .rep12box canvas.grow12 { position: absolute; right: -1px; bottom: -1px; width: 16px; height: 16px; image-rendering: pixelated; }
+/* (3.0.1's End Turn at the map's (3, 2): the map's box starts a column and a row sooner on the System 7.5 screen) */
+html.mac75.macfam #msg.et301 { top: 3px; left: 4px; }

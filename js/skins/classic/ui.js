@@ -547,8 +547,16 @@ function resize() {
 function fit() {
   if (!G || !mapW) return;
   const pad = 30;
-  const s = Math.min((mapW - pad * 2) / G.W, (mapH - pad * 2 - 30) / G.H);
-  UI.view = { s, ox: (mapW - G.W * s) / 2, oy: (mapH - 30 - G.H * s) / 2 + 4 };
+  // the stars fill the map (Jake, 20 Nov 2026: in every version, a galaxy that doesn't fill the screen zooms to fit it across or down, the
+  // same space on either side): scaled to the stars' own extent, not the galaxy's whole rectangle, which a small galaxy fills only in part
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const st of G.stars || []) { x0 = Math.min(x0, st.x); x1 = Math.max(x1, st.x); y0 = Math.min(y0, st.y); y1 = Math.max(y1, st.y); }
+  if (!(x1 >= x0)) { x0 = 0; x1 = G.W; y0 = 0; y1 = G.H; }
+  const sw = Math.max(1, x1 - x0), sh = Math.max(1, y1 - y0);
+  let s = Math.min((mapW - pad * 2) / sw, (mapH - pad * 2 - 30) / sh);
+  s = Math.min(s, 40 * (isTablet() ? 2 : 1.5)); // (no closer than the map's closest zoom, zoomRange's top)
+  s = Math.max(s, Math.min((mapW - pad * 2) / G.W, (mapH - pad * 2 - 30) / G.H)); // (only ever closer than the galaxy's whole rectangle: never zoomed out further than before)
+  UI.view = { s, ox: mapW / 2 - (x0 + x1) / 2 * s, oy: (mapH - 30) / 2 - (y0 + y1) / 2 * s + 4 };
   // T.fitView(view, ctx): a skin's own first view (the Amiga's zoom, on your home)
   if (T.fitView) T.fitView(UI.view, { G, ME, mapW, mapH, sel: UI.sel, redraw: draw });
   UI.fitted = true;
@@ -6379,7 +6387,8 @@ function newGameDialog() {
   // DOS 2.0 rules: the 2.0 Create Galaxy settings
   // 4.0.5 rules (Windows 95): its New Game settings
   const w95Box = el('div', { class: 'group' },
-    sel('w_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'normal'),
+    // (Novice first, as both 4.0.5 programs open their Join window: Jake's Mac shots 006, 191; the Windows profile's playerSkill 0, docs/status-w95.md)
+    sel('w_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'novice'),
     sel('w_iq', 'Computer intelligence', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart'], ['diabolical', 'Diabolical']], 'average'),
     sel('w_shape', 'Galaxy style', [['circle', 'Circle'], ['random', 'Random'], ['ring', 'Ring'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['cluster', 'Cluster']], 'circle'),
     sel('w_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),

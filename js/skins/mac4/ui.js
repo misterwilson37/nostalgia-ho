@@ -98,7 +98,8 @@ window.HOMAC4 = {
     const face = (q) => q && !q.human ? 'bad' + q.face + '_' + (q.female ? 1 : 0) : P + own;
     const tech = ['Range', 'Speed', 'Weapon', 'Shield', 'Mini'].findIndex(n => new RegExp('Your ' + n + '\\w* Tech').test(t));
     if (!t.trim()) return R(own, 2001);
-    if (/^Spaceward Ho! by/.test(t)) return R('i3115', 7001);
+    if (/^Spaceward Ho! (by|Version)/.test(t)) return R('i3115', 7001); // (4.0.5's "Spaceward Ho! Version 4.0.3 by Peter Commons.": shot 008)
+    if (/^Artwork by/.test(t)) return R('i3116', 7001); // (shot 008)
     if (m.hint) return R('i3170', 7001); // a help message, report 24 (GetIconID @151682: 3170)
     if (/^Click here/.test(t)) return R('i3116', 7001);
     if (tech >= 0) return R('i' + (3100 + tech), 2000);
@@ -220,6 +221,9 @@ window.HOMAC4 = {
     // inside the start-up window, under the splash
     const b = doc.querySelector('#titlescreen .tbtns'), w = doc.querySelector('#titlescreen .tsplash .wbody');
     if (b && w) w.append(b);
+    // How to play: the remake's own, under the window (DITL 1200's third button is Quit; Import a Game… takes its place)
+    const hp = doc.querySelector('#thelp'), sp = doc.querySelector('#titlescreen .tsplash');
+    if (hp && sp) { const c = hp.cloneNode(true); c.id = 'thelp405'; c.className = 'quiet thelp405'; c.addEventListener('click', () => hp.click()); sp.after(c); }
   },
 };
 })();

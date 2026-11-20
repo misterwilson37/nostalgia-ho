@@ -37,7 +37,7 @@ const MACS = { s: 1, need: 480 };
 // (quarter steps since 18 Nov: 3.0.1's panel is the tallest, and in half steps a laptop's screen left it at x1.5 with a band to spare, Jake's report)
 function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerHeight / Math.max(480, MACS.need)); return u0 >= 1.25 ? Math.floor(u0 * 4) / 4 : 1; }
 function measureMac() {
-  const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1) return; // (only in the Mac's layout: the page's own panel is wider, so taller)
+  const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1 || document.documentElement.classList.contains('mac75')) { if (MACS.need !== 480 && document.documentElement.classList.contains('mac75')) { MACS.need = 480; setMacScale(); } return; } // (only in the Mac's layout: the page's own panel is wider, so taller)
   const z = MACS.s, pr = p.getBoundingClientRect(), last = p.lastElementChild.getBoundingClientRect();
   const t3 = document.documentElement.classList.contains('mac301lay') && document.getElementById('tech301'); // (3.0.1's bottom row: Tech Spending's height too)
   const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 16 + (m ? m.getBoundingClientRect().height / z : 20) + (t3 ? t3.getBoundingClientRect().height / z : 0)); // (the content's foot, the panel's padding above and below, the menu bar)
@@ -2325,7 +2325,7 @@ function reportsBox12() {
     const t = el('span', { class: 'rt' }); t.append(a.degText(H().say(g, m.text))); li.append(t);
     list.append(li);
   });
-  if (V3) { // (3.0.1's layout gives the list its own window: js/skins/mac12/panel.css #rep301)
+  if (V3 && !document.documentElement.classList.contains('mac75')) { // (3.0.1's layout gives the list its own window: js/skins/mac12/panel.css #rep301; on the System 7.5 screen, html.mac75, its scroll bar and grow box too, below)
     const box3 = el('section', { class: 'box rep12box' }, list), key3 = g.turn + ':' + ms.length;
     setTimeout(() => { if (REP12.key === key3 && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key3; }, 0);
     list.addEventListener('scroll', () => { REP12.top = list.scrollTop; });
@@ -2339,7 +2339,8 @@ function reportsBox12() {
   grow.rect(0, 0, 16, 16, '#000'); grow.rect(1, 1, 15, 15, '#fff'); grow.x.strokeStyle = '#000'; grow.x.strokeRect(3.5, 3.5, 6, 6); grow.x.strokeRect(5.5, 5.5, 7, 7); grow.rect(6, 6, 12, 12, '#fff'); grow.x.strokeRect(5.5, 5.5, 7, 7);
   const vals = () => { const max = Math.max(0, Math.ceil((list.scrollHeight - list.clientHeight) / 32)); return { v: Math.min(max, Math.round(list.scrollTop / 32)), max }; };
   let press = null, ghost = null, timer = 0, drag = null;
-  const L = () => Math.max(34, Math.round(list.clientHeight) - 15);
+  const L = () => Math.max(34, Math.round(list.clientHeight) - 15 + (BAR75() ? 2 : 0)); // (System 7.5's: from the title bar's black row to the grow box's, html.mac75)
+  if (BAR75()) { const x = grow.x; x.setTransform(grow.x.getTransform()); drawGrow75(x); }
   const paint = () => { const o = vals(); bar.setAttribute('aria-valuenow', o.v); bar.setAttribute('aria-valuemax', o.max); paintBar(bb, true, L(), { on: true, value: o.v, max: o.max, press, ghost }); };
   const go = (d) => { list.scrollTop = Math.max(0, list.scrollTop + d); paint(); };
   bar.addEventListener('pointerdown', (e) => {
@@ -2356,7 +2357,7 @@ function reportsBox12() {
   bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
   bar.addEventListener('keydown', (e) => { const d = { ArrowUp: -32, ArrowDown: 32, PageUp: -64, PageDown: 64 }[e.key]; if (d) { e.preventDefault(); go(d); } });
   const body = el('div', { class: 'rep12body' }, list, bar, grow.c);
-  const box = el('section', { class: 'box rep12box' }, titleBar12(226), body);
+  const box = V3 ? el('section', { class: 'box rep12box' }, body) : el('section', { class: 'box rep12box' }, titleBar12(226), body); // (3.0.1, 4.0.5: the windoid's title bar is frame75's)
   // (kept where the player scrolled it while the reports are the same; a new turn opens it at the current year's first)
   const key = g.turn + ':' + ms.length;
   setTimeout(() => { if (REP12.key === key && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key; paint(); }, 0);
@@ -2920,9 +2921,12 @@ function fleetBox301() {
   q.hline(0, 227, Y(89)); q.vline(225, 0, 65);
   q.rect(0, Y(130), 226, Y(133), '#000'); // DrawDragBarRect
   // the scroll bar (an OS control), 214..226 x 89..131: arrows at its ends, the thumb when there is more than fits
+  if (V4 && COLOUR3) scrollBar75s(q, x, 215, Y(89), Y(131), Math.max(0, total - 4), FLT301.top, 1, 108); // (4.0.5's: 216..227 x 129..170 on the screen, shot 008)
+  else {
   q.rect(214, Y(89), 226, Y(130), '#fff'); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(214.5, Y(89) + 0.5, 11, 41);
   [[Y(89), 1], [Y(119), -1]].forEach(([t0, d]) => { x.strokeRect(214.5, t0 + 0.5, 11, 11); x.beginPath(); const cy = t0 + 6; x.moveTo(217, cy + 2 * d); x.lineTo(220, cy - 2 * d); x.lineTo(223, cy + 2 * d); x.closePath(); x.stroke(); });
   if (total > 4) { x.fillStyle = orPat(x, GRAY, '#000'); x.fillRect(215, Y(101), 10, 18); const ty = Y(101) + Math.round(10 * FLT301.top / (total - 4)); q.rect(215, ty, 225, ty + 8, '#fff'); x.strokeRect(214.5, ty + 0.5, 11, 7); }
+  }
   q.c.addEventListener('click', (ev) => {
     const pt = q.at(ev), v = pt.v + Y0;
     if (pt.h >= 214) { if (v < 101) FLT301.top--; else if (v >= 119) FLT301.top++; else return; a.renderPanel(); return; }
@@ -2967,43 +2971,78 @@ const hPercBar = (pm) => { for (let x = 0; x < 78; x++) if (HLOG[x] >= pm) retur
 //   DoHBarClick: a drag on a bar sets its share (the ruleset's rs.dragShare, the others moved as it says); a click on the heading switches
 //     the scale. ("Sort" is not built.)
 const LOW301 = { pTop: 0, bTop: 0 };
-function scrollBar301(q, x, l, t, b, max, val) { // an OS scroll bar, drawn plainly: arrows at the ends, the grey track and its thumb when it scrolls
+function scrollBar301(q, x, l, t, b, max, val, oy) { // an OS scroll bar, drawn plainly: arrows at the ends, the grey track and its thumb when it scrolls
+  if (V4 && COLOUR3) return scrollBar75s(q, x, l, t, b, max, val, 1, oy == null ? 206 : oy); // (the canvas's place on the 640 x 480 screen: its dots as the screen's; the players and budget pane's from (1, 206))
   q.rect(l, t, l + 12, b, '#fff'); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(l + 0.5, t + 0.5, 11, b - t - 1);
   [[t, 1], [b - 12, -1]].forEach(([t0, d]) => { x.strokeRect(l + 0.5, t0 + 0.5, 11, 11); x.beginPath(); const cy = t0 + 6; x.moveTo(l + 3, cy + 2 * d); x.lineTo(l + 6, cy - 2 * d); x.lineTo(l + 9, cy + 2 * d); x.closePath(); x.stroke(); });
   if (max > 0) { const tr = b - t - 24; x.fillStyle = orPat(x, GRAY, '#000'); x.fillRect(l + 1, t + 12, 10, tr); const ty = t + 12 + Math.round((tr - 8) * val / max); q.rect(l + 1, ty, l + 11, ty + 8, '#fff'); x.strokeRect(l + 0.5, ty + 0.5, 11, 7); }
 }
+// 4.0.5's 12-pixel scroll bars (the panes': players, colonies, fleets), System 7.5's colour bar copied from Jake's shot 008: the frame black
+// both sides, an arrow box 10 rows (#dddddd, the arrow #9999cc edged #333366, a #777777 last row and column), black dividers, the track's
+// #777777 dots on #dddddd aligned to the screen, a 12-row thumb (#555555, #ccccff, #aaaaaa, a #9999cc / #666699 grip, #333366); with nothing to
+// scroll, #eeeeee with the arrows outlined in #777777 and no thumb.
+const AR75S = [' ', '    E', '   EFE', '  EEFFE', ' EFFFFFE', 'EEEEFFEEE', '   EFFE', '   EFFE', '   EEEE'];
+function scrollBar75s(q, x, l, t, b, max, val, ox, oy) {
+  const on = max > 0, R = (h, v, w, hh, c) => q.rect(h, v, h + w, v + hh, c);
+  R(l, t, 12, b - t, '#000'); R(l + 1, t + 1, 10, b - t - 2, on ? '#dddddd' : '#eeeeee');
+  const box = (t0, down) => {
+    R(l + 1, t0, 10, 10, on ? '#dddddd' : '#eeeeee'); if (on) { R(l + 10, t0, 1, 10, '#777777'); R(l + 1, down ? t0 + 9 : t0 + 9, 10, 1, '#777777'); }
+    AR75S.forEach((row, i) => { for (let j = 0; j < row.length; j++) { const ch = row[j]; if (ch === ' ' || (!on && ch === 'F')) continue; R(l + 1 + j, down ? t0 + 9 - i : t0 + i, 1, 1, on ? (ch === 'E' ? '#333366' : '#9999cc') : '#777777'); } });
+  };
+  box(t + 1, false); R(l + 1, t + 11, 10, 1, on ? '#000' : '#777777'); R(l + 1, b - 12, 10, 1, on ? '#000' : '#777777'); box(b - 11, true);
+  if (!on) return;
+  for (let v = t + 12; v < b - 12; v++) for (let h = l + 1; h < l + 11; h++) { const gx = h + ox, gy = v + oy; if ((gy & 1) ? (gx & 3) === 0 : (gx & 3) === 2) R(h, v, 1, 1, '#777777'); }
+  const T = b - t - 36; if (T < 0) return;
+  const tp = t + 12 + Math.round(T * Math.max(0, Math.min(1, val / max)));
+  R(l + 1, tp, 10, 12, '#aaaaaa'); R(l + 1, tp, 10, 1, '#555555'); R(l + 1, tp + 1, 1, 10, '#ccccff'); R(l + 10, tp + 1, 1, 10, '#333366'); R(l + 1, tp + 11, 10, 1, '#333366');
+  R(l + 4, tp + 2, 4, 1, '#9999cc'); [3, 6, 9].forEach(k => R(l + 4, tp + k, 4, 1, '#ccccff')); [4, 5, 7, 8].forEach(k => R(l + 4, tp + k, 4, 1, '#666699'));
+}
 function lowBox301(B) {
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), col = COL301(), S5 = STR301(1005), S1 = STR301(1001);
-  const Y0 = 166, q = qdCanvas(226, 165, ''), x = q.x, Y = (v) => v - Y0, bg = col ? RGB301.grey : '#fff';
+  const Y0 = 166, q = qdCanvas(226, 165, ''), x = q.x, Y = (v) => v - Y0, bg = col ? (V4 ? '#ccc' : RGB301.grey) : '#fff'; // (4.0.5's grey: #cccccc, shot 008)
+  // 4.0.5 (Jake's shot 008, at 640 x 480): the players' rect 0..78 with its scroll bar 78..90, 22 pixels a row from 166, the icon at (10, row + 7),
+  // the name at (29, row + 19), the check mark (2, row + 15) (4, row + 19) (7, row + 12), every player from the start (2000 shows all seven);
+  // the budget from 90 (DrawBudgetRect @115252: DrawHBarControl at the rect's left - 1)
+  const PW = V4 ? 78 : 67, RH = V4 ? 22 : 18, BL = V4 ? 90 : 79, SH = V4 ? { shadow: '#fff' } : null;
   // DrawIconRect
-  q.rect(0, Y(166), 67, Y(331), bg);
-  const prow = Math.trunc((330 - 167 - 3) / 18);
+  q.rect(0, Y(166), PW, Y(331), bg);
+  const prow = V4 ? Math.trunc((330 - 166) / RH) : Math.trunc((330 - 167 - 3) / 18);
   // (the remake's faces are picked from the twenty, not numbered 0 to n - 1 as 3.0.1's are: the order is the players sorted by face, a player with
   // none, the human, after them)
   const ranked = g.players.map((pl, i) => i).sort((i, j) => ((g.players[i].face ?? 99) - (g.players[j].face ?? 99)) || i - j);
-  const order = g.players.map((pl, i) => ({ pl, i, at: g.year < 2010 ? (i === a.ME ? 0 : -1) : ranked.indexOf(i) }));
-  const nP = g.year < 2010 ? 1 : g.players.length;
+  const early = g.year < 2010 && !V4;
+  const order = g.players.map((pl, i) => ({ pl, i, at: early ? (i === a.ME ? 0 : -1) : ranked.indexOf(i) }));
+  const nP = early ? 1 : g.players.length;
   LOW301.pTop = Math.max(0, Math.min(LOW301.pTop, nP - prow));
   order.forEach(({ pl, i, at }) => {
-    const r = at - (g.year < 2010 ? 0 : LOW301.pTop); if (at < 0 || r < 0 || r >= prow) return;
-    const top = Y(167 + 18 * r);
-    const ic = a.IMG['dos:s' + ((i === a.ME ? 1000 : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0))];
+    const r = at - (early ? 0 : LOW301.pTop); if (at < 0 || r < 0 || r >= prow) return;
+    const top = V4 ? Y(166 + RH * r) + 4 : Y(167 + 18 * r); // (4.0.5: the icon at row + 7, the 3.0.1 code's + 3)
+    const ic = a.IMG['dos:s' + ((i === a.ME ? (V4 ? 1406 : 1000) : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0))]; // (4.0.5 numbers its small icons as its planets: you are 1406, shot 008)
     if (ic && ic.width) x.drawImage(ic, 9, top + 3, 16, 16);
     if (i !== a.ME && pl.alive && H().isAllied(g, a.ME, i)) { const h = a.IMG['dos:s5000']; if (h && h.width) x.drawImage(h, 9, top + 3, 16, 16); }
-    q.text(pl.name, 28, top + 16, G9, { cond: q.width(pl.name) > 39 });
+    q.text(pl.name, V4 ? 29 : 28, top + (V4 ? 15 : 16), G9, Object.assign({ cond: q.width(pl.name) > (V4 ? 48 : 39) }, SH));
     if (!pl.alive || pl.surrendered) { x.strokeStyle = '#000'; x.lineWidth = 2; x.beginPath(); x.moveTo(10, top + 4); x.lineTo(25, top + 19); x.moveTo(25, top + 4); x.lineTo(10, top + 19); x.stroke(); x.lineWidth = 1; }
-    if (!pl.human || (g.done || []).includes(i)) { x.strokeStyle = '#000'; x.beginPath(); x.moveTo(1.5, top + 11.5); x.lineTo(3.5, top + 15.5); x.lineTo(7.5, top + 7.5); x.stroke(); }
+    if (!pl.human || (g.done || []).includes(i)) {
+      if (V4) [[7, 8], [7, 9], [6, 10], [2, 11], [6, 11], [3, 12], [5, 12], [3, 13], [5, 13], [4, 14], [4, 15]].forEach(([h, v]) => q.rect(h, top + v, h + 1, top + v + 1, '#000')); // (shot 008's pixels)
+      else { x.strokeStyle = '#000'; x.beginPath(); x.moveTo(1.5, top + 11.5); x.lineTo(3.5, top + 15.5); x.lineTo(7.5, top + 7.5); x.stroke(); }
+    }
   });
-  scrollBar301(q, x, 67, Y(165), Y(331), Math.max(0, nP - prow), LOW301.pTop);
+  scrollBar301(q, x, PW, Y(165), Y(331), Math.max(0, nP - prow), LOW301.pTop);
   // DrawBudgetRect, DrawHBarControl
-  q.rect(79, Y(166), 214, Y(331), bg); q.rect(214, Y(181), 225, Y(331), bg);
-  const L = 79, x0 = L + 45, sc = a.budgetScale(), log = sc.id === 'log';
-  x.font = G9; const sw = q.width('Sort');
-  x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.roundRect(x0 - sw - 7 + 0.5, Y(169) + 0.5, (x0 - 2) - (x0 - sw - 7) - 1, 10, 3); x.stroke();
-  q.text('Sort', x0 - sw - 4, Y(178));
-  const pc100 = S1[10] || '100%'; q.text(pc100, L + 123 - q.width(pc100), Y(178)); q.text(S1[6] || '0%', x0, Y(178));
-  q.hline(x0, 215, Y(181));
-  q.text(log ? (S5[22] || 'Log') : (S5[23] || 'Linear'), log ? L + 74 : L + 68, Y(178));
+  q.rect(BL, Y(166), 214, Y(331), bg); q.rect(214, Y(V4 ? 166 : 181), 225, Y(331), bg); if (V4 && col) q.rect(225, Y(166), 226, Y(331), '#fff');
+  const L = BL, x0 = L + 45, sc = a.budgetScale(), log = sc.id === 'log';
+  x.font = G9;
+  const pc100 = S1[10] || '100%';
+  if (V4) { // (4.0.5's heading: "100%" ending at the rect's left + 128, with its shadow, and the ticks; no Sort, no "0%", no scale's name: shot 008)
+    q.text(pc100, 0, Y(178), G9, Object.assign({ right: L + 128 }, SH)); q.hline(x0 - 1, 215, Y(181));
+  } else {
+    const sw = q.width('Sort');
+    x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.roundRect(x0 - sw - 7 + 0.5, Y(169) + 0.5, (x0 - 2) - (x0 - sw - 7) - 1, 10, 3); x.stroke();
+    q.text('Sort', x0 - sw - 4, Y(178));
+    q.text(pc100, L + 123 - q.width(pc100), Y(178)); q.text(S1[6] || '0%', x0, Y(178));
+    q.hline(x0, 215, Y(181));
+    q.text(log ? (S5[22] || 'Log') : (S5[23] || 'Linear'), log ? L + 74 : L + 68, Y(178));
+  }
   for (let k = 1; k <= 10; k++) { const tx = x0 + (log ? hPercBar(100 * k) : Math.trunc(77 * k / 10)); q.vline(tx, Y(179), Y(181)); }
   const ents = B.ents || [], brow = Math.trunc((330 - 167 - 15) / 14);
   // 3.0.1's slots: Ships first, then Tech, then the colonies
@@ -3013,11 +3052,16 @@ function lowBox301(B) {
   const lenOf = (pm) => pm < 1 ? 0 : log ? hPercBar(pm) : Math.trunc((pm * 77 + 999) / 1000);
   let y = Y(181);
   const tb = []; // (where the bars are, in the canvas's pixels: for a test tool, data-bars)
-  slots.slice(LOW301.bTop, LOW301.bTop + brow).forEach((e) => {
+  // 4.0.5 (DrawHBarControl @50a80): Ships and Tech always on top; at the third slot a rule down the bars' left, then 7 lower a rule across to
+  // the rect's right, and the colonies below it, scrolled by their own bar (shot 008: the rule at 256, the colonies' bar from 257)
+  const shown = V4 ? slots.slice(0, 2).concat(slots.slice(2).slice(LOW301.bTop, LOW301.bTop + brow - 2)) : slots.slice(LOW301.bTop, LOW301.bTop + brow);
+  let sepY = null;
+  shown.forEach((e, k) => {
+    if (V4 && k === 2) { q.vline(L + 44, y, y + 14); y += 7; q.hline(L + 44, 226, y); sepY = y; }
     const pm = Math.round(e.get() * 1000), len = Math.min(77, lenOf(pm)), st = e.star != null ? g.stars[e.star] : null;
     const inc = st ? H().planetIncome(g, p, st) : 0, abandoning = !!(st && st.abandon301);
     const ratio = st ? Math.trunc(100 * Math.max(st.g, p.homeG) / Math.max(0.01, Math.min(st.g, p.homeG))) : 0;
-    q.vline(123, y, y + 15);
+    q.vline(L + 44, y, y + 15);
     let top = y + 7, bottom = y + 14;
     if (!col) {
       top -= 1; bottom += 1;
@@ -3041,24 +3085,26 @@ function lowBox301(B) {
     const name = e.key === 'savings' ? (S5[25] || 'Ships') : e.key === 'tech' ? (S5[24] || 'Tech') : st.name;
     tb.push({ x: x0, y: y + 3, w: 77, h: 13, vert: false, frac: len / 77, label: name });
     const lc = !col ? '#000' : !st || inc >= 0 ? css16(CT301[5]) : css16(ratio <= 256 ? CT301[1] : CT301[2]);
-    const w = q.text(name, 0, y + 14, G9, { right: L + 43, color: lc });
+    const w = q.text(name, 0, y + 14, G9, Object.assign({ right: L + 43, color: lc }, SH));
     if (st && a.UI.sel === st.id) q.rect(L + 43 - w, y + 15, L + 43, y + 16, lc);
     if (abandoning) q.text('Abandoning', L + 48, y + 14, G9, { color: lc });
     else if (st) { const bb = bars301(st); if (bb[0] === -1 && bb[1] === -1) q.text('$' + H().niceNum(Math.round(inc)), L + 48, y + 14, G9, { color: lc }); }
     y += 14;
   });
-  q.vline(123, y, Y(331));
+  q.vline(L + 44, y, Y(331));
+  if (V4 && sepY == null) { q.vline(L + 44, y, y + 14); y += 7; q.hline(L + 44, 226, y); sepY = y; }
   q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = '165';
-  scrollBar301(q, x, 214, Y(181), Y(331), Math.max(0, slots.length - brow), LOW301.bTop);
+  if (V4) scrollBar301(q, x, 213, sepY + 1, Y(331), Math.max(0, slots.length - 2 - (brow - 2)), LOW301.bTop);
+  else scrollBar301(q, x, 214, Y(181), Y(331), Math.max(0, slots.length - brow), LOW301.bTop);
   // DoHBarClick: a drag on a bar, a click on the heading; the scroll bars; a click on a colony's name selects it (FollowStarNameClick)
   q.c.style.touchAction = 'none';
   q.c.addEventListener('pointerdown', (ev) => {
     const pt = q.at(ev), v = pt.v + Y0;
-    if (pt.h >= 67 && pt.h < 79) { LOW301.pTop += v < (165 + 331) / 2 ? -1 : 1; a.renderPanel(); return; }
-    if (pt.h >= 214) { LOW301.bTop += v < (181 + 331) / 2 ? -1 : 1; a.renderPanel(); return; }
-    if (pt.h < 79) return;
+    if (pt.h >= PW && pt.h < PW + 12) { LOW301.pTop += v < (165 + 331) / 2 ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h >= (V4 ? 213 : 214) && (!V4 || v > 181 + 35)) { LOW301.bTop += v < (V4 ? (181 + 35 + 331) / 2 : (181 + 331) / 2) ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h < BL) return;
     if (v < 181) { if (pt.h >= x0 && a.flipBarScale) a.flipBarScale(); return; }
-    const e = slots[LOW301.bTop + Math.floor((v - 181) / 14)]; if (!e) return;
+    const e = V4 ? (v < 181 + 28 ? slots[Math.floor((v - 181) / 14)] : v >= 181 + 35 ? slots[2 + LOW301.bTop + Math.floor((v - 181 - 35) / 14)] : null) : slots[LOW301.bTop + Math.floor((v - 181) / 14)]; if (!e) return;
     if (pt.h < x0 - 1) { if (e.star != null) { a.UI.sel = e.star; if (a.centerOn) a.centerOn(e.star); a.renderPanel(); a.draw(); } return; }
     ev.preventDefault();
     const lk = rs.barLocked ? rs.barLocked(g, p, e.key) : null; if (lk) { a.beep(); return; }
@@ -3073,7 +3119,7 @@ function lowBox301(B) {
     const up = (e2) => { window.removeEventListener('pointermove', later); window.removeEventListener('pointerup', up); if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; set(e2); a.save(); a.renderPanel(); };
     window.addEventListener('pointermove', later); window.addEventListener('pointerup', up); set(ev);
   });
-  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); if (pt.h < 79) LOW301.pTop += ev.deltaY > 0 ? 1 : -1; else LOW301.bTop += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); if (pt.h < BL) LOW301.pTop += ev.deltaY > 0 ? 1 : -1; else LOW301.bTop += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
   const box = a.el('section', { class: 'box low301' }, q.c);
   return box;
 }
@@ -3096,7 +3142,7 @@ function special301(t) {
   if (k === 1065 || k === 1066) return 'cross';
   if ((k >= 1034 && k <= 1061) || (k >= 1077 && k <= 1082)) {
     const caps = hit.re.exec(t).slice(1), pl = g.players.find(p0 => caps.includes(p0.name));
-    if (pl) return 'dos:s' + ((pl.id === A().ME ? 1000 : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0));
+    if (pl) return 'dos:s' + ((pl.id === A().ME ? (V4 ? 1406 : 1000) : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0));
   }
   return null;
 }
@@ -3115,6 +3161,7 @@ function reportsBox301() {
 function panel301(panel, B) {
   const a = A(), el = a.el;
   const low = lowBox301(B || {});
+  { const de = document.documentElement, on = !NARROW301.matches && !!document.getElementById('main'); de.classList.toggle('mac301lay', on); de.classList.toggle('mac75', on); } // (before the boxes: the Report Window's scroll bar follows html.mac75)
   const rep = reportsBox301();
   panel.innerHTML = '';
   const tech = techBox301();
@@ -3129,8 +3176,94 @@ function panel301(panel, B) {
   } else {
     if (t3) t3.remove(); if (r3) r3.remove();
     panel.append(planetBox301(), fleetBox301(), incomeBox301(), low, tech, rep);
-  }
+  }  frame75();
 }
+// ---------- the System 7.5 screen (html.mac75; js/skins/mac12/panel.css): 3.0.1's and 4.0.5's windows as Jake's shots show them ----------
+// The map window's title bar and the windoids' (Tech Spending, Report Window) are System 7.5's window definition, read pixel by pixel in Jake's
+// 4.0.5 shot 008 (3.0.1's shot 012 the same): colour, interior rows of the title bar: a #ccccff row, #eeeeee with a #ccccff left column and a
+// #9999cc right one, #777777 stripes on rows 3-13 (every other row) but for the close box (11 x 11 from the interior's x 8), the zoom box (11 x 11
+// ending 8 from the right) and the title (Chicago 12, centred in the window, stripes stopped 6 pixels each side); a #9999cc foot row. A windoid's
+// 9 rows: #9999cc, then #eeeeee / #888888 stripes, a 7 x 7 close box (black frame, white) at x 7, #9999cc. Black and white (no capture of 4.0.5
+// in black and white): the same shapes in black on white.
+const TB75 = { title: '', obs: null, on: null };
+function tbBox75(x, cx0, l, t, zoom) { // the close and zoom boxes' colours: dark top-left frame, light inner top-left, grey face, dark inner bottom-right
+  const R = (h, v, w, hh, c) => { x.fillStyle = c; x.fillRect(l + h, t + v, w, hh); };
+  if (!COLOUR3) { R(0, 0, 11, 11, '#000'); R(1, 1, 9, 9, '#fff'); if (zoom) { R(1, 1, 6, 6, '#000'); R(1, 1, 5, 5, '#fff'); } return; }
+  R(0, 0, 11, 11, '#ccccff'); R(0, 0, 11, 1, '#333366'); R(0, 0, 1, 11, '#333366'); R(2, 2, 7, 7, '#aaaaaa'); R(9, 2, 1, 8, '#333366'); R(2, 9, 8, 1, '#333366');
+  if (zoom) { R(6, 2, 1, 5, '#333366'); R(2, 6, 5, 1, '#333366'); }
+}
+function drawTb75(cv, W, title) {
+  const K = QK(); if (cv.width !== W * K || cv.height !== 17 * K) { cv.width = W * K; cv.height = 17 * K; }
+  const x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.imageSmoothingEnabled = false;
+  const C = COLOUR3, R = (h, v, w, hh, c) => { x.fillStyle = c; x.fillRect(h, v, w, hh); };
+  R(0, 0, W, 17, C ? '#eeeeee' : '#fff'); if (C) { R(0, 0, W, 1, '#ccccff'); R(0, 0, 1, 16, '#ccccff'); R(W - 1, 0, 1, 17, '#9999cc'); R(0, 16, W, 1, '#9999cc'); }
+  x.font = SYS; const tw = title ? Math.ceil(x.measureText(title).width) : 0, tx = Math.floor((W + 2 - tw) / 2) - 1; // (centred in the window, its frame counted)
+  const gaps = [[7, 20], [W - 20, W - 7]]; if (tw) gaps.push([tx - 6, tx + tw + 6]);
+  for (let v = 3; v <= 13; v += 2) { let h = 1; gaps.slice().sort((a2, b) => a2[0] - b[0]).forEach(([g0, g1]) => { if (g0 > h) R(h, v, g0 - h, 1, C ? '#777777' : '#000'); h = Math.max(h, g1); }); if (W - 1 > h) R(h, v, W - 1 - h, 1, C ? '#777777' : '#000'); }
+  tbBox75(x, 0, 8, 3, false); tbBox75(x, 0, W - 19, 3, true);
+  if (tw) { x.fillStyle = '#000'; x.textBaseline = 'alphabetic'; x.fillText(title, tx, 13); }
+}
+function drawWd75(cv, W) {
+  const K = QK(); if (cv.width !== W * K || cv.height !== 9 * K) { cv.width = W * K; cv.height = 9 * K; }
+  const x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0);
+  const C = COLOUR3, R = (h, v, w, hh, c) => { x.fillStyle = c; x.fillRect(h, v, w, hh); };
+  R(0, 0, W, 9, C ? '#eeeeee' : '#fff');
+  if (C) { R(0, 0, W, 1, '#9999cc'); R(0, 8, W, 1, '#9999cc'); }
+  for (let v = 2; v <= 6; v += 2) { R(0, v, 6, 1, C ? '#888888' : '#000'); R(15, v, W - 15, 1, C ? '#888888' : '#000'); }
+  R(7, 1, 7, 7, '#000'); R(8, 2, 5, 5, '#fff');
+}
+function frame75() {
+  const de = document.documentElement, on = V3 && de.classList.contains('mac301lay');
+  de.classList.toggle('mac75', on); de.classList.toggle('mac405', V4);
+  // (the frame changes the map's box: the first view, fitted before it, is fitted again once it is in place, so a home star near the foot
+  // isn't left under the windows there: real-play's 4k select-colony failures, 19-20 Nov)
+  if (TB75.on !== on) { TB75.on = on; requestAnimationFrame(() => { const a = A(); if (a && a.G) { a.UI.fitted = false; a.resize(); } }); }
+  const main = document.getElementById('main'); let mw = document.getElementById('mapwin301');
+  if (!on) { if (mw) mw.remove(); const ck = document.getElementById('clock405'); if (ck) ck.remove(); return; }
+  if (!mw) { mw = A().el('div', { id: 'mapwin301', 'aria-hidden': 'true' }, A().el('canvas', { class: 'tb75' })); main.prepend(mw); }
+  const t = document.getElementById('title');
+  if (t && !TB75.obs) { TB75.obs = new MutationObserver(() => frame75()); TB75.obs.observe(t, { childList: true, characterData: true, subtree: true }); }
+  const S = MACS.s || 1, W = Math.round(mw.clientWidth / S);
+  if (W > 0) drawTb75(mw.firstChild, W, t ? t.textContent : '');
+  ['tech301', 'rep301'].forEach((id) => {
+    const w = document.getElementById(id); if (!w) return;
+    let c = w.querySelector(':scope > canvas.wd75'); if (!c) { c = A().el('canvas', { class: 'wd75', 'aria-hidden': 'true' }); w.prepend(c); }
+    drawWd75(c, id === 'tech301' ? 225 : 250);
+  });
+  const cn = document.querySelector('#mapwrap .mapcorner12');
+  if (cn && BAR75() && !cn.querySelector('canvas')) { const c = A().el('canvas', { width: 64, height: 64, 'aria-hidden': 'true' }); const x = c.getContext('2d'); x.setTransform(4, 0, 0, 4, 0, 0); drawGrow75(x); cn.append(c); }
+  if (V4) clock405();
+}
+// 4.0.5's clock (DrawTimeClock @115af2; EndTurnButtonShowing @111944: shown whenever the turn is open, reports read or not): PICT 5500, the time
+// the turn has taken (no time limit: hours and minutes, "%d:%02d") in its black window, green (0, 187, 0) in Geneva 9, and a seconds hand 23
+// pixels long from (28, 30), two pixels wide, orange (255, 153, 0), turning 6 degrees a second (shots 008, 031: "0:00" and "0:02").
+// A click on it ends the turn (ClickInMapWindow). Pressed: PICT 5501. In black and white (no capture): the hand black, the time white.
+const CK405 = { turn: null, t0: 0, last: '' };
+function clock405() {
+  const a = A(), g = G(), wrap = document.getElementById('mapwrap'); if (!wrap) return;
+  let b = document.getElementById('clock405');
+  const open = !!(g && !g.over && !document.querySelector('#msg .waiting') && document.documentElement.classList.contains('mac75'));
+  if (!open) { if (b) b.hidden = true; return; }
+  if (!b) {
+    b = a.el('button', { id: 'clock405', type: 'button', 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn' }, a.el('canvas', { width: 60 * 4, height: 61 * 4 }));
+    b.addEventListener('click', () => { const c = document.querySelector('#msg .clock'); if (c) c.click(); else a.doEndTurn(); });
+    b.addEventListener('pointerdown', () => { b.dataset.down = '1'; CK405.last = ''; clock405(); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, () => { delete b.dataset.down; CK405.last = ''; clock405(); }));
+    wrap.append(b);
+  }
+  b.hidden = false;
+  if (CK405.turn !== g.turn) { CK405.turn = g.turn; CK405.t0 = Date.now(); }
+  const secs = Math.floor((Date.now() - CK405.t0) / 1000), txt = Math.floor(secs / 3600) + ':' + String(Math.floor(secs / 60) % 60).padStart(2, '0'), ang = (secs % 60) * 6;
+  const key = txt + '|' + ang + '|' + (b.dataset.down || ''); if (key === CK405.last) return; CK405.last = key;
+  const cv = b.firstChild, x = cv.getContext('2d'); x.setTransform(4, 0, 0, 4, 0, 0); x.clearRect(0, 0, 60, 61); x.imageSmoothingEnabled = false;
+  const im = a.IMG[b.dataset.down ? 'dos:p5501' : 'dos:p5500'] || a.IMG['dos:p5500']; if (im && im.complete) x.drawImage(im, 0, 0);
+  x.font = G9; x.fillStyle = COLOUR3 ? 'rgb(0,187,0)' : '#fff'; const w = Math.ceil(x.measureText(txt).width); x.fillText(txt, Math.floor(29.5 - w / 2), 43);
+  const r = ang * Math.PI / 180, ex = 28 + Math.trunc(Math.sin(r) * 23), ey = 30 - Math.trunc(Math.cos(r) * 23);
+  x.fillStyle = COLOUR3 ? 'rgb(255,153,0)' : '#000'; // (QuickDraw's Line with a 2 x 2 pen: every point of the line, the pen's square to its right and below)
+  const n = Math.max(Math.abs(ex - 28), Math.abs(ey - 30)); for (let i = 0; i <= n; i++) { const px = Math.round(28 + (ex - 28) * i / n), py = Math.round(30 + (ey - 30) * i / n); x.fillRect(px, py, 2, 2); }
+}
+if (V4) setInterval(() => { if (document.getElementById('clock405') || (G() && document.documentElement.classList.contains('mac75'))) clock405(); }, 250);
+window.addEventListener('resize', () => { if (V3 && G()) frame75(); });
 const NARROW301 = window.matchMedia('(max-width: 760px)');
 NARROW301.addEventListener('change', () => { if (window.HOMAC301 && A() && A().G) { A().renderPanel(); A().resize(); } });
 
@@ -3571,12 +3704,46 @@ function drawBar(x, ox, oy, vertical, L, t, o) {
     }
   }
 }
+// System 7.5's colour scroll bar (the colour 3.0.1 and 4.0.5 on the System 7.5 screen, html.mac75), copied from Jake's 4.0.5 shot 008 (the map's
+// bars): 16 across with its black frame both sides; an arrow box 14 long (a white first row and column, #dddddd, the arrow #9999cc edged
+// #333366, a #777777 last row and column), black dividers, the track #dddddd with #777777 dots aligned to the screen as the desktop's
+// pattern, the thumb 16 long (#555555 edge, #ccccff and #aaaaaa, a grip of #9999cc then #666699 / #ccccff lines, #333366 far edges).
+const AR75 = ['', '', '      E', '     EFE', '    EFFFE', '   EFFFFFE', '  EFFFFFFFE', ' EEEEFFFEEEE', '    EFFFE', '    EFFFE', '    EFFFE', '    EEEEE'];
+const C75 = { E: '#333366', F: '#9999cc' };
+function drawBar75(x, ox, oy, vertical, L, o, ax, ay) {
+  const R = (a0, p0, w, h, col) => { x.fillStyle = col; if (vertical) x.fillRect(ox + a0, oy + p0, w, h); else x.fillRect(ox + p0, oy + a0, h, w); };
+  R(0, 0, 16, L, '#000'); R(1, 1, 14, L - 2, '#dddddd');
+  if (o.on === false) return;
+  const box = (p0, down, press) => {
+    R(1, p0, 14, 14, press ? '#999999' : '#dddddd'); R(1, p0, 13, 1, '#fff'); R(1, p0, 1, 13, '#fff'); R(1, p0 + 13, 14, 1, '#777777'); R(14, p0, 1, 14, '#777777');
+    AR75.forEach((row, i) => { for (let j = 0; j < row.length; j++) if (row[j] !== ' ') R(1 + j, down ? p0 + 13 - i : p0 + i, 1, 1, C75[row[j]]); });
+  };
+  box(1, false, o.press === 'lo'); R(1, 15, 14, 1, '#000'); R(1, L - 16, 14, 1, '#000'); box(L - 15, true, o.press === 'hi');
+  if (!(o.max > 0)) return;
+  for (let p0 = 16; p0 < L - 16; p0++) for (let a0 = 1; a0 < 15; a0++) {
+    const gx = (vertical ? a0 : p0) + (ax || 0), gy = (vertical ? p0 : a0) + (ay || 0);
+    if ((gy & 1) ? (gx & 3) === 0 : (gx & 3) === 2) R(a0, p0, 1, 1, '#777777');
+  }
+  const T = L - 48; // (the thumb, 16 long, between the dividers)
+  if (T < 0) return;
+  const thumb = (tp, ghost) => {
+    if (ghost) { for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) if ((i === 0 || j === 0 || i === 15 || j === 15) && (i + j) % 2 === 0) R(i, tp + j, 1, 1, '#000'); return; }
+    R(1, tp, 14, 16, '#aaaaaa'); R(1, tp, 14, 1, '#555555'); R(1, tp + 1, 13, 1, '#ccccff'); R(1, tp + 1, 1, 14, '#ccccff'); R(14, tp + 1, 1, 15, '#333366'); R(1, tp + 15, 14, 1, '#333366');
+    R(5, tp + 3, 6, 1, '#9999cc'); for (let k = 4; k <= 12; k++) R(5, tp + k, 6, 1, k % 2 ? '#666699' : '#ccccff');
+  };
+  thumb(16 + Math.round(T * Math.max(0, Math.min(1, o.value / o.max))), false);
+  if (o.ghost != null) thumb(o.ghost, true);
+}
+// the map window's grow box (System 7.5, colour: shot 008, 14 x 14 inside the bars' frames)
+const GROW75 = ['GGGGGGGGGGGGGG', 'GGGGGGGGGGGGGG', 'GGEEEEEEGGGGGG', 'GGEHHHHHEEEEGG', 'GGEHIIIEHHHHGG', 'GGEHIIIEJJJEGG', 'GGEHIIIEJJJEGG', 'GGEHEEEEJJJEGG', 'GGGEHJJJJJJEGG', 'GGGEHJJJJJJEGG', 'GGGEHJJJJJJEGG', 'GGGEHEEEEEEEGG', 'GGGGGGGGGGGGGG', 'GGGGGGGGGGGGGG'];
+function drawGrow75(x) { const P = { G: '#eeeeee', E: '#333366', H: '#ccccff', I: '#bbbbbb', J: '#aaaaaa' }; x.fillStyle = '#000'; x.fillRect(0, 0, 16, 16); GROW75.forEach((r, i) => { for (let j = 0; j < 14; j++) { x.fillStyle = P[r[j]]; x.fillRect(1 + j, 1 + i, 1, 1); } }); }
+const BAR75 = () => COLOUR3 && document.documentElement.classList.contains('mac75');
 function paintBar(b, vertical, L, o) {
   const k = Math.max(1, Math.round(window.devicePixelRatio || 1)), cw = vertical ? BAR12 : L, ch = vertical ? L : BAR12, c = b.c;
   if (c.width !== cw * k || c.height !== ch * k) { c.width = cw * k; c.height = ch * k; }
   c.style.width = cw + 'px'; c.style.height = ch + 'px';
   const x = c.getContext('2d'); x.setTransform(k, 0, 0, k, 0, 0); x.imageSmoothingEnabled = false;
-  drawBar(x, 0, 0, vertical, L, BAR12, o);
+  if (BAR75() && BAR12 === 16) drawBar75(x, 0, 0, vertical, L, o); else drawBar(x, 0, 0, vertical, L, BAR12, o);
 }
 function ensureBars() {
   if (MB.wrap && MB.wrap.isConnected) return true;
@@ -3867,7 +4034,7 @@ function afterTurn12(go) {
 }
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
-  document.documentElement.classList.add('mac301');
+  document.documentElement.classList.add('mac301'); if (V4) document.documentElement.classList.add('mac405');
   // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
   try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); if (V4) { document.fonts.load("12px 'DOS Geneva 9 Bold'"); document.fonts.load("12px 'DOS Geneva 9'").then(() => { const a = A(); if (a && a.G) a.renderPanel(); }); } } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {

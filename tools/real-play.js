@@ -399,6 +399,9 @@ async function playRun(browser, job, outDir, idx) {
     await step('send-fleet', async () => {
       const f = await myFleet(); if (!f) { warn('skipped: no fleet to send'); return; }
       await G((id) => { HOAPI.UI.sel = HOAPI.G.fleets.find(x => x.id === id).star; HOAPI.UI.selFleet = null; HOAPI.renderPanel(); HOAPI.draw(); }, f.id); await sleep(150);
+      // (3.0.1 and 4.0.5 select the star's first fleet, RecalcFleetsAtNewStar; with more than one there, as a Novice start has, a person clicks the
+      // fleet's row in the pane first: the pane is a canvas, so the row's click is made here)
+      await G((id) => { if (HOAPI.UI.selFleet != null && HOAPI.UI.selFleet !== id) { HOAPI.UI.selFleet = id; HOAPI.renderPanel(); HOAPI.draw(); } }, f.id); await sleep(100);
       // stars in reach, nearest first, that a person can see and click
       const cand = await G((fid) => { const a = HOAPI, G = a.G, f = G.fleets.find(x => x.id === fid); return G.stars.filter(s => s.id !== f.star && HO.starDist(G, f.star, s.id) <= f.fuel).sort((x, y) => HO.starDist(G, f.star, x.id) - HO.starDist(G, f.star, y.id)).slice(0, 40).map(s => s.id); }, f.id);
       if (!cand.length) { warn('no star within the fleet\'s fuel'); return; }
