@@ -170,6 +170,12 @@ html.mac301 .dl20 .ok20 { white-space: nowrap; }
 /* 3.0.1's battle window has no title bar (Jake's captures 020-030) */
 html.mac301 .win.bw12m .wtitle { display: none; }
 html.mac301 .win.bw12m .wbody { padding: 0; }
+/* (4.0.5's battle window: 445 x 300 in its own frame (battleWindow), Skip at (194, 269), shot 033) */
+html.mac405 .win.bw12m { border: 0 !important; box-shadow: none !important; background: none !important; padding: 0 !important; border-radius: 0 !important; width: auto !important; }
+html.mac405 .bw12w.bw405 { width: 445px; height: 300px; aspect-ratio: auto; max-width: none; }
+html.mac405 .bw12w.bw405 .bw12b { left: 194px; top: 269px; width: 58px; height: 20px; }
+html.mac405 .bw12w.bw405 .bw12b:not(.done):focus-visible { outline: 1px dotted #fff; outline-offset: -4px; } /* (the program draws no ring round Skip: a keyboard user still sees where the focus is) */
+html.mac405 .bw12w.bw405 .bw12b:not(.done):focus:not(:focus-visible) { outline: none; }
 /* 3.0.1's battle window button (DITL 7010): a Mac push button in Chicago, the default ring once it says OK */
 html.mac301 .win .bw12w button.bw12b { container-type: normal; font: 30px/1 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
 html.mac301 .win .bw12w button.bw12b.done { outline: 6px solid #fff; outline-offset: 2px; } /* (the default ring, white on the black window, at twice the size) */

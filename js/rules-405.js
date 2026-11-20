@@ -1151,6 +1151,7 @@ function duel(G, sid, A, Dh, rec) {
   // with smarter generals (player +0x5c bit 8); without it, 0
   const luck = (o) => { if (!G.opts.luck) return 0; const l = RI(G, -1, 1); return G.players[o].flags.generals && l === -1 ? 0 : l; };
   const lA = luck(A), lD = luck(Dh);
+  if (rec && (lA || lD)) rec.lk = [lA, lD]; // (each side's luck in the record's sides order, as 3.0.1's: the battle window's horseshoe or black cat, DoOneBattle's ICON 3141 + luck)
   // the planet fights when the holder owns the star: its people as hit
   // points, the owner's Weapons and Shields
   const planet = Dh === s.owner && s.pop > 0 ? { pop: popU(s), W: G.players[Dh].tech.weapons, S: G.players[Dh].tech.shields } : null;

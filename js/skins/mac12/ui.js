@@ -3822,7 +3822,7 @@ const SYS = "15px 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN9
 const SYS3 = SYS, GEN93 = GEN9;
 function battleWindow(b, k) {
   const a = A(), g = G(), rs = H().rules(g), el = a.el, IMG = a.IMG, ME = a.ME;
-  const fr = lang() === 'fr', W = 445, Hh = 310, S = 2, TICK = 1000 / 60;
+  const fr = lang() === 'fr', W = 445, Hh = V4 ? 300 : 310, S = 2, TICK = 1000 / 60; // (4.0.5's DLOG 7011: 445 x 300, shot 033)
   const pic = (n) => { const im = IMG['dos:' + n]; return im && im.complete && im.naturalWidth ? im : null; };
   // (the pace: 2.0.1's 30 ticks a shot; 3.0.1's 'Stup' 1000 has long +0x50 = 10 ticks, which HaveGroupShoot adds to the deadline after each
   // drawn shot and again for each ship or planet destroyed)
@@ -3847,7 +3847,7 @@ function battleWindow(b, k) {
   const ownerOf = (L) => { const s = L.find(x => !x.planet && x.units.length); return s ? b.start[s.units[0]].o : b.planetOwner; };
   if (b.grp && ownerOf(sides[0]) !== leftSide && ownerOf(sides[1]) === leftSide) sides.reverse();
   const cols = sides.map((L, ci) => L.slice().sort((p, q) => (q.planet ? 1 : 0) - (p.planet ? 1 : 0)).map((x, row) => Object.assign(x, { o: x.planet ? b.planetOwner : b.start[x.units[0]] ? b.start[x.units[0]].o : -1, ci, row })));
-  const colX = [25, 300], owners = [leftSide, rightSide];
+  const colX = [V4 ? 5 : 25, 300], owners = [leftSide, rightSide]; // (4.0.5's DoOneBattle @6099e: the sides at 5 and 300, shots 033-100)
   const where = new Map(), planetAt = {};
   cols.forEach(L => L.forEach(x => { x.units.forEach(i => where.set(i, x)); if (x.planet) planetAt[x.o] = x; }));
   // a viewer who lost a battle of one round sees nothing of the other side (DrawAllGroups)
@@ -3858,9 +3858,14 @@ function battleWindow(b, k) {
   const btn = el('button', { class: 'bw12b', onclick: () => { if (done) a.closeModal(); else skip = true; } });
   const setBtn = (t) => { btn.textContent = ''; btn.append(document.createTextNode(t)); btn.setAttribute('translate', 'no'); };
   setBtn(fr ? 'Passe' : 'Skip');
-  const box = el('div', { class: 'bw12w' }, c, btn);
+  const box0 = el('div', { class: 'bw12w' + (V4 ? ' bw405' : '') }, c, btn);
+  // (4.0.5, shot 033: four rings round a 4-pixel black margin, white; #ccccff over #666699; #bbbbbb; #666699 over #ccccff)
+  const ring = (inner, tl, br) => el('div', { style: `border:1px solid;border-color:${tl} ${br} ${br} ${tl};background:#000` }, inner);
+  const box = V4 ? ring(ring(ring(ring(el('div', { style: 'padding:4px;background:#000' }, box0), '#669', '#ccf'), '#bbb', '#bbb'), '#ccf', '#669'), '#fff', '#fff') : box0;
   let stop = false, skip = false, done = false;
   a.modal('', box, { cls: 'bw12m', label: 'Summary of battle', onClose: () => { stop = true; } });
+  // (4.0.5 puts the window with its frame's corner at (89, 48) on the 640 x 480 screen, shot 033; the remake's own windows stay centred)
+  if (V4) { const w = box.closest('.win'), m = document.getElementById('main'); if (w && m && document.documentElement.classList.contains('mac75')) { const r = m.getBoundingClientRect(), k = MACS.s || 1, sc = w.closest('.scrim'); if (sc) { sc.style.placeItems = 'start'; sc.style.padding = '0'; sc.style.background = 'none'; } w.style.position = 'fixed'; w.style.margin = '0'; w.style.left = (r.left / k + 89) + 'px'; w.style.top = ((r.top - 20 * k) / k + 48) + 'px'; } }
   // QuickDraw's qd.gray in patOr with black: every other pixel black
   const grayPat = (() => { const p = document.createElement('canvas'); p.width = 2; p.height = 2; const q = p.getContext('2d'); q.fillStyle = '#000'; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); })();
   const whiteGray = (() => { const p = document.createElement('canvas'); p.width = 2; p.height = 2; const q = p.getContext('2d'); q.fillStyle = '#fff'; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); })();
@@ -3872,7 +3877,7 @@ function battleWindow(b, k) {
   const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) x.fillRect(h, v, 1, 1); };
   const face = (o, ci) => {
     const p = g.players[o]; if (!p) return;
-    const id = o === ME ? (p.female ? 1500 : 1000) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20);
+    const id = o === ME ? (V4 ? (p.female ? 1906 : 1406) : (p.female ? 1500 : 1000)) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20); // (4.0.5: you are ICON 1406, +500 a woman, @60baa)
     const im = pic('i' + id); if (im) x.drawImage(im, colX[ci], 2, 32, 32);
     // (3.0.1's DoOneBattle @e0aee: the side's luck, ICN# 3141 + luck (3140 bad, 3142 good, none for 0), 32 to the right of the face, and the
     // name at +67; 1.2 and 2.0.1 have no luck and the name at +35)
@@ -3904,7 +3909,7 @@ function battleWindow(b, k) {
     if (!keepPic) tile(gr, gx, gy);
     x.fillStyle = '#000'; x.fillRect(gx - 20, gy + 40, 160, 13);
     const t = groupWords(gr);
-    x.font = V3 ? SYS3 : SYS; const cond = x.measureText(t).width > 120;
+    x.font = V4 ? GEN9 : V3 ? SYS3 : SYS; const cond = x.measureText(t).width > 120; // (4.0.5 measures in the face it draws with: shot 033's "3 Serpent (3/3) Fighters" is not condensed)
     x.font = V3 ? GEN93 : GEN9; x.letterSpacing = cond ? '-1px' : '0px';
     const w = x.measureText(t).width; text(t, gx + 60 - Math.trunc(w / 2), gy + 50, GEN9, cond);
     if (!gr.planet) { // the shading: the whole cell when gone, else the front ship's damage from the left (a satellite: a third, from 40)
