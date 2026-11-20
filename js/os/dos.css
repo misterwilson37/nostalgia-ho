@@ -15,7 +15,9 @@
    bitmaps carry the bold, and the 8x14 face for buttons and menus, as the game's own dialogs (js/skins/dos/style.css, .dd). The
    Windows 3.1 look (win31.css) keeps MS Sans Serif: it is Windows' own.) */
 html.os-dos { --ui: "DOS Geneva 9", sans-serif; font-synthesis: none; }
-html.os-dos :where(button, input, select, textarea, .mbtn, .wtitle span, .tbtn) { font-family: "DOS Bios", monospace; font-synthesis: none; -webkit-font-smoothing: none; }
+html.os-dos :where(.mbtn) { font-family: "DOS Bios", monospace; font-synthesis: none; -webkit-font-smoothing: none; }
+/* (the remake's own controls and window titles are proportional Geneva 9, bold from its own bold face: the 8x14 is monospace, which spaced "Galaxy" as "Gal axy" and "Circle" as "Ci rcl e"; only the menus and the DOS program's own dialogs, js/skins/dos/style.css, use it) */
+html.os-dos :where(button, input, select, textarea, .wtitle span, .tbtn) { font-family: "DOS Geneva 9", sans-serif; font-synthesis: none; -webkit-font-smoothing: none; }
 html.os-dos :where(h1, h2, h3, h4) { font-family: "DOS Geneva 9", sans-serif; }
 /* 3-D bevels */
 .box, .designer { background: var(--plat); border: 2px solid; border-color: #fff #808080 #808080 #fff; }
