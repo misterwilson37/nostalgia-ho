@@ -881,6 +881,7 @@ function buildShips(G, pid, sid, did, n) {
     p.savings -= c.money; p.metal -= c.metal;
     p.spentThisTurn.push({ did, sid, money: c.money, metal: c.metal });
     d.built++; built++;
+    if (p.st405) p.st405.b++; // (4.0.5's Statistics: Total # of Ships Built, BuildAShip @f2ac6, BuildAFleet @722c8)
     addShipsToStar(G, pid, sid, d, 1);
   }
   return built;
@@ -897,7 +898,7 @@ function unbuildShip(G, pid, sid, did) {
       f.ships[did]--; if (!f.ships[did]) delete f.ships[did];
       if (fleetCount(f) === 0) G.fleets.splice(G.fleets.indexOf(f), 1);
       p.savings += e.money; p.metal += e.metal;
-      const d = getDesign(G, pid, did); d.built--;
+      const d = getDesign(G, pid, did); d.built--; if (p.st405) p.st405.b--;
       p.spentThisTurn.splice(i, 1);
       return true;
     }

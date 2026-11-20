@@ -180,3 +180,6 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
 ## Open questions
 
 (Kept in step with what Jake answers.)
+
+- **20 Nov (Mac 4.0.5 round):** the 405 rules now keep 4.0.5's Statistics counters (`p.st405`, docs/status-mac405.md); the w95 skin's
+  Statistics (dialog 355) can be built on them. Digests: 405 d9ff9858e51b92af, mac405 9fc3fa9801f815ff (the field only).

@@ -239,9 +239,8 @@ function menuLayout301() {
 // Mac 4.0.5's menus (MENU 129-134 of its resource fork, HOLANG.mac405En.MENU; Jake's shots 011-013, 022-024, 166, 251): 3.0.1's commands
 // in 4.0.5's words and order. File: New Game, Open Game, Begin Game (network: dimmed), Close Game, Save Game (the remake saves by itself:
 // dimmed), End Turn, End Turn and Switch Players, Page Setup, Print, Quit. Options: Auto Play, Sound, Master Point List, Hall of Fame, Hall
-// of Shame, Preferences. Galaxy: Compare Players (Y), Graph History (H), Statistics (dimmed: the engine keeps no counters yet, as the
-// Windows 4.0.5 skin's), List All Explored Stars, Dip Into Savings, Abandon Planet, Alliances, Give Money/Metal, Surrender To, Send Message,
-// Armageddon (no Fix Spending). Window: Tech Spending, Report, Chat (network: dimmed), Zoom In, Zoom Out, Hide Information, Clean Up Windows.
+// of Shame, Preferences. Galaxy: Compare Players (Y), Graph History (H), Statistics, List All Explored Stars, Dip Into Savings, Abandon Planet, Alliances, Give Money/Metal, Surrender To, Send Message,
+// Armageddon (no Fix Spending); Statistics from the rules' counters (p.st405). Window: Tech Spending, Report, Chat (network: dimmed), Zoom In, Zoom Out, Hide Information, Clean Up Windows.
 function menuLayout405(M, o) {
   const p = (menu, name) => o.pick(M[menu], name), keyed = (x, key) => x && [x[0], x[1], x[2], x[3], x[4], key];
   const named = (x, label) => x && [label, x[1], x[2], x[3], x[4], x[5]];
@@ -258,7 +257,7 @@ function menuLayout405(M, o) {
       named(p('Options', 'Hall Of Fame…'), 'Hall of Fame…'), named(p('Options', 'Hall Of Shame…'), 'Hall of Shame…'), '-', p('Options', 'Preferences…')],
     Ships: M.Ships,
     Galaxy: [
-      keyed(p('Galaxy', 'Compare Players…'), 'Y'), keyed(p('Galaxy', 'Graph History…'), 'H'), it('Statistics…', () => {}, { ghost: () => true }), p('Galaxy', 'List All Explored Stars…'), '-',
+      keyed(p('Galaxy', 'Compare Players…'), 'Y'), keyed(p('Galaxy', 'Graph History…'), 'H'), it('Statistics…', () => stats405(), { ghost: () => noGame() || !A().me().st405 }), // (a game begun before the counters: dimmed) p('Galaxy', 'List All Explored Stars…'), '-',
       p('Galaxy', 'Dip Into Savings…'), M.Galaxy.find(x => x !== '-' && x[5] === 'A'), '-',
       p('Galaxy', 'Alliances…'), p('Galaxy', 'Give Money/Metal…'), p('Galaxy', 'Surrender To…'), p('Galaxy', 'Send Message…'), '-', p('Galaxy', 'Armageddon')],
     Window: [
@@ -1929,6 +1928,18 @@ function give301() {
   return true;
 }
 
+// 4.0.5's DLOG 6160 "Statistics" (DoStatisticsDlg @52080; 359 x 236, DITL 6160; Jake's shot 019): "Cumulative Statistics:" (12, 12),
+// six lines at (16, 44 + 24k) with their numbers (LongToNiceString) at (204, ...): the player's counters (js/rules-405.js p.st405).
+function stats405() {
+  const a = A(), el = a.el, st = a.me().st405; if (!st) return false;
+  const L = [['Total Population Gained:', st.g], ['Total Population Killed:', st.k], ['Enemy Population Killed:', st.ek], ['Total # of Ships Built:', st.b], ['Total # of Ships Destroyed:', st.d], ['Total # of Enemy Ships Destroyed:', st.ed]];
+  a.modal('', dlog20(359, 236, txt20('Cumulative Statistics:', [12, 12, 28, 216]),
+    ...L.map(([t], k) => txt20(t, k === 5 ? [164, 16, 196, 182] : [44 + 24 * k, 16, 60 + 24 * k, 197])),
+    ...L.map(([, v], k) => txt20(nice(v), [44 + 24 * k, 204, 60 + 24 * k, 334])),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([200, 288, 220, 346]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Statistics' });
+  return true;
+}
 // 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
 // SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
 // legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a

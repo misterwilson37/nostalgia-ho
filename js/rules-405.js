@@ -133,6 +133,11 @@ function setupPlayer(G, p, home, start) {
   D.setBars20(home, -1, 1000, 0);
   p.flags = {}; p.bonus = {}; p.deck = []; p.hand405 = 0;
   p.skill = k; p.startRank = 0;
+  // 4.0.5's Statistics window (DoStatisticsDlg @52080: the player's +0x18d6 .. +0x18ea, set in CreatePlayer @81c9c): population gained
+  // (from the home's first people: ComputeIncomeAndPopulation's growth, ColonizeStar's settlers), population killed (your own people lost:
+  // a starving colony, battles, supernovas, armageddon's stars), enemy population killed (in battle), ships built (BuildAShip, BuildAFleet;
+  // ScrapCurrentFleet takes them back off), ships destroyed (yours, ZeroFleetsAtStar / ResolveVictorFleetsAtStar), enemy ships destroyed
+  p.st405 = { g: st.pop, k: 0, ek: 0, b: (st.colony || 0) + (st.scouts || 0), d: 0, ed: 0 };
   p.colOrder = [home.id];
 }
 // the designs a radical discovery gives and the starting ones (CONFIRMED,
@@ -553,6 +558,7 @@ function deductInterest(G, p) {
 function scrapReturn(G, p) { return p.human ? (p.flags.recycle ? 7 / 8 : 3 / 4) : 1; }
 function scrap405(G, f) {
   const p = G.players[f.owner];
+  if (p.st405) p.st405.b -= fleetCount(f); // (ScrapCurrentFleet @f348a: the ships scrapped come off Total # of Ships Built)
   let metal = 0;
   for (const k in f.ships) { const d = getDesign(G, f.owner, +k); if (d) metal += f.ships[k] * designCost(G, d).metal; }
   if (p.human) metal = trunc(metal * (p.flags.recycle ? 7 : 3) / (p.flags.recycle ? 8 : 4));
@@ -604,6 +610,7 @@ function maintainKillStars(G, p) {
     if (avail < need) {
       need -= avail; p.savings -= avail; avail = 0;
       const u = Math.max(0, trunc(Math.imul(popU(s), -need - inc) / -inc) - 100);
+      if (p.st405) p.st405.k += popU(s) - u;
       setPopU(s, u);
       if (u === 0) { msg(G, p.id, `You have abandoned ${s.name}.`, { icon: 'm9013', star: sid }); decolonize(G, p, sid); }
       else { s.oStarve = true; msg(G, p.id, `Your colony at ${s.name} is not receiving sufficient funds to support itself.`, { icon: 'm9020', sound: 3002, star: sid }); }
@@ -1395,6 +1402,13 @@ function makeResultMessages(G, sid, x) {
       if (own) { s.owner = -1; s.pop = 0; }
     }
   }
+  // the Statistics' battle counters (MakeResultMessages @6287e, ZeroFleetsAtStar @63838, ResolveVictorFleetsAtStar @638be)
+  {
+    const PA = G.players[A], PD = G.players[Dh], lostA = winner === A ? nA - survN : nA, lostD = winner === Dh ? nD - survN : nD;
+    const killed = pop > 0 ? Math.max(0, winner === Dh ? pop - planetLeft : pop) : 0; // (the defender's own planet fought: its people as hit points)
+    if (PA && PA.st405) { PA.st405.d += lostA; PA.st405.ed += lostD; PA.st405.ek += killed; }
+    if (PD && PD.st405) { PD.st405.d += lostD; PD.st405.ed += lostA; PD.st405.k += killed; }
+  }
 }
 // CONFIRMED (FUN_0042780e): the winner's survivors of each design go back to
 // its fleets at the star listed first; the others lose theirs
@@ -1590,7 +1604,7 @@ function settle(G, p, s, f) {
   if (p.human) msg(G, p.id, `You have colonized ${s.name}.`, { icon: 'm9031', sound: 7018, star: s.id });
   L.splice(firstCol(L), 0, s.id);
   (p.colOrder || (p.colOrder = [])).unshift(s.id);
-  s.owner = p.id; setPopU(s, n); s.everProfit = false; s._warned = false;
+  s.owner = p.id; setPopU(s, n); s.everProfit = false; s._warned = false; if (p.st405) p.st405.g += n;
   s.oInc = -7501; s.oSink = 0; s.oStarve = false; s.oNew = false; s.abandon301 = false; s.done301 = false;
   p.net301 = (p.net301 || 0) - 7501;
   let T, X;
@@ -1761,7 +1775,7 @@ function reactToSupernova(G, p, armFired, thrown) {
     const s = G.stars[sid], m = thrown[sid];
     if (!m) continue;
     const kill = Math.min(popU(s), Math.imul(m, RI(G, 40, 60)));
-    setPopU(s, popU(s) - kill);
+    setPopU(s, popU(s) - kill); if (p.st405) p.st405.k += kill;
     if (p.human) msg(G, p.id, `The shock wave from the supernova threw ${num(G, m)} metal at ${s.name}, killing ${num(G, kill * 1000)} people.`, { icon: 'm9036', sound: 8000, star: sid });
     if (popU(s) === 0) { if (p.human) msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 8000, star: sid }); decolonize(G, p, sid); }
     else { p.metal += m; s.metal -= m; }
@@ -1863,7 +1877,7 @@ function income(G, p) {
     const m = G.meteors && G.meteors[sid];
     if (m > 0) {
       const kill = Math.min(popU(s), m * 50);
-      setPopU(s, popU(s) - kill);
+      setPopU(s, popU(s) - kill); if (p.st405) p.st405.k += kill;
       if (p.human) msg(G, p.id, `Oh no!  ${num(G, kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', sound: 8000, star: sid });
       if (popU(s) === 0) { if (p.human) msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 8000, star: sid }); decolonize(G, p, sid); continue; }
     }
@@ -1880,7 +1894,7 @@ function income(G, p) {
           if (u + add >= mx && p.human) msg(G, p.id, `${s.name}'s population growth rate has slowed.`, { icon: 'm9030', star: sid, quiet: true });
         }
       } else add = RI(G, 0, trunc(mx / 10000)) + trunc(mx / 1000);
-      u += add; setPopU(s, u);
+      u += add; setPopU(s, u); if (p.st405) p.st405.g += add;
     }
     const inc = incomeU(u, h.H);
     s.oInc = inc;
