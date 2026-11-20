@@ -181,8 +181,9 @@ window.HOTHEME = {
     const own = 'i' + (me.female ? 1500 : 1000);
     const tech = ['Range', 'Speed', 'Weapon', 'Shield', 'Miniaturization'].findIndex(n => new RegExp('Your ' + n + 's? Technology').test(t));
     const R = (icon, sound) => ({ icon: icon && (P + icon), sound });
-    if (/^Spaceward Ho! (Version [\d.]+ )?by/.test(t)) return R('i3115', null); // 1.2 says "Version 1.2 by"
-    if (/^Click here/.test(t)) return R('i3116', null);
+    if (/^Spaceward Ho! (Version [\d.]+ )?(by|par)\b/.test(t)) return R('i3115', null); // 1.2 says "Version 1.2 by" (French "par")
+    // (DOS 2.0's second report is "Click here…"; 1.2's is its artwork credit, report 1001, ICON 3116 in 1.2's GetIconID @130db0: Jake's shot010)
+    if (/^Click here|^Artwork by Howard Vives|^Graphismes de Howard Vives/.test(t)) return R('i3116', null);
     if (tech >= 0) return R('i' + (3100 + tech), 2000);
     if (/^Year \d+|updated to the year/.test(t)) return R('i3111', 2000);
     // 1.2's blank meteor report (the 1009 report with no player's name):
@@ -461,7 +462,7 @@ function dosKeys() {
 }
 // F10, the program's boss key (FUN_9000_7450, which its event loop FUN_2000_fd17 calls on the key code 0x10c4, at any time, over any window): the screen goes to
 // text mode and shows a DOS prompt, "C:\>" in grey at its top left, until a key is pressed, then the program sets its graphics mode again and redraws its screen
-// (captured over the licence window: v20dos-orig-bosskey.png). Here a black page with the prompt in the screen font; a key or a click brings the page back.
+// (captured over the licence window: v20dos-orig-bosskey.png). Here a black page with the prompt in the VGA text mode's own 9 x 16 font (IBM VGA 9x16, int10h.org, CC BY-SA 4.0); a key or a click brings the page back.
 function bossKey() {
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'F10' || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey || !frameOn() || document.querySelector('.dd-boss')) return;
@@ -532,7 +533,7 @@ function battleDos(b, k) {
   const mo = new MutationObserver(() => { if (!d.isConnected) { stop = true; mo.disconnect(); } }); mo.observe(document.body, { childList: true });
   const pat = (col) => { const p = document.createElement('canvas'); p.width = p.height = 2; const q = p.getContext('2d'); q.fillStyle = col; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); };
   const grayPat = pat('#000'), whiteGray = pat('#fff');
-  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "bold 13px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif") : bold ? F9B : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
+  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "13px 'Win31 System', 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif") : bold ? F9B : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
   let seed = (b.id | 0) * 7919 + 13; const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
   const stars = Array.from({ length: 35 }, () => [rnd(5, 440), rnd(5, 348)]);
   const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) x.fillRect(h, v, 1, 1); };
@@ -778,8 +779,8 @@ function setUnit() {
 const F9 = "12px 'DOS Geneva 9'", F9B = "12px 'DOS Geneva 9 Bold'", C12 = "15px 'DOS Chicago 12'";
 // the Windows program's panels are in MS Sans Serif 8 (measured: capitals 8 pixels, lines 14 apart) and the planet's name in the bold System font
 // (capitals 10); neither font is in the repo, so the look's MS Sans Serif / Arial at those sizes (docs/win20-findings.md)
-const WSANS = "'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif", WFONT = { [F9]: '11px ' + WSANS, [F9B]: 'bold 11px ' + WSANS, [C12]: 'bold 14px ' + WSANS };
-const wf = (f) => (winOn() && WFONT[f]) || f, WK = 0.92;
+const WSANS = "'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif", WFONT = { [F9]: '11px ' + WSANS, [F9B]: 'bold 11px ' + WSANS, [C12]: "13px 'Win31 System', " + WSANS };
+const wf = (f) => (winOn() && WFONT[f]) || f, WK = 1; // (the real MS Sans Serif bitmap, from Windows 3.1's disks: js/os/win31.css, needs no narrowing)
 let fontsReady = false;
 function loadFonts() {
   if (fontsReady || !document.fonts) return;

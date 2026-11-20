@@ -609,8 +609,8 @@ The side-by-side sheet is the session's `amiga-real.png`.
   when they can't be used. Optionen's toggles: Nachrichten zeigen, Kämpfe zeigen (starts ticked), Warnungen
   ausgeben (off: no colony warning), Sound; Kontrollzeit and Kampftempo open Preferences; Bildschirm picks the pixels.
 - **The ASL file requester** (from a real Amiga): "Name der neuen Galaxis:" / "Name der zu öffnenden Galaxis:" with
-  close, zoom and depth gadgets, the list in a Topaz-like font (`tools/amiga-topaz.py`: the real Topaz is Commodore's
-  ROM font; this is the public-domain font8x8 set) with "(Drw)" on an orange-gold cell, Pattern "#?.HO!", Drawer and
+  close, zoom and depth gadgets, the list in Topaz (`tools/amiga-topaz.py`, from the Multi Platform Amiga Fonts pack's Kickstart 2.x
+  Topaz, GPL with the font exception: assets/skins/amiga/fonts/README.txt; it was a font8x8 stand-in until 20 Nov 2026) with "(Drw)" on an orange-gold cell, Pattern "#?.HO!", Drawer and
   File with white labels, OK, Disks, Parent, Cancel, and a sizing gadget in the cyan frame. Neues Spiel asks it
   first; its file name becomes the galaxy's.
 - **Spieleintrag** (from a real Amiga): at the start of a new game, "Identifizieren Sie sich:", Name, Paßwort; Ok and

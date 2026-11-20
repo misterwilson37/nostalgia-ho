@@ -73,7 +73,34 @@ const noGame = () => !G();
 const LY = 2, ZOOMS = [6, 9, 12, 17].map(z => z * LY);
 // With modern conveniences, three closer zooms beyond the original's largest (the remake's: on a big screen 17 is small); the plain game keeps the four.
 const ZOOMS_MODERN = ZOOMS.concat([24, 34, 48].map(z => z * LY));
-const zooms = () => { const g = G(); return g && g.opts && g.opts.modern ? ZOOMS_MODERN : ZOOMS; };
+const zoomsBase = () => { const g = G(); return g && g.opts && g.opts.modern ? ZOOMS_MODERN : ZOOMS; };
+// The window filled (Jake, 19 Nov 2026, the remake's own: on a big screen the whole galaxy shows at 17 with a wide empty band at the right or
+// the foot): when every star fits at the largest zoom with room to spare, that zoom becomes the one that fills the window, the stars and their
+// names as far from the top as from the foot (or from the left as from the right, whichever binds); the smaller zooms are the program's, and a
+// galaxy that doesn't fit at 17 is shown as the program shows it. The edge round the stars: half a planet's picture, and its name under it.
+const FILL = { key: '', s: 0 };
+const planetPx12 = (s) => Math.max(18, Math.min(52, s * 0.9)); // (the classic map's planet size, js/skins/classic/ui.js planetPx)
+function starBox(g, s) { // the stars' extent at scale s, in map pixels, with each one's picture and name
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (const st of g.stars) { x0 = Math.min(x0, st.x); x1 = Math.max(x1, st.x); y0 = Math.min(y0, st.y); y1 = Math.max(y1, st.y); }
+  const ps = planetPx12(s), side = Math.max(ps / 2, 30), top = ps / 2 + 2, foot = ps / 2 + 15;
+  return { x0: x0 * s - side, x1: x1 * s + side, y0: y0 * s - top, y1: y1 * s + foot };
+}
+function fillZoom() {
+  const g = G(), a = A(); if (!g || !a || !g.stars || !g.stars.length) return 0;
+  const [w, h] = mapSize(); if (!w || !h) return 0;
+  const key = [w, h, g.stars.length, g.W, g.H, g.stars[0].x, g.stars[0].y].join();
+  if (FILL.key === key) return FILL.s;
+  const GAP = 16; let s = ZOOMS[3];
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const st of g.stars) { x0 = Math.min(x0, st.x); x1 = Math.max(x1, st.x); y0 = Math.min(y0, st.y); y1 = Math.max(y1, st.y); }
+  for (let i = 0; i < 6; i++) { // (the edge grows with the zoom until the planets are their largest: a few rounds settle it)
+    const ps = planetPx12(s), padX = 2 * Math.max(ps / 2, 30), padY = ps + 17;
+    s = Math.min((w - 2 * GAP - padX) / Math.max(1, x1 - x0), (h - 2 * GAP - padY) / Math.max(1, y1 - y0));
+  }
+  FILL.key = key; FILL.s = s > ZOOMS[3] * 1.02 ? Math.floor(s * 100) / 100 : 0;
+  return FILL.s;
+}
+const zooms = () => { const Z = zoomsBase(), f = own() ? fillZoom() : 0; return f ? ZOOMS.slice(0, 3).concat([f], Z.slice(4).filter(z => z > f * 1.1)) : Z; };
 const zoomIdx = (s) => { const Z = zooms(); let b = 0; Z.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(Z[b] / s))) b = i; }); return b; };
 const snapZoom = (s) => zooms()[zoomIdx(s)];
 function zoomTo(s, f) {
@@ -319,31 +346,57 @@ const shipCount = (did) => G().fleets.filter(f => f.owner === A().ME).reduce((a,
 function win(body, cls2) { A().modal('', body, { cls: 'mid mac12 ' + (cls2 || ''), label: 'Spaceward Ho!' }); }
 const btn = (t, fn, o) => A().el('button', Object.assign({ onclick: fn }, o || {}), t);
 
-// DLOG 6000 "List Ship Types…" (ListShipTypes @110fc0, InitShipTypesList, SetShipTypeAttrs @11153c, doRenameTypeDialog @11170e)
+// DLOG 6000 "Modèles existants…" (ListShipTypes @110fc0, InitShipTypesList, DRAWSHIPTYPEPICTURE @1114ae, SetShipTypeAttrs @11153c; 430 x 301,
+// DITL 6000 read in 1.2F's resource fork; Jake's capture list-ship-types): the types at the left (3, 3, 137 x 214) as 53-pixel cells, each the
+// small picture over "Classe Nom (A/B)", the chosen one inverted, with the list's scroll bar; the chosen type's big picture (149, 3, 243 x 76);
+// "Nom du modèle:", "Classe:", the three costs, the five levels in two columns, "Construits:" and "En service:", the check box "Modèle à
+// recycler", Renommer (253, 271) and OK. English has no 1.2: 2.0.1's English window (shipTypes20).
+const R6000 = { name: [[87, 148, 102, 261], [87, 311, 103, 419]], cls: [[107, 148, 123, 203], [105, 311, 120, 419]],
+  costs: [[[132, 148, 148, 309], [132, 311, 148, 415]], [[150, 148, 166, 296], [150, 311, 166, 415]], [[167, 148, 183, 276], [167, 311, 183, 415]]],
+  lv: [[[196, 151, 211, 236], [195, 258, 211, 278]], [[215, 151, 231, 206], [215, 258, 231, 279]], [[235, 151, 251, 217], [235, 258, 251, 280]], [[196, 311, 212, 375], [196, 388, 212, 412]], [[215, 311, 231, 365], [215, 388, 231, 414]]],
+  built: [[226, 14, 242, 91], [226, 94, 242, 133]], exist: [[246, 14, 262, 87], [246, 94, 262, 133]], chk: [270, 14, 288, 188], ren: [271, 253, 290, 329], ok: [271, 343, 291, 401] };
+let L6000 = { top: 0 };
 function shipTypes(selId) {
-  const a = A(), el = a.el, p = a.me(), rs = H().rules(G());
-  const ds = p.designs.filter(d => !d.scrapped);
+  if (lang() !== 'fr') return shipTypes20(selId);
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g);
+  const ds = p.designs.filter(d => !d.scrapped).reverse();
   if (!ds.length) return true;
-  let cur = ds.find(d => d.id === selId) || ds[ds.length - 1];
-  const list = el('div', { class: 'lb', role: 'listbox' }), info = el('div', { class: 'tinfo' });
+  let cur = ds.find(d => d.id === selId) || ds[0];
+  const pane = el('div', { style: 'position:absolute;left:0;top:0;width:430px;height:301px' });
+  const picOf = (d) => (a.shipPic ? a.shipPic(d, a.ME) : null);
+  const putPic = (q, d, l, t, w, h) => { const im = picOf(d); if (!im || !im.width) return; const k = Math.min(w / im.width, h / im.height), pw = Math.round(im.width * k), ph = Math.round(im.height * k); q.x.imageSmoothingEnabled = false; q.x.drawImage(im, l + Math.round((w - pw) / 2), t + Math.round((h - ph) / 2), pw, ph); };
+  const T = (t, r) => { const n = txt20(String(t), r); n.style.overflow = 'visible'; n.style.whiteSpace = 'nowrap'; return n; };
   const show = () => {
-    list.innerHTML = '';
-    for (const d of ds.slice().reverse()) list.append(raw('div', desc0(d), { class: 'li' + (d === cur ? ' sel' : ''), role: 'option', onclick: () => { cur = d; show(); } }));
-    const c = H().designCost(G(), cur);
-    info.innerHTML = '';
-    const pic = a.shipImgEl(cur, 48);
-    const r = (label, v) => el('div', { class: 'kv' }, el('span', null, label), raw('b', String(v)));
-    info.append(pic, r('Name:', cur.name), r('Class:', cls(cur.type)), r('Development Cost:', '$' + nice(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0))),
-      r('Production Cost:', '$' + nice(c.money)), r(lang() === 'fr' ? raw('span', 'Coût en métal:') : 'Metal Cost:', nice(c.metal)),
-      r('Range', cur.R), r('Speed', cur.V), r('Weapons', cur.W), r('Shields', cur.S), r('Mini', cur.M),
-      r('# Built:', nice(cur.built || 0)), r('#Existing:', nice(shipCount(cur.id))),
-      el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: cur.scrap301 ? 'checked' : false, onchange: (e) => { if (rs.flagScrapDesign) { rs.flagScrapDesign(G(), p, cur, 'command'); a.save(); show(); return; }
-          // (a ruleset that marks nothing, Gemini: scrapped at once, after the question the classic window asks)
-          e.target.checked = false; const n = shipCount(cur.id); a.confirmBox(`Scrap this ship type and all ${n} existing ship${n === 1 ? '' : 's'} of it?`, () => { const m = H().scrapDesign(G(), a.ME, cur.id); a.Sound.play(7003); a.toast(`Scrapped 1 type for ${a.fmt(m)} metal.`); a.renderPanel(); a.draw(); a.save(); show(); }); } }), el('span', null, 'Scrap This Type')),
-      el('div', { class: 'btns' }, btn('Rename', () => renameType(cur))));
+    pane.innerHTML = '';
+    // the list
+    const LW = 137, LH = 214, rows = Math.floor((LH - 2) / 53), maxTop = Math.max(0, ds.length - rows);
+    const ci = ds.indexOf(cur); if (ci < L6000.top) L6000.top = ci; if (ci >= L6000.top + rows) L6000.top = ci - rows + 1;
+    L6000.top = Math.max(0, Math.min(L6000.top, maxTop));
+    const lq = qdCanvas(LW, LH, 'Modèles'); lq.c.style.cssText = at20([3, 3, 3 + LH, 3 + LW]); lq.x.strokeStyle = '#000'; lq.x.strokeRect(0.5, 0.5, LW - 1, LH - 1);
+    const lb = el('div', { role: 'listbox', 'aria-label': 'Modèles existants', style: at20([4, 4, 2 + LH, 3 + LW - 16]) });
+    ds.slice(L6000.top, L6000.top + rows).forEach((d, i) => {
+      const t = 1 + 53 * i; putPic(lq, d, 1, t + 2, LW - 18, 40);
+      const lab = desc0(d); lq.text(lab, 0, t + 50, G9, { center: (LW - 16) / 2, cond: lq.width(lab, G9) > LW - 18 });
+      if (d === cur) { lq.x.globalCompositeOperation = 'difference'; lq.rect(1, t, LW - 16, t + 53, '#fff'); lq.x.globalCompositeOperation = 'source-over'; }
+      lb.append(el('div', { class: 'li', role: 'option', tabindex: 0, 'aria-selected': d === cur ? 'true' : 'false', 'aria-label': lab, style: `position:absolute;left:0;right:0;top:${53 * i}px;height:53px;cursor:default`, onclick: () => { cur = d; show(); } }));
+    });
+    drawBar(lq.x, LW - 16, 0, true, LH, 16, { on: true, value: L6000.top, max: maxTop });
+    lq.c.addEventListener('click', (ev) => { const pt = lq.at(ev); if (pt.h < LW - 16 || !maxTop) return; L6000.top += pt.v < 16 ? -1 : pt.v >= LH - 16 ? 1 : pt.v < LH / 2 ? -rows : rows; show(); });
+    lq.c.addEventListener('wheel', (ev) => { if (!maxTop) return; ev.preventDefault(); L6000.top += ev.deltaY > 0 ? 1 : -1; show(); }, { passive: false });
+    // the chosen type
+    const bq = qdCanvas(243, 76, cur.name); bq.c.style.cssText = at20([3, 149, 79, 392]); putPic(bq, cur, 0, 0, 243, 76);
+    const c = H().designCost(g, cur), R = R6000;
+    pane.append(lq.c, lb, bq.c, T('Nom du modèle:', R.name[0]), T(cur.name, R.name[1]), T('Classe:', R.cls[0]), T(cls(cur.type), R.cls[1]),
+      ...[['Coût de développement:', '$' + nice(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0))], ['Coût de production:', '$' + nice(c.money)], ['Coût en métal:', nice(c.metal)]].flatMap(([l, v], i) => [T(l, R.costs[i][0]), T(v, R.costs[i][1])]),
+      ...[['Distance', cur.R], ['Vitesse', cur.V], ['Armes', cur.W], ['Boucliers', cur.S], ['Mini', cur.M]].flatMap(([l, v], i) => [T(l, R.lv[i][0]), T(v, R.lv[i][1])]),
+      T('Construits:', R.built[0]), T(nice(cur.built || 0), R.built[1]), T('En service:', R.exist[0]), T(nice(shipCount(cur.id)), R.exist[1]),
+      put20(el('label', { class: 'chk', style: 'display:flex;align-items:center;gap:6px' }, el('input', { type: 'checkbox', checked: cur.scrap301 ? 'checked' : false, onchange: (e) => {
+        if (rs.flagScrapDesign) { rs.flagScrapDesign(g, p, cur, 'command'); a.save(); show(); return; }
+        e.target.checked = false; } }), raw('span', 'Modèle à recycler')), R.chk));
   };
   show();
-  win(el('div', { class: 'types12' }, list, info, el('div', { class: 'btns right' }, btn('OK', () => a.closeModal()))));
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  a.modal('', dlog20(430, 301, pane, B('Renommer', R6000.ren, () => renameType(cur, show)), B('OK', R6000.ok, () => a.closeModal(), true)), { cls: 'mac12 dl20w dlg6010', label: 'Modèles existants' });
   return true;
 }
 // DLOG 6000 "List Ship Types" (ListShipTypes @111b0c; 430 x 301, DITL 6000): the list of types at (3, 3, 137 x 214), the ship picture at (3, 149, 243 x 76), then the lines at their rectangles: Name (87), Class (107),
@@ -375,19 +428,27 @@ function shipTypes20(selId) {
           // (a ruleset that marks nothing, Gemini: scrapped at once, after the question the classic window asks)
           e.target.checked = false; const n = shipCount(cur.id); a.confirmBox(`Scrap this ship type and all ${n} existing ship${n === 1 ? '' : 's'} of it?`, () => { const m = H().scrapDesign(G(), a.ME, cur.id); a.Sound.play(7003); a.toast(`Scrapped 1 type for ${a.fmt(m)} metal.`); a.renderPanel(); a.draw(); a.save(); show(); }); } }), el('span', null, 'Scrap This Type'));
   show();
-  a.modal('', dlog20(430, 301, list, pane, put20(el('button', { type: 'button', class: 'ok20', onclick: () => renameType(cur) }, raw('span', 'Rename')), [271, 253, 291, 311]),
+  a.modal('', dlog20(430, 301, list, pane, put20(el('button', { type: 'button', class: 'ok20', onclick: () => renameType(cur, show) }, raw('span', 'Rename')), [271, 253, 291, 311]),
     put20(el('button', { type: 'button', class: 'ok20', onclick: () => a.closeModal() }, raw('span', 'OK')), [271, 343, 291, 401])), { cls: 'mac12 dl20w', label: 'List Ship Types' });
   return true;
 }
 const put20 = (n, r) => { n.setAttribute('style', (n.getAttribute('style') || '') + ';' + at20(r) + ';min-width:0;padding:0'); return n; };
 // DLOG 6090: a type's new name, 15 letters at most (a beep past them), "Name It" draws one from the list
-function renameType(d) {
-  const a = A(), el = a.el;
-  const inp = el('input', { maxlength: 15, value: d.name, 'aria-label': 'New Ship Name', onkeydown: (e) => { if (e.key.length === 1 && inp.value.length >= 15 && inp.selectionStart === inp.selectionEnd) { a.beep && a.beep(); } } });
+// DLOG 6090 (doRenameTypeDialog @11170e; 236 x 143, DITL 6090, the same rects in 1.2F and 2.0.1; Jake's captures rename-type*): the line
+// (13, 13, 211 x 48), the field (16, 68, 205 x 20; its frame 3 outside), Idée / Name It (13, 104), Annuler (91, 104), OK (156, 104) with the
+// default ring; over the List Ship Types window, which shows the new name when it closes. 15 letters at most, a beep past them.
+function renameType(d, back) {
+  const a = A(), el = a.el, fr = lang() === 'fr';
+  const W = fr ? ['Entrez le nouveau nom du vaisseau ou cliquez sur Idée:', 'Idée', 'Annuler', 'OK'] : ['Type your new ship name or click on “Name It” for a suggestion:', 'Name It', 'Cancel', 'OK'];
+  const close = (ok) => { if (ok) { const n = inp.value.trim(); if (n) { d.name = n.slice(0, 15); a.save(); a.renderPanel(); } } scr.remove(); if (back) back(); };
+  const inp = el('input', { type: 'text', maxlength: 15, value: d.name, 'aria-label': W[0], style: at20([65, 13, 91, 224]),
+    onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); close(true); } else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(false); } else if (e.key.length === 1 && inp.value.length >= 15 && inp.selectionStart === inp.selectionEnd && a.beep) a.beep(); } });
   inp.setAttribute('translate', 'no');
-  win(el('div', null, el('p', null, 'Type your new ship name or click on “Name It” for a suggestion:'), inp,
-    el('div', { class: 'btns' }, btn('Name It', () => { inp.value = H().designName(G(), a.me(), d.type); }), btn('Cancel', () => shipTypes(d.id), { class: 'quiet' }),
-      btn('OK', () => { const n = inp.value.trim(); if (n) { d.name = n.slice(0, 15); a.save(); a.renderPanel(); } shipTypes(d.id); }))), 'small');
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  const txt = txt20(W[0], [13, 13, 61, 224]); txt.style.whiteSpace = 'normal';
+  const scr = el('div', { class: 'scrim' }, el('div', { class: 'win small notitle mac12 dl20w dlg6010 ct6010', role: 'dialog', 'aria-modal': 'true', 'aria-label': W[0] },
+    dlog20(236, 143, txt, inp, B(W[1], [104, 13, 124, 71], () => { inp.value = H().designName(G(), a.me(), d.type); inp.focus(); }), B(W[2], [104, 91, 124, 149], () => close(false)), B(W[3], [104, 156, 124, 214], () => close(true), true))));
+  document.body.append(scr); inp.focus(); inp.select();
 }
 
 // DLOG 6030 "List All Fleets…" (ListAllFleets @1120dc, InitFleetsList @1123a0): every fleet of yours but satellites, one line each
@@ -403,7 +464,7 @@ function stuck(f) {
   return !G().stars.some(s => s.id !== f.star && H().starDist(G(), f.star, s.id) <= f.fuel + 1e-9);
 }
 function fleetsStatus() {
-  const a = A(), el = a.el, W = FLEET_LINES[lang()], g = G();
+  const a = A(), W = FLEET_LINES[lang()], g = G();
   const fs = g.fleets.filter(f => f.owner === a.ME && !f.sat);
   const order = fs.filter(f => !stuck(f)).concat(fs.filter(stuck));
   const turns = (f) => Math.ceil((f.dist - (f.prog || 0)) / H().fleetSpeed(g, f) - 1e-9);
@@ -414,26 +475,74 @@ function fleetsStatus() {
     if (f.dest != null) return fill(W.leave, d, st(f.star), st(f.dest), H().arrivalYear(g, Math.ceil(H().starDist(g, f.star, f.dest) / H().fleetSpeed(g, f) - 1e-9)));
     return fill(W.at, d, st(f.star));
   };
-  let cur = null;
-  const list = el('div', { class: 'lb', role: 'listbox' });
-  const show = () => { list.innerHTML = ''; for (const f of order) list.append(raw('div', line(f), { class: 'li' + (f === cur ? ' sel' : ''), role: 'option', onclick: dbl12(f, () => { cur = f; show(); }, go) })); };
+  let cur = order[0] || null;
   function go() {
     if (!cur) return;
     if (cur.to != null) { alertBox([W.hyper]); return; }
     a.UI.selFleet = cur.id; a.UI.sel = cur.star; a.closeModal(); a.centerOn(cur.star); a.renderPanel(); a.draw();
   }
-  show();
-  win(el('div', null, el('p', null, 'List of All Fleets:'), list, el('div', { class: 'btns right' }, btn('Go To Fleet', go, { class: 'quiet' }), btn('OK', () => a.closeModal()))));
+  const fr = lang() === 'fr';
+  return list6030(fr ? 'Statut des flottes:' : 'List of All Fleets:', order.map(f => ({ id: f, cells: [[0, line(f)]] })), fr ? 'Rejoindre flotte' : 'Go To Fleet',
+    (f) => { cur = f; go(); }, { head: fr ? [5, 12, 24, 210] : [2, 13, 18, 200], go: fr ? [264, 238, 283, 352] : [264, 255, 284, 352], first: true }); // (the first fleet chosen when it opens: Jake's capture)
+}
+// DLOG 6030 and 6040 (ListAllFleets @1120dc, ListExploredStars @120004; 486 x 296, DITL 6030 / 6040: the line at (12, 5) / (13, 2), the list user item
+// (13, 26, 455 x 225), "Rejoindre flotte" (238, 264, 114 x 19) / "Rejoindre planète" (229, 264, 124 x 19), OK (364, 264, 82 x 20) with the default ring):
+// a List Manager list in Chicago 12, 16 pixels a row, the text a pixel in from the cell, the fields at 1, 101, 176, 251, 326 (Jake's shot078, read
+// pixel by pixel: the frame at the window's 90, 60), its 16-pixel scroll bar inside the frame at the right, the chosen row inverted (the explored
+// stars open with the first chosen, shot078); a double click is the button. rows: [{ id, cells: [[x, text]] }]
+function list6030(title, rows, goWord, onGo, o) {
+  const a = A(), el = a.el, LW = 455, LH = 226, n = Math.floor((LH - 2) / 16);
+  let pick = o.first && rows.length ? 0 : -1, top = 0;
+  const lq = qdCanvas(LW, LH, title), lb = el('div', { role: 'listbox', 'aria-label': title, style: at20([27, 14, 25 + LH, 13 + LW - 16]) });
+  const draw = () => {
+    top = Math.max(0, Math.min(top, rows.length - n));
+    lq.rect(0, 0, LW, LH, '#fff'); lq.x.strokeStyle = '#000'; lq.x.lineWidth = 1; lq.x.strokeRect(0.5, 0.5, LW - 1, LH - 1);
+    lq.x.save(); lq.x.beginPath(); lq.x.rect(1, 1, LW - 17, LH - 2); lq.x.clip();
+    lb.innerHTML = '';
+    rows.slice(top, top + n).forEach((r, i) => {
+      const y = 1 + 16 * i;
+      r.cells.forEach(([cx, t]) => lq.text(t, 1 + cx, y + 13, SYS12));
+      if (top + i === pick) { lq.x.globalCompositeOperation = 'difference'; lq.rect(1, y, LW - 16, y + 16, '#fff'); lq.x.globalCompositeOperation = 'source-over'; }
+      const k = top + i;
+      lb.append(el('div', { class: 'li', role: 'option', tabindex: 0, 'aria-selected': k === pick ? 'true' : 'false', 'aria-label': r.cells.map(c => c[1]).join(' '),
+        style: `position:absolute;left:0;right:0;top:${16 * i}px;height:16px;cursor:default`,
+        onclick: dbl12('l' + k, () => { pick = k; draw(); }, () => { pick = k; onGo(rows[k].id); }), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); pick = k; onGo(rows[k].id); } } }));
+    });
+    lq.x.restore();
+    drawBar(lq.x, LW - 16, 0, true, LH, 16, { on: true, value: top, max: Math.max(0, rows.length - n) });
+  };
+  lq.c.style.cssText = at20([26, 13, 26 + LH, 13 + LW]);
+  lq.c.addEventListener('click', (ev) => { const pt = lq.at(ev); if (pt.h < LW - 16 || rows.length <= n) return; top += pt.v < 16 ? -1 : pt.v >= LH - 16 ? 1 : pt.v < LH / 2 ? -(n - 1) : n - 1; draw(); });
+  lq.c.addEventListener('wheel', (ev) => { if (rows.length <= n) return; ev.preventDefault(); top += ev.deltaY > 0 ? 1 : -1; draw(); }, { passive: false });
+  draw();
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  const head = txt20(title, o.head); head.style.overflow = 'visible'; head.style.whiteSpace = 'nowrap';
+  a.modal('', dlog20(486, 296, head, lq.c, lb, B(goWord, o.go, () => { if (pick >= 0) onGo(rows[pick].id); }), B('OK', [264, 364, 284, 446], () => a.closeModal(), true)), { cls: 'mac12 dl20w dlg6010', label: title });
   return true;
+}
+// the explored stars (ListExploredStars @120004, DITL 6040; rs.exploredList and the classic code's exploredData: 1.2's order and its words)
+function stars6040() {
+  const a = A(), X = a.exploredData ? a.exploredData() : null; if (!X) return false;
+  const L = X.L, rows = X.plain().map(s => { const c = X.climate(s), cells = [[0, s.name]];
+    if (c) cells.push([100, c.t], [175, c.g], [250, c.m]); else cells.push([100, L.noClimate]);
+    cells.push([325, X.status(s)]); return { id: s.id, cells }; });
+  const fr = lang() === 'fr';
+  return list6030(L.title, rows, L.go, (sid) => { a.closeModal(); a.UI.sel = sid; a.centerOn(sid); a.renderPanel(); a.draw(); },
+    { head: fr ? [2, 13, 22, 299] : [2, 13, 18, 300], go: fr ? [264, 229, 283, 353] : [264, 255, 284, 352], first: true });
 }
 // an alert over what is open (the dialog stays under it), in the program's words; its picture 3020 is the skin's
 // Mac 2.0.1's alerts (ALRT size and DITL: text, picture and button rectangles, from the resource fork; made by audit/mac-2.0.1 of the private repo): an alert is drawn at those rectangles,
 // the words being the paragraphs the page gives (the same lines) in the order of the DITL's text items
 if (window.HOMAC2_COLOUR || (V3 && COLOUR3)) document.documentElement.classList.add('col20'); // (the colour Mac's bevelled dialog frame: panel.css, html.col20; 3.0.1's too, Jake's captures 015, 018)
 const ALERTS20 = {"128":[432,160,[["b",[123,312,143,402],"OK"],["t",[13,84,45,406],"Sorry ^0 requires the follow things to be able to run:"],["t",[58,110,74,380],"• ^1 CPU or better"],["t",[74,110,90,380],"• System Software ^2 or later"],["t",[90,110,106,380],"• ^3"]]],"2000":[230,172,[["b",[143,91,163,220],"Return To Finder"],["t",[26,26,128,224],"Sorry, but this is a development version of Spaceward Ho! 2.0 that's past it's prime. To get a newer copy, call Delta Tao Software, Inc. at (408) 730-9336."]]],"2010":[282,200,[["b",[169,156,189,253],"Play in B/W"],["p",[117,26,191,100],3010],["t",[13,13,48,279],"Sorry, but Spaceward Ho! 2.0 requires 32-bit Color Quickdraw to run in color."],["t",[52,13,106,278],"You can obtain Color Quickdraw from any Apple dealer for a nominal charge."]]],"3000":[240,228,[["b",[195,169,215,227],"OK"],["t",[39,26,71,227],"^0"],["t",[117,26,149,226],"File: ^1"],["t",[78,26,110,227],"Error Type: ^2"],["t",[156,26,172,225],"Error Code: ^3"],["t",[13,91,29,166],"File Error"]]],"3001":[237,210,[["b",[182,169,202,227],"OK"],["t",[39,26,71,227],"^0"],["t",[78,26,110,227],"Error Type: ^2"],["t",[117,26,133,225],"Error Code: ^3"],["t",[13,78,30,200],"Memory Error"],["t",[143,26,175,226],"Please quit Spaceward Ho! and start again."]]],"3010":[235,159,[["b",[130,169,150,227],"OK"],["p",[78,13,152,87],3020],["t",[13,13,65,229],"Sorry, but that is not the correct password for “^0”. Please try again."]]],"3020":[240,149,[["b",[117,169,137,227],"OK"],["t",[13,13,48,236],"Sorry, but this galaxy is already full. No more players can join."],["p",[65,13,139,87],3020]]],"3030":[232,180,[["b",[143,156,163,214],"OK"],["p",[91,26,165,100],3010],["t",[13,26,77,223],"Sorry, but Spaceward Ho! 2.0 can't read galaxy files created with versions 1.0 - 1.1.2."]]],"3040":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please name your new ship type."],["p",[60,10,134,84],3020]]],"3050":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please set your new ship type’s tech levels."],["p",[60,10,134,84],3020]]],"3060":[301,206,[["b",[162,207,182,265],"OK"],["t",[13,13,80,290],"Sorry, but the name you just typed in doesn’t match any of those in this game. And since the game has  progressed past the year 2000, it’s too late to join…"],["p",[120,17,194,91],3020],["t",[92,13,112,284],"Maybe you typed your name in wrong?"]]],"3070":[335,210,[["b",[143,223,163,292],"Continue"],["b",[143,117,163,186],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, all of the ^1 currently registered players have finished their first turn. "],["t",[52,13,92,328],"Should we continue with the game, or wait for more human players to join?"]]],"3080":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,98,232],"All currently registered players have ended their first turn. We’re waiting for the game administrator to give his okay to continue…"]]],"3090":[236,132,[["t",[10,14,74,223],"^0’s Star System “^1” has had a revolution, and is now under your control."],["b",[100,157,120,215],"OK"]]],"3100":[236,132,[["t",[10,14,74,223],"^0 has offerred ^1 units of metal for ^2 dollars."],["b",[100,157,120,215],"OK"]]],"3110":[236,132,[["t",[10,14,74,223],"You have found an additional ^0 units of metal on ^0."],["b",[100,157,120,215],"OK"]]],"3120":[236,132,[["t",[10,14,74,223],"Your fleet of ^0 ^1 unexpectedly disappeared in hyperspace on their way to ^2."],["b",[100,157,120,215],"OK"]]],"3130":[236,132,[["t",[10,14,74,223],"^0 has gone nova.  Everything there has been destroyed."],["b",[100,157,120,215],"OK"]]],"3140":[236,132,[["t",[10,14,74,223],"Your Terraforming Technology has reached level ^0."],["b",[100,157,120,215],"OK"]]],"3150":[236,132,[["t",[10,14,74,223],"^0 has turned all his planets over to your control.  "],["b",[100,157,120,215],"OK"]]],"3160":[236,132,[["t",[10,14,74,223],"You have destroyed the Star System ^0, previously owned by ^1."],["b",[100,157,120,215],"OK"]]],"3170":[236,132,[["t",[10,14,74,223],"You have stolen ^0 Technology from ^1.  Your Tech level is now ^2."],["b",[100,157,120,215],"OK"]]],"3180":[233,177,[["b",[143,143,163,210],"OK"],["t",[13,13,84,224],"Sorry, your turn can’t be saved. Although you are in the year ^0, the game has already been updated to ^1…"],["p",[91,13,165,87],3020]]],"3190":[237,161,[["b",[104,156,124,214],"OK"],["p",[65,26,139,100],3020],["t",[13,26,66,224],"The game has been updated to the year ^0. Click “OK” to go to the next turn…"]]],"3200":[234,185,[["b",[143,156,163,214],"OK"],["t",[13,13,93,232],"Sorry, but the file was busy and your new auto play setting was not changed. Please try again shortly."],["p",[104,13,178,87],3020]]],"3210":[335,210,[["b",[143,222,163,299],"Force End"],["b",[143,117,163,194],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, ^1 of the ^2 players haven’t finished their turn yet. "],["t",[52,13,92,328],"Do you really want to force an end of turn, or do you want to wait for them to finish?"]]],"3220":[238,201,[["b",[154,156,174,214],"OK"],["p",[102,26,176,100],3020],["t",[13,26,84,230],"Sorry, but the file way busy and the turn could not be marked “done”. Please try again in a moment."]]],"3230":[286,190,[["b",[145,188,165,257],"Continue"],["b",[145,110,165,168],"Wait"],["p",[99,13,173,87],3020],["t",[13,13,52,268],"^0, do you want to play alone, or wait for more humans to join?"],["t",[64,13,84,264],"(Computer Opponents: ^1)"]]],"3240":[230,182,[["b",[125,156,145,214],"OK"],["t",[13,13,80,220],"Auto play has been turned off, but your current turn has already been marked “done.” Update may occur at any time."],["p",[86,13,160,87],3020]]],"3250":[216,137,[["b",[78,143,98,201],"OK"],["t",[13,26,45,211],"Please unlock this disk and try again."],["p",[52,26,126,100],3020]]],"3260":[228,159,[["b",[117,156,137,214],"OK"],["t",[13,13,65,222],"Please enter both your name and a company name or address."],["p",[65,13,139,87],3020]]],"3270":[227,184,[["b",[156,156,176,214],"OK"],["t",[13,13,102,223],"The game has been updated to the next turn. You made some changes since ending your turn that you didn’t save. These changes have now been lost."],["p",[104,13,178,87],3020]]],"3280":[329,258,[["b",[208,182,228,240],"OK"],["p",[182,26,256,100],3020],["t",[13,26,49,320],"Sorry, but Spaceward Ho! allows you to have only 20 ship types at one time. "],["t",[52,26,119,320],"If you would like to create another ship type, scrap an old type by checking the “Scrap” box for it in the “List Ship Types…” Dialog."],["t",[130,26,178,325],"The ship will be scrapped during the turn update and you can create a new type next turn…"]]],"3290":[231,174,[["b",[143,156,163,214],"OK"],["t",[13,13,81,227],"Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location."],["p",[91,13,165,87],3020]]],"3300":[240,200,[["b",[156,156,176,214],"OK"],["t",[13,13,46,223],"There are no colonists aboard that colony ship."],["p",[117,26,191,100],3020],["t",[56,14,106,223],"To refill it, you must either wait one turn or abandon the colony."]]],"3310":[259,249,[["b",[192,156,212,214],"OK"],["t",[14,13,68,252],"Sorry, but the battle information on that battle is no longer available."],["p",[140,13,214,87],3020],["t",[70,13,134,251],"Battle reports that are more that 500 years old are automatically deleted to keep the game file size small."]]],"3320":[235,192,[["b",[156,156,176,214],"OK"],["t",[13,13,98,224],"Sorry, but the game file was busy, and the battle information could not be read for this battle. Please try again in a moment."],["p",[104,13,178,87],3020]]],"3330":[240,200,[["b",[171,156,191,214],"OK"],["p",[119,13,193,87],3020],["t",[13,13,61,234],"Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. "],["t",[67,13,117,234],"You can tell this because there are no arrows on either end of the dragged line."]]],"3340":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,82,228],"Sorry, there’s already a star named  “^0.” Please pick another name."]]],"5000":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,26,124,98],"Don't Save"],["b",[104,156,124,214],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before closing the current game?"]]],"5010":[240,200,[["b",[156,156,176,214],"OK"],["p",[117,13,191,87],3020],["t",[13,13,107,230],"^0^1^2^3"]]],"5020":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,78,124,150],"Don't Save"],["b",[200,200,220,258],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before updating the turn?"]]],"5030":[305,234,[["b",[195,234,215,292],"OK"],["t",[13,13,99,297],"Oops! Something kinda funny has happened in TheHo 2.0. Please write down the following problem with as much information as you can on what you think led up to it. Then let us know. Thanks."],["t",[104,13,185,295],"^0^1^2^3"]]],"5040":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3030]]],"5041":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3530]]],"5050":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,203,188],3040],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5051":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,204,188],3540],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5060":[282,177,[["b",[143,193,163,272],"Let ’em Die"],["b",[143,104,163,181],"Cancel"],["p",[91,13,165,87],3020],["t",[13,13,83,263],"Warning! You are not spending enough money to support some of your colonies. Do you really want to abandon them?"]]],"5070":[232,153,[["b",[104,156,124,214],"OK"],["t",[13,13,64,224],"Sorry, but the file was busy. Please try again in a few seconds."],["p",[65,13,139,87],3020]]],"5080":[262,153,[["b",[104,182,124,240],"Revert"],["b",[104,117,124,175],"Cancel"],["p",[65,13,139,87],3020],["t",[13,13,62,254],"Do you really want to revert to the saved version of the game? All changes will be lost…"]]],"5090":[228,191,[["b",[143,143,163,201],"OK"],["p",[104,13,178,87],3020],["t",[13,13,72,219],"Sorry, but this game was created with a newer version of Spaceward Ho! "]]]};
+// 1.2F's own alerts (ALRT and DITL from its resource fork: size, items' rectangles, French words, pictures), for the 1.2 skin in French: the
+// abandon question (5060 "Qu'elles meurent!"), "Merci de baptiser…" (3040), eliminated (5050), as Jake's captures 025, 081 and 165 show them.
+// English, which 1.2 never had, takes 2.0.1's (ALERTS20).
+const ALERTS12 = {"128":[432,160,[["b",[123,312,143,402],"OK"],["t",[13,84,45,406],"Désolé, ^0 requiert les éléments suivants:"],["t",[58,110,74,380],"• ^1 CPU ou davantage"],["t",[74,110,90,380],"• System ^2 ou plus"],["t",[90,110,106,380],"• ^3"]]],"2000":[230,172,[["b",[143,91,163,220],"Return To Finder"],["t",[26,26,128,224],"Sorry, but this is a development version of Spaceward Ho! 2.0 that's past it's prime. To get a newer copy, call Delta Tao Software, Inc. at (408) 730-9336."]]],"3000":[240,228,[["b",[195,169,215,227],"OK"],["t",[39,26,71,227],"^0"],["t",[117,26,149,226],"Fichier: ^1"],["t",[78,26,110,227],"Type erreur: ^2"],["t",[156,26,172,225],"Code erreur: ^3"],["t",[13,77,28,175],"Erreur Fichier"]]],"3001":[237,210,[["b",[182,169,202,227],"OK"],["t",[39,26,71,227],"^0"],["t",[78,26,110,227],"Type erreur: ^2"],["t",[117,26,133,225],"Code erreur: ^3"],["t",[13,78,30,200],"Erreur mémoire"],["t",[143,26,175,226],"Merci de quitter Spaceward Ho! et de recommencer."]]],"3010":[235,159,[["b",[130,169,150,227],"OK"],["p",[78,13,152,87],3020],["t",[12,12,64,228],"Désolé, mais ce n'est pas le bon mot de passe pour “^0”. Merci de réessayer."]]],"3020":[240,149,[["b",[117,169,137,227],"OK"],["t",[13,13,67,237],"Désolée mais cette Galaxie est complète. Aucun Joueur supplémentaire n'est admis."],["p",[65,13,139,87],3020]]],"3030":[232,180,[["b",[143,156,163,214],"OK"],["p",[91,26,165,100],3010],["t",[13,26,77,223],"Désolé, mais Spaceward Ho! 2.0 ne peut lire les fichiers créés avec les versions 1.0 - 1.1.2."]]],"3040":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Merci de baptiser votre nouveau modèle de vaisseau."],["p",[60,10,134,84],3020]]],"3050":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,59,212],"Merci d'affecter un minimum technologique à votre nouveau modèle."],["p",[60,10,134,84],3020]]],"3060":[301,206,[["b",[162,207,182,265],"OK"],["t",[13,13,80,290],"Désolé, mais le nom que vous venez de taper ne correspond pas à ceux qui sont prévus pour ce jeu. Il est désormais trop tard pour y participer."],["p",[120,17,194,91],3020],["t",[92,13,112,284],"Aviez-vous fait une fraute de fappe?"]]],"3070":[335,210,[["b",[143,223,163,292],"Continuer"],["b",[143,117,163,186],"Attendre"],["p",[117,13,191,87],3020],["t",[14,13,47,327],"^0, tous les Joueurs enregistrés (^1) ont fini leur premier tour. "],["t",[52,13,92,328],"Devons nous continuer le jeu, ou attendre l'arrivée d'autres Joueurs humains?"]]],"3080":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,98,232],"Psst! Tous mes Joueurs enregistrés ont fini leur premier tour. J'attends l'accord de l'administrateur du Jeu pour continuer."]]],"3090":[236,132,[["t",[9,14,73,223],"Le système  “^1” de ^0 vient de se révolter et se trouve maintenant sous votre contrôle."],["b",[100,157,120,215],"OK"]]],"3100":[236,132,[["t",[10,14,74,223],"^0 a proposé ^1 unités de métal pour ^2 dollars galactiques."],["b",[100,157,120,215],"OK"]]],"3110":[236,132,[["t",[10,14,74,223],"Vous avez trouvé ^0 unités de métal supplémentaires sur ^0."],["b",[100,157,120,215],"OK"]]],"3120":[236,132,[["t",[9,13,73,222],"Votre flotte ^0 ^1 a bizarrement disparu dans l'hyperespace sur la route de ^2."],["b",[100,157,120,215],"OK"]]],"3130":[236,132,[["t",[10,14,74,223],"^0 s'est transformée en nova.  Tout y a été détruit."],["b",[100,157,120,215],"OK"]]],"3140":[236,132,[["t",[10,14,74,223],"Votre technologie de terraformatage a atteint le niveau ^0."],["b",[100,157,120,215],"OK"]]],"3150":[236,132,[["t",[10,14,74,223],"^0 a placé l'ensemble de ses planètes sous votre contrôle.  "],["b",[100,157,120,215],"OK"]]],"3160":[236,132,[["t",[10,14,74,223],"Vous avez détruit le système ^0, jusqu'à présent contrôlé par ^1."],["b",[100,157,120,215],"OK"]]],"3170":[236,132,[["t",[10,14,74,223],"Vous avez volé la technologie ^0 de ^1.  Votre niveau de technologie est maintenant de ^2."],["b",[100,157,120,215],"OK"]]],"3180":[233,177,[["b",[143,143,163,210],"OK"],["t",[13,13,84,224],"Désolé, votre tour ne peut être sauvé. Bien que vous soyez en année ^0, le Jeu a déjà été mis à jour vers l'année ^1…"],["p",[91,13,165,87],3020]]],"3190":[237,161,[["b",[104,156,124,214],"OK"],["p",[65,26,139,100],3020],["t",[13,26,66,224],"Le jeu a été mis à jour vers l'année ^0. Cliquez sur “OK” pour le prochain tour…"]]],"3200":[234,185,[["b",[143,156,163,214],"OK"],["t",[13,13,93,232],"Désolé, mais le fichier était en service et votre nouveau réglage de jeu automatique n'a pas été pris en compte. Réessayez sous peu."],["p",[104,13,178,87],3020]]],"3210":[335,210,[["b",[143,222,163,299],"Fin du tour"],["b",[143,117,163,194],"Attendre"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0,  des Joueurs (^1 sur ^2) n'ont pas encore fini leur tour. "],["t",[52,13,92,328],"Voulez-vous vraiment forcer la fin du tour, ou voulez-vous attendre qu'ils aient fini?"]]],"3220":[238,201,[["b",[154,156,174,214],"OK"],["p",[102,26,176,100],3020],["t",[13,26,84,230],"Désolé, le fichier était en service et le tour n'a pu être marqué \"fini\". Merci de réessayer dans un instant."]]],"3230":[286,190,[["b",[145,188,165,257],"Continuer"],["b",[145,110,165,174],"Attendre"],["p",[99,13,173,87],3020],["t",[12,13,64,269],"^0, voulez-vous jouer seul, ou attendre que d'autres Humains arrivent?"],["t",[64,13,84,264],"(Joueurs de Silicium: ^1)"]]],"3240":[230,182,[["b",[125,156,145,214],"OK"],["t",[4,13,88,218],"Le jeu automatique est arrêté mais votre tour a déjà été marqué \"fini\". La mise à jour va se produire n'importe quand."],["p",[86,13,160,87],3020]]],"3250":[216,137,[["b",[78,143,98,201],"OK"],["t",[13,26,45,211],"Merci de déverrouiller ce disque et de recommencer."],["p",[52,26,126,100],3020]]],"3260":[228,159,[["b",[117,156,137,214],"OK"],["t",[13,13,65,222],"Merci d'entrer non seulement votre nom mais aussi votre adresse."],["p",[65,13,139,87],3020]]],"3270":[227,184,[["b",[156,156,176,214],"OK"],["t",[13,13,102,223],"Le jeu a été mis à jour vers le nouveau tour. Depuis la fin de votre tour vous avez fait des modifications. Elles n'ont pas été sauvées."],["p",[104,13,178,87],3020]]],"3280":[329,258,[["b",[208,182,228,240],"OK"],["p",[182,26,256,100],3020],["t",[13,26,61,320],"Désolé, mais Spaceward Ho! vous autorise seulement 20 modèles de vaisseaux simultanés. "],["t",[64,26,117,318],"Pour créer ce nouveau modèle, recyclez-en d'abord un ancien en cochant la case correspondante de la boîte de dialogue."],["t",[130,26,178,325],"Ce modèle sera détruit lors de la mise à jour du tour, et vous pourrez en créer un autre au prochain tour."]]],"3290":[231,174,[["b",[143,156,163,214],"OK"],["t",[13,13,81,227],"Désolé, mais cette flotte est actuellement en hyperespace et ne pourra être contactée qu'arrivée à destination."],["p",[91,13,165,87],3020]]],"3300":[240,200,[["b",[156,156,176,214],"OK"],["t",[9,13,42,223],"Il n'y a pas de colons sur ce Transport.\r"],["p",[117,26,191,100],3020],["t",[41,13,120,222],"Si vous confirmez votre départ, ceux qui ont débarqué seront récupérés et vous abandonnerez cette planète.\rOu alors attendez un tour..."]]],"3310":[259,249,[["b",[192,156,212,214],"OK"],["t",[14,13,68,252],"Désolé mais il n'y a plus d'informations disponibles sur cette bataille."],["p",[140,13,214,87],3020],["t",[70,13,134,251],"Les rapports de batailles de plus de 500 ans ne sont pas conservés."]]],"3320":[235,192,[["b",[156,156,176,214],"OK"],["t",[13,13,98,224],"Désolé, mais j'étais occupé, et je n'ai pu vous fournir cette information. Soyez assez aimable pour me redemander ça dans un instant."],["p",[104,13,178,87],3020]]],"3330":[240,200,[["b",[171,156,191,214],"OK"],["p",[119,13,193,87],3020],["t",[13,13,61,234],"Désolé, mais cette flotte ne dispose pas d'assez de carburant pour atteindre cette destination."],["t",[61,14,122,233],"Soit dit en passant, il suffisait d'observer l'absence de flèche aux extrémités du trajet..."]]],"3340":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,82,228],"Désolé, il y a déjà une Etoile nommée “^0.” Soyons créatifs!"]]],"3350":[240,178,[["b",[143,169,163,227],"OK"],["b",[143,91,163,149],"Annuler"],["t",[13,13,84,231],"Le Jeu que vous venez d'ouvrir a été créé par une version antérieure de Spaceward Ho! Voulez-vous le mettre à niveau?"],["p",[91,13,165,87],3020]]],"3370":[240,200,[["b",[156,169,176,227],"OK"],["t",[13,13,63,229],"Sorry, but this version of Spaceward Ho! is for up to two human players."],["t",[78,13,113,229],"Contact us to get the upgraded 20 player version, if you’d like."]]],"5000":[325,140,[["b",[104,226,124,315],"Enregistrer"],["b",[105,10,124,143],"Ne pas enregistrer"],["b",[105,156,124,214],"Annuler"],["t",[13,78,86,306],"^0, voulez-vous enregistrer les changements effectués avant de clore cette partie?"]]],"5010":[240,200,[["b",[156,156,176,214],"OK"],["p",[117,13,191,87],3020],["t",[13,13,107,230],"^0^1^2^3"]]],"5020":[325,140,[["b",[104,216,124,311],"Enregistrer"],["b",[104,78,124,208],"Ne pas enregistrer"],["b",[200,200,220,258],"Cancel"],["t",[13,78,86,306],"^0, voulez-vous enregistrer les changements effectués avant de mettre à jour le tour?"]]],"5030":[305,234,[["b",[195,234,215,292],"OK"],["t",[13,13,99,297],"Oops! Quelque d'imprévu vient de se produire dans The Ho 2.0. Merci de nous décrire le problème en nous fournissant le maximum d'information sur les circonstances de l'accident."],["t",[104,13,185,295],"^0^1^2^3"]]],"5040":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Bravo, vous venez de conquérir la Galaxie!"],["p",[52,39,203,188],3030]]],"5041":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Bravo, vous venez de conquérir la galaxie!"],["p",[52,39,203,188],3530]]],"5050":[235,244,[["b",[212,72,232,163],"Bon, ça va…"],["p",[52,39,203,188],3040],["t",[13,13,47,222],"Il est regrettable que vous ayez été éliminé…"]]],"5051":[235,244,[["b",[212,67,232,158],"Bon, ça va..."],["p",[52,39,204,188],3540],["t",[13,13,47,222],"Il est regrettable que vous ayez été éliminé..."]]],"5060":[282,177,[["b",[142,158,163,279],"Qu'elles meurent!"],["b",[143,89,162,150],"Annuler"],["p",[91,13,165,87],3020],["t",[13,13,83,263],"Attention, vous n'investissez pas assez pour soutenir vos colonies. Voulez-vous vraiment les abandonner?"]]],"5070":[232,153,[["b",[104,156,124,214],"OK"],["t",[13,13,64,224],"Désolé, le fichier était en service. Merci de recommencer dans un instant."],["p",[65,13,139,87],3020]]],"5080":[262,153,[["b",[103,171,124,245],"Retourner"],["b",[104,98,124,156],"Annuler"],["p",[65,13,139,87],3020],["t",[5,13,67,257],"Voulez-vous vraiment retourner à une version antérieure du jeu? Toutes les modifications seront perdues."]]],"5090":[228,191,[["b",[143,143,163,201],"OK"],["p",[104,13,178,87],3020],["t",[13,13,83,221],"Désolé, mais ce jeu a été créé avec une version de Spaceward HO que je ne connais pas encore."]]]};
+const alertTables = () => (!V2 && lang() === 'fr' ? [ALERTS12, ALERTS20] : [ALERTS20]);
 // (a box of ALERTS20 by its id, with its own words: the won and lost boxes, ALRT 5040 / 5041 and 5050 / 5051, in the captures `shot103`-`105`, `lost027`)
 function alertById20(id, paras, ok, done) {
-  const [w, h, items] = ALERTS20[id], a = A(), el = a.el; let ti = 0;
+  const [w, h, items] = alertTables().map(T => T[id]).find(Boolean), a = A(), el = a.el; let ti = 0;
   const close = () => { back.remove(); if (done) done(); };
   const kids = items.map(it => {
     if (it[0] === 't') return raw('span', paras[ti++], { class: 'dt20', style: at20(it[1]) + ';white-space:pre-line' });
@@ -449,10 +558,10 @@ function alert20(paras) {
   const norm = (t) => String(t).replace(/[‘’“”]/g, "'").replace(/\s+/g, ' ').replace(/\^\d|%[sd]/g, '').trim();
   const p0 = norm(paras[0]); if (p0.length < 8) return null;
   const common = (x) => { let i = 0; while (i < x.length && i < p0.length && x[i] === p0[i]) i++; return i; };
-  let id = null, best = 17;
-  for (const k of Object.keys(ALERTS20)) { const t = ALERTS20[k][2].find(x => x[0] === 't'); const c = t ? common(norm(t[2])) : 0; if (c > best) { best = c; id = k; } }
+  let id = null, best = 17, TB = null;
+  for (const T of alertTables()) for (const k of Object.keys(T)) { const t = T[k][2].find(x => x[0] === 't'); const c = t ? common(norm(t[2])) : 0; if (c > best) { best = c; id = k; TB = T; } }
   if (!id) return null;
-  const [w, h, items] = ALERTS20[id], a = A(), el = a.el; let ti = 0;
+  const [w, h, items] = TB[id], a = A(), el = a.el; let ti = 0;
   const done = () => back.remove();
   const kids = items.map(it => {
     if (it[0] === 't') return raw('span', paras[ti] != null && items.filter(x => x[0] === 't').length === paras.length ? paras[ti++] : (ti++, it[2]), { class: 'dt20', style: at20(it[1]) + ';white-space:pre-line' });
@@ -464,7 +573,7 @@ function alert20(paras) {
   document.body.append(back); const b = back.querySelector('button'); if (b) b.focus();
   return back;
 }
-function alertBox(paras) { const b = (V2 && alert20(paras)) || A().alertOver(paras, lang()); if (b) b.setAttribute('translate', 'no'); }
+function alertBox(paras) { const b = ((V2 || own12Rules()) && alert20(paras)) || A().alertOver(paras, lang()); if (b) b.setAttribute('translate', 'no'); }
 
 // DLOG 6020 "Build Ships at …" (BuildShips @112946): "Shipbuilding Queue at:" the star; "Available Types" (the designs);
 // "In The Queue:" (each line MakeFleetDescription of the design and its count); for the type picked, "$%s (D)" its development and
@@ -472,30 +581,95 @@ function alertBox(paras) { const b = (V2 && alert20(paras)) || A().alertOver(par
 // (AddTypeToQueue: a beep when it can't), on a queued line takes one off (RemoveTypeFromQueue). OK keeps the queue, Cancel puts it back.
 const DONE = { en: '%d%% Done', fr: '%d%% finition' };
 function buildShips(sid) {
-  const a = A(), el = a.el, g = G(), p = a.me(), s = g.stars[sid];
+  const a = A(), g = G(), s = g.stars[sid];
   if (!s || s.owner !== a.ME) return false;
   if (!H().feature(g, 'buildQueue')) return buyShips(sid); // (a later ruleset buys ships at once, as its own window does; only 1.2's and DOS 2.0's queue)
   const before = JSON.stringify(s.queue || []);
+  return build6020(sid, before);
+}
+// DLOG 6020 drawn as BuildShips @112946 draws it (476 x 304; DITL 6020, 1.2F's, 2.0.1's for that skin; Jake's shot035 and shot077):
+// "En production à:" and the star; the production box (item 5, 245 x 78, DRAWBUILDSHIPTYPEPICTURE @1132e4): framed, the first queued type's
+// picture, and over the part not yet built (the right (100 - done)% of the box) the 50% grey painted white (PenMode patOr, ForeColor white),
+// so it shows as a dotted sketch (Jake's captures at 0, 44, 67 and 89%), "$x (D)" while the type has never been built, else "$x (P)" (STR# 4000.28-29), and
+// "%d%% finition" (.30) under it; "En attente:" and the queue's three slots (items 6-8, 124 x 55, DRAWBUILDLISTSHIPBORDER @112f7c: framed,
+// the type's small picture, MakeFleetDescription of the type and count in Geneva 9, condensed when wider, centred); "Modèles disponibles:"
+// and the types (item 4, 137 x 214: a list of 53-pixel cells, each the small picture over its description, with its scroll bar), Annuler,
+// OK with the default ring. A double click on a type queues one (AddTypeToQueue: its slot, or the first free of three; a beep when none);
+// a click on a slot takes one off (RemoveTypeFromQueue, the slot inverted meanwhile). Annuler puts the queue back.
+const D6020 = {
+  12: { head: [0, 39, 15, 150], star: [0, 156, 16, 231], prod: [26, 39, 104, 284], dev: [107, 39, 124, 136], pct: [107, 159, 124, 274], wait: [129, 39, 145, 132],
+    slots: [[130, 143, 185, 267], [186, 143, 241, 267], [242, 143, 297, 267]], avail: [2, 323, 17, 468], list: [28, 323, 242, 460], cancel: [250, 286, 270, 344], ok: [250, 366, 270, 424] },
+  20: { head: [0, 0, 16, 150], star: [0, 156, 16, 231], prod: [26, 39, 104, 284], dev: [107, 65, 124, 162], pct: [107, 182, 125, 265], wait: [143, 39, 159, 132],
+    slots: [[130, 143, 185, 267], [186, 143, 241, 267], [242, 143, 297, 267]], avail: [2, 323, 18, 430], list: [28, 323, 242, 460], cancel: [250, 286, 270, 344], ok: [250, 366, 270, 424] },
+};
+const W6020 = { fr: { head: 'En production à:', wait: 'En attente:', avail: 'Modèles disponibles:', cancel: 'Annuler', ok: 'OK' },
+  en: { head: 'Shipbuilding Queue at:', wait: 'In The Queue:', avail: 'Available Types', cancel: 'Cancel', ok: 'OK' } };
+let B6020 = { top: 0 };
+function build6020(sid, before) {
+  const a = A(), el = a.el, g = G(), p = a.me(), s = g.stars[sid], D = D6020[V2 || lang() !== 'fr' ? 20 : 12], Wd = W6020[lang()] || W6020.en; // (English has no 1.2 of its own: 2.0.1's English dialog)
   const ds = p.designs.filter(d => !d.scrapped).reverse(); // (InitBuildShipsTypesList: every type, the newest first)
-  let pick = ds[0] || null;
-  const types = el('div', { class: 'lb', role: 'listbox' }), queue = el('div', { class: 'lb', role: 'listbox' });
-  const dev = raw('span', ''), pro = raw('span', ''), done = raw('span', '');
-  const show = () => {
-    types.innerHTML = ''; queue.innerHTML = '';
-    for (const d of ds) types.append(raw('div', desc0(d), { class: 'li' + (d === pick ? ' sel' : ''), role: 'option', onclick: dbl12('t' + d.id, () => { pick = d; show(); }, () => add(d)) }));
-    (s.queue || []).forEach((it, i) => { const d = H().getDesign(g, a.ME, it.did); if (d) queue.append(raw('div', descN(d, it.n), { class: 'li', role: 'option', onclick: dbl12('q' + i, () => {}, () => { H().unqueueShip(g, a.ME, sid, i); show(); }) })); });
-    const c = pick ? H().designCost(g, pick) : null;
-    dev.textContent = c ? fill('$%s (D)', nice(c.protoTotal != null ? c.protoTotal : c.money)) : '';
-    pro.textContent = c ? fill('$%s (P)', nice(c.money)) : '';
-    const pr = (s.queue || []).length ? H().rules(g).yardProgress(g, p, s) : null;
-    done.textContent = pr ? fill(DONE[lang()], pr.pct) : '';
+  let pick = null; // (none chosen when it opens: shot035)
+  const picOf = (d) => (a.shipPic ? a.shipPic(d, a.ME) : null);
+  const putPic = (q, d, l, t, w, h) => { const im = picOf(d); if (!im || !im.width) return; const k = Math.min(w / im.width, h / im.height), pw = Math.round(im.width * k), ph = Math.round(im.height * k); q.x.imageSmoothingEnabled = false; q.x.drawImage(im, l + Math.round((w - pw) / 2), t + Math.round((h - ph) / 2), pw, ph); };
+  const centre = (q, t, w, v) => { const cond = q.width(t, G9) > w - 2; q.text(t, 0, v, G9, { center: w / 2, cond }); };
+  const box = el('div', { style: 'position:absolute;left:0;top:0;width:476px;height:304px' });
+  const draw = () => {
+    box.innerHTML = '';
+    const Q = s.queue || [], first = Q[0] ? H().getDesign(g, a.ME, Q[0].did) : null;
+    // the production box
+    const pr = D.prod, pw = pr[3] - pr[1], ph = pr[2] - pr[0], q = qdCanvas(pw, ph, ''); q.c.style.cssText = at20(pr);
+    q.x.strokeStyle = '#000'; q.x.strokeRect(0.5, 0.5, pw - 1, ph - 1);
+    let devT = '', pctT = '';
+    if (first) {
+      putPic(q, first, 1, 1, pw - 2, ph - 2);
+      const c = H().designCost(g, first), never = first.built === 0 && !first.free;
+      devT = fill(never ? '$%s (D)' : '$%s (P)', nice(never ? (c.protoTotal != null ? c.protoTotal : c.money) : c.money));
+      const yp = H().rules(g).yardProgress ? H().rules(g).yardProgress(g, p, s) : null, pct = yp ? Math.max(0, Math.min(100, Math.round(yp.pct))) : 0;
+      pctT = fill(DONE[lang()], pct);
+      // (the part not yet built: the right (100 - done)% of the box, drawn over in white every other pixel, so it shows as a dotted sketch:
+      // Jake's captures at 0, 44, 67 and 89%; the asm moves the rect's left to right - (100 - done) x width / 100)
+      const left = Math.round((pw - 1) - (100 - pct) * (pw - 2) / 100);
+      for (let y = 1; y < ph - 1; y++) for (let x = left; x < pw - 1; x++) if ((x + y) % 2 === 0) q.rect(x, y, x + 1, y + 1, '#fff');
+    }
+    q.c.setAttribute('aria-label', first ? descN(first, Q[0].n) : '');
+    const lab = (t, r) => { const n = txt20(t, r); n.style.overflow = 'visible'; n.style.whiteSpace = 'nowrap'; return n; }; // (a static text item draws past its rectangle: TextBox wraps, it doesn't clip a word that fits the line)
+    box.append(lab(Wd.head, D.head), lab(s.name, D.star), q.c, lab(devT, D.dev), lab(pctT, D.pct), lab(Wd.wait, D.wait), lab(Wd.avail, D.avail));
+    // the queue's three slots
+    D.slots.forEach((r, i) => {
+      const w = r[3] - r[1], h = r[2] - r[0], qs = qdCanvas(w, h, ''), it = Q[i], d = it ? H().getDesign(g, a.ME, it.did) : null;
+      qs.c.style.cssText = at20(r) + ';cursor:default'; qs.x.strokeStyle = '#000'; qs.x.strokeRect(0.5, 0.5, w - 1, h - 1);
+      if (d) { putPic(qs, d, 2, 2, w - 4, 40); centre(qs, descN(d, it.n), w, h - 4); qs.c.setAttribute('aria-label', descN(d, it.n)); }
+      qs.c.addEventListener('click', () => { if (!d) return; qs.x.globalCompositeOperation = 'difference'; qs.rect(0, 0, w, h, '#fff'); qs.x.globalCompositeOperation = 'source-over';
+        setTimeout(() => { H().unqueueShip(g, a.ME, sid, i); draw(); }, 120); });
+      box.append(qs.c);
+    });
+    // the types: 53-pixel cells, 121 wide, the scroll bar at the right
+    const L = D.list, lw = L[3] - L[1], lh = L[2] - L[0], rows = Math.floor((lh - 2) / 53), maxTop = Math.max(0, ds.length - rows);
+    B6020.top = Math.max(0, Math.min(B6020.top, maxTop));
+    const lq = qdCanvas(lw, lh, Wd.avail); lq.c.style.cssText = at20(L); lq.x.strokeStyle = '#000'; lq.x.strokeRect(0.5, 0.5, lw - 1, lh - 1);
+    ds.slice(B6020.top, B6020.top + rows).forEach((d, i) => {
+      const t = 1 + 53 * i; putPic(lq, d, 1, t + 2, lw - 18, 40); centre(lq, desc0(d), lw - 16, t + 50);
+      if (d === pick) { lq.x.globalCompositeOperation = 'difference'; lq.rect(1, t, lw - 16, t + 53, '#fff'); lq.x.globalCompositeOperation = 'source-over'; }
+    });
+    drawBar(lq.x, lw - 16, 0, true, lh, 16, { on: true, value: B6020.top, max: maxTop });
+    lq.c.addEventListener('click', (ev) => {
+      const pt = lq.at(ev);
+      if (pt.h >= lw - 16) { if (maxTop) { B6020.top += pt.v < 16 ? -1 : pt.v >= lh - 16 ? 1 : pt.v < lh / 2 ? -rows : rows; draw(); } return; }
+    });
+    // each cell an option over the picture (a reader, the keyboard and the test tools have something to click; the drawing is the canvas's)
+    const lb = el('div', { role: 'listbox', 'aria-label': Wd.avail, style: at20([L[0] + 1, L[1] + 1, L[2] - 1, L[3] - 16]) });
+    ds.slice(B6020.top, B6020.top + rows).forEach((d, i) => {
+      const queueOne = () => { pick = d; if (d.scrap301 || !H().canBuildType(g, p, d.type) || !H().queueShips(g, a.ME, sid, d.id, 1)) { if (a.beep) a.beep(); } draw(); };
+      lb.append(el('div', { class: 'li', role: 'option', tabindex: 0, 'aria-selected': d === pick ? 'true' : 'false', 'aria-label': desc0(d), style: `position:absolute;left:0;right:0;top:${53 * i}px;height:53px;cursor:default`,
+        onclick: dbl12('b' + d.id, () => { pick = d; draw(); }, queueOne), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); queueOne(); } } }));
+    });
+    lq.c.addEventListener('wheel', (ev) => { if (!maxTop) return; ev.preventDefault(); B6020.top += ev.deltaY > 0 ? 1 : -1; draw(); }, { passive: false });
+    box.append(lq.c, lb);
   };
-  const add = (d) => { if (d.scrap301 || !H().canBuildType(g, p, d.type) || !H().queueShips(g, a.ME, sid, d.id, 1)) { if (a.beep) a.beep(); } show(); };
-  show();
-  win(el('div', { class: 'build12' },
-    el('div', { class: 'kv' }, el('span', null, 'Shipbuilding Queue at:'), raw('b', s.name)),
-    el('div', { class: 'cols' }, el('div', null, el('p', null, 'In The Queue:'), queue, dev, ' ', pro, el('br'), done), el('div', null, el('p', null, 'Available Types'), types)),
-    el('div', { class: 'btns right' }, btn('Cancel', () => { s.queue = JSON.parse(before); a.closeModal(); a.renderPanel(); }, { class: 'quiet' }), btn('OK', () => { a.closeModal(); a.save(); a.renderPanel(); }))));
+  draw();
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  const dl = dlog20(476, 304, box, B(Wd.cancel, D.cancel, () => { s.queue = JSON.parse(before); a.closeModal(); a.renderPanel(); }), B(Wd.ok, D.ok, () => { a.closeModal(); a.save(); a.renderPanel(); }, true));
+  a.modal('', dl, { cls: 'mac12 dl20w dlg6010', label: Wd.head + ' ' + s.name });
   return true;
 }
 
@@ -626,7 +800,27 @@ function list12(items, o) {
 }
 // the question box (the plain "Are you sure?" of a later ruleset's commands: Armageddon, Evacuate, Surrender ...): 1.2's alert, no title, the
 // default button ringed; under 1.2's own rules the classic box stays, as 1.2's own questions are not this skin's to restyle
+// a question the program asks with an alert of two buttons (ALRT 5060's "Qu'elles meurent!" / "Annuler": GiveSpendingWarning @102498): the table's
+// box by its words, the first button (the default, with its ring) answers yes
+function ask12alert(text, yes) {
+  const norm = (t) => String(t).replace(/[‘’“”]/g, "'").replace(/\s+/g, ' ').trim(), p0 = norm(text);
+  let hit = null;
+  for (const T of alertTables()) for (const k of Object.keys(T)) { const t = T[k][2].find(x => x[0] === 't'); if (t && T[k][2].filter(x => x[0] === 'b').length === 2 && norm(t[2]).slice(0, 30) === p0.slice(0, 30)) { hit = T[k]; break; } }
+  if (!hit) return false;
+  const [w, h, items] = hit, a = A(), el = a.el, bs = items.filter(x => x[0] === 'b');
+  const close = (ok) => { back.remove(); if (ok) yes(); };
+  const kids = items.map(it => {
+    if (it[0] === 't') return raw('span', it[2], { class: 'dt20', style: at20(it[1]) + ';white-space:pre-line' });
+    if (it[0] === 'p') { const im = a.IMG['dos:p' + it[2]]; return im ? el('img', { src: im.src, alt: '', style: at20(it[1]) + ';image-rendering:pixelated' }) : null; }
+    return el('button', { type: 'button', class: 'ok20' + (it === bs[0] ? ' def20' : ''), style: at20(it[1]) + ';min-width:0;padding:0', onclick: () => close(it === bs[0]) }, raw('span', it[2]));
+  });
+  const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(false); } else if (e.key === 'Enter') { e.stopPropagation(); close(true); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': text }, dlog20(w, h, ...kids)));
+  document.body.append(back); const b = back.querySelector('button.def20'); if (b) b.focus();
+  return true;
+}
 function ask12(text, yes, labels) {
+  if (G() && own12Rules() && typeof text === 'string') return ask12alert(text, yes);
   if (!G() || own12Rules()) return false;
   const a = A(), el = a.el;
   const no = btn(labels ? labels[1] : 'Cancel', () => a.closeModal(), { class: 'quiet' }), ok = btn(labels ? labels[0] : 'OK', () => { a.closeModal(); yes(); });
@@ -855,48 +1049,104 @@ const ALERT_TYPES = {
   fr: { full: ['Désolé, mais Spaceward Ho! vous autorise seulement 20 modèles de vaisseaux simultanés. ', 'Pour créer ce nouveau modèle, recyclez-en d\'abord un ancien en cochant la case correspondante de la boîte de dialogue.', 'Ce modèle sera détruit lors de la mise à jour du tour, et vous pourrez en créer un autre au prochain tour.'],
     name: ['Merci de baptiser votre nouveau modèle de vaisseau.'], tech: ['Merci d\'affecter un minimum technologique à votre nouveau modèle.'] },
 };
+// The dialog as DITL 6010 lays it out (1.2F's, read in its resource fork; 2.0.1's is the same dialog, 458 x 270, a few items a pixel or two
+// apart and in English), Jake's System 6 capture of 1.2F (19 Nov 2026): "Nom du nouveau modèle:" (10, 40), the field (13, 70, 174 x 16),
+// the ship's picture in user item 4 (210, 20, 243 x 76: DRAWNEWSHIPTYPEPICTURE, DrawShipPicture of the levels set), the five rows: the
+// level's name (7, 110 ...), "%d/%d" (its level / the most, 80, 110 ...: CreateShipType's sprintf) and its scroll bar (CNTL 6010-6014, 70 x 16
+// at 123, 110 ...: the standard bar, empty when the level can't move), the Class pop-up (CNTL 6015, 214 x 20 at 221, 114, its title 90
+// wide), "CT Dév:" / "CT Prod:" / "CT Métal:" (220, 140 ...) and their values (310), "Donner un nom" (76, 220), Annuler (280, 220), Créer
+// (360, 221) with the default's ring (user item 3). SetSBMinMax @111c3c sets the bars' ranges: rs.designLimits / designMin.
+const DITL6010 = {
+  12: { title: [40, 10, 57, 190], field: [70, 13, 86, 187], pic: [20, 210, 96, 453], rows: [110, 130, 150, 170, 190], lab: [7, 74], num: 80, bar: 123,
+    pop: [114, 221, 134, 435], popW: 90, costL: [220, 85], costV: [310, 104], costY: [140, 160, 180], name: [220, 76, 240, 194], cancel: [220, 280, 240, 338], ok: [221, 360, 241, 418] },
+  20: { title: [40, 10, 58, 179], field: [70, 13, 86, 187], pic: [20, 210, 96, 453], rows: [110, 130, 150, 170, 190], lab: [10, 66], num: 80, bar: 123,
+    pop: [110, 220, 130, 434], popW: 90, costL: [220, 85], costV: [310, 104], costY: [140, 160, 180], name: [220, 85, 240, 195], cancel: [220, 280, 240, 338], ok: [220, 360, 240, 418] },
+};
+const WORDS6010 = {
+  fr: { title: 'Nom du nouveau modèle:', rows: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Mini'], cls: 'Classe:', costs: ['CT Dév:', 'CT Prod:', 'CT Métal:'], name: 'Donner un nom', cancel: 'Annuler', ok: 'Créer' },
+  en: { title: 'Name of New Ship Type:', rows: ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'], cls: 'Class:', costs: ['Dev. Cost:', 'Prod. Cost:', 'Metal Cost:'], name: 'Name It For Me', cancel: 'Cancel', ok: 'Create' },
+};
+// a dialog's scroll bar (the standard control, drawn as the map's: paintBar), horizontal, L long; arrows a step, the grey a step towards the
+// pointer, the thumb dragged and let go; the keyboard's arrows (the remake's)
+function dlgBar(L, get, set) {
+  const a = A(), c = a.el('canvas', { class: 'cv12' }), b = { c, L };
+  const el = a.el('div', { class: 'dbar12', role: 'scrollbar', tabindex: 0, 'aria-orientation': 'horizontal' }, c);
+  let press = null, ghost = null;
+  const paint = () => { const g = get(), span = g.max - g.min; el.setAttribute('aria-valuemin', g.min); el.setAttribute('aria-valuemax', g.max); el.setAttribute('aria-valuenow', g.v);
+    el.setAttribute('aria-disabled', span > 0 ? 'false' : 'true'); paintBar(b, false, L, { on: true, value: g.v - g.min, max: span, press, ghost }); };
+  const pos = (e) => { const r = c.getBoundingClientRect(); return (e.clientX - r.left) / r.width * L; };
+  const thumbAt = () => { const g = get(); return 15 + Math.round((L - 46) * (g.v - g.min) / Math.max(1, g.max - g.min)); };
+  const step = (d) => { const g = get(), n = Math.max(g.min, Math.min(g.max, g.v + d)); if (n !== g.v) set(n); paint(); };
+  let timer = 0, drag = null;
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault(); el.focus({ preventScroll: true });
+    const g = get(); if (g.max <= g.min) return;
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    const p = pos(e), t = thumbAt();
+    if (p >= t && p < t + 16 && p >= 16 && p < L - 16) { drag = { p0: p, t0: t }; ghost = t; paint(); return; }
+    const d = p < 16 ? -1 : p >= L - 16 ? 1 : p < t ? -1 : 1;
+    press = p < 16 ? 'lo' : p >= L - 16 ? 'hi' : null;
+    const tick = () => { step(d); timer = setTimeout(tick, 100); }; tick();
+  });
+  el.addEventListener('pointermove', (e) => { if (drag) { ghost = Math.max(15, Math.min(L - 31, drag.t0 + pos(e) - drag.p0)); paint(); } });
+  const up = (e) => {
+    clearTimeout(timer); press = null;
+    if (drag) { const g = get(), T = L - 46, n = g.min + Math.round(Math.max(0, Math.min(1, T > 0 ? (ghost - 15) / T : 0)) * (g.max - g.min)); drag = null; ghost = null; if (e.type !== 'pointercancel' && n !== g.v) set(n); }
+    paint();
+  };
+  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  el.addEventListener('keydown', (e) => { const d = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[e.key]; if (d) { e.preventDefault(); step(d); } });
+  return { el, paint };
+}
 function createType() {
   const a = A(), el = a.el, g = G(), p = a.me(), W = ALERT_TYPES[lang()];
   if (p.designs.filter(d => !d.scrapped).length >= (H().rules(g).maxDesigns || 20)) { alertBox(W.full); return; }
-  const types = CLASSES();
-  const st = { type: 'scout', R: 0, V: 0, W: 0, S: 0, M: 0, name: '' };
+  const types = CLASSES(), D = DITL6010[V2 || lang() !== 'fr' ? 20 : 12], /* (English has no 1.2 of its own: 2.0.1's English dialog) */ Wd = WORDS6010[lang()] || WORDS6010.en, K = ['R', 'V', 'W', 'S', 'M'];
+  const st = { type: types[0] || 'scout', R: 0, V: 0, W: 0, S: 0, M: 0, name: '' };
   let named = false, moved = false;
-  const box = el('div', { class: 'create12' });
-  const name = el('input', { maxlength: 15, value: '', 'aria-label': 'Name of New Ship Type:', oninput: () => { st.name = name.value.trim(); named = !!st.name; },
-    onkeydown: (e) => { if (e.key.length === 1 && name.value.length >= 15 && name.selectionStart === name.selectionEnd && a.beep) a.beep(); } });
+  const lim = (k) => { const L = H().designLimits(g, p, st.type), min = k === 'R' && st.type === 'satellite' ? 0 : H().designMin(g, k, st.type); return { min, max: k === 'R' && st.type === 'satellite' ? 0 : Math.max(min, L[k] || min) }; };
+  const clamp = () => { for (const k of K) { const l = lim(k); st[k] = Math.max(l.min, Math.min(l.max, st[k])); } };
+  clamp();
+  // the field: its frame 3 pixels outside the text's rectangle, as a dialog's edit text item is drawn
+  const fr = D.field, name = el('input', { type: 'text', maxlength: 15, value: '', 'aria-label': Wd.title, style: at20([fr[0] - 3, fr[1] - 3, fr[2] + 3, fr[3] + 3]),
+    oninput: () => { st.name = name.value.trim(); named = !!st.name; },
+    onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); create(); } else if (e.key.length === 1 && name.value.length >= 15 && name.selectionStart === name.selectionEnd && a.beep) a.beep(); } });
   name.setAttribute('translate', 'no');
-  const sel = el('select', { 'aria-label': 'Class', onchange: () => { st.type = sel.value; render(); } }, ...types.map(t => raw('option', cls(t), { value: t })));
-  const sliders = el('div'), costs = el('div');
-  const render = () => {
-    const L = H().designLimits(g, p, st.type);
-    sliders.innerHTML = '';
-    for (const [k, lab] of [['R', 'Range'], ['V', 'Speed'], ['W', 'Weapons'], ['S', 'Shields'], ['M', 'Mini']]) {
-      const min = k === 'R' && st.type === 'satellite' ? 0 : H().designMin(g, k, st.type), max = k === 'R' && st.type === 'satellite' ? 0 : Math.max(min, L[k] || min);
-      st[k] = Math.max(min, Math.min(max, st[k]));
-      const out = raw('b', `${st[k]}/${max}`);
-      sliders.append(el('label', { class: 'slide' }, el('span', null, lab), el('input', { type: 'range', min, max, value: st[k], disabled: max <= min,
-        oninput: (e) => { st[k] = +e.target.value; moved = true; out.textContent = `${st[k]}/${max}`; showCost(); } }), out));
-    }
-    showCost();
-  };
-  const showCost = () => {
+  const pr = D.pic, picBox = el('div', { style: at20(pr) + ';display:flex;justify-content:center;align-items:center;overflow:hidden', 'aria-hidden': 'true' });
+  const drawPic = () => { picBox.innerHTML = ''; const im = a.shipImgEl({ type: st.type, R: st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name }, pr[2] - pr[0]); im.style.maxWidth = '100%'; im.style.width = 'auto'; im.style.imageRendering = 'pixelated'; picBox.append(im); };
+  const nums = [], bars = [], parts = [];
+  K.forEach((k, i) => {
+    const y = D.rows[i];
+    parts.push(txt20(Wd.rows[i], [y, D.lab[0], y + 16, D.lab[0] + D.lab[1]]));
+    const n = raw('span', '', { class: 'dt20', style: at20([y, D.num, y + 16, D.num + 43]) }); nums.push(n); parts.push(n);
+    const b = dlgBar(70, () => Object.assign({ v: st[k] }, lim(k)), (v) => { st[k] = v; moved = true; show(); });
+    b.el.setAttribute('aria-label', Wd.rows[i]); b.el.setAttribute('style', at20([y, D.bar, y + 16, D.bar + 70])); bars.push(b); parts.push(b.el);
+  });
+  // the Class pop-up (CNTL 6015, the standard pop-up menu control): its title, then the box with its shadow and the black triangle; the menu the system's
+  const pp = D.pop, sel = el('select', { class: 'pop12', 'aria-label': Wd.cls, style: at20([pp[0], pp[1] + D.popW, pp[2] - 1, pp[3] - 1]),
+    onchange: () => { st.type = sel.value; clamp(); show(); } }, ...types.map(t => raw('option', cls(t), { value: t })));
+  const costs = D.costY.map((y, i) => { parts.push(txt20(Wd.costs[i], [y, D.costL[0], y + 16, D.costL[0] + D.costL[1]])); const v = raw('span', '', { class: 'dt20', style: at20([y, D.costV[0], y + 16, D.costV[0] + D.costV[1]]) }); parts.push(v); return v; });
+  const show = () => {
+    K.forEach((k, i) => { nums[i].textContent = `${st[k]}/${lim(k).max}`; bars[i].paint(); });
     const c = H().designCost(g, st);
-    costs.innerHTML = '';
-    costs.append(el('div', { class: 'kv' }, el('span', null, 'Dev. Cost:'), raw('b', '$' + nice(c.protoTotal != null ? c.protoTotal : c.money))),
-      el('div', { class: 'kv' }, el('span', null, 'Prod. Cost:'), raw('b', '$' + nice(c.money))),
-      el('div', { class: 'kv' }, lang() === 'fr' ? raw('span', 'CT Métal:') : el('span', null, 'Metal Cost:'), raw('b', nice(c.metal))));
+    costs[0].textContent = '$' + nice(c.protoTotal != null ? c.protoTotal : c.money); costs[1].textContent = '$' + nice(c.money); costs[2].textContent = nice(c.metal);
+    drawPic();
   };
-  render();
-  box.append(el('p', null, 'Name of New Ship Type:'), name, sel, sliders, costs,
-    el('div', { class: 'btns' }, btn('Name It For Me', () => { st.name = H().designName(g, p, st.type); name.value = st.name; named = true; }, { class: 'quiet' }),
-      btn('Cancel', () => a.closeModal(), { class: 'quiet' }),
-      btn('Create', () => {
-        if (!named || !st.name) { alertBox(W.name); return; }
-        if (!moved) { alertBox(W.tech); return; }
-        H().findOrCreateDesign(g, p, { type: st.type, R: st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name });
-        a.closeModal(); a.save(); a.renderPanel();
-      })));
-  win(box);
+  const create = () => {
+    if (!named || !st.name) { alertBox(W.name); return; }
+    if (!moved) { alertBox(W.tech); return; }
+    H().findOrCreateDesign(g, p, { type: st.type, R: st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name });
+    a.closeModal(); a.save(); a.renderPanel();
+  };
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  const box = dlog20(458, 270, txt20(Wd.title, D.title), name, picBox, ...parts, txt20(Wd.cls, [pp[0] + 1, pp[1], pp[2], pp[1] + D.popW]), sel, ...[],
+    B(Wd.name, D.name, () => { st.name = H().designName(g, p, st.type); name.value = st.name; named = true; }),
+    B(Wd.cancel, D.cancel, () => a.closeModal()), B(Wd.ok, D.ok, create, true));
+  box.classList.add('ct6010');
+  show();
+  a.modal('', box, { cls: 'mac12 dl20w dlg6010', label: Wd.title });
+  setTimeout(() => name.focus(), 0);
 }
 
 // the players' strip at the foot of the map window (DrawIconRect @c5452): each player's face (your own planet for you), the name, a cross
@@ -1014,23 +1264,45 @@ function organize(f0) {
   const fleets = g.fleets.filter(f => f.owner === a.ME && f.star === f0.star && f.to == null && Object.keys(f.ships).length === 1 && +Object.keys(f.ships)[0] === did);
   const piles = fleets.map(f => ({ f, n: f.ships[did] }));
   let sel = null; // { pile, all }
-  const box = el('div', { class: 'piles12' });
+  // OrganizeFleets @113896 / DRAWORGFLEETS @113ea8, DrawOneOrgFleet @113f10 (Jake's captures organize-*): each pile one cell, the small picture
+  // (120 x 40) with its count at the left, the piles down the box 50 pixels apart (3 to a column, the next column 135 to the right); the chosen
+  // pile inverted; a drag carries a dotted outline of the cell, and dropping it on a pile moves one ship there (Shift: the whole pile), below
+  // the piles makes a new one. A click alone chooses the pile.
+  const box = el('div', { class: 'org12', style: 'position:relative;overflow:hidden;background:#fff' });
+  const cellAt = (i) => [16 + 135 * Math.floor(i / 3), 1 + 50 * (i % 3)];
+  const shown = () => piles.map((p, i) => ({ p, i })).filter(o => o.p.n || o.p.f);
   const show = () => {
     box.innerHTML = '';
-    piles.forEach((p, i) => {
-      if (!p.n && !p.f) return;
-      const col = el('div', { class: 'pile', ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); moveTo(i); }, onclick: (e) => { if (sel && sel.pile !== i && e.target === col) moveTo(i); } });
-      for (let k = 0; k < p.n; k++) {
-        const sh = el('div', { class: 'ship' + (sel && sel.pile === i && (sel.all || k === p.n - 1) ? ' sel' : ''), draggable: 'true',
-          onclick: (e) => { e.stopPropagation(); if (sel && sel.pile !== i) { moveTo(i); return; } sel = { pile: i, all: e.shiftKey }; show(); },
-          ondragstart: (e) => { sel = { pile: i, all: e.shiftKey || (sel && sel.pile === i && sel.all) }; try { e.dataTransfer.setData('text/plain', 'ship'); } catch (x) {} } },
-          a.shipImgEl(d, 24));
-        col.append(sh);
-      }
-      box.append(col);
+    shown().forEach(({ p, i }, k) => {
+      if (!p.n) return;
+      const [x, y] = cellAt(k), on = sel && sel.pile === i;
+      const cell = el('div', { class: 'opile' + (on ? ' sel' : ''), 'data-pile': i, role: 'button', tabindex: 0, 'aria-label': `${p.n} × ${d.name}`, style: `position:absolute;left:${x}px;top:${y}px;width:128px;height:43px` },
+        raw('span', String(p.n), { class: 'ocount' }), a.shipImgEl(d, 40));
+      box.append(cell);
     });
-    box.append(el('div', { class: 'pile new', ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); moveTo(-1); }, onclick: () => { if (sel) moveTo(-1); } }));
   };
+  // the drag: pointer events (a mouse and a finger alike), the outline following the pointer
+  let drag = null;
+  box.addEventListener('pointerdown', (e) => {
+    const cell = e.target.closest('.opile'); if (!cell) return;
+    e.preventDefault(); const i = +cell.dataset.pile, r = box.getBoundingClientRect(), z = r.width / box.offsetWidth || 1;
+    sel = { pile: i, all: e.shiftKey }; show();
+    const ghost = el('div', { class: 'oghost', style: `position:absolute;width:128px;height:43px;left:${cell.offsetLeft}px;top:${cell.offsetTop}px` });
+    drag = { i, ghost, dx: (e.clientX - r.left) / z - cell.offsetLeft, dy: (e.clientY - r.top) / z - cell.offsetTop, moved: false, z };
+    try { box.setPointerCapture(e.pointerId); } catch (x) {}
+  });
+  box.addEventListener('pointermove', (e) => {
+    if (!drag) return; const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / drag.z - drag.dx, y = (e.clientY - r.top) / drag.z - drag.dy;
+    if (!drag.moved && Math.hypot(x - drag.ghost.offsetLeft, y - drag.ghost.offsetTop) > 3) { drag.moved = true; box.append(drag.ghost); }
+    drag.ghost.style.left = x + 'px'; drag.ghost.style.top = y + 'px';
+  });
+  const drop = (e) => {
+    if (!drag) return; const g0 = drag; drag = null; g0.ghost.remove(); if (!g0.moved || e.type === 'pointercancel') return;
+    const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / g0.z, y = (e.clientY - r.top) / g0.z;
+    const hit = shown().filter(o => o.p.n).map(({ i }, k) => ({ i, at: cellAt(k) })).find(o => x >= o.at[0] && x < o.at[0] + 128 && y >= o.at[1] && y < o.at[1] + 43);
+    moveTo(hit ? hit.i : -1);
+  };
+  box.addEventListener('pointerup', drop); box.addEventListener('pointercancel', drop);
   const moveTo = (i) => {
     if (!sel) return;
     const from = piles[sel.pile], n = sel.all ? from.n : 1;
@@ -1059,7 +1331,18 @@ function organize(f0) {
     for (const p of piles) if (!p.f && p.n > 0) take(p.n);
     a.closeModal(); a.save(); a.renderPanel(); a.draw();
   };
-  if (V2) { // DLOG 6060 (439 x 285, DITL 6060): the heading (0, 13), the two lines (18, 16) and (35, 16), the piles (56, 12, 405 x 180), the buttons at y 249: Group All (45), Divide All (131), Cancel (232), OK (340)
+  if (!V2 && lang() === 'fr') { // 1.2F's DITL 6060 (439 x 285): the heading (13, 5), the two lines (16, 21) and (16, 35), the piles (12, 56, 405 x 180), Tout regrouper (11, 249), Tout diviser (126, 249), Annuler (263, 249), OK (340, 249)
+    const b2 = (t, fn, r, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+    const grp = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); };
+    const dvd = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); };
+    box.style.border = '1px solid #000'; box.style.boxSizing = 'border-box';
+    const T = (t, r) => { const n = txt20(t, r); n.style.whiteSpace = 'nowrap'; n.style.overflow = 'visible'; return n; };
+    a.modal('', dlog20(439, 285, T('Pour organiser les flottes:', [5, 13, 20, 207]), T('•\u00a0Cliquer et tirer chaque vaisseau vers le groupe final.', [21, 16, 37, 427]), T('•\u00a0Shift-Clic sélectionne un groupe de vaisseaux.', [35, 16, 51, 362]),
+      put20(box, [56, 12, 236, 417]), b2('Tout regrouper', grp, [249, 11, 271, 117]), b2('Tout diviser', dvd, [249, 126, 271, 214]), b2('Annuler', () => a.closeModal(), [249, 263, 271, 328]), b2('OK', apply, [249, 340, 269, 412], true)), { cls: 'mac12 dl20w dlg6010', label: 'Pour organiser les flottes' });
+    return;
+  }
+  if (V2 || lang() !== 'fr') { // DLOG 6060 (439 x 285, DITL 6060): the heading (0, 13), the two lines (18, 16) and (35, 16), the piles (56, 12, 405 x 180), the buttons at y 249: Group All (45), Divide All (131), Cancel (232), OK (340)
+    box.style.border = '1px solid #000'; box.style.boxSizing = 'border-box';
     const b2 = (t, fn, r) => put20(el('button', { type: 'button', class: 'ok20', onclick: fn }, raw('span', t)), r);
     const grp = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); };
     const dvd = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); };
@@ -1822,7 +2105,10 @@ function starLine(cx, d) {
 // @c0446: an axis 50 high with ten ticks (linear for a colony, the log table for the technologies), bars 18 wide 27 apart
 // on a base line, each name centred under its bar (the technologies' every other one 10 lower), a finished part's bar empty
 // and a click on it the system beep; a drag sets the share and spreads the rest over the others in proportion. ----------
-const G9 = '9px Geneva, Verdana, sans-serif', G9B = 'bold 9px Geneva, Verdana, sans-serif', SYS12 = '12px Chicago, Charcoal, Geneva, sans-serif';
+// (the Mac's own bitmap Geneva 9, Geneva 9 Bold and Chicago 12, as the DOS 2.0 program carries them: js/skins/dos/style.css's faces, 12 and 15
+// pixels to the em for one font pixel to one of the Mac's; a browser without them draws with the fallbacks)
+const G9 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif", G9B = "12px 'DOS Geneva 9 Bold', Geneva, Verdana, sans-serif", SYS12 = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif";
+try { if (document.fonts) Promise.all([G9, G9B, SYS12].map(f => document.fonts.load(f))).then(() => { const a = A(); if (a && a.G && a.renderPanel) a.renderPanel(); }).catch(() => {}); } catch (e) { /* (the fallbacks) */ }
 function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as the panel
   let lastR = null;
   const K = QK(), c = A().el('canvas', { class: 'qd12', width: w * K, height: h * K, role: 'img', 'aria-label': label || '' });
@@ -1950,45 +2236,56 @@ const langView = (g) => Object.assign(Object.create(g), { opts: Object.assign({}
 const planetWords = (g) => { const rs = H().rules(g), r12 = RS12(); return ((rs.planetInfo || (r12 && r12.planetInfo)) || {})[lang()] || {}; };
 function fleetBox12() {
   const a = A(), g = G(), rs = H().rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = planetWords(g), r12 = RS12();
-  const q = qdCanvas(226, 62, 'Fleets');
+  const q = qdCanvas(226, 64, 'Fleets'); // (the window's 68 to 132: the fleet rect starts two rows under the planet's, Jake's shot015)
   const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
   const sel = here.find(f => f.id === a.UI.selFleet);
   FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
   if (sel) {
     const L = rs.fleetInfo ? rs.fleetInfo(g, sel) : r12 ? r12.fleetInfo(langView(g), sel) : [];
     const first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
-    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(m[1], 3, 6); q.text(m[2], 70, 6); } else q.text(first, 3, 6);
-    if (L[1]) q.text(L[1], 3, 16); if (L[2]) q.text(L[2], 70, 16); if (L[3]) q.text(L[3], 125, 16);
+    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(m[1], 3, 8); q.text(m[2], 70, 8); } else q.text(first, 3, 8);
+    if (L[1]) q.text(L[1], 3, 18); if (L[2]) q.text(L[2], 70, 18); if (L[3]) q.text(L[3], 125, 18);
   }
-  q.hline(0, 214, 18);
-  if (!here.length) q.text(W.noFleets || '', 3, 28);
+  q.hline(0, 214, 20);
+  if (!here.length) q.text(W.noFleets || '', 3, 30);
   here.slice(FLEET_TOP, FLEET_TOP + 4).forEach((f, i) => {
-    const top = 19 + 10 * i, ds = H().fleetDesigns(g, f), d = ds[0], n = H().fleetCount ? H().fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
+    const top = 21 + 10 * i, ds = H().fleetDesigns(g, f), d = ds[0], n = H().fleetCount ? H().fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
     // (a ruleset without shipsText: 1.2's line for a fleet of one design; the engine's own label, "6 ships", for a mixed fleet)
     const t = rs.shipsText ? (d ? rs.shipsText(g, d, n) : '') : ds.length === 1 && r12 ? r12.shipsText(langView(g), d, n) : H().fleetLabel(g, f);
     const font = f.dest != null ? G9B : G9, cond = q.width(t, font) > 214 - 3;
     q.text(t, 3, top + 8, font, { cond });
     if (f.id === a.UI.selFleet) { q.x.globalCompositeOperation = 'difference'; q.rect(0, top, 214, top + 10, '#fff'); q.x.globalCompositeOperation = 'source-over'; }
   });
-  // the scroll bar (an OS control: drawn plainly), 12 wide, from the rule to the foot
-  q.x.strokeStyle = '#000'; q.x.strokeRect(214.5, 18.5, 11, 41); if (here.length > 4) { const h = Math.max(6, 41 * 4 / here.length), y = 18.5 + (41 - h) * FLEET_TOP / (here.length - 4); q.rect(215, y, 225, y + h, '#888'); }
-  q.hline(0, 226, 59); q.hline(0, 226, 61); q.vline(225, 0, 62);
+  // the list's scroll bar, 12 wide, from the rule (the window's 88) to the first of the two rules under it (129, 131): shot015
+  drawBar(q.x, 214, 20, true, 42, 12, { on: true, value: FLEET_TOP, max: Math.max(0, here.length - 4) });
+  q.hline(0, 226, 61); q.hline(0, 226, 63); q.vline(225, 0, 64);
   q.c.addEventListener('click', (ev) => { // ClickInFleetRect @c67d0: a row selects its fleet
-    const pt = q.at(ev); if (pt.h >= 214 || pt.v < 19) return;
-    const f = here[FLEET_TOP + Math.floor((pt.v - 19) / 10)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); }
+    const pt = q.at(ev);
+    if (pt.h >= 214) { if (here.length > 4 && pt.v >= 20 && pt.v < 62) { FLEET_TOP += pt.v < 41 ? -1 : 1; a.renderPanel(); } return; } // (the bar: a row up or down)
+    if (pt.v < 21) return;
+    const f = here[FLEET_TOP + Math.floor((pt.v - 21) / 10)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); }
   });
   q.c.addEventListener('wheel', (ev) => { if (here.length <= 4) return; ev.preventDefault(); FLEET_TOP += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
   return a.el('section', { class: 'box fleets12' }, q.c);
 }
 function incomeBox12(old) {
-  const a = A(), q = qdCanvas(226, 34, 'Totals');
+  const a = A(), q = qdCanvas(226, 32, 'Totals'); // (its rule, the window's 164, is the first row of the players and budget pane below: lowBox12)
   const rows = old ? Array.from(old.querySelectorAll('.kv')) : [];
   rows.slice(0, 3).forEach((r, i) => {
     const t = kvText(old, r.getAttribute('data-help')) || { label: r.querySelector('span').textContent, value: '', chg: '' }, v = 10 + 10 * i;
     q.text(t.label, 0, v, G9B, { right: 87 }); q.text(t.value, 90, v, G9B); if (t.chg) q.text(t.chg, 0, v, G9, { right: 225 });
   });
-  q.hline(0, 226, 32); q.vline(225, 0, 34);
+  q.vline(225, 0, 32);
   return a.el('section', { class: 'box info12' }, q.c);
+}
+// The small windows' title bar (Tech Spending, the Report Window: Jake's shot010, rows 371-381): 11 rows, the frame, then four rows dotted on
+// every other pixel round a 7 x 7 close box at 7..13 (two white pixels either side of it), and a rule; no title.
+function titleBar12(w) {
+  const q = qdCanvas(w, 11, ''); q.c.setAttribute('aria-hidden', 'true'); q.c.classList.add('tbar12');
+  q.hline(0, w, 0); q.hline(0, w, 10);
+  for (let r = 2; r <= 8; r += 2) for (let h = 0; h < w; h += 2) if (h < 5 || h > 15) q.rect(h, r, h + 1, r + 1, '#000');
+  q.x.strokeStyle = '#000'; q.x.lineWidth = 1; q.x.strokeRect(7.5, 2.5, 6, 6);
+  return q.c;
 }
 const TECH12 = ['range', 'speed', 'weapons', 'shields', 'mini'];
 const TECH_NAMES12 = { fr: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Mini'], en: ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'] };
@@ -2000,11 +2297,11 @@ function techBox12() {
   const rad = !H().feature(g, 'noRadical') && H().TECHS.includes('radical');
   const keys = rad ? TECH12.concat('radical') : TECH12, names = rad ? names0.concat('Radical') : names0;
   const bw = 228, x0 = 80, geo = rad ? { b: 14, g: 8 } : null;
-  const q = qdCanvas(bw, 80, W.head), sc = H().barScale(g, 'tech');
+  const q = qdCanvas(bw, 96, W.head), sc = H().barScale(g, 'tech'); // (96 high, its second row of names at 85: shot010's window 382..477)
   const toPix = (v) => Math.trunc(50 * sc.toX(v)), fromPix = (px) => sc.toValue(px / 50);
   const vals = () => { const t = keys.reduce((s, k) => s + (p.talloc[k] || 0), 0) || 1; return keys.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
   const draw = () => {
-    q.rect(0, 0, bw, 80, '#fff');
+    q.rect(0, 0, bw, 96, '#fff');
     q.text(W.head, 3, 10); q.text(W.levels, 3, 25);
     TECH12.forEach((k, i) => { q.text(names[i], 5, 35 + 10 * i); q.text(String(p.tech[k]), 50, 35 + 10 * i); });
     vbars(q, x0, 15, vals(), 2, names, toPix, geo);
@@ -2012,7 +2309,7 @@ function techBox12() {
   draw();
   dragBars(q, x0, 15, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix, geo);
   if (rad) q.c.classList.add('remake12');
-  return a.el('section', { class: 'box tech12', 'aria-label': W.head }, q.c);
+  return a.el('section', { class: 'box tech12', 'aria-label': W.head }, titleBar12(bw), q.c);
 }
 // the Report Window (CreateReportWin @1300b8: 250 x 96 under the map window, Stup +0x12, beside the Tech Spending window;
 // UpdateReportWin @130370, DrawMessage @130652): the last 50 reports, 32 a row, each its icon (GetIconID) at the row's left and its
@@ -2028,11 +2325,145 @@ function reportsBox12() {
     const t = el('span', { class: 'rt' }); t.append(a.degText(H().say(g, m.text))); li.append(t);
     list.append(li);
   });
-  const box = el('section', { class: 'box rep12box' }, list);
+  if (V3) { // (3.0.1's layout gives the list its own window: js/skins/mac12/panel.css #rep301)
+    const box3 = el('section', { class: 'box rep12box' }, list), key3 = g.turn + ':' + ms.length;
+    setTimeout(() => { if (REP12.key === key3 && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key3; }, 0);
+    list.addEventListener('scroll', () => { REP12.top = list.scrollTop; });
+    return box3;
+  }
+  // its scroll bar (16 wide, the window's right edge, above the grow box: shot010) over the list's rows of 32 pixels (InitDelta: an arrow a row,
+  // the grey a window less a row), and the grow box (16 x 16, its two squares); the browser's own scroll bar never shows
+  list.classList.add('nosb12');
+  const bc = el('canvas', { class: 'cv12' }), bar = el('div', { class: 'rbar12', role: 'scrollbar', 'aria-orientation': 'vertical', 'aria-controls': 'reports', tabindex: 0 }, bc), bb = { c: bc };
+  const grow = qdCanvas(16, 16, ''); grow.c.classList.add('grow12'); grow.c.setAttribute('aria-hidden', 'true');
+  grow.rect(0, 0, 16, 16, '#000'); grow.rect(1, 1, 15, 15, '#fff'); grow.x.strokeStyle = '#000'; grow.x.strokeRect(3.5, 3.5, 6, 6); grow.x.strokeRect(5.5, 5.5, 7, 7); grow.rect(6, 6, 12, 12, '#fff'); grow.x.strokeRect(5.5, 5.5, 7, 7);
+  const vals = () => { const max = Math.max(0, Math.ceil((list.scrollHeight - list.clientHeight) / 32)); return { v: Math.min(max, Math.round(list.scrollTop / 32)), max }; };
+  let press = null, ghost = null, timer = 0, drag = null;
+  const L = () => Math.max(34, Math.round(list.clientHeight) - 15);
+  const paint = () => { const o = vals(); bar.setAttribute('aria-valuenow', o.v); bar.setAttribute('aria-valuemax', o.max); paintBar(bb, true, L(), { on: true, value: o.v, max: o.max, press, ghost }); };
+  const go = (d) => { list.scrollTop = Math.max(0, list.scrollTop + d); paint(); };
+  bar.addEventListener('pointerdown', (e) => {
+    const o = vals(); if (!o.max) return; e.preventDefault();
+    try { bar.setPointerCapture(e.pointerId); } catch (x) {}
+    const r = bc.getBoundingClientRect(), p0 = (e.clientY - r.top) / r.height * L(), t = 15 + Math.round((L() - 46) * o.v / o.max);
+    if (p0 >= t && p0 < t + 16 && p0 >= 16 && p0 < L() - 16) { drag = { p0, t0: t, r }; ghost = t; paint(); return; }
+    const page = Math.max(32, list.clientHeight - 32), d = p0 < 16 ? -32 : p0 >= L() - 16 ? 32 : p0 < t ? -page : page;
+    press = p0 < 16 ? 'lo' : p0 >= L() - 16 ? 'hi' : null;
+    const tick = () => { go(d); timer = setTimeout(tick, 100); }; tick();
+  });
+  bar.addEventListener('pointermove', (e) => { if (drag) { ghost = Math.max(15, Math.min(L() - 31, drag.t0 + (e.clientY - drag.r.top) / drag.r.height * L() - drag.p0)); paint(); } });
+  const up = () => { clearTimeout(timer); press = null; if (drag) { const o = vals(), T = L() - 46; list.scrollTop = Math.round(Math.max(0, Math.min(1, T > 0 ? (ghost - 15) / T : 0)) * o.max) * 32; drag = null; ghost = null; } paint(); };
+  bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
+  bar.addEventListener('keydown', (e) => { const d = { ArrowUp: -32, ArrowDown: 32, PageUp: -64, PageDown: 64 }[e.key]; if (d) { e.preventDefault(); go(d); } });
+  const body = el('div', { class: 'rep12body' }, list, bar, grow.c);
+  const box = el('section', { class: 'box rep12box' }, titleBar12(226), body);
   // (kept where the player scrolled it while the reports are the same; a new turn opens it at the current year's first)
   const key = g.turn + ':' + ms.length;
-  setTimeout(() => { if (REP12.key === key && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key; }, 0);
-  list.addEventListener('scroll', () => { REP12.top = list.scrollTop; });
+  setTimeout(() => { if (REP12.key === key && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key; paint(); }, 0);
+  list.addEventListener('scroll', () => { REP12.top = list.scrollTop; paint(); });
+  return box;
+}
+
+// The players and the budget bars under the totals, as 1.2 draws them (the same code in 2.0.1), one canvas from the totals' rule (R, the map
+// window's 164) to the window's foot (R + 166 at 640 x 480), each pixel placed as Jake's captures show it (captures/shot010, captures-system6/):
+//   DrawIconRect @c5452: the players' rect 0..67 from R + 2, 18 pixels a row; each player's 16 x 16 icon at (9, row + 3) (you 1000, the
+//     others 2000 + their face), the name at (28, row + 16) clipped at 67, a cross (pen 2) from (9, row + 3) to (25, row + 19) over a player
+//     who is out, and a check mark (1, row + 11) (3, row + 15) (7, row + 7) by one who has ended the turn; before 2010 only you, on the first
+//     row. Its scroll bar, 12 wide, 67..79 from R to the foot. ClickInIconRect @c745a does nothing.
+//   DrawBudgetRect @c53bc, DrawHBarControl @c091e (79, R + 1): the heading "0%" at 124, "Lin" or "Log" at 146 and "100%" ending at 202 on
+//     R + 13, ten ticks 2 high above a rule along R + 16 from 123 (linear: every 77 / 10 pixels; log: GetHPercBarAmt of 100, 200 ...);
+//     then a row every 14 pixels from R + 16, Savings ("Epargne"), Tech, then the colonies: a rule down 123, the bar from 124 as long as
+//     the share (77 at most), 9 high from the row's 5th pixel, black, or 50% grey for a colony losing money (its slot's +0x3c1, set by
+//     ComputeIncomeAndPopulation when its income is below 0); for such a colony a tick 12 high from the row's 3rd pixel at its least share
+//     (ComputeMinPercent; at 202 when it can't be met); the name right-aligned at 122 on the row's 13th pixel, italic below its least share,
+//     underlined for the selected star. A rule down 123 to the foot. Its scroll bar, 12 wide, 214..226 from R + 16 to the foot.
+//   DoHBarClick @c1002: a drag on a bar sets its share (rs.dragShare), a click above the bars switches the scale; a click on a colony's name
+//     selects it (FollowStarNameClick); the bars' arrows scroll a row.
+// The remake's own, for a later ruleset: a ring round an ally's icon (double for a best buddy), and a click on the players opens the Players window.
+const LOW12 = { pTop: 0, bTop: 0 };
+function lowBox12(B) {
+  const a = A(), g = G(), p = a.me(), rs = H().rules(g), Wd = BAR_WORDS[lang()], later = rs.id !== (V2 ? 'mac20' : '12');
+  const HT = 167, q = qdCanvas(226, HT, ''), x = q.x, FOOT = HT - 1;
+  q.hline(0, 226, 0); // (the totals' rule, R)
+  // DrawIconRect
+  const prow = Math.trunc((FOOT - 2) / 18), early = g.year < 2010;
+  const order = early ? [a.ME] : g.players.map((pl, i) => i);
+  LOW12.pTop = early ? 0 : Math.max(0, Math.min(LOW12.pTop, order.length - prow));
+  x.save(); x.beginPath(); x.rect(0, 2, 67, FOOT - 2); x.clip();
+  order.slice(LOW12.pTop, LOW12.pTop + prow).forEach((i, r) => {
+    const pl = g.players[i], top = 2 + 18 * r;
+    // (LoadDrawBWIcon: the icon's own pixels inside its mask and black outside it, so on the pane it reads as a black square: shot015)
+    const im = a.IMG['dos:s' + (i === a.ME ? 1000 : 2000 + (pl.face || 0))] || a.IMG[i === a.ME ? 'white0_0' : 'bad' + (pl.face || 0) + '_0'];
+    q.rect(9, top + 3, 25, top + 19, '#000'); if (im && im.width) x.drawImage(im, 9, top + 3, 16, 16);
+    if (later && i !== a.ME && pl.alive && H().isAllied(g, a.ME, i)) { // (the remake's ring for an ally, double for a best buddy)
+      x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.arc(17, top + 11, 10.5, 0, Math.PI * 2); x.stroke();
+      if (H().isBuddy(g, a.ME, i)) { x.beginPath(); x.arc(17, top + 11, 12.5, 0, Math.PI * 2); x.stroke(); }
+    }
+    q.text(pl.name, 28, top + 16, G9);
+    if (!pl.alive || pl.surrendered) { x.strokeStyle = '#000'; x.lineWidth = 2; x.beginPath(); x.moveTo(10, top + 4); x.lineTo(26, top + 20); x.moveTo(26, top + 4); x.lineTo(10, top + 20); x.stroke(); x.lineWidth = 1; }
+    if (!pl.human || (g.done || []).includes(i)) { x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.moveTo(1.5, top + 11.5); x.lineTo(3.5, top + 15.5); x.lineTo(7.5, top + 7.5); x.stroke(); }
+  });
+  x.restore();
+  drawBar(x, 67, 0, true, HT, 12, { on: true, value: LOW12.pTop, max: Math.max(0, order.length - prow) });
+  // DrawHBarControl
+  const x0 = 124, sc = a.budgetScale(), log = sc.id === 'log';
+  q.text('0%', x0, 13, G9); q.text(log ? Wd.log : Wd.lin, log ? 153 : 147, 13, G9); q.text('100%', 0, 13, G9, { right: 203 }); // ("Lin" at 147 and "100%" ending at 202 in shot010; English "Linear" / "Log" at 2.0.1's 147 / 153, as the 3.0.1 skin has them)
+  for (let k = 1; k <= 10; k++) { const tx = x0 + (log ? hPercBar(100 * k) : Math.trunc(77 * k / 10)); q.vline(tx, 14, 16); }
+  q.hline(123, 226, 16);
+  const ents = B.ents || [], brow = Math.trunc((FOOT - 16) / 14);
+  // the slots in the player's order (CreatePlayer: Savings, Tech, home; ColonizeStar puts each new colony's slot in front: shot015, Regor
+  // above Epargne): the newer colonies newest first (rs colOrder, p.colOrder), Savings, Tech, then the home star
+  const cols = ents.filter(e => e.star != null), ord = p.colOrder || [], home = p.homeStar;
+  if (ord.length) cols.sort((e1, e2) => { const i1 = ord.indexOf(e1.star), i2 = ord.indexOf(e2.star); return (i1 < 0 ? 1e9 : i1) - (i2 < 0 ? 1e9 : i2); });
+  const first = cols.filter(e => e.star !== home), last = cols.filter(e => e.star === home);
+  const slots = first.concat(ents.filter(e => e.key === 'savings'), ents.filter(e => e.key === 'tech'), last);
+  LOW12.bTop = Math.max(0, Math.min(LOW12.bTop, slots.length - brow));
+  const low = new Set((rs.underfunded ? rs.underfunded(g, p) : []).map(st => st.id));
+  const lenOf = (pm) => pm < 1 ? 0 : log ? hPercBar(pm) : Math.trunc((pm * 77 + 999) / 1000);
+  let y = 16; const tb = [];
+  slots.slice(LOW12.bTop, LOW12.bTop + brow).forEach((e) => {
+    const pm = Math.round(e.get() * 1000), len = Math.min(77, lenOf(pm)), st = e.star != null ? g.stars[e.star] : null;
+    const losing = !!(st && (st.oInc != null ? st.oInc : H().planetIncome(g, p, st)) < 0); // (the slot's +0x3c1, set from the income the last turn left)
+    q.vline(123, y, y + 14);
+    x.fillStyle = losing ? orPat(x, GRAY, '#000') : '#000'; x.fillRect(x0, y + 5, len, 9);
+    if (losing) { const mn = rs.minShare ? rs.minShare(g, p, st.id) : 0; const tx = mn > 1000 ? 202 : x0 + Math.min(78, lenOf(mn)); q.vline(tx, y + 3, y + 15); }
+    const name = e.key === 'savings' ? Wd.sav : e.key === 'tech' ? Wd.tech : st.name;
+    tb.push({ x: x0, y: y + 3, w: 77, h: 12, vert: false, frac: len / 77, label: name });
+    const font = st && low.has(st.id) ? 'italic ' + G9 : G9;
+    const w = q.text(name, 0, y + 13, font, { right: 122 });
+    if (st && a.UI.sel === st.id) q.hline(122 - Math.ceil(w), 122, y + 14);
+    y += 14;
+  });
+  q.vline(123, y, FOOT);
+  drawBar(x, 214, 16, true, HT - 16, 12, { on: true, value: LOW12.bTop, max: Math.max(0, slots.length - brow) });
+  q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = String(HT);
+  q.c.setAttribute('aria-label', (W => W)(lang() === 'fr' ? 'Joueurs et budget' : 'Players and budget'));
+  // the clicks
+  q.c.style.touchAction = 'none';
+  const scroll = (k, d) => { LOW12[k] += d; a.renderPanel(); };
+  q.c.addEventListener('pointerdown', (ev) => {
+    const pt = q.at(ev), v = pt.v;
+    if (pt.h >= 67 && pt.h < 79) { if (v < 12) scroll('pTop', -1); else if (v >= HT - 12) scroll('pTop', 1); return; }
+    if (pt.h >= 214) { if (v >= 16 && v < 28) scroll('bTop', -1); else if (v >= HT - 12) scroll('bTop', 1); return; }
+    if (pt.h < 67) { if (later && a.openPlayers) a.openPlayers(); return; } // (ClickInIconRect: nothing in 1.2; the remake's Players window for a later ruleset)
+    if (pt.h < 79) return;
+    if (v < 16) { if (pt.h >= 123 && a.flipBarScale) a.flipBarScale(); return; }
+    const e = slots[LOW12.bTop + Math.floor((v - 16) / 14)]; if (!e) return;
+    if (pt.h < 123) { if (e.star != null) { a.UI.sel = e.star; if (a.centerOn) a.centerOn(e.star); a.renderPanel(); a.draw(); } return; }
+    ev.preventDefault();
+    const lk = rs.barLocked ? rs.barLocked(g, p, e.key) : null; if (lk) { a.beep(); return; }
+    const start = JSON.stringify(p.budget);
+    const set = (e2) => { const h = q.at(e2).h, f = Math.max(0, Math.min(1, (h - x0) / 77)), pm = log ? sc.toValue(f) : Math.round(f * 1000);
+      if (rs.dragShare) { const b = p.budget, o = JSON.parse(start); b.tech = o.tech; b.savings = o.savings; b.col = o.col; const r = rs.dragShare(g, p, e.key, Math.max(0, Math.min(1000, Math.round(pm)))); if (r) { if (r.tech != null) b.tech = r.tech / 1000; if (r.savings != null) b.savings = r.savings / 1000; for (const k in r.col || {}) b.col[k] = r.col[k] / 1000; } }
+      else e.set(pm / 1000);
+      const c = lowBox12(B); box.replaceWith(c); box = c; };
+    let pend = null, raf = 0;
+    const later2 = (e2) => { pend = e2; if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (pend) { const e3 = pend; pend = null; set(e3); } }); };
+    const up = (e2) => { window.removeEventListener('pointermove', later2); window.removeEventListener('pointerup', up); if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; set(e2); a.save(); a.renderPanel(); };
+    window.addEventListener('pointermove', later2); window.addEventListener('pointerup', up); set(ev);
+  });
+  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); scroll(pt.h < 79 ? 'pTop' : 'bTop', ev.deltaY > 0 ? 1 : -1); }, { passive: false });
+  let box = a.el('section', { class: 'box low12c' }, q.c);
   return box;
 }
 
@@ -2043,19 +2474,10 @@ function panel12(panel, B) {
   const pb = planetBox12(old);
   const fb = fleetBox12();
   const ib = incomeBox12(B.info);
-  const rost = el('div', { class: 'rost12' }); roster(rost);
-  const low = el('div', { class: 'low12' }, rost, B.budget);
+  const low = lowBox12(B);
   const tb = techBox12();
   panel.innerHTML = '';
   panel.append(pb, fb, ib, low, tb, reportsBox12());
-  // (the budget bars go down to the map window's foot, 136 of its pixels under the totals, and scroll; CenterOnStarBar @c5c26
-  // scrolls them to the selected colony's row)
-  if (B.budget) {
-    const k = (panel.clientWidth || 226) / 226, bx = B.budget;
-    bx.style.maxHeight = Math.round(136 * k) + 'px'; bx.style.overflowY = 'auto'; bx.style.position = 'relative';
-    const r = bx.querySelector('.barrow.hl');
-    if (r && (r.offsetTop < bx.scrollTop || r.offsetTop + r.offsetHeight > bx.scrollTop + bx.clientHeight)) bx.scrollTop = Math.max(0, r.offsetTop - bx.clientHeight / 2);
-  }
 }
 
 // ---------- Mac 3.0.1's main screen (js/skins/mac3, docs/status-301.md) ----------
@@ -2734,9 +3156,10 @@ NARROW301.addEventListener('change', () => { if (window.HOMAC301 && A() && A().G
 // 1030.6-7 or .8-9 at (155, 135) and (155, 150) with PICT 3500 (won) or 3510 at (180, 175, 254, 239), and the button
 // (DITL 7010: "Passe" at 193, 273, 58 x 20, which skips to the end) says "Bien". A viewer who lost a battle of one round sees
 // nothing of the other side (DrawAllGroups: STR# 1030.11 and .12 at (155, 85) and (155, 100)) and no shots.
-const SYS = '12px Chicago, Charcoal, Geneva, sans-serif', GEN9 = '9px Geneva, Verdana, sans-serif';
+// (the battle window's text in the Mac's own bitmap Chicago 12 and Geneva 9, as the panes: Jake's battle captures; they were the browser's Chicago / Geneva)
+const SYS = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN9 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif";
 // (3.0.1's battle window in the skins' bitmap Chicago 12 and Geneva 9, the sizes the dialogs use: js/skins/dos/style.css's faces)
-const SYS3 = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN93 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif";
+const SYS3 = SYS, GEN93 = GEN9;
 function battleWindow(b, k) {
   const a = A(), g = G(), rs = H().rules(g), el = a.el, IMG = a.IMG, ME = a.ME;
   const fr = lang() === 'fr', W = 445, Hh = 310, S = 2, TICK = 1000 / 60;
@@ -3088,6 +3511,8 @@ function syncMapView(v, c) {
   if (!barsOn()) return;
   v.s = snapZoom(v.s);
   barMetrics(v.s, c.mapW, c.mapH, c.G);
+  if (FILL.s && v.s === FILL.s) MB.maxH = MB.maxV = 0; // (the window filled: the stars all show, the bars have nothing to scroll)
+  if (!MB.maxH && !MB.maxV) { centreStars(v, c); MB.H = 0; MB.V = 0; MB.s = v.s; MB.centerSel = false; return; }
   let [H, V] = cellOf(v);
   if (MB.s && MB.s !== v.s && MB.centerSel && c.sel != null && c.G.stars[c.sel]) [H, V] = centerCells(c.G.stars[c.sel], c.G); // (Zoom In / Zoom Out: CenterOnStar, forced)
   else if (!c.live) { H = Math.round(H); V = Math.round(V); } // (whole cells; while a drag or a throw is on, the map follows it and settles at its end)
@@ -3095,46 +3520,63 @@ function syncMapView(v, c) {
   putCell(v, H, V);
   MB.H = H; MB.V = V; MB.s = v.s; MB.centerSel = false;
 }
+// the whole galaxy in view: the stars in the middle of the window, as far from the top as from the foot and from the left as from the right
+// (the remake's: the program put cell 0 at the window's top left and left the rest empty)
+function centreStars(v, c) { const b = starBox(c.G, v.s); v.ox = (c.mapW - (b.x1 - b.x0)) / 2 - b.x0; v.oy = (c.mapH - (b.y1 - b.y0)) / 2 - b.y0; }
 function centerOnStar12(v, sid, c) {
   if (!barsOn()) return false;
   const st = c.G.stars[sid]; if (!st) return false;
   v.s = snapZoom(v.s); barMetrics(v.s, c.mapW, c.mapH, c.G);
+  if ((FILL.s && v.s === FILL.s) || (!MB.maxH && !MB.maxV)) { centreStars(v, c); return true; } // (all of it in view: nothing to bring nearer)
   const [H, V] = cellOf(v), z = v.s / 2, px = (st.x * 2 - H) * z - 6, py = (st.y * 2 - V) * z - 7;
   if (px > 40 && px < c.mapW - 40 && py > 40 && py < c.mapH - 85) return true; // (already in view: CenterOnStar leaves the map)
   const [h2, v2] = centerCells(st, c.G); putCell(v, h2, v2); return true;
 }
 let BAR_TILE = null;
 const barTile = () => BAR_TILE || (() => { const t = document.createElement('canvas'); t.width = t.height = 2; const x = t.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 2, 2); x.fillStyle = '#000'; x.fillRect(0, 0, 1, 1); x.fillRect(1, 1, 1, 1); return (BAR_TILE = t); })();
-// one bar, drawn as the standard scroll bar of System 6 and 7 in black and white: a frame, an arrow box at each end (a black arrow, inverted while
-// it is held), a grey page area (the 50% pattern), the thumb a white square with a frame; inactive (no room to scroll, or a dialog is up): an empty bar
+// one bar, drawn as the standard scroll bar of System 6 in black and white, read pixel by pixel in Jake's System 6 captures of 1.2F
+// (captures-system6/, the map window's bars and the panes' narrow ones): a frame; an arrow box at each end, its outline arrow (filled black
+// while it is held); between them the light grey (QuickDraw's ltGray: every fourth pixel, two along on the next row) and the thumb, a white
+// square with a frame. With nothing to scroll the arrows stay and the track is white, with no thumb (the players' bar in shot010, a level
+// that can't move in DITL 6010); an inactive bar (a dialog is up) is an empty frame. t: the bar's thickness, 16 (the map, the dialogs)
+// or 12 (the panes' bars: GrowMapWin's 67..79 and 214..226).
+const ARROW = {
+  16: { out: [[], [], [[7, 7]], [[6, 6], [8, 8]], [[5, 5], [9, 9]], [[4, 4], [10, 10]], [[3, 3], [11, 11]], [[2, 2], [12, 12]], [[1, 4], [10, 13]], [[4, 4], [10, 10]], [[4, 4], [10, 10]], [[4, 4], [10, 10]], [[4, 10]]],
+    fill: [[], [], [[7, 7]], [[6, 8]], [[5, 9]], [[4, 10]], [[3, 11]], [[2, 12]], [[1, 13]], [[4, 10]], [[4, 10]], [[4, 10]], [[4, 10]]] },
+  12: { out: [[], [[5, 5]], [[4, 4], [6, 6]], [[4, 4], [7, 7]], [[2, 3], [7, 8]], [[1, 1], [9, 9]], [[1, 3], [7, 10]], [[3, 3], [7, 7]], [[3, 3], [7, 7]], [[3, 7]]],
+    fill: [[], [[5, 5]], [[4, 6]], [[4, 7]], [[2, 8]], [[1, 9]], [[1, 10]], [[3, 7]], [[3, 7]], [[3, 7]]] },
+};
+function drawBar(x, ox, oy, vertical, L, t, o) {
+  // (a, p, w, h): a across the bar, p along it
+  const R = (a0, p0, w, h, col) => { x.fillStyle = col; if (vertical) x.fillRect(ox + a0, oy + p0, w, h); else x.fillRect(ox + p0, oy + a0, h, w); };
+  R(0, 0, t, L, '#000'); R(1, 1, t - 2, L - 2, '#fff');
+  if (o.on === false) return;
+  const box = t; // an arrow box: the frame, the arrow, the divider (16 rows for the 16-pixel bar, 12 for the narrow one)
+  R(1, box - 1, t - 2, 1, '#000'); R(1, L - box, t - 2, 1, '#000');
+  const A0 = ARROW[t] || ARROW[16];
+  const arrow = (end, inv) => (inv ? A0.fill : A0.out).forEach((segs, i) => { for (const [a0, a1] of segs) R(a0, end ? L - 1 - i : i, a1 - a0 + 1, 1, '#000'); });
+  arrow(0, o.press === 'lo'); arrow(1, o.press === 'hi');
+  if (!(o.max > 0)) return;
+  // the light grey, aligned to the window's pixels
+  for (let p0 = box; p0 < L - box; p0++) for (let a0 = 1; a0 < t - 1; a0++) {
+    const gx = vertical ? ox + a0 : ox + p0, gy = vertical ? oy + p0 : oy + a0;
+    if ((gy & 1) ? (gx & 3) === 2 : (gx & 3) === 0) R(a0, p0, 1, 1, '#000');
+  }
+  const T = L - 3 * box + 2; // the thumb's travel: from the first divider to the last, less its own size
+  if (T >= 0) {
+    const tp = box - 1 + Math.round(T * Math.max(0, Math.min(1, o.value / o.max)));
+    R(0, tp, t, t, '#000'); R(1, tp + 1, t - 2, t - 2, '#fff');
+    if (o.ghost != null) { // the outline that is dragged
+      for (let i = 0; i < t; i++) for (let j = 0; j < t; j++) if ((i === 0 || j === 0 || i === t - 1 || j === t - 1) && (i + j) % 2 === 0) R(i, o.ghost + j, 1, 1, '#000');
+    }
+  }
+}
 function paintBar(b, vertical, L, o) {
   const k = Math.max(1, Math.round(window.devicePixelRatio || 1)), cw = vertical ? BAR12 : L, ch = vertical ? L : BAR12, c = b.c;
   if (c.width !== cw * k || c.height !== ch * k) { c.width = cw * k; c.height = ch * k; }
   c.style.width = cw + 'px'; c.style.height = ch + 'px';
   const x = c.getContext('2d'); x.setTransform(k, 0, 0, k, 0, 0); x.imageSmoothingEnabled = false;
-  // (a, b, w, h): a across the bar, b along it
-  const R = (a, p, w, h, col) => { x.fillStyle = col; if (vertical) x.fillRect(a, p, w, h); else x.fillRect(p, a, h, w); };
-  R(0, 0, BAR12, L, '#000'); R(1, 1, BAR12 - 2, L - 2, '#fff');
-  if (!o.active) return;
-  const pat = x.createPattern(barTile(), 'repeat'); x.fillStyle = pat;
-  if (vertical) x.fillRect(1, 16, 14, L - 32); else x.fillRect(16, 1, L - 32, 14);
-  R(1, 15, BAR12 - 2, 1, '#000'); R(1, L - 16, BAR12 - 2, 1, '#000');
-  // the arrows: a 7 x 4 triangle (js/os/system7.css has the same) in each box
-  const arrow = (end, dir, inv) => {
-    const p0 = end ? L - 15 : 1; // the box: 14 along, between the frame and the divider
-    if (inv) R(1, p0, BAR12 - 2, 14, '#000');
-    for (let r = 0; r < 4; r++) { const w = dir < 0 ? 1 + 2 * r : 7 - 2 * r; R(7 - (w - 1) / 2, p0 + 5 + r, w, 1, inv ? '#fff' : '#000'); }
-  };
-  arrow(0, -1, o.press === 'lo'); arrow(1, 1, o.press === 'hi');
-  // the thumb
-  const T = L - 46;
-  if (T >= 0) {
-    const t = 15 + Math.round(T * Math.max(0, Math.min(1, o.value / o.max)));
-    R(0, t, BAR12, 16, '#000'); R(1, t + 1, BAR12 - 2, 14, '#fff');
-    if (o.ghost != null) { // the outline that is dragged (the map moves when it is let go)
-      for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) if ((i === 0 || j === 0 || i === 15 || j === 15) && (i + j) % 2 === 0) R(i, o.ghost + j, 1, 1, '#000');
-    }
-  }
+  drawBar(x, 0, 0, vertical, L, BAR12, o);
 }
 function ensureBars() {
   if (MB.wrap && MB.wrap.isConnected) return true;
@@ -3226,7 +3668,7 @@ function updateBars() {
     const key = [b.L, vals.value, vals.max, act, press, ghost, window.devicePixelRatio].join();
     b.el.setAttribute('aria-valuemin', '0'); b.el.setAttribute('aria-valuemax', String(vals.max)); b.el.setAttribute('aria-valuenow', String(Math.round(vals.value)));
     b.el.setAttribute('aria-disabled', act ? 'false' : 'true');
-    if (b.key !== key) { b.key = key; paintBar(b, b.vertical, b.L, { active: act, value: vals.value, max: Math.max(1, vals.max), press, ghost }); }
+    if (b.key !== key) { b.key = key; paintBar(b, b.vertical, b.L, { on: !document.querySelector('.scrim'), value: vals.value, max: vals.max, press, ghost }); }
   }
   MB.v.el.style.height = MB.v.L + 'px'; MB.h.el.style.width = MB.h.L + 'px';
   MB.v.el.dataset.value = String(MB.V); MB.h.el.dataset.value = String(MB.H);
@@ -3475,7 +3917,7 @@ if (V3) {
     modernPan: () => barsOn(),
     syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
     zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
-    fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [h0, v0] = centerCells(st, c.G); putCell(v, h0, v0); } },
+    fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = zooms()[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [h0, v0] = centerCells(st, c.G); putCell(v, h0, v0); } },
     mapBg: '#000', bgStars: false, transitDots: false,
     routes: false, routesOver: true,
     fleetPaths: (cx, i) => { if (own()) fleetPaths301(cx, i); },
@@ -3498,7 +3940,7 @@ if (V3) {
   return;
 }
 window.HOMAC12 = {
-  alertBox: (paras) => { const b = V2 && G() && own12Rules() ? alert20(paras) : null; if (b) b.setAttribute('translate', 'no'); return b; },
+  alertBox: (paras) => { const b = G() && own12Rules() ? alert20(paras) : null; if (b) b.setAttribute('translate', 'no'); return b; },
   battleWindow,
   battleWindowAlways: true,
   // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
@@ -3537,10 +3979,15 @@ window.HOMAC12 = {
   // the map window's scroll bars and the whole-cell scrolling they give (above); dragging the map with a mouse and the wheel are modern conveniences
   mapInset: () => (barsOn() ? [BAR12 * MACS.s, BAR12 * MACS.s] : [0, 0]),
   mapPixel: macPixel,
+  // no fleet markers on the map, as 1.2 and 2.0.1 draw none (Jake's captures: fleets at Gemini, nothing beside it; the remake's markers boxed the
+  // selected fleet's ship in yellow): the selected fleet is picked up from its star by an unseen handle, as FollowPathDrag does (3.0.1's markerAt)
+  // (getters: under a later version's rules this skin keeps the remake's markers)
+  get marker() { return own() ? () => 'none' : undefined; },
+  get markerAt() { return own() ? (f, i) => { if (!i.mine) return null; const a = A(), here = a.fleetOrder(a.G.fleets.filter(x => x.owner === a.ME && x.star === i.s.id && x.to == null)), cur = here.find(x => x.id === a.UI.selFleet) || here[0]; if (!cur || f.id !== cur.id) return null; const u = i.view.s / 2, d = u >= 17 ? 32 * Math.max(1, u / 17) : u < 7 ? u + 4 : 16; return { x: i.x - d / 2, y: i.y - d / 2, w: d, hidden: true }; } : undefined; },
   modernPan: () => barsOn(),
   syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
   zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
-  fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [H, V] = centerCells(st, c.G); putCell(v, H, V); } },
+  fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = zooms()[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [H, V] = centerCells(st, c.G); putCell(v, H, V); } },
   mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
   // (DrawOneBWStarSubProc @c38ce: at the second zoom the names are drawn condensed, TextFace 0x20: a pixel less between letters)
   // (StarLine: the line while a fleet is dragged, and a fleet's orders)
@@ -3554,8 +4001,9 @@ window.HOMAC12 = {
   // (ALRT 5040 / 5041: "Congratulations! You have conquered the galaxy!" with PICT 3030 / 3530 and OK; ALRT 5050 / 5051: "Unfortunately, you have been
   // eliminated from the game…" with PICT 3040 / 3540 and "Oh, well…": the colour ones are the odd ids)
   youWonLayout(kind, Y, done) {
-    if (!V2 || !own() || !G() || !own12Rules()) return false;
-    const col = window.HOMAC2_COLOUR ? 1 : 0;
+    if (!own() || !G() || !own12Rules()) return false;
+    // (1.2F: 5040 / 5050 name PICT 3030 / 3040 of its lost colour pictures' file; 5041 / 5051 name 3530 / 3540, which its own file has: Jake's System 6 shot168)
+    const col = !V2 || window.HOMAC2_COLOUR ? 1 : 0;
     alertById20(String((kind === 'won' ? 5040 : 5050) + col), [Y.text], Y.ok, done); return true;
   },
   mapNameStyle(cx, s) { cx.letterSpacing = own() && zoomIdx(s) === 1 ? '-1px' : '0px'; },
@@ -3584,6 +4032,7 @@ window.HOMAC12 = {
     if (!G() || !own()) return false;
     if (name === 'types') return V2 ? shipTypes20() : shipTypes();
     if (name === 'fleets') return fleetsStatus();
+    if (name === 'stars' && H().rules(G()).exploredList && H().rules(G()).exploredList.layout === 'mac') return stars6040();
     if (name === 'build') return buildShips(x[0]);
     return false;
   },

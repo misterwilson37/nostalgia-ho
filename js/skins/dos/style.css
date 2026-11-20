@@ -34,6 +34,9 @@
 /* The DOS program's menu bar and menus are set in its screen font (the VGA 8x14 font of HO.PRS, tools/extract/dosfont.py): grey bar, black text, the
    first letter of each menu red, a green bar on the item under the pointer, a diamond for a checked item (screenshot of the running program). */
 @font-face { font-family: "DOS Bios"; src: url("../../../assets/skins/dos/fonts/bios8x14.ttf") format("truetype"); font-display: block; }
+/* the VGA text mode's 9 x 16 font (IBM VGA 9x16, code page 437), for the one text-mode screen, F10's DOS prompt: "Web437_IBM_VGA_9x16" from the
+   Ultimate Oldschool PC Font Pack by VileR, int10h.org, CC BY-SA 4.0 (assets/skins/dos/fonts/LICENSE-int10h-CC-BY-SA-4.0.txt) */
+@font-face { font-family: "IBM VGA 9x16"; src: url("../../../assets/skins/dos/fonts/ibmvga9x16.woff") format("woff"); font-display: block; }
 html.os-dos #menubar { background: #aaa; border-bottom: 0; }
 html.os-dos #menubar .mbtn, html.os-dos .dropdown button { font: 14px/14px "DOS Bios", monospace; color: #000; border-radius: 0; font-synthesis: none; -webkit-font-smoothing: none; }
 html.os-dos #menubar .menu > .mbtn::first-letter { color: #a00000; }
@@ -260,7 +263,8 @@ html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-vis
 
 .dd-type .cap.cond, .dd-qcell .cap.cond, .dd-qtop .cap.cond { letter-spacing: calc(-1 * var(--du)); }
 /* F10, the boss key (bossKey in ui.js): the text screen with its DOS prompt */
-.dd-boss { position: fixed; inset: 0; z-index: 1000; background: #000; color: #aaa; font: calc(14 * var(--du))/calc(16 * var(--du)) "DOS Bios", monospace; white-space: pre; padding: 0; outline: 0; -webkit-font-smoothing: none; }
+/* (text mode is 720 x 400, 80 x 25 cells of 9 x 16, shown on the 4:3 screen: each of its pixels 640 / 720 wide and 480 / 400 tall of the graphics screen's) */
+.dd-boss { position: fixed; inset: 0; z-index: 1000; background: #000; color: #aaa; font: calc(19.2 * var(--du))/calc(19.2 * var(--du)) "IBM VGA 9x16", "DOS Bios", monospace; white-space: pre; padding: 0; outline: 0; -webkit-font-smoothing: none; transform: scaleX(.9259); transform-origin: 0 0; width: 108%; }
 
 /* the Startup window, framed on the title page (startupDos in ui.js): the remake's frame round the program's window, which sits on the program's black screen */
 #titlescreen.dd-wel:not([hidden]) { display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: 20px; padding: 12px 12px 28px; }

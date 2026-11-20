@@ -165,3 +165,59 @@ html.macscale .win.bw12m { width: min(445px, calc((100vw - 24px) / var(--mac)), 
 .win.bw12m .bw12w { width: 100%; }
 html.macscale.mac301 .win .bw12w button.bw12b { font-size: 15px !important; }
 html.macscale.mac301 .win .bw12w button.bw12b.done { outline-width: 3px; outline-offset: 1px; }
+/* DLOG 6010 Create New Ship Type (js/skins/mac12/ui.js createType): the program's own dialog, DITL 6010's rectangles; no title bar (a dBoxProc
+   window), its scroll bars drawn as the map's (paintBar), the Class pop-up as the System's pop-up menu control: a framed box with a 1-pixel
+   shadow at its right and foot and a black triangle at its right */
+.win.dlg6010 .wtitle { display: none; }
+.win.dlg6010 .wbody { padding: 0; }
+.win.dlg6010 .dl20 { margin: 8px; }
+.ct6010 .dbar12 { cursor: default; touch-action: none; }
+.ct6010 .dbar12 canvas { display: block; }
+.ct6010 input[type=text] { box-sizing: border-box; font: inherit; padding: 0 3px; border: 1px solid #000; border-radius: 0; background: #fff; color: #000; outline: none; }
+.ct6010 select.pop12 { appearance: none; -webkit-appearance: none; box-sizing: border-box; border: 1px solid #000; border-radius: 0; box-shadow: 1px 1px 0 #000; padding: 0 22px 0 14px;
+  font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; cursor: default;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h11L5.5 6z'/%3E%3C/svg%3E") no-repeat right 6px center; }
+/* the budget bars' box scrolls with the wheel, never with the browser's own scroll bar (it showed under the bars on a Mac set to always show them) */
+.nosb12 { scrollbar-width: none; }
+.nosb12::-webkit-scrollbar { display: none; }
+/* the players and budget pane, one canvas (js/skins/mac12/ui.js lowBox12) */
+:is(#panel, .p301x) .box.low12c { padding: 0; margin: 0; }
+/* the map window's panes (planet, fleets, totals, players and budget) touch, as in the window they are: no gaps, no shadows, one frame
+   round them (Jake's shot010); Tech Spending and the Report Window stay windows of their own below */
+:is(#panel, .p301x) .box.planet12, :is(#panel, .p301x) .box.fleets12, :is(#panel, .p301x) .box.info12, :is(#panel, .p301x) .box.low12c { margin: 0; border: 0; border-left: 1px solid #000; border-radius: 0; box-shadow: none; }
+:is(#panel, .p301x) .box.planet12 { border-top: 1px solid #000; }
+:is(#panel, .p301x) .box.low12c { border-bottom: 1px solid #000; margin-bottom: 8px; }
+/* the small windows (Tech Spending, the Report Window) as 1.2 has them (shot010): the title bar, then the content; the Report Window's text in
+   the bitmap Geneva 9 on 11-pixel lines from x 35, rows of 32 with the icon at the left, its 16-pixel scroll bar above the grow box */
+:is(#panel, .p301x) canvas.tbar12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+html:not(.mac301lay) :is(#panel, .p301x) .box.tech12, html:not(.mac301lay) :is(#panel, .p301x) .rep12box { border: 1px solid #000; border-radius: 0; box-shadow: 1px 1px 0 #000; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rep12body { position: relative; height: 96px; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 { position: absolute; left: 0; top: 0; right: 16px; height: 96px; font: 12px/11px 'DOS Geneva 9', Geneva, Verdana, sans-serif; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 li { gap: 3px; min-height: 32px; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 li .rt { padding-top: 0; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rbar12 { position: absolute; right: 0; top: 0; width: 16px; line-height: 0; touch-action: none; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rbar12 canvas { display: block; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box canvas.grow12 { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; image-rendering: pixelated; }
+/* a dialog's edit text: the selection inverted, as TextEdit draws it in black and white (Jake's rename capture) */
+.ct6010 input[type=text]::selection { background: #000; color: #fff; }
+/* Organize Ships' piles (organize: DRAWORGFLEETS): the count at the cell's left, the picture, the chosen pile inverted, the dotted outline of a drag */
+.org12 .opile { display: flex; align-items: flex-end; gap: 0; cursor: default; touch-action: none; user-select: none; }
+.org12 .opile .ocount { width: 14px; padding-left: 0; margin-left: -12px; font: 15px/1 'DOS Chicago 12', Chicago, sans-serif; text-align: left; }
+.org12 .opile img { display: block; height: 40px; width: auto; image-rendering: pixelated; }
+.org12 .opile.sel { background: #000; } .org12 .opile.sel img { filter: invert(1); }
+.org12 .oghost { border: 1px dotted #000; pointer-events: none; box-sizing: border-box; }
+/* 1.2's and 2.0.1's battle window too (DLOG 7010: a plain box, no title bar; Jake's 1.2F captures 037-074): the 3.0.1 rules above for every Mac skin */
+.win.bw12m .wtitle { display: none; }
+.win.bw12m .wbody { padding: 0; }
+.win.bw12m { border: 1px solid #000; border-radius: 0; box-shadow: none; padding: 0; background: #000; }
+.win .bw12w button.bw12b { container-type: normal; font: 30px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
+.win .bw12w button.bw12b.done { outline: 6px solid #fff; outline-offset: 2px; }
+@media (max-width: 900px) { .win .bw12w button.bw12b { font-size: 3.4vw !important; } }
+/* (with the Mac's screen zoomed, html.macscale, the window is 445 CSS pixels wide: the button's Chicago at its own 15, the ring 3) */
+html.macscale .win .bw12w button.bw12b { font-size: 15px !important; }
+html.macscale .win .bw12w button.bw12b.done { outline-width: 3px; outline-offset: 1px; }
+/* the menu bar and menus in the Mac's own bitmap Chicago 12 (the DOS program's copy, as the dialogs and panes), in the Mac skins' System 6 and
+   System 7 looks: the same pixels as the game's windows, as on the Mac itself (Jake, 19 Nov); the bitmap is Chicago's own weight, so no bold */
+html.macfam:is(.os-system6, .os-system7) :is(#menubar, #menubar .logo, #menubar #title, .mbtn, .dropdown button) { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; font-weight: normal; font-synthesis: none; letter-spacing: .58px; -webkit-font-smoothing: none; }
+html.macfam:is(.os-system6, .os-system7) .dropdown { width: max-content; min-width: 0; max-width: none; }
+html.macfam:is(.os-system6, .os-system7) .dropdown button { white-space: nowrap; }

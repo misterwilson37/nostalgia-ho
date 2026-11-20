@@ -3,11 +3,20 @@
    bars, grey 3-D buttons and bevels, white menus, MS Sans Serif. (Moved
    here from js/skins/dos/style.css; the DOS skin's default look.) */
 @import url("base.css");
+@import url("pixel-fonts.css");
+@import url("pixel-sizes.css");
 :root {
   --plat: #c0c0c0; --plat2: #c0c0c0; --edge: #808080; --ink: #000; --sub: #404040;
   --hi: #000080;
   --ui: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
 }
+/* (the DOS program drew no MS Sans Serif of its own: it carries Geneva 9, Chicago 12 and its 8x14 face (js/os/pixel-fonts.css), so the
+   remake's own text under this look, the title screen, New Game, About, Help, the toasts, is in them: Geneva 9 for the text, whose
+   bitmaps carry the bold, and the 8x14 face for buttons and menus, as the game's own dialogs (js/skins/dos/style.css, .dd). The
+   Windows 3.1 look (win31.css) keeps MS Sans Serif: it is Windows' own.) */
+html.os-dos { --ui: "DOS Geneva 9", sans-serif; font-synthesis: none; }
+html.os-dos :where(button, input, select, textarea, .mbtn, .wtitle span, .tbtn) { font-family: "DOS Bios", monospace; font-synthesis: none; -webkit-font-smoothing: none; }
+html.os-dos :where(h1, h2, h3, h4) { font-family: "DOS Geneva 9", sans-serif; }
 /* 3-D bevels */
 .box, .designer { background: var(--plat); border: 2px solid; border-color: #fff #808080 #808080 #fff; }
 #panel { background: var(--plat); border-right: 2px solid #000; }

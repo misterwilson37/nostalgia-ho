@@ -1082,3 +1082,45 @@ Jake's decision: if the original had scroll bars, so do the skins; dragging the 
 - **Built** (`js/skins/mac12/ui.js`, hooks in `js/skins/classic/ui.js`): the bars (the System 6/7 black and white look), whole-cell scrolling, the first view by CenterOnStar on the home star, Zoom as above, inactive bars while a dialog is up. A star's coordinates in the remake are half cells (2 light years to its unit, so a cell is half a unit), so the galaxy is `round(2 x G.W)` cells. Dragging with a mouse and the wheel work only with modern conveniences on (the map follows the pointer and settles on a whole cell at the end); a finger and a pinch always do.
 - **Kept differences:** the grow box is not built (the map's pane is the page's remaining area; the browser window sizes it, and shrinking it would only hide cells; the corner is a blank square); only the map's two bars dim (the left column's fleet-box bar does not, and no window stacking exists, so "inactive" means a dialog is open); the thumb's snap-back when the pointer strays is left out (a finger drifts); the arrow glyph and page pattern are the OS's, drawn as `js/os/system7.css` has them (the OS's CDEF is not in the program); the remake's keyboard (arrows, Page Up/Down on a focused bar) and the bars' accessible names (`js/ui-text.js`) are additions.
 - **Side by side:** no emulator or Mac ROM is in the sources, so the figure is the code's rectangles and star pixels against the skin (`mapbars-sidebyside.png`): the stars and the bars' rects coincide at V 4/7, H 1/1.
+
+## Rebuilt against Jake's captures (19 November 2026)
+
+Jake compared the skin with his System 6 captures and found it far from them. The November note above ("Windows dressed, not
+rebuilt") had judged Create New Ship Type and the others close enough; they were not. Each piece is now rebuilt from 1.2F's own
+routine and resources and checked pixel by pixel against `captures/` (640 x 480) and `captures-system6/` (512 x 342):
+
+- **Scroll bars** (`drawBar`): the 16-pixel bar's outline arrow, the panes' 12-pixel bar with its own arrow, the light grey
+  (ltGray) track, arrows on a white track when there is nothing to scroll, an empty frame only when inactive. All copied from the
+  captures' pixels.
+- **Create New Ship Type** (`createType`): DITL 6010 item by item (2.0.1's DITL for that skin).
+- **Players and budget pane** (`lowBox12`): DrawIconRect, DrawBudgetRect and DrawHBarControl: the rects of GrowMapWin, icons
+  drawn with black outside their mask (shot015), the heading and ticks, 14-pixel rows in the slot order (new colonies first,
+  then Epargne, Tech, home: shot015), grey bars and the least-share tick for colonies losing money, italic and underlined names.
+  Not built: the blinking of a losing colony's name (DrawHBarControl's last argument).
+- **The left column** (planet, fleets, totals, players and budget, Tech Spending): diffed row by row against shot010 and
+  shot015 and now the same pixels, words apart (the comparisons ran in English): the Mac's bitmap Geneva 9, Geneva 9 Bold and
+  Chicago 12 (the DOS program's, `assets/skins/dos/fonts/`) in place of the browser's Geneva/Verdana; the fleet pane two rows lower
+  (the window's 68 to 132, it was 2 short) with its 12-pixel scroll bar from the rule to 129; the panes edge to edge with one frame.
+- **The planet's income** is the one the last turn left (DrawPlanetRect prints the slot's +0xefa: $30 000 at home in 2000, shot010);
+  the remake showed this year's projection ($30,664).
+- **Tech Spending and the Report Window** are small windows again: the title bar of shot010 (dotted rows round a 7 x 7 close
+  box, no title), Tech Spending 96 rows high (its second row of names was cut at 80), the Report Window's text in Geneva 9 on
+  11-pixel lines with its 16-pixel scroll bar and grow box. The credit reports get 1.2's own icons (GetIconID @130db0: 1000 is
+  ICON 3115, 1001 "Graphismes de Howard Vives" 3116; the DOS skin's table only knew DOS 2.0's "Click here…").
+- **Build Ships** (DLOG 6020, `build6020`): BuildShips and its item procs: the production box with the first queued type's picture,
+  its cost "(D)" or "(P)", "%d%% finition" and the unbuilt part veiled (the veil's pen mode read, not yet seen in a capture: GUESS);
+  the three queue slots with picture and MakeFleetDescription; the types as 53-pixel picture cells with their scroll bar, none
+  chosen at first. 92% of pixels agree with shot035 at the Mac's own size, the rest being the two games' different ships.
+- English, which 1.2 never had, uses 2.0.1's English layout of the same dialog (Create New Ship Type, Build Ships).
+- **Fleet Status and the explored planets** (DLOG 6030, 6040, `list6030`): the List Manager list in Chicago 12, 16-pixel rows, fields at
+  1, 101, 176, 251, 326 (read in shot078), its scroll bar, the go button and OK; the explored stars open with the first chosen.
+  95% of pixels agree with shot078 at 1:1, the rest being the two games' different planets.
+- **List Ship Types, Rename, Organize Ships** (DLOG 6000, 6090, 6060) from Jake's second set of System 6 captures
+  (`captures-system6-jake2/`): picture cells in the list, Rename over it, one picture and its count a pile in Organize.
+- **The battle window**: a plain black box, no title bar, the bitmap Chicago and Geneva (shots 037-074).
+- **The alerts**: `ALERTS12`, every ALRT of 1.2F's resource fork (size, rectangles, French words, pictures), drawn for the 1.2 skin
+  in French: the abandon question (5060, "Qu'elles meurent!" answers yes), "Merci de baptiser…" (3040), eliminated and won as
+  5051 / 5041 (PICT 3540 / 3530: 5050 and 5040 name 3040 and 3030 of the lost colour file). English takes 2.0.1's.
+- Not in 1.2's menus, so not built: 6100 ("Synthèse des niveaux des Joueurs", no item opens it). Still to see: the budget bars
+  with 11 or more colonies, the win screen.
+  (6000, 6020, 6030, 6040, 6060, 6090, 6100, 7000-7011).

@@ -50,7 +50,7 @@ html.w31-256 { --w31cap: #a6caf0; --w31captext: #000; }
 .win.w31dlg .wtitle { display: none; }
 .win.w31dlg .wbody { padding: 0; overflow: visible; }
 .w31d { position: relative; box-sizing: border-box; background: var(--w31cap); border: ${U(1)} solid #000;
-  color: #000; font: bold ${U(13)}/${U(16)} "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; text-align: left; -webkit-font-smoothing: none; user-select: none; }
+  color: #000; font: ${U(13)}/${U(16)} "Win31 System", "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; font-weight: normal; text-align: left; -webkit-font-smoothing: none; user-select: none; }
 .w31d * { box-sizing: border-box; }
 .w31d .w31cap { position: absolute; background: var(--w31cap); border: ${U(1)} solid #fff; border-bottom: 0; box-shadow: inset 0 ${U(-1)} 0 #000; color: var(--w31captext); text-align: center; white-space: nowrap; overflow: hidden; }
 .w31d .w31cap .t { position: absolute; left: ${U(19)}; right: 0; top: ${U(1)}; line-height: ${U(16)}; }
@@ -90,7 +90,7 @@ ${B}.def:disabled { border-width: ${U(1)}; } /* (a dimmed default button loses i
 .w31d .w31list:focus { outline: none; }
 .w31d .w31list:focus .row.sel { outline: ${U(1)} dotted #ff0; outline-offset: ${U(-1)}; } /* (the chosen row's focus frame: yellow dots on the blue, captured, win20-orig-vga16-fleets-sel.png) */
 /* (the fixed-pitch System font, SYSTEM_FIXED_FONT, 8 x 15, its strokes two pixels wide: the lists of explored stars and of skills; stand-in Courier New bold at 8 pixels a letter) */
-.w31d .w31list.fixed { font: bold ${U(40 / 3)}/${U(15)} "Fixedsys", "Courier New", Courier, monospace; }
+.w31d .w31list.fixed { font: ${U(12)}/${U(15)} "Win31 Fixedsys", "Fixedsys", monospace; font-weight: normal; }
 .w31d .w31list.fixed .row { padding: 0 ${U(2)}; }
 :is(.w31d, .w31sbw) .w31sb { background: var(--w31face); border: ${U(1)} solid #000; cursor: pointer; touch-action: none; }
 :is(.w31d, .w31sbw) .w31sb .part { position: absolute; background: var(--w31face); box-shadow: inset ${U(-2)} ${U(-2)} 0 var(--w31shade), inset ${U(1)} ${U(1)} 0 #fff; } /* (the shade over the light at the corners: measured) */

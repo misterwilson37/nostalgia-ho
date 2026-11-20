@@ -2,14 +2,15 @@
 """Build a Topaz-like 8 x 8 bitmap font for the Amiga skin's file requester
 (assets/fonts/Topaz.woff2 and TopazTall.woff2).
 
-The real Topaz is Commodore's ROM font and is not in this repository; ASL's
-requester (Jake's captures) is drawn in it. This stand-in is the public-domain
-"font8x8_basic" 8 x 8 ASCII set (Daniel Hepper), whose letters are close to Topaz's. Same layout rules as tools/amiga-font.py: one Amiga pixel is a square
+ASL's requester (Jake's captures) is drawn in Topaz, Commodore's ROM font. With the "Multi Platform Amiga Fonts" pack's raw file as the argument
+(private repo originals/fonts/amiga/extracted/amigafonts-1.02/raw/Topaz_a1200_v1.0.raw, Kickstart 2.x's Topaz) this builds the real thing, Latin-1 (every second row of
+the pack's 8 x 16 raw bitmap is the 8 x 8 original); without it, the old stand-in, the public-domain "font8x8_basic" 8 x 8 ASCII set (Daniel Hepper).
+The pack is released under the GPL with the font exception (its README, section 14: "Topaz is (c) AmigaInc"; the conversions (c) dMG / TrueSchool): assets/fonts/README.txt. Same layout rules as tools/amiga-font.py: one Amiga pixel is a square
 (Topaz) or half as wide as high (TopazTall); 16 pixels to the em.
 
-    python3 tools/amiga-topaz.py
+    python3 tools/amiga-topaz.py [Topaz_a1200_v1.0.raw]
 """
-import os
+import os, sys
 from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
@@ -112,13 +113,18 @@ FONT8X8 = {
     '~': [0x6E, 0x3B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
 }
 
+RAW = open(sys.argv[1], 'rb').read() if len(sys.argv) > 1 else None
+CODES = list(range(33, 127)) + (list(range(161, 256)) if RAW else [])
 def rows(code):
+    if RAW:  # the pack's raw file: 256 glyphs of 16 rows (each of the 8 rows twice), the leftmost pixel the top bit
+        g = RAW[code * 16:code * 16 + 16:2]
+        return [[(by >> (7 - x)) & 1 for x in range(8)] for by in g] if any(g) else None
     g = FONT8X8.get(chr(code))
     # (least significant bit leftmost; the table's rows run from the top, the descenders of g j p q y on the last)
     return [[(by >> x) & 1 for x in range(8)] for by in g] if g else None
 
 def build(name, xw):
-    names = ['.notdef', 'space'] + ['uni%04X' % c for c in range(33, 127)]
+    names = ['.notdef', 'space'] + ['uni%04X' % c for c in CODES]
     glyphs = {}
     adv = {}
     for n in names:
@@ -135,7 +141,7 @@ def build(name, xw):
         glyphs[n] = pen.glyph(); adv[n] = (8 * xw, 0)
     fb = FontBuilder(EM, isTTF=True)
     fb.setupGlyphOrder(names)
-    fb.setupCharacterMap({c: 'uni%04X' % c for c in range(33, 127)} | {32: 'space'})
+    fb.setupCharacterMap({c: 'uni%04X' % c for c in CODES} | {32: 'space', 160: 'space'})
     fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(adv)
     fb.setupHorizontalHeader(ascent=12 * UNIT, descent=-4 * UNIT)
     fb.setupNameTable({'familyName': name, 'styleName': 'Regular'})

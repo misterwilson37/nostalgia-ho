@@ -119,6 +119,8 @@ const $ = (s, el) => (el || document).querySelector(s);
 const UIL = window.HOUI || { t: (s, ...a) => { let i = 0; return s.replace(/%(?:\d+\$)?[sd]/g, () => String(a[i++])); }, tr: (s) => s, text: (d, s) => d.createTextNode(s), en: (n) => n.textContent, set: () => false, pref: { get: () => null, at: () => 0, set: () => false }, onChange() {}, lang: 'en' };
 const tl = (s, ...a) => (a.length ? UIL.t(s, ...a) : UIL.tr(s));
 const TL_ATTRS = ['title', 'aria-label', 'placeholder', 'alt'];
+// the minus sign: U+2212, but the Mac and DOS pixel fonts (js/os/pixel-fonts.css, system7.css) have no such glyph, so under those looks a hyphen, as the originals drew
+const MINUS = () => /\bos-(system6|system7|system75|dos|win31|win95|palmos)\b/.test(document.documentElement.className) ? '-' : '\u2212';
 const el = (tag, attrs, ...kids) => {
   const e = document.createElement(tag);
   if (attrs) for (const k in attrs) {
@@ -868,12 +870,11 @@ function drawMarkers(f, dx, dy, w, dir) {
   if (T.marker) { // the theme draws one picture per fleet
     const k = T.marker(f, f.owner === ME), im = k && IMG[k];
     if (im) cx.drawImage(im, dx, dy, w, w);
-    if (im && UI.selFleet === f.id) { cx.strokeStyle = '#ffe066'; cx.lineWidth = 2; cx.strokeRect(dx - 1, dy - 1, w + 2, w + 2); }
     return { x: dx, w: im ? w : 0 };
   }
   const ims = fleetMarkers(f), n = Math.max(1, ims.length), span = n * w + (n - 1) * 2;
   const left = dir < 0 ? dx + w - span : dx;
-  cx.fillStyle = UI.selFleet === f.id ? '#ffe066' : (f.owner === ME ? '#f4f7ff' : '#ffe3f1');
+  cx.fillStyle = f.owner === ME ? '#f4f7ff' : '#ffe3f1'; // (no yellow box for the selected fleet: no original drew one, Jake 19 Nov; the fleet pane shows which is selected)
   cx.beginPath(); cx.roundRect(left - 2, dy - 2, span + 4, w + 4, 3); cx.fill();
   ims.forEach((im, i) => { if (im) cx.drawImage(im, dir < 0 ? dx - i * (w + 2) : dx + i * (w + 2), dy, w, w); });
   return { x: left, w: span };
@@ -901,7 +902,6 @@ function drawDots(s, x, y, ps) {
     if (f.sat) { dx = x - ps / 2 - w - 1; dy = y - ps / 2 + li * (w + 2); li++; dir = -1; }
     else { dx = x + ps / 2 + 1; dy = y - ps / 2 + ri * (w + 2); ri++; }
     const box = drawMarkers(f, dx, dy, w, dir);
-    if (f.dest != null && mine) { cx.fillStyle = '#ffe066'; cx.fillRect(box.x + box.w - 4, dy, 4, 4); }
     UI.dots.push({ x: box.x, y: dy, w: box.w, h: w, f: f.id, star: s.id, mine, sat: f.sat });
   }
 }
@@ -1727,7 +1727,7 @@ function planetBox(sid) {
     const src = s.owner === ME ? s : k;
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
     // (1.2's order, DrawPlanetRect: yours: Revenu, Pop, Temp, Gravité, Métal; another's: Contrôle, Date info, Pop, Temp, Gravité, Métal)
-    const own12 = PI && s.owner === ME, inc0 = own12 ? HO.planetIncome(G, p, s) : 0;
+    const own12 = PI && s.owner === ME, inc0 = own12 ? (s.oInc != null ? s.oInc : s.id === p.homeStar && p.lastIncome != null ? p.lastIncome : HO.planetIncome(G, p, s)) : 0; // (DrawPlanetRect prints the colony's income as the last turn left it, its slot's +0xefa: $30 000 at home in 2000, Jake's shot010; the remake had this year's)
     if (own12) box.append(row(PW('income', 'Income'), panelFig('planetIncome', inc0, true), inc0 < 0 ? 'neg' : '', 'planetIncome'), row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'));
     else if (PI) box.append(row(PW('pop', 'Population'), PW(k.owner >= 0 ? 'popUnknown' : 'popNone', k.owner >= 0 ? 'Unknown' : 'Uninhabited'), '', 'population'));
     box.append(row(PW('temp', 'Temp'), degF(ts), '', 'temp'), row(PW('grav', 'Gravity'), gravF(src.g, p.homeG) + (PI ? '' : classNote(gs)), '', 'gravity'), row(PW('metal', 'Metal'), panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
@@ -2876,7 +2876,7 @@ function openBuild(sid) {
             }
             render(); renderPanel(); draw(); save();
           } }, scrapWords('type')[d.scrap301 ? 1 : 0]) : null,
-          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else if (HO.unbuildShip(G, ME, sid, d.id) && session[d.id] > 0) session[d.id]--; render(); renderPanel(); draw(); } }, '−'),
+          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else if (HO.unbuildShip(G, ME, sid, d.id) && session[d.id] > 0) session[d.id]--; render(); renderPanel(); draw(); } }, MINUS()),
           el('span', { class: 'n' }, String(n)),
           el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { manyAsk(d, () => { if (queue ? HO.queueShips(G, ME, sid, d.id, 1) : HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } render(); renderPanel(); draw(); }); } }, '+'))));
     }
@@ -2938,7 +2938,7 @@ function openSplit(f) {
     const d = HO.getDesign(G, f.owner, +k); take[k] = 0;
     const n = el('b', null, '0');
     body.append(el('div', { class: 'drow' }, shipImgEl(d, 22, f.owner), el('div', { class: 'dtext' }, `${d.name} (${f.ships[k]})`),
-      el('div', { class: 'pm' }, el('button', { class: 'quiet', onclick: () => { take[k] = Math.max(0, take[k] - 1); n.textContent = take[k]; } }, '−'), n,
+      el('div', { class: 'pm' }, el('button', { class: 'quiet', onclick: () => { take[k] = Math.max(0, take[k] - 1); n.textContent = take[k]; } }, MINUS()), n,
         el('button', { class: 'quiet', onclick: () => { take[k] = Math.min(f.ships[k], take[k] + 1); n.textContent = take[k]; } }, '+'))));
   }
   body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { const nf = HO.splitFleet(G, f, take); if (nf) UI.selFleet = nf.id; closeModal(); renderPanel(); draw(); save(); } }, 'Split fleet')));
@@ -6950,7 +6950,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, profile, rankOf, // (profile, rankOf: the rank window a skin draws itself)
     arrivesText, markedLine, hallTables, playAgain, openTemperature, compareWords, tl, CMP_EN, CMP_ICONS, openSkillsList: () => openSkills(), hasCloud: () => !!CLOUD, cloudHall: (kind, order) => CLOUD.hallTop(G.rules, kind, order), cloudError: (e) => CLOUD.errorText(e), cloudUser: () => cloudUser(), // (what the iOS skin's own fleet list, Hall and Master Point List need)
-    openGameCenter, switchPlayers, openFleetList, openStarList, exploredText, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
+    openGameCenter, switchPlayers, openFleetList, openStarList, exploredText, exploredData, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
     toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
   };

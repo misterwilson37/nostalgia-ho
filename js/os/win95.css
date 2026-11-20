@@ -2,16 +2,25 @@
    bars with the close box at the right, Tahoma / MS Sans Serif. (Moved
    here from js/skins/w95/style.css; the 4.0.5 Windows 95 skin's default.) */
 @import url("base.css");
+@import url("pixel-fonts.css");
+@import url("pixel-sizes.css");
 :root {
   --plat: #c0c0c0; --plat2: #c0c0c0; --edge: #808080; --ink: #000; --sub: #333;
   --hi: #000080;
-  --ui: Tahoma, "MS Sans Serif", "Segoe UI", Arial, sans-serif;
+  --ui: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif;
 }
-body { font-size: 12px; }
+/* Windows 95's own MS Sans Serif 8 (11px; the bold as GDI drew it), from its setup disks (tools/extract/winfon.py, docs/brief-bitmap-fonts.md), answers to "MS Sans Serif"
+   wherever the skin uses it. (Windows 95 shipped no Tahoma.) */
+@font-face { font-family: "MS Sans Serif"; src: url("../../assets/skins/w95/fonts/mssansserif8.ttf") format("truetype"); font-weight: 400; font-display: block; }
+@font-face { font-family: "MS Sans Serif"; src: url("../../assets/skins/w95/fonts/mssansserif8-bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+@font-face { font-family: "Microsoft Sans Serif"; src: url("../../assets/skins/w95/fonts/mssansserif8.ttf") format("truetype"); font-weight: 400; font-display: block; }
+@font-face { font-family: "Microsoft Sans Serif"; src: url("../../assets/skins/w95/fonts/mssansserif8-bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+html { font-synthesis: none; -webkit-font-smoothing: none; -moz-osx-font-smoothing: grayscale; font-smooth: never; text-rendering: optimizeSpeed; }
+body { font-size: 11px; }
 .box, .designer { background: var(--plat); border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf; }
 #panel { background: var(--plat); border-right: 2px solid #404040; }
 #menubar { background: #c0c0c0; border-bottom: 1px solid #808080; box-shadow: inset 0 -1px 0 #fff; }
-#menubar .logo { font: bold 13px var(--ui); color: #000080; }
+#menubar .logo { font: bold 11px var(--ui); color: #000080; }
 .mbtn:hover, .mbtn:focus-visible, .dropdown button:hover, .dropdown button:focus-visible { background: #000080; color: #fff; }
 .dropdown { background: #c0c0c0; border: 2px solid; border-color: #dfdfdf #000 #000 #dfdfdf; box-shadow: 1px 1px 0 #404040; }
 button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {

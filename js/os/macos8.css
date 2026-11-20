@@ -6,6 +6,13 @@
    slider with a pointed thumb and grey scroll bars. The classic (5.0.5)
    skin's default look; the Mac 4.0.5 skins' second. */
 @import url("base.css");
+/* Charcoal, Platinum's system font, is Apple's (not shipped): where a visitor has none, the stand-in is the Mac's own Chicago 12 bitmap, which Charcoal replaced and resembles in weight (the pixel fonts of
+   js/os/pixel-fonts.css, docs/brief-bitmap-fonts.md; drawn at 15px for each 12px asked: size-adjust). A system Charcoal still wins. */
+@font-face { font-family: "Charcoal Stand-in"; src: url("../../assets/skins/dos/fonts/chicago12.ttf") format("truetype"); font-weight: 400 700; size-adjust: 125%; font-display: block; }
+@font-face { font-family: "Charcoal Stand-in"; src: url("../../assets/skins/dos/fonts/turkish-chicago12.ttf") format("truetype"); font-weight: 400 700; size-adjust: 125%; unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "Charcoal Stand-in"; src: url("../../assets/skins/dos/fonts/extras-chicago12.ttf") format("truetype"); font-weight: 400 700; size-adjust: 125%; unicode-range: U+2212, U+00BD, U+00D7, U+2715, U+25B2, U+25BC, U+25C0, U+25C2, U+25B6, U+25B8; font-display: block; }
+:root { --ui: Charcoal, "Charcoal Stand-in", Geneva, "Lucida Grande", Verdana, sans-serif; }
+html { font-synthesis: none; }
 /* the headings take the player's hat colour; on Platinum's grey the default red read 4.1:1 (the contrast scan) */
 html .box h3 { color: lch(from var(--hat) min(l, 36) c h); }
 html select, html input[type=text], html input[type=number], html input:not([type]) {
