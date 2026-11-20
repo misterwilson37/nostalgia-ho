@@ -4998,6 +4998,10 @@ const titleLang = () => UIL.pref.get() || 'en';
 // title screen of a 3.0.1 or 4.0.5 skin shows them too, its New Game is 3.0.1F's: Jake, October 2026;
 // 2.0 and 1.2 show 1.2F's, 2.0 with 3.0.1F's for what only 3.0.1 has)
 const TITLE_RULES = { mac3: '301', mac3c: '301', mac4: 'mac405', mac4c: 'mac405', w95: '405', mac2: 'mac20', mac2c: 'mac20', dos: 'dos', mac12: '12' };
+// each skin's own rules: New Game opens on them for the skin the title shows (Jake, 20 Nov 2026: "if I chose the 1.2 skin, it should choose the
+// 1.2 ruleset and its defaults initially"); the player can still pick others there (the Amiga 2.x plays DOS 2.0's rules: docs/amiga-skin.md)
+const SKIN_RULES = Object.assign({}, TITLE_RULES, { classic: 'original', palm: 'palm', ios: 'ios', android: 'android', amiga: 'dos', cozy: 'claude', gemini: 'gemini' });
+const skinRules = () => { const id = window.HOSKINS && SKIN_RULES[HOSKINS.current]; return id && HO.RULESETS[id] ? id : null; };
 function titleWindows(lang) {
   const id = window.HOSKINS && TITLE_RULES[HOSKINS.current], rs = id && HO.RULESETS[id];
   if (!rs) return null;
@@ -6434,7 +6438,8 @@ function newGameDialog() {
   // Version and Edition pick the rules; Skin and OS look how they show
   const famSel = el('select', { name: 'version', 'aria-label': 'Ruleset version' });
   const edSel = el('select', { name: 'rules', 'aria-label': 'Edition' });
-  const famNow = famKey(familyOf(chosenRules()));
+  const rules0 = skinRules() || chosenRules(); // (the skin's own rules first)
+  const famNow = famKey(familyOf(rules0));
   famSel.append(...familyList().flatMap(fm => [...(fm === 'remake' ? [sepOption()] : []), el('option', { value: fm, selected: fm === famNow ? 'selected' : false }, FAMILY_NAMES[fm] || fm)]));
   // every edition is in the Edition menu, only the version's showing (so
   // that picking one by its id also picks its version)
@@ -6444,7 +6449,7 @@ function newGameDialog() {
     const mine = editionList(fam);
     edSel.value = mine.includes(value) ? value : mine[0];
   };
-  fillEditions(famNow, chosenRules());
+  fillEditions(famNow, rules0);
   const pick = skinOSPickers(edSel.value);
   // the shared names for the edition chosen, fetched now (at most once a day)
   // so they are there by Create galaxy; New Game itself never waits for them
@@ -6493,6 +6498,9 @@ function newGameDialog() {
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas')),
       autoEndBox),
+    // the original window's own button, above the line, so the game can be started without scrolling to the remake's choices (Jake, 20 Nov
+    // 2026): its word as the version's window has it (3.0.1's and 4.0.5's DITL 6080: "Create"), else the remake's
+    el('div', { class: 'btns right ngtop' }, el('button', { type: 'submit', class: 'ngcreate' }, 'Create galaxy')),
     // the line: below it, the remake's own choices
     el('hr', { class: 'ngline' }),
     pickRow,
@@ -6532,6 +6540,7 @@ function newGameDialog() {
     const ngr = HO.RULESETS[d.rules] || {};
     const palm = d.rules === 'palm', orig = k === 'original', dos = k === 'dos', w95 = k === '405', mac3 = k === '301', mac12 = k === '12';
     // the Claude rules' own settings show only for them (not for any ruleset the window doesn't know)
+    { const b = f.querySelector('.ngcreate'); if (b) b.textContent = tl(w95 || mac3 ? 'Create' : 'Create galaxy'); }
     claudeBox.hidden = k !== 'claude'; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
     // your home system just after the computers' IQ, as the original window has it
     const box = k === 'claude' ? claudeBox : orig ? origBox : null;

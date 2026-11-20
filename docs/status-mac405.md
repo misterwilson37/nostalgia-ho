@@ -54,6 +54,16 @@ against. "close" lists what is still off.
 | New game's start | the program's defaults | done | Novice by default in both 4.0.5 skins' New Game (Mac shots 006, 191: the Join window opens on Novice; Windows: playerSkill 0): $100,000, 20,000 metal, two Scouts and a Colony Ship, as shot 008. |
 | Title (start-up window) | DLOG / DITL 1200 | close | the splash, its rule, the buttons 74 x 18 at 12, 115 and 210, Open Game the default (shot 001). The remake has no Quit: Import a Game… there, How to play under the window. The licence lines: "Licensed to:" and the signed-in player's name in red (the remake's account), with a small Sign out; blank when no one is signed in (Jake, 20 Nov). |
 
+## Jake's 20 Nov look (after it "plays beautifully")
+
+- **Black band under the players list on a 16:10 screen:** GrowMapWin runs the players' and budget's rects to the window's foot; the
+  pane now does. **Desktop between Tech Spending and the Report Window:** kept: ResetWindows puts them at the screen's two sides, fixed
+  sizes (Chat between, network games only), so a wide screen shows more desktop, as the original.
+- **A satellite selected first:** the patch's `firstShip` (3.0.1, 4.0.5 Mac): a ship that can move first.
+- **Import a Game… hung off the window:** "Import…".
+- **New Game:** opens on the skin's own rules (SKIN_RULES, every skin) and has its Create button above the line ("Create", 3.0.1's and
+  4.0.5's DITL 6080), so a game starts without scrolling to the remake's choices.
+
 ## Windows, battles, start-up, end of the game
 
 Not started: every window from the menus (shots 014-024), New Game and start-up (001-007, 188-192), battles (033-157, 204-246),

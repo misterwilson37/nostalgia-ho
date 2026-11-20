@@ -235,7 +235,7 @@ async function playOne(browser, rules, url) {
     await form.locator('select[name=start]').selectOption('abundant');
     await form.locator('select[name=o_cstart]').selectOption('abundant');
   }
-  await form.locator('button[type=submit]').click();
+  await form.locator('button[type=submit]').first().click();
   await sleep(300);
   const fails = [], notes = [];
   const fail = (t) => fails.push(t);
