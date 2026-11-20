@@ -2044,6 +2044,31 @@ function summary405(e, shame, back) {
     pic && pic.width ? el('img', { src: pic.src, alt: '', style: at20(shame ? R(300, 44, 374, 118) : R(308, 52, 382, 126)) + ';image-rendering:pixelated' }) : null];
   a.modal('', dlog20(shame ? 420 : 410, shame ? 265 : 272, ...items), { cls: 'mac12 dl20w', label: shame ? 'Summary of Game Loss' : 'Summary of Game Victory', onClose: back });
 }
+// 4.0.5's Master Point List (doMasterListDlg @10538e: DLOG 6180, 451 x 220). "Master Points:" (16, 8); the heads Name, Points, Rank (16 / 141 /
+// 266, 32); the list (user item 3, 16..441 x 48..170, inset a pixel, its scroll bar on the right): three columns of 136, rows 15, each player's
+// name, points (NumToString: plain digits) and rank (STR# 6280 by the points: rs.hall.rank); the first row picked. DRAWMASTERICON @10569e:
+// at (408, 8) the picked player's 32 x 32 icon by the points, cicn 3030 under 5,000, 3031 from 5,000, 3032 from 50,000, 3033 from
+// 500,000 (ICN# in black and white). OK closes. Not checked against a capture (none yet).
+function master405() {
+  const a = A(), el = a.el, g = G(), Hh = H().rules(g).hall; if (!Hh || !a.hallTables) return false;
+  const L = (a.hallTables(g).master || {}).list || [];
+  let cur = L.length ? 0 : -1;
+  const icon = el('img', { alt: '', style: at20([8, 408, 40, 440]) + ';image-rendering:pixelated' });
+  const box = el('div', { class: 'lst301 master405', role: 'listbox', 'aria-label': 'Master Points', style: at20([49, 17, 169, 425]) });
+  const show = () => {
+    box.textContent = '';
+    L.forEach((e, i) => box.append(el('div', { class: 'li301' + (i === cur ? ' sel' : ''), role: 'option', 'aria-selected': i === cur ? 'true' : 'false', style: 'display:flex;height:15px;line-height:15px;padding:0', onclick: () => { cur = i; show(); } },
+      ...[e.name, String(Math.trunc(e.points || 0)), Hh.rank ? Hh.rank(e.points || 0, g) : ''].map(t => raw('span', t, { style: 'flex:none;width:136px;padding-left:3px;box-sizing:border-box;overflow:hidden;white-space:nowrap' })))));
+    const pts = cur >= 0 ? L[cur].points || 0 : null, id = pts == null ? null : pts >= 500000 ? 3033 : pts >= 50000 ? 3032 : pts >= 5000 ? 3031 : 3030, im = id && a.IMG['dos:i' + id];
+    if (im && im.src) { icon.src = im.src; icon.style.visibility = ''; } else icon.style.visibility = 'hidden';
+  };
+  show();
+  a.modal('', dlog20(451, 220, el('button', { type: 'button', class: 'ok20 def20', style: at20([184, 380, 204, 438]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK')),
+    txt20('Master Points:', [8, 16, 24, 128]), txt20('Name', [32, 16, 48, 66]), txt20('Points', [32, 141, 48, 216]), txt20('Rank', [32, 266, 48, 341]), icon,
+    el('div', { style: at20([48, 16, 170, 441]) + ';border:1px solid #000;box-sizing:border-box;background:#fff' }), box, listBar20(box, [48, 425, 170, 441], 15)),
+    { cls: 'mac12 dl20w', label: 'Master Points' });
+  return true;
+}
 // 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
 // SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
 // legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
@@ -4470,6 +4495,7 @@ if (V3) {
       if (name === 'chat') return chat301();
       if (name === 'organize' || name === 'group') return organize301(x[0]);
       if (V4 && name === 'hall') return hall405(x[0]);
+      if (V4 && name === 'master') return master405();
       return false;
     },
     // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,
