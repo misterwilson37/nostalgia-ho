@@ -1992,6 +1992,58 @@ function stats405() {
     { cls: 'mac12 dl20w', label: 'Statistics' });
   return true;
 }
+// 4.0.5's Hall of Fame and Hall of Shame (doHallOfFameDlg @105020, InitHOFList @105166: DLOG 4080 / 4090, 344 x 247). "Hall Of Fame" /
+// "Hall Of Shame" (16, 8), the heads Name, When, Difficulty (16 / 116 / 216, 32); the list (user item 3, 16..333 x 48..200, a List Manager
+// list inset a pixel, its scroll bar on the right): three columns 100 wide, rows 15 high, each game's name, its date ("%d/%d/%d") and its
+// difficulty ("%d"); nothing picked when it opens (Details then shows the first). Details (Fame's at 20, Shame's at 104; dimmed with no
+// games) or a double-click opens the game's summary (DLOG 4100 / 4110); OK closes. The games are the remake's Hall for this edition
+// (hallTables); the remake's own window (every edition's games, everyone's online) is a button away: "All editions…" (a modern convenience).
+// Not checked against a capture (none yet): the cells' text inset (LDEF 1000's drawing) is taken as 3 pixels, as the program's other lists.
+function hall405(kind) {
+  const a = A(), el = a.el, g = G(), Hh = H().rules(g).hall; if (!Hh || !a.hallTables) return false;
+  const shame = kind === 'shame', L = a.hallTables(g)[shame ? 'shame' : 'fame'] || [];
+  const date = (e) => Hh.date ? Hh.date(e.time, g) : '';
+  let cur = 0, picked = -1;
+  const box = el('div', { class: 'lst301 hall405', role: 'listbox', 'aria-label': shame ? 'Hall Of Shame' : 'Hall Of Fame', style: at20([49, 17, 199, 317]) });
+  const show = () => {
+    box.textContent = '';
+    L.forEach((e, i) => box.append(el('div', { class: 'li301' + (i === picked ? ' sel' : ''), role: 'option', 'aria-selected': i === picked ? 'true' : 'false', style: 'display:flex;height:15px;line-height:15px;padding:0',
+      onclick: () => { cur = picked = i; show(); }, ondblclick: () => { cur = picked = i; details(); } },
+      ...[e.name, date(e), String(e.difficulty)].map(t => raw('span', t, { style: 'flex:none;width:100px;padding-left:3px;box-sizing:border-box;overflow:hidden' })))));
+  };
+  const details = () => { if (L[cur]) summary405(L[cur], shame, () => hall405(kind)); };
+  const det = ok20('Details', shame ? [212, 104, 232, 162] : [212, 20, 232, 78], details); if (!L.length) det.disabled = true;
+  const more = ok20('', [212, 168, 232, 260], () => { a.closeModal(); a.classic('hall', a.openHall, kind); }); more.textContent = ''; more.append(el('span', null, 'All editions…'));
+  show();
+  a.modal('', dlog20(344, 247, el('button', { type: 'button', class: 'ok20 def20', style: at20([212, 268, 232, 326]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK')), /* (first: the window's focus, the default button) */ txt20(shame ? 'Hall Of Shame' : 'Hall Of Fame', [8, 16, 24, 128]), txt20('Name', [32, 16, 46, 66]), txt20('When', [32, 116, 47, 176]), txt20('Difficulty', [32, 216, 48, 316]),
+    el('div', { style: at20([48, 16, 200, 333]) + ';border:1px solid #000;box-sizing:border-box;background:#fff' }), box, listBar20(box, [48, 317, 200, 333], 15),
+    det, more),
+    { cls: 'mac12 dl20w', label: shame ? 'Hall Of Shame' : 'Hall Of Fame' });
+  return true;
+}
+// The game's summary (doDetailsDlg @1057e4: DLOG 4100 "Summary of Game Victory", 410 x 272, its picture PICT 3500 (3000 in black and
+// white: DRAWBWCOLORGOODGUY); DLOG 4110 "Summary of Game Loss", 420 x 265, PICT 3510 / 3010, DRAWBWCOLORBADGUY): the labels right-aligned to
+// 159, the values from 164: the name, the date ("%d/%d/%d"), the difficulty, the humans, the computers, the allies, the computers'
+// intelligence, the game's year, the galaxy's size, density and style (164, 244, 324), the player's skill, the Armageddons; OK.
+function summary405(e, shame, back) {
+  const a = A(), el = a.el, g = G(), Hh = H().rules(g).hall, N = (Hh && Hh.names) || {}, nm = (k, i) => (N[k] && N[k][i]) || '';
+  const R = (l, t, r, b) => [t, l, b, r]; // (the DITL's left, top, right, bottom)
+  const lab = (t, r) => raw('span', t, { class: 'dt20', style: at20(r) + ';text-align:right' });
+  const pic = a.IMG['dos:p' + (shame ? 3510 : 3500)];
+  const items = [
+    el('button', { type: 'button', class: 'ok20 def20', style: at20(R(308, 224, 366, 244)) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK')), // (first: the window's focus)
+    txt20(shame ? 'Summary of Game Loss' : 'Summary of Game Victory', R(4, 4, 183, 21)),
+    lab(shame ? 'Loser:' : 'Winner:', shame ? R(115, 24, 159, 39) : R(105, 24, 159, 39)), lab('Date:', R(121, 44, 159, 60)), lab('Difficulty:', shame ? R(90, 64, 159, 80) : R(89, 64, 159, 80)),
+    lab('# Humans:', R(86, 84, 159, 100)), lab('# Computers:', R(66, 104, 159, 120)), lab('# Allies:', R(101, 124, 159, 140)), lab('Computer Intelligence:', R(4, 144, 159, 160)),
+    lab('Game Date:', R(80, 164, 159, 180)), lab('Galaxy Style:', R(70, 184, 159, 200)), lab('Player Skill:', R(77, 204, 159, 220)), lab('Armageddons:', shame ? R(60, 224, 158, 240) : R(60, 224, 157, 240)),
+    txt20(e.name || '', R(164, 24, shame ? 363 : 354, 41)), txt20(Hh && Hh.date ? Hh.date(e.time, g) : '', R(164, 44, 269, 60)), txt20(String(e.difficulty), R(164, 64, 239, 80)),
+    txt20(String(e.humans), R(164, 84, 239, 100)), txt20(String(e.computers), R(164, 104, 239, 120)), txt20(String(e.allies), R(164, 124, 239, 140)),
+    txt20(nm('iq', e.iq), R(164, 144, 239, 160)), txt20(String(e.year), R(164, 164, 239, 180)),
+    txt20(nm('size', e.size), R(164, 184, 239, 200)), txt20(nm('density', e.density), R(244, 184, 319, 200)), txt20(nm('shape', e.shape), R(324, 184, 399, 200)),
+    txt20(nm('skill', e.skill), R(164, 204, 239, 220)), txt20(String(e.armageddons), R(164, 224, 239, 240)),
+    pic && pic.width ? el('img', { src: pic.src, alt: '', style: at20(shame ? R(300, 44, 374, 118) : R(308, 52, 382, 126)) + ';image-rendering:pixelated' }) : null];
+  a.modal('', dlog20(shame ? 420 : 410, shame ? 265 : 272, ...items), { cls: 'mac12 dl20w', label: shame ? 'Summary of Game Loss' : 'Summary of Game Victory', onClose: back });
+}
 // 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
 // SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
 // legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
@@ -4417,6 +4469,7 @@ if (V3) {
       if (name === 'give') return give301();
       if (name === 'chat') return chat301();
       if (name === 'organize' || name === 'group') return organize301(x[0]);
+      if (V4 && name === 'hall') return hall405(x[0]);
       return false;
     },
     // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,

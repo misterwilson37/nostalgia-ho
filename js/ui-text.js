@@ -701,6 +701,7 @@ root.HOUI.add([
 ['This computer', 'Cet ordinateur', 'Dieser Computer', 'Bu bilgisayar', 'Este ordenador'],
 ['Everyone', 'Tout le monde', 'Alle', 'Herkes', 'Todos'],
 ['All editions', 'Toutes les éditions', 'Alle Ausgaben', 'Tüm baskılar', 'Todas las ediciones'],
+['All editions…', 'Toutes les éditions…', 'Alle Ausgaben…', 'Tüm baskılar…', 'Todas las ediciones…'],
 ['Name', 'Nom', 'Name', 'Ad', 'Nombre', { de: 'Amiga' }],
 ['When', 'Quand', 'Wann', 'Ne zaman', 'Cuándo'],
 ['Summary of Game Defeat', 'Résumé de la défaite', 'Zusammenfassung der Niederlage', 'Yenilgi Özeti', 'Resumen de la derrota'],
