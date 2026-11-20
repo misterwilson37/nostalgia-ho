@@ -218,7 +218,7 @@ function menuLayout301() {
       it('Dip Into Savings…', () => A().openDip(), { ghost: noGame, key: 'D' }),
       it(() => (mine() ? (abandonMarked() ? S(15) : S(16)) : 'Abandon Planet…'), () => { if (mine()) A().evacuateClick(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'A' }),
       '-',
-      it('Alliances…', () => alliances301(), { ghost: () => noGame() || early() || out() }),
+      it('Alliances…', () => (V4 ? alliances405() : alliances301()), { ghost: () => noGame() || early() || out() }),
       it('Give Money/Metal…', () => A().openGive(), { ghost: () => noGame() || early() }),
       it('Surrender To…', () => A().openSurrender(), { ghost: () => noGame() || early() || out() }),
       it('Send Message…', () => A().openChat(), { ghost: () => noGame() || early(), key: 'M' }),
@@ -1484,7 +1484,7 @@ function autoPlay20() {
 // icon 32 x 32 (ICN#, at the cell's centre less (16, 21)) with its name under it (a 13 pixel strip, Geneva 9, centred, condensed when too wide), the picked cell inverted;
 // no scroll bars. cells: [{ icon: 'dos:i3000', name, id, off }]
 function cells20(cols, rows, cells, o) {
-  const a = A(), el = a.el, W = 45, box = el('div', { class: 'cl20', role: 'listbox', style: `position:relative;width:${cols * W}px;height:${rows * W}px;border:0` });
+  const a = A(), el = a.el, W = (o && o.W) || 45, box = el('div', { class: 'cl20', role: 'listbox', style: `position:relative;width:${cols * W}px;height:${rows * W}px;border:0` });
   let sel = o && o.sel != null ? o.sel : null;
   const draw = () => {
     box.textContent = '';
@@ -1492,7 +1492,7 @@ function cells20(cols, rows, cells, o) {
     cells.forEach((c, i) => {
       const x = (i % cols) * W, y = Math.floor(i / cols) * W, im = c.icon && a.IMG[c.icon];
       const d = el('div', { class: 'c20' + (sel === i ? ' sel' : '') + (c.off ? ' off' : ''), role: 'option', 'aria-selected': sel === i ? 'true' : 'false', tabindex: c.off ? -1 : 0, style: `position:absolute;left:${x}px;top:${y}px;width:${W}px;height:${W}px`, onclick: () => { if (c.off || !o || !o.pick) return; sel = i; draw(); o.pick(c, i); } },
-        im ? el('img', { src: im.src, alt: '', style: 'position:absolute;left:6px;top:1px;width:32px;height:32px;image-rendering:pixelated' }) : null,
+        im ? el('img', { src: im.src, alt: '', style: `position:absolute;left:${Math.floor((W - 32) / 2) - 1}px;top:1px;width:32px;height:32px;image-rendering:pixelated` }) : null,
         raw('span', c.name, { class: 'n20', style: 'position:absolute;left:0;right:0;top:33px;height:13px;line-height:13px;text-align:center;white-space:nowrap;overflow:hidden' }));
       box.append(d);
     });
@@ -1929,6 +1929,43 @@ function give301() {
   return true;
 }
 
+// 4.0.5's DLOG 6110 "Alliances" (DoAlliancesDlg @10349a, SetAllianceLists @103880; 472 x 302, DITL 6110; Jake's shot 020): "Click on a
+// player's icon to move it horizontally ..." (4, 4) and "Their icon represents what their current opinion of you is." (36, 4); three lists
+// (80, 4 / 160 / 316, each 152 x 182, cells three across), headed "I Really Like Them" (60, 16), "I Like Them" (60, 200), "I Don't Like
+// Them" (60, 336): a player is in the first if you count them a best buddy and an ally, the second an ally only, else the third, in the
+// players' order (the header's +0x318), out players left off. Each one's icon is their opinion of you: ICON 4021 if they count you a
+// best buddy, 4020 an ally, 4019 neither. A click moves a player one column (not liked -> liked -> really liked -> not liked); on
+// yourself, a beep. OK keeps it (your allies and best buddies), Cancel (272, 332) leaves it. Only with alliances on and you in the game.
+function alliances405() {
+  const a = A(), el = a.el, g = G(), ME = a.ME, me = a.me();
+  if (!me.alive || me.surrendered || !(g.opts && g.opts.alliances)) { if (a.beep) a.beep(); return true; }
+  const order = (H().rules(g).giveWindow && H().rules(g).giveWindow.order) ? H().rules(g).giveWindow.order(g) : g.players;
+  const ps = order.filter(q => q.alive && !q.surrendered);
+  const ally = new Set(me.allies || []), bud = new Set((me.buddies || []).filter(x => ally.has(x)));
+  const opinion = (q) => q.id === ME ? 4021 : (q.buddies || []).includes(ME) && (q.allies || []).includes(ME) ? 4021 : (q.allies || []).includes(ME) ? 4020 : 4019;
+  const R = [[80, 4, 262, 156], [80, 160, 262, 312], [80, 316, 262, 468]];
+  const lists = R.map(r => { const c = cells20(3, 4, [], { pick: (x) => tap(x.id) }); c.el.setAttribute('style', c.el.getAttribute('style') + ';' + at20([r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 16]) + ';overflow-y:auto'); return c; }); // (three 45-pixel cells and the list's scroll bar: shot 020)
+  const draw = () => {
+    const by = [[], [], []];
+    for (const q of ps) by[q.id === ME || bud.has(q.id) ? 0 : ally.has(q.id) ? 1 : 2].push({ icon: 'dos:i' + opinion(q), name: q.name, id: q.id });
+    by.forEach((L, i) => lists[i].set(L, null));
+  };
+  function tap(id) {
+    if (id === ME) { if (a.beep) a.beep(); return; }
+    if (bud.has(id)) { bud.delete(id); ally.delete(id); } else if (!ally.has(id)) ally.add(id); else bud.add(id);
+    draw();
+  }
+  const ok = () => { for (const q of g.players) if (q.id !== ME) { H().setPact(g, ME, q.id, 'ally', ally.has(q.id)); H().setPact(g, ME, q.id, 'buddy', bud.has(q.id)); } a.closeModal(); a.save(); a.renderPanel(); a.draw(); };
+  draw();
+  a.modal('', dlog20(472, 302, txt20('Click on a player’s icon to move it horizontally to specify whether you would or would not like to ally with that player.', [4, 4, 37, 425]),
+    txt20('Their icon represents what their current opinion of you is.', [36, 4, 52, 464]),
+    txt20('I Really Like Them', [60, 16, 75, 137]), txt20('I Like Them', [60, 200, 75, 279]), txt20('I Don’t Like Them', [60, 336, 75, 458]),
+    ...R.map(r => el('div', { style: at20(r) + ';border:1px solid #000;box-sizing:border-box;background:#fff' })), ...lists.map(c => c.el), ...lists.map((c, i) => listBar20(c.el, [R[i][0], R[i][3] - 16, R[i][2], R[i][3]], 45)),
+    ok20('Cancel', [272, 332, 292, 390], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([272, 404, 292, 462]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Alliances' });
+  return true;
+}
 // DLOG 6110 "Alliances" (DoAlliancesDlg @1432a4, InitAllianceLists @1434b6, SetAllianceLists @143600; 443 x 300, DITL 6110; Jake's capture
 // 073): the line "Click on a player's icon…" (5, 7), "I Like Them" (43, 97) and "I Don't Like Them" (43, 268) over the columns, "They Like
 // Me" (88, 8) and "They Don't Like Me" (171, 7) beside the rows; four lists (63, 52) (63, 236) (157, 52) (157, 236), each 182 x 92, four

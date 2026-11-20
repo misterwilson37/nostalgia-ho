@@ -75,7 +75,7 @@ against. "close" lists what is still off.
 | Compare Players | (3.0.1's window) | close | beside shot 017 (a 2020 game): the same layout. Left: position. |
 | Give Stuff | DLOG 6120 | close | beside shot 021: the same. |
 | Send Message | DLOG 6070 | close | beside shot 022; Everyone, Your Allies, Your Buddies now 4.0.5's ICON 1402 and 4018 (pixel matches). |
-| Alliances | DLOG 6110 (4.0.5: 472 x 302) | wrong | 4.0.5's has three columns, I Really Like Them / I Like Them / I Don't Like Them, the icons showing each player's opinion of you (shot 020); ours is 3.0.1's two by two. |
+| Alliances | `DoAlliancesDlg` @10349a, `SetAllianceLists` @103880, DLOG / DITL 6110 (472 x 302) | close | `alliances405`, beside shot 020: three lists (I Really Like Them: best buddy and ally; I Like Them: ally; I Don't Like Them), each with its scroll bar, three cells across; each player's icon their opinion of you (ICON 4021 best buddy, 4020 ally, 4019 neither); a click moves a player one column round (not liked, liked, really liked); yourself: a beep. Left: the first line wraps a word later than the shot's; position. |
 | Graph History | DLOG 6150 | wrong | opens the remake's Players window (shot 018: the history graph with its icon strip). |
 | Statistics | | wrong | dimmed (shot 019: Cumulative Statistics; the engine keeps no counters). |
 
