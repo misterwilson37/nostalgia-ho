@@ -2069,6 +2069,42 @@ function master405() {
     { cls: 'mac12 dl20w', label: 'Master Points' });
   return true;
 }
+// 4.0.5's Surrender (DoSurrenderToDlg @103eb8: DLOG 6130, 357 x 211). "Surrender To:" (0, 20) over the players' cells (20, 20, 202, 247: the
+// Give window's, 5 across, the icon and the name), the last cell "No One" (STR# 6170.30) with ICON 1402; the player's choice (+0x5a) picked
+// when it opens. Cancel (140, 274) leaves it as it was; OK (180, 274, default): nothing picked ends a surrender; "No One" asks ALRT 3380 "Do
+// you really, really, REALLY want to surrender?", a player ALRT 3390 "... to ^0?" (Really / Cancel, PICT 3020), Really making it so
+// (rules: HO.surrender, -1 for no one). Not checked against a capture (none yet).
+function really405(text, go) {
+  const a = A(), el = a.el, im = a.IMG['dos:p3020'], close = () => back.remove();
+  const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': text },
+      dlog20(277, 162, el('button', { type: 'button', class: 'ok20 def20', style: at20([120, 210, 140, 268]) + ';min-width:0;padding:0', onclick: () => { close(); go(); } }, raw('span', 'Really')),
+        ok20('Cancel', [120, 120, 140, 178], close), txt20(text, [10, 20, 49, 232]),
+        im ? el('img', { src: im.src, alt: '', style: at20([70, 20, 144, 94]) + ';image-rendering:pixelated' }) : null)));
+  document.body.append(back); back.querySelector('button').focus();
+}
+function surrender405() {
+  const a = A(), el = a.el, g = G(), me = a.me(), ME = a.ME;
+  const hat = (q) => 'dos:i' + ((q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const ps = g.players.filter(q => q.id !== ME && q.alive && !q.surrendered);
+  const cells = ps.map((q, i) => ({ icon: hat(q), name: q.name, id: i })).concat([{ icon: 'dos:i1402', name: (STR405(6170)[29] || 'No One'), id: ps.length }]);
+  const cur = me.surrenderTo, at0 = cur == null ? null : cur === -1 ? ps.length : ps.findIndex(q => q.id === cur);
+  let pick = at0 != null && at0 >= 0 ? at0 : null;
+  const cl = cells20(5, 4, cells, { sel: pick, pick: (c) => { pick = c.id; } });
+  cl.el.setAttribute('style', cl.el.getAttribute('style') + ';' + at20([21, 21, 201, 246]));
+  const set = (to) => { H().surrender(g, ME, to); a.save(); a.renderPanel(); };
+  const ok = () => {
+    a.closeModal();
+    if (pick == null) { if (cur != null) set(null); return; }
+    if (pick === ps.length) really405('Do you really, really, REALLY want to surrender?', () => set(-1));
+    else really405(fill('Do you really, really, REALLY want to surrender to %s?', ps[pick].name), () => set(ps[pick].id));
+  };
+  a.modal('', dlog20(357, 211, el('button', { type: 'button', class: 'ok20 def20', style: at20([180, 274, 200, 332]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK')),
+    txt20('Surrender To:', [0, 20, 18, 173]), el('div', { style: at20([20, 20, 202, 247]) + ';border:1px solid #000;box-sizing:border-box' }), cl.el,
+    ok20('Cancel', [140, 274, 160, 332], () => a.closeModal())),
+    { cls: 'mac12 dl20w', label: 'Surrender To' });
+  return true;
+}
 // 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
 // SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
 // legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
@@ -4496,6 +4532,7 @@ if (V3) {
       if (name === 'organize' || name === 'group') return organize301(x[0]);
       if (V4 && name === 'hall') return hall405(x[0]);
       if (V4 && name === 'master') return master405();
+      if (V4 && name === 'surrender') return surrender405();
       return false;
     },
     // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,
