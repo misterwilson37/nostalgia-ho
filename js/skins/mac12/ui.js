@@ -3568,7 +3568,12 @@ function lowBox301(B) {
     const ic = a.IMG['dos:s' + ((i === a.ME ? (V4 ? 1406 : 1000) : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0))]; // (4.0.5 numbers its small icons as its planets: you are 1406, shot 008)
     if (ic && ic.width) x.drawImage(ic, 9, top + 3, 16, 16);
     if (i !== a.ME && pl.alive && H().isAllied(g, a.ME, i)) { const h = a.IMG['dos:s5000']; if (h && h.width) x.drawImage(h, 9, top + 3, 16, 16); }
-    q.text(pl.name, V4 ? 29 : 28, top + (V4 ? 15 : 16), G9, Object.assign({ cond: q.width(pl.name) > (V4 ? 48 : 39) }, SH));
+    // (4.0.5's DrawIconRect @11537c: a rival whose home you know (made best buddies, or everything shown when you are out or the game is over:
+    // ExploreEverything) has the name 4 higher and "%d.%d, %d°" under it: their home's gravity over yours in tenths and its temperature; shot 204)
+    const knows = V4 && i !== a.ME && (p.out405 || g.over || (p.knows405 && p.knows405[i]));
+    q.text(pl.name, V4 ? 29 : 28, top + (V4 ? (knows ? 11 : 15) : 16), G9, Object.assign({ cond: q.width(pl.name) > (V4 ? 48 : 39) }, SH));
+    if (knows) { const g10 = Math.round(10 * (pl.homeG || 1) / Math.max(0.01, p.homeG || 1)), tF = Math.round(72 + ((pl.homeT || 0) - (p.homeT || 0))), t = a.Prefs && a.Prefs.celsius ? Math.round((tF - 32) * 5 / 9) : tF;
+      q.text(`${Math.trunc(g10 / 10)}.${g10 % 10}, ${t}°`, 29, top + 20, G9, SH); }
     if (!pl.alive || pl.surrendered) { x.strokeStyle = '#000'; x.lineWidth = 2; x.beginPath(); x.moveTo(10, top + 4); x.lineTo(25, top + 19); x.moveTo(25, top + 4); x.lineTo(10, top + 19); x.stroke(); x.lineWidth = 1; }
     if (!pl.human || (g.done || []).includes(i)) {
       if (V4) [[7, 8], [7, 9], [6, 10], [2, 11], [6, 11], [3, 12], [5, 12], [3, 13], [5, 13], [4, 14], [4, 15]].forEach(([h, v]) => q.rect(h, top + v, h + 1, top + v + 1, '#000')); // (shot 008's pixels)

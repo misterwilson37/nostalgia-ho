@@ -2229,6 +2229,7 @@ function pactNews405(G, p) {
       say(`You are now best buddies with ${n}.`, 5001);
       (p.news = p.news || []).push({ type: 'buddies', with: q.id });
       if (p.ai) { p.ai.prefG = p.ai.prefG || {}; p.ai.prefT = p.ai.prefT || {}; p.ai.prefG[q.id] = g100(q.homeG); p.ai.prefT[q.id] = t10(q.homeT); }
+      if (p.human) (p.knows405 = p.knows405 || {})[q.id] = 1; // (the header's +0x77c / +0x7a4: a human's players list then shows their home's gravity and temperature)
     } else if (!(tA0 && myA0) && tA1 && myA1) { say(`You have formed an alliance with ${n}.`, 5001); (p.news = p.news || []).push({ type: 'allied', with: q.id }); }
     if (tA0 && myA0 && !(tA1 && myA1)) { say(`You alliance with ${n} is gone.`, 2001); (p.news = p.news || []).push({ type: 'broken', with: q.id }); }
     else if (tB0 && myB0 && !(tB1 && myB1)) say(`You best buddy relationship with ${n} is gone.  You're only allies now.`, 2001);
