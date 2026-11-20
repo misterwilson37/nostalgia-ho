@@ -94,7 +94,11 @@ won (163-165), armageddon (167-187), lost (247-251). The 3.0.1 skin's versions s
 - human-play 301, 405, mac405, original ok. notes-check ok.
 - ui-lang-audit: the four known w95 findings; one false alarm, Spanish "$1,989 · 663 de metal" in the Build window (the audit reads
   "663 de" as the number of "%s · %s metal" and translates again).
-- real-play: see the session's report to Jake (results by skin and size).
+- real-play, Mac skins (mac4c, mac4, mac3c, mac3 x mac405, 301 x desktop, phone-l, pad, 4k): 32 of 32 pass after the 4k refit (two
+  earlier failures at 4k were the opening view; one pad run threw in the test's End Turn step once and passed again).
+- real-play, the 5.0.5 family (classic with every ruleset, palm; desktop and phone-l): desktop all pass; **phone-l fails send-fleet in every
+  run** (the finger drag leaves no destination). The same on 925cc53 without tonight's fit change (classic 405 and original checked), so it
+  comes from main (the handoff's known finger-drag failure, w95 / palm, now in classic too). Not fixed.
 
 ## Checks (19 Nov)
 
