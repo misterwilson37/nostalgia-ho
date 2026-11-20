@@ -1421,6 +1421,9 @@ root.HOUI.add([
 // the Mac 4.0.5's menus (js/skins/mac4)
 ['Window', 'Fenêtre', 'Fenster', 'Pencere', 'Ventana', { de: 'Amiga' }],
 ['New Game…', 'Nouveau Jeu…', 'Neues Spiel…', 'Yeni Oyn…', 'Nueva partida…', { fr: '~iOS', de: '~Amiga', tr: '~iOS' }, { tr: 'Yeni Oyun…' }],
+['Begin Game', 'Commencer la partie', 'Spiel beginnen', 'Oyunu Başlat', 'Comenzar partida'],
+['Close Game', 'Fermer la partie', 'Spiel schließen', 'Oyunu Kapat', 'Cerrar partida'],
+['Statistics…', 'Statistiques…', 'Statistiken…', 'İstatistikler…', 'Estadísticas…'],
 // iOS's and Android's master points (rs.gameCenter)
 ['Master Points', 'Master Points', 'Meisterpunkte', 'Usta Derece', 'Puntos maestros', { fr: '~iOS' }, { tr: 'Usta Puanları' }],
 ['Master points', 'Master Points', 'Meisterpunkte', 'Usta derece', 'Puntos maestros', { fr: '~iOS' }, { tr: 'Usta puanları' }],
