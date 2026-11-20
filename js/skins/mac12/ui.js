@@ -2125,6 +2125,42 @@ function dip405() {
   setTimeout(() => { f.focus(); f.select(); }, 0);
   return true;
 }
+// 4.0.5's Auto Play (doAutoPlayDialog @10417e: DLOG 4020, 409 x 231). "Auto Play Options:" (12, 8); four radio buttons, the player's mode
+// (2 "Have computer play for me.", 1 "Just mark me done every turn.", 3 "Mark me done until something interesting happens.", else "I'll play
+// my own turns, thank you."); Config… (292, 34) opens DLOG 4021; "Under auto play, event messages disappear after:" (12, 152), the seconds
+// (12, 172) and their scroll bar (CNTL 4020, 103..233 x 172, 0 to 15), "Seconds"; OK (332, 192). The remake plays the turns in the page
+// (runAutoPlay), "something interesting" being a battle or a message; "I'll play my own turns" stops it.
+function autoPlay405(mode0) {
+  const a = A(), el = a.el, P = a.Prefs, secs0 = P.autoSecs != null ? P.autoSecs : 2;
+  const opts = [['Have computer play for me.', [35, 12, 53, 236]], ['Just mark me done every turn.', [61, 12, 79, 275]], ['Mark me done until something interesting happens.', [88, 12, 106, 377]], ['I’ll play my own turns, thank you.', [116, 12, 134, 300]]];
+  let mode = mode0 != null ? mode0 : 3;
+  const radios = opts.map(([w, r], i) => { const b = el('input', { type: 'radio', name: 'ap405', checked: i === mode ? 'checked' : false, onchange: () => { mode = i; } });
+    return el('label', { style: at20(r) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' }, b, raw('span', w)); });
+  const num = raw('span', String(secs0), { class: 'dt20', style: at20([172, 12, 188, 33]) });
+  const sl = el('input', { type: 'range', min: 0, max: 15, value: secs0, style: at20([172, 103, 188, 233]), 'aria-label': 'Seconds', oninput: (e) => { num.textContent = e.target.value; } });
+  const ok = () => {
+    P.autoSecs = +sl.value; a.savePrefs(); a.closeModal();
+    if (mode < 3) a.runAutoPlay({ turns: Infinity, computer: mode === 0, won: mode === 2, lost: mode === 2, news: mode === 2, every: P.autoSecs });
+  };
+  const cfg = H().rules(G()).autoPlaySettings ? ok20('Config…', [34, 292, 54, 357], () => { P.autoSecs = +sl.value; a.savePrefs(); a.closeModal(); config405(() => autoPlay405(mode)); }) : null;
+  a.modal('', dlog20(409, 231, el('button', { type: 'button', class: 'ok20 def20', style: at20([192, 332, 212, 390]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK')),
+    txt20('Auto Play Options:', [8, 12, 24, 140]), ...radios, cfg, txt20('Under auto play, event messages disappear after:', [152, 12, 168, 358]), num, sl, txt20('Seconds', [172, 38, 188, 94])),
+    { cls: 'mac12 dl20w', label: 'Auto Play Options' });
+  return true;
+}
+// DoConfigAutoPlayDialog @10440e: DLOG 4021, 345 x 162. "Configure Computer's Auto Play Style:" (10, 10); Friendly (10, 40) to Aggressive (250, 40)
+// on CNTL 4021 (100..230, 0 to 10); No Defense (10, 70) to Dig In (250, 70) on CNTL 4022 (0 to 100, the share of colonies defended);
+// Cancel (190, 114), OK (260, 114). (rules: autoPlaySettings)
+function config405(back) {
+  const a = A(), el = a.el, g = G(), rs = H().rules(g), cur = rs.autoPlaySettings(g, a.me()) || { aggr: 0, colDef: 50 };
+  const s1 = el('input', { type: 'range', min: 0, max: 10, value: cur.aggr, 'aria-label': 'Friendly to Aggressive', style: at20([40, 100, 56, 230]) });
+  const s2 = el('input', { type: 'range', min: 0, max: 100, value: cur.colDef, 'aria-label': 'No Defense to Dig In', style: at20([70, 100, 86, 230]) });
+  const done = (save) => { if (save) { rs.autoPlaySettings(g, a.me(), { aggr: +s1.value, colDef: +s2.value }); a.save(); } a.closeModal(); if (back) back(); };
+  a.modal('', dlog20(345, 162, el('button', { type: 'button', class: 'ok20 def20', style: at20([114, 260, 134, 318]) + ';min-width:0;padding:0', onclick: () => done(true) }, raw('span', 'OK')),
+    txt20('Configure Computer’s Auto Play Style:', [10, 10, 27, 269]), txt20('Friendly', [40, 10, 58, 73]), s1, txt20('Aggressive', [40, 250, 56, 333]),
+    txt20('No Defense', [70, 10, 86, 85]), s2, txt20('Dig In', [70, 250, 86, 325]), ok20('Cancel', [114, 190, 134, 248], () => done(false))),
+    { cls: 'mac12 dl20w', label: 'Configure Computer’s Auto Play Style' });
+}
 // 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
 // SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
 // legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
@@ -4554,6 +4590,7 @@ if (V3) {
       if (V4 && name === 'master') return master405();
       if (V4 && name === 'surrender') return surrender405();
       if (V4 && name === 'dip') return dip405();
+      if (V4 && name === 'autoplay') return autoPlay405();
       return false;
     },
     // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,
