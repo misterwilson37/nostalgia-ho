@@ -2105,6 +2105,26 @@ function surrender405() {
     { cls: 'mac12 dl20w', label: 'Surrender To' });
   return true;
 }
+// 4.0.5's Dip Into Savings (DipIntoSavings @83c66: DLOG 4070, 226 x 178). "You currently have $^0 in ship money. You can take out up to $^1.
+// How much would you like?" (13, 13, 222, 77), ^0 the Ship Savings, ^1 the most there is (the savings less what may be borrowed), both
+// NumToString's plain digits; the amount (13, 91, 112, 107) starting at the savings (0 if below), put back between 0 and the most as it is
+// typed; Cancel (78, 134), OK (156, 134, default). The program moves it at once; the remake at the turn's end (rules: dipAmount), so a second
+// dip in the same turn counts the first.
+function dip405() {
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g); if (!rs.dipAmount || !rs.dipLimit) return false;
+  const pend = Math.max(0, Math.trunc(p.dipAmt || 0)), sav = Math.trunc(p.savings) - pend, max = Math.max(0, rs.dipLimit(g, p) - pend);
+  const f = el('input', { type: 'text', inputmode: 'numeric', value: String(Math.max(0, sav)), 'aria-label': 'How much would you like?', style: at20([91, 13, 107, 112]) });
+  let v = Math.max(0, sav);
+  f.addEventListener('input', () => { const n = parseInt(f.value, 10); v = !(n >= 0) ? 0 : Math.min(n, max); if (f.value !== '' && String(v) !== f.value) f.value = String(v); });
+  const ok = () => { a.closeModal(); if (v > 0) { rs.dipAmount(g, p, pend + v); a.save(); a.renderPanel(); } };
+  a.modal('', dlog20(226, 178, el('button', { type: 'button', class: 'ok20 def20', style: at20([134, 156, 154, 214]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK')),
+    txt20(fill('You currently have $%s in ship money. You can take out up to $%s. How much would you like?', String(sav), String(max)), [13, 13, 77, 222]), f, // (16-pixel lines: Chicago 12's ascent, descent and leading, four in the item's 64)
+    ok20('Cancel', [134, 78, 154, 136], () => a.closeModal())),
+    { cls: 'mac12 dl20w', label: 'Dip Into Savings' });
+  const q = document.querySelector('.dl20 .dt20'); if (q) q.style.lineHeight = '16px';
+  setTimeout(() => { f.focus(); f.select(); }, 0);
+  return true;
+}
 // 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
 // SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
 // legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
@@ -4533,6 +4553,7 @@ if (V3) {
       if (V4 && name === 'hall') return hall405(x[0]);
       if (V4 && name === 'master') return master405();
       if (V4 && name === 'surrender') return surrender405();
+      if (V4 && name === 'dip') return dip405();
       return false;
     },
     // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,

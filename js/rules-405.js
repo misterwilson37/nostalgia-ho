@@ -509,12 +509,13 @@ function pass1(G, p) {
 // Buying a ship (FUN_004691c4) or undoing one (FUN_00419a52) works the
 // interest out again too (a computer's buying, FUN_00462105, doesn't).
 const dipMax = (G, p) => Math.max(0, p.savings - borrowLimit(G, p));
-const dipAmt = (G, p) => p.dip > 0 ? trunc(dipMax(G, p) * Math.min(100, p.dip) / 100) : 0;
+// (the Mac program's window, DLOG 4070, asks for an amount, not a share: p.dipAmt, at most the most there is)
+const dipAmt = (G, p) => p.dipAmt > 0 ? Math.min(dipMax(G, p), trunc(p.dipAmt)) : p.dip > 0 ? trunc(dipMax(G, p) * Math.min(100, p.dip) / 100) : 0;
 function dipAndInterest(G, p) {
   const bought = (p.spentThisTurn || []).length - (p.ai && p.ai.built || 0);
   if (p.ai) p.ai.built = 0;
   const amt = dipAmt(G, p);
-  p.dip = 0;
+  p.dip = 0; if (p.dipAmt) delete p.dipAmt; // (only where a window set it: the saved game is otherwise as before)
   p.tm = (p.tm || 0) + amt;
   if (amt > 0) p.savings -= amt;
   if (amt > 0 || (p.human && bought > 0)) p.oInterest = interestOn(p, p.savings);
@@ -2577,6 +2578,8 @@ E.registerRules('405', Object.assign({}, D, {
   // (FUN_004221d7); the arrival messages are MoveShips' and pass 2's
   features: { arrivalNotices: false, alliances: true, gifts: true, surrender: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
   bestBuddies: true,
+  // Dip Into Savings as an amount (the Mac's DLOG 4070): the most there is, and what is asked for, taken at the turn's end
+  dipLimit: (G, p) => dipMax(G, p), dipAmount: (G, p, n) => { const v = Math.max(0, trunc(n || 0)); if (v) p.dipAmt = v; else delete p.dipAmt; p.dip = 0; },
   // CONFIRMED (FUN_00469b1d): a human has an Abandon command (evacuate405)
   evacuateCommand: true,
   // CONFIRMED (FUN_00469b1d): Abandon asks a joke for a star named exactly
