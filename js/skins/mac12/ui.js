@@ -2393,7 +2393,7 @@ function organize301(sid) {
   const fuel = Math.min(...fleets.map(f => f.fuel || 0)), allNew = fleets.every(f => !!f.newThisTurn), colony = d && d.type === 'colony', allLoaded = colony && fleets.every(f => (f.colonists || 0) > 0);
   const flags = (f, changed) => { f.fuel = fuel; if (!changed) return; if (!allNew) f.newThisTurn = false; if (colony) f.colonists = allLoaded ? 10 * f.ships[did] : 0; };
   const pic = a.shipPic ? a.shipPic(d, a.ME) : null;
-  const area = el('div', { class: 'org301', style: at20([56, 12, 236, 417]) + ';border:1px solid #000;box-sizing:border-box;touch-action:none' });
+  const area = el('div', { class: 'org301', style: at20(V4 ? [56, 36, 236, 441] : [56, 12, 236, 417]) + ';border:1px solid #000;box-sizing:border-box;touch-action:none' });
   let drag = -1;
   const draw = () => {
     area.textContent = '';
@@ -2417,6 +2417,9 @@ function organize301(sid) {
   });
   const total = () => piles.reduce((x, y) => x + y, 0);
   const group = () => { const t = total(); piles.fill(0); piles[0] = t; draw(); };
+  // 4.0.5's Split All (OrganizeFleets @f3804, item 8): each pile of more than one that held ships when it was pressed gives half (rounded down)
+  // to the next empty pile after it, if there is one
+  const split = () => { const had = piles.map(n => n > 0); for (let k = 0; k < 11; k++) { if (piles[k] < 2 || !had[k]) continue; let j = k + 1; while (j <= 11 && piles[j] !== 0) j++; if (j > 11) continue; piles[j] = Math.floor(piles[k] / 2); piles[k] -= piles[j]; } draw(); };
   const divide = () => { let t = total(); const per = Math.max(1, Math.floor(t / 12)); for (let k = 0; k < 11; k++) { piles[k] = Math.min(per, t); t -= piles[k]; } piles[11] = Math.max(0, t); draw(); };
   const apply = () => {
     fleets.forEach((f, i) => {
@@ -2434,9 +2437,11 @@ function organize301(sid) {
     if (a.beep) a.beep();
   };
   draw();
-  a.modal('', dlog20(427, 283, txt20('To Organize Fleets:', [0, 13, 16, 142]), txt20('• Click and drag fleets into desired number of piles', [18, 16, 35, 363]), txt20('• Shift-Click selects an entire pile', [35, 16, 51, 362]), area,
-    ok20('Next Type', [249, 27, 269, 92], next), ok20('Group All', [249, 107, 269, 172], group), ok20('Divide All', [249, 187, 269, 252], divide), ok20('Cancel', [249, 264, 269, 329], () => a.closeModal()),
-    el('button', { type: 'button', class: 'ok20 def20', style: at20([249, 340, 269, 412]) + ';min-width:0;padding:0', onclick: () => { apply(); a.closeModal(); } }, raw('span', 'OK'))),
+  // (4.0.5's DLOG 6060: 487 x 284, the piles from 36, Next Type, Group All, Divide All, Split All, Cancel, OK along 248)
+  const B = V4 ? { w: 487, h: 284, next: [248, 16, 268, 88], group: [248, 108, 268, 174], divide: [248, 184, 268, 250], split: [248, 260, 268, 326], cancel: [248, 340, 268, 405], ok: [248, 416, 268, 474] }
+    : { w: 427, h: 283, next: [249, 27, 269, 92], group: [249, 107, 269, 172], divide: [249, 187, 269, 252], cancel: [249, 264, 269, 329], ok: [249, 340, 269, 412] };
+  a.modal('', dlog20(B.w, B.h, el('button', { type: 'button', class: 'ok20 def20', style: at20(B.ok) + ';min-width:0;padding:0', onclick: () => { apply(); a.closeModal(); } }, raw('span', 'OK')), /* (first: the window's focus) */ txt20('To Organize Fleets:', [0, 13, 16, 142]), txt20('• Click and drag fleets into desired number of piles', [18, 16, 35, 363]), txt20('• Shift-Click selects an entire pile', [35, 16, 51, 362]), area,
+    ok20('Next Type', B.next, next), ok20('Group All', B.group, group), ok20('Divide All', B.divide, divide), B.split ? ok20('Split All', B.split, split) : null, ok20('Cancel', B.cancel, () => a.closeModal())),
     { cls: 'mac12 dl20w', label: 'Organize Fleets' });
   return true;
 }
