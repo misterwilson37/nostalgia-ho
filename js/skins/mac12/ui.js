@@ -198,7 +198,7 @@ function menuLayout301() {
       it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { ghost: noGame, checked: () => A().Sound.on }),
       it('I’ll Update Turns', () => {}, { ghost: () => noGame() || humans() < 2, checked: () => true }),
       '-',
-      it('Preferences…', () => A().openPrefs(), { ghost: noGame }),
+      it('Preferences…', () => (V4 ? prefs405() : A().openPrefs()), { ghost: noGame }),
       it('Hall Of Fame…', () => A().openHall('fame')),
       it('Hall Of Shame…', () => A().openHall('shame'))],
     Ships: [
@@ -1928,6 +1928,52 @@ function give301() {
   return true;
 }
 
+// 4.0.5's DLOG 6150 "Preferences" (482 x 297, DITL 6150, read from the resource fork; no capture of it). Wired to the remake's settings as
+// the Windows 4.0.5's dialog 350 (js/skins/w95/screen.js prefsDialog, the same program): Show Event Messages, But Only The Most Important
+// Ones, Review Event Battles, Give Helpful Game Play Hints, Battle Speed (its scroll bar, Fast to Slow), Fully Animated Battles, Polling
+// Time (and its seconds), Temp. in Celsius; kept as chosen with nothing to act on: Automatically Sort Planet List, Groups Shoot Together,
+// Show Fleets Paths; Your Password dimmed (the remake keeps none). The remake's own options: "Remake options…" (the classic window).
+function prefs405() {
+  const a = A(), el = a.el, P = a.Prefs, O = (a.verOpts && a.verOpts()) || {};
+  const R = (t, l, b, r) => [t, l, b, r];
+  const ck = (label, r, on) => { const i = el('input', { type: 'checkbox' }); i.checked = !!on; const lb = el('label', { class: 'chk20', style: at20(r) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' }, i, raw('span', label)); return { lb, i }; };
+  const sort = ck('Automatically Sort Planet List', R(44, 16, 60, 232), P.sortPlanets !== false), show = ck('Show Event Messages', R(64, 16, 80, 189), P.showMsgs !== false);
+  const imp = ck('But Only The Most Important Ones', R(84, 28, 100, 271), !!P.important), rev = ck('Review Event Battles', R(104, 28, 120, 216), a.prefReview ? a.prefReview() : !!P.review);
+  const hint = ck('Give Helpful Game Play Hints', R(124, 16, 140, 250), !!P.hints), paths = ck('Show Fleets Paths', R(44, 290, 60, 483), P.fleetPaths !== false), cel = ck('Temp. in Celsius (not °F)', R(64, 290, 80, 470), !!P.celsius);
+  const full = ck('Fully Animated Battles', R(194, 16, 210, 192), P.fullAnim !== false), grp = ck('Groups Shoot Together', R(194, 200, 210, 392), P.groupsTogether !== false);
+  const sync = () => { imp.i.disabled = rev.i.disabled = !show.i.checked; }; show.i.addEventListener('change', sync); sync();
+  const pw = el('input', { type: 'password', disabled: 'disabled', title: 'The remake keeps no password', style: at20(R(116, 298, 132, 437)) });
+  // the two scroll bars (CNTL 4040, 4060): System 7.5's, a click on an arrow a step, on the grey to that place
+  const bar = (r, C, key) => {
+    const c0 = C || { min: 1, max: 10, def: 5 }, W = r[3] - r[1], cv = el('canvas', { width: 2 * W, height: 32, role: 'slider', tabindex: 0, 'aria-valuemin': c0.min, 'aria-valuemax': c0.max, style: at20(r) + ';image-rendering:pixelated;touch-action:none' });
+    const o = { v: P[key] != null ? P[key] : c0.def, c: c0, cv };
+    o.draw = () => { const x = cv.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); const m = { on: true, value: o.v - c0.min, max: c0.max - c0.min }; if (COLOUR3) drawBar75(x, 0, 0, false, W, m); else drawBar(x, 0, 0, false, W, 16, m); cv.setAttribute('aria-valuenow', o.v); if (o.onset) o.onset(); };
+    const set = (v) => { o.v = Math.max(c0.min, Math.min(c0.max, Math.round(v))); o.draw(); };
+    cv.addEventListener('pointerdown', (e) => { const b = cv.getBoundingClientRect(), h = (e.clientX - b.left) * W / b.width; if (h < 16) set(o.v - 1); else if (h >= W - 16) set(o.v + 1); else set(c0.min + (h - 24) / (W - 48) * (c0.max - c0.min)); });
+    cv.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') set(o.v - 1); if (e.key === 'ArrowRight') set(o.v + 1); });
+    return o;
+  };
+  const bs = bar(R(174, 156, 190, 286), O.battleSpeed, 'battleSpeed'), po = bar(R(238, 158, 254, 288), O.poll, 'poll');
+  const pv = raw('span', '', { class: 'dt20', style: at20(R(238, 334, 254, 354)) + ';text-align:right' });
+  po.onset = () => { pv.textContent = String(po.v); };
+  const okFn = () => {
+    P.sortPlanets = sort.i.checked; P.showMsgs = show.i.checked; P.important = imp.i.checked; P.review = rev.i.checked; P.hints = hint.i.checked;
+    P.fullAnim = full.i.checked; P.groupsTogether = grp.i.checked; P.fleetPaths = paths.i.checked;
+    P.battleSpeed = O.battleSpeed && bs.v === O.battleSpeed.def ? null : bs.v; P.poll = O.poll && po.v === O.poll.def ? null : po.v;
+    if (cel.i.checked !== !!P.celsius) { P.celsius = cel.i.checked; P.temp = null; }
+    a.savePrefs(); a.closeModal(); a.renderPanel(); a.draw();
+  };
+  a.modal('', dlog20(482, 297, txt20('Preferences', R(0, 188, 15, 286)), txt20('After Every Turn Update:', R(24, 8, 40, 191)), txt20('On The Star Map:', R(24, 282, 40, 444)),
+    sort.lb, show.lb, imp.lb, rev.lb, hint.lb, paths.lb, cel.lb, txt20('Your Password:', R(92, 282, 108, 418)), pw,
+    txt20('When Reviewing Battles:', R(154, 8, 169, 180)), txt20('Battle Speed:', R(174, 16, 190, 111)), txt20('Fast', R(174, 116, 190, 150)), bs.cv, txt20('Slow', R(174, 292, 190, 335)), full.lb, grp.lb,
+    txt20('When Checking To See If All Players Have Ended Their Turn:', R(218, 6, 234, 400)), txt20('Polling Time:', R(238, 22, 254, 112)), txt20('Fast', R(238, 118, 254, 151)), po.cv, txt20('Slow', R(238, 294, 254, 329)), pv, txt20('Seconds', R(238, 358, 254, 433)),
+    ok20('Remake options…', R(266, 8, 286, 150), () => { a.closeModal(); a.openPrefs(); }),
+    ok20('Cancel', R(266, 324, 286, 382), () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20(R(266, 400, 286, 458)) + ';min-width:0;padding:0', onclick: okFn }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Preferences' });
+  bs.draw(); po.draw();
+  return true;
+}
 // 4.0.5's DLOG 6160 "Statistics" (DoStatisticsDlg @52080; 359 x 236, DITL 6160; Jake's shot 019): "Cumulative Statistics:" (12, 12),
 // six lines at (16, 44 + 24k) with their numbers (LongToNiceString) at (204, ...): the player's counters (js/rules-405.js p.st405).
 function stats405() {
