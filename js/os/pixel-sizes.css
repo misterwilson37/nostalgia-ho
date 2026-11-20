@@ -1,13 +1,13 @@
 /* Spaceward Ho! — sizes for the remake's own screens (title, New Game, About, Help, the lists) in the looks that use pixel fonts: a bitmap face is crisp only at its native size
    (Chicago and Geneva 12px, the DOS 8x14 14px, MS Sans Serif 11px, Palm OS 11px; see js/os/pixel-fonts.css) or a whole multiple of it, and the screens' own rules ask for 9 to 16 and
-   a 52px title. The game's own panels keep the sizes of their skins' own rules. docs/brief-bitmap-fonts.md. Imported by dos.css (which System 6, 7, 7.5 and Windows 3.1 build on),
+   a 52px title. The game's own panels keep the sizes of their skins' own rules. The DOS program's own dialogs (.dd, .dosw, .dosx) and the Windows program's (.w31d) are excluded: they are built at the original's sizes. docs/brief-bitmap-fonts.md. Imported by dos.css (which System 6, 7, 7.5 and Windows 3.1 build on),
    win95.css and palmos.css. */
 html.os-system6, html.os-system7, html.os-system75 { --pxt: 12px; --pxh: 36px; --pxb: 12px; --pxn: 24px; }
 html.os-dos { --pxt: 12px; --pxh: 36px; --pxb: 14px; --pxn: 24px; }
 html.os-win31, html.os-win95, html.os-palmos { --pxt: 11px; --pxh: 33px; --pxb: 11px; --pxn: 22px; }
-html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .tcard h1 { font-size: var(--pxh) !important; line-height: 1.1 !important; }
-html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .tcard :is(p, .ver, .credit, .by, .madeby, .madeby a, label, label span, a) { font-size: var(--pxt) !important; }
-html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .tcard .tbtns button, html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .tcard button { font-size: var(--pxb) !important; }
-html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .newgame :is(small, span, label, p), html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .win :is(small, .sub, .note, .fine) { font-size: var(--pxt) !important; }
-html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .newgame .rating b:not(.none) { font-size: var(--pxn) !important; }
-html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .win :is(h3, h4) { font-size: var(--pxb) !important; }
+html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .tcard h1:not(:is(.dd, .dosw, .dosx, .w31d) *) { font-size: var(--pxh) !important; line-height: 1.1 !important; }
+html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .tcard :is(p, .ver, .credit, .by, .madeby, .madeby a, label, label span, a):not(:is(.dd, .dosw, .dosx, .w31d) *) { font-size: var(--pxt) !important; }
+html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .tcard .tbtns button:not(:is(.dd, .dosw, .dosx, .w31d) *), html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .tcard button:not(:is(.dd, .dosw, .dosx, .w31d) *) { font-size: var(--pxb) !important; }
+html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .newgame :is(small, span, label, p):not(:is(.dd, .dosw, .dosx, .w31d) *), html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .win :is(small, .sub, .note, .fine):not(:is(.dd, .dosw, .dosx, .w31d) *) { font-size: var(--pxt) !important; }
+html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .newgame .rating b:not(.none):not(:is(.dd, .dosw, .dosx, .w31d) *) { font-size: var(--pxn) !important; }
+html:is(.os-system6, .os-system7, .os-system75, .os-dos, .os-win31, .os-win95, .os-palmos) .win :is(h3, h4):not(:is(.dd, .dosw, .dosx, .w31d) *) { font-size: var(--pxb) !important; }

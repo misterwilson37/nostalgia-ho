@@ -222,11 +222,13 @@ html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute
 .dd-cell2 { box-sizing: border-box; }
 .dd-cell2.has { border: calc(1 * var(--du)) solid #000; }
 /* the program's button: grey #aaa face, a black outline, white top-left edge, dark #555 bottom-right (the OS look's own button rules are more specific, hence !important) */
-.dd .dd-btn { background: #aaa !important; border: calc(1 * var(--du)) solid #000 !important; border-radius: 0 !important; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-2 * var(--du)) calc(-2 * var(--du)) 0 #555 !important; font-weight: normal !important; color: #000 !important; font: calc(15 * var(--du))/1 "DOS Chicago 12", monospace !important; text-shadow: none !important; } /* (the program's buttons are in its Chicago 12, plain: v20dos-orig-newgame's "Cancel" pixel for pixel, not the BIOS face made bold with a shadow) */
+.dd .dd-btn { background: #aaa !important; border: calc(1 * var(--du)) solid #000 !important; border-radius: 0 !important; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-2 * var(--du)) calc(-2 * var(--du)) 0 #555 !important; font-weight: normal !important; color: #000 !important; text-shadow: none !important; } /* (no fake bold: the buttons are the program's plain Chicago 12, below; v20dos-orig-newgame's "Cancel" pixel for pixel) */
 .dd .dd-btn:active { box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #555 !important; }
 .dd .dd-btn.def { border-width: calc(2 * var(--du)) !important; }
 .dd .dd-btn.off, .dd .dd-btn:disabled { color: #777 !important; text-shadow: calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff !important; }
-.dd .dd-btn { -webkit-font-smoothing: none; }
+/* (the program draws its dialogs' titles and buttons in Chicago 12, proportional, and only the text inside them in the 8x14: checked against audit/dos-2.0.1 captures v20dos-orig-n2, -startup, 20 Nov 2026) */
+.dd .dd-btn { font: calc(15 * var(--du))/calc(14 * var(--du)) "DOS Chicago 12", sans-serif !important; font-synthesis: none; -webkit-font-smoothing: none; }
+.dd-title:not(.teal) { font-family: "DOS Chicago 12", sans-serif; font-size: calc(15 * var(--du)); font-synthesis: none; }
 
 /* Show Skills: the second window over the chart; the player's name and the skill in a second column (measured: 160 apart) */
 .dd-over { z-index: 5; }
