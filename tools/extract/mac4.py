@@ -100,7 +100,8 @@ def colour(images, res, cres):
     for (t, i), (_, d) in sorted(cres.items()):
         if t == 'icl8':
             mono = res.get(('ICN#', i), (0, None))[1]
-            images['i%d' % i] = mac3.colour_icon(d, mono, 32, pal) if mono else black_clear(mac3.colour_icon(d, None, 32, pal))
+            if i == 3051: mono = None  # (Sparse: its ICN# is only the dots, but Create New Galaxy shows the whole icl8, Jake's shot 002)
+            images['i%d' % i] = mac3.colour_icon(d, mono, 32, pal) if mono else mac3.colour_icon(d, None, 32, pal) if i == 3051 else black_clear(mac3.colour_icon(d, None, 32, pal))
         elif t == 'ics8':
             images['s%d' % i] = mac3.colour_icon(d, res.get(('ics#', i), (0, None))[1], 16, pal)
         elif t == 'PPMp':
