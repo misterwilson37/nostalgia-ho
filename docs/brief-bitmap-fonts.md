@@ -66,3 +66,7 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
 - **Regression, 19 Nov:** tests 405, dos, 301, original, 12, palm, mac20, mac405 run clean; notes-check ok; human-play ok; ui-lang-audit over mac12, mac2, mac3, mac4, dos, w95, palm, amiga: 4 findings, all
   in the w95 skin's wording (a French word in the English and Spanish New Game, "Product." and "Maximum" untranslated in Build Ships): not font findings; real-play (each skin with its ruleset at desktop and phone-l, and the Windows 3.1
   look at desktop): all pass except w95 and palm at phone-l (the known finger-drag send-fleet failure) and Amiga, which does not start under the harness on `main` either. Firefox not tested here (Chromium only).
+
+## 20 Nov 2026: Amiga
+- The Amiga skin's Topaz (`assets/fonts/Topaz.woff2`, `TopazTall.woff2`) is now the real Topaz (Kickstart 2.x, Latin-1) from the Multi Platform Amiga Fonts pack, which its README releases under the GPL with the font
+  exception ("Topaz is (c) AmigaInc"): source and notice in `assets/skins/amiga/fonts/`; checked against Jake's requester capture (shot017). Turkish: none in Topaz (the Amiga had none); falls back.

@@ -20,3 +20,7 @@ ibmvga9x16.woff        IBM VGA 9x16 (code page 437), "Web437_IBM_VGA_9x16" from 
                        by VileR, https://int10h.org/oldschool-pc-fonts/ , licensed CC BY-SA 4.0
                        (LICENSE-int10h-CC-BY-SA-4.0.txt beside it). Used only for the text-mode DOS prompt (F10).
                        The game's own screens use the program's own fonts (bios8x14, geneva9, chicago12: HO.PRS).
+
+Topaz.woff2, TopazTall.woff2   the Amiga skin's file requester's font: Topaz (Kickstart 2.x, Latin-1), square pixels and half-width ("tall") ones, built by tools/amiga-topaz.py from
+                       assets/skins/amiga/fonts/Topaz_a1200_v1.0.raw (the Multi Platform Amiga Fonts pack by dMG / TrueSchool, GPL with the font exception; "Topaz is (c) AmigaInc"):
+                       see assets/skins/amiga/fonts/README.txt.
