@@ -2175,6 +2175,19 @@ function youWon405(kind, Y, done) {
   document.body.append(back); back.querySelector('button').focus();
   return true;
 }
+// 4.0.5's Armageddon question (ALRT 3240-3244, one at random: 291 x 194; the line (12, 16, 273, 72: left, top, right, bottom), PICT 3020 (16, 112), Cancel (140, 160), OK
+// (212, 160, default); shot 167). The ruleset's line is the Windows program's ("?  It'll"): the Mac's has one space and its own apostrophe.
+function armAsk405(text, yes) {
+  const a = A(), el = a.el, im = { src: 'assets/skins/mac4/sprites/p3020.png' }, t = String(text).replace(/\?\s+/, '? ').replace(/'/g, '’'), close = () => back.remove(); // (the alert's PICT 3020 is the black and white one, in colour too: shot 167)
+  const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': t },
+      dlog20(291, 194, el('button', { type: 'button', class: 'ok20 def20', style: at20([160, 212, 180, 270]) + ';min-width:0;padding:0', onclick: () => { close(); yes(); } }, raw('span', 'OK')),
+        ok20('Cancel', [160, 140, 180, 198], close), txt20(t, [16, 12, 72, 273]),
+        im ? el('img', { src: im.src, alt: '', style: at20([112, 16, 186, 90]) + ';image-rendering:pixelated' }) : null)));
+  document.body.append(back); back.querySelector('button').focus();
+  const q = back.querySelector('.dt20'); if (q) q.style.font = "15px/16px 'Mac Chicago 12', Chicago, sans-serif";
+  return true;
+}
 // 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
 // SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
 // legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
@@ -4614,7 +4627,7 @@ if (V3) {
   // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
   try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); if (V4) { document.fonts.load("12px 'Mac Geneva 9 Bold'"); document.fonts.load("12px 'Mac Geneva 9'").then(() => { const a = A(); if (a && a.G) a.renderPanel(); }); } } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {
-    ...(V4 ? { youWonLayout: (kind, Y, done) => (own() && G() ? youWon405(kind, Y, done) : false), nameStarLayout } : {}),
+    ...(V4 ? { youWonLayout: (kind, Y, done) => (own() && G() ? youWon405(kind, Y, done) : false), nameStarLayout, confirm: (text, yes) => (own() && /armageddon device\?/.test(String(text)) ? armAsk405(text, yes) : false) } : {}),
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
     newGame(f) { createGalaxy301(f); },
