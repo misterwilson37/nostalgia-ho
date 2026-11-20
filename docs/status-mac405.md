@@ -50,7 +50,7 @@ against. "close" lists what is still off.
 | Desktop between the windows | | done | System 7.5's pattern (above). |
 | Map: stars, names, fleets, routes | `DrawGalaxyMap`, `DrawOneColorStarSubProc`, `DrawFleetPaths` | 3.0.1 | not compared yet. |
 | Tech Spending window | `UpdateTechWin` | 3.0.1 | in its windoid now; the bars not compared pixel by pixel. |
-| Menu bar | MBAR 128, `SetMenuItems` | close | `menuLayout405`: 4.0.5's MENU 129-134 (words, order, keys: Compare ⌘Y, Graph ⌘H; Begin Game, Save Game, Chat Window and Statistics dimmed: network play, the remake's own saving, no engine counters yet). Left: Graph History opens the remake's Players window, not 4.0.5's DLOG 6150. |
+| Menu bar | MBAR 128, `SetMenuItems` | close | `menuLayout405`: 4.0.5's MENU 129-134 (words, order, keys: Compare ⌘Y, Graph ⌘H; Begin Game, Save Game, Chat Window and Statistics dimmed: network play, the remake's own saving, no engine counters yet).  |
 | New game's start | the program's defaults | done | Novice by default in both 4.0.5 skins' New Game (Mac shots 006, 191: the Join window opens on Novice; Windows: playerSkill 0): $100,000, 20,000 metal, two Scouts and a Colony Ship, as shot 008. |
 | Title (start-up window) | DLOG / DITL 1200 | close | the splash, its rule, the buttons 74 x 18 at 12, 115 and 210, Open Game the default (shot 001). The remake has no Quit: Import a Game… there, How to play under the window. The licence lines: "Licensed to:" and the signed-in player's name in red (the remake's account), with a small Sign out; blank when no one is signed in (Jake, 20 Nov). |
 
@@ -68,7 +68,7 @@ against. "close" lists what is still off.
 
 | Window | 4.0.5 routine | Status | Evidence / what is left |
 |---|---|---|---|
-| Build / Design Ships | `BuildDesignShips` @f0d8e, DLOG / DITL 6000 (500 x 318, its 45 items read from the resource fork) | close | `build405` (js/skins/mac12/ui.js), beside shot 015: the types list on white (the one shown on black), its scroll bar, the picture, name, class, costs, the five System 7.5 scroll bars, Savings and Metal (no dollar sign) with their coins and bars (PICT 4050 / 4052 / 4060: DRAWSHIPMONEYCHIPS, DRAWMETALCHIPS), Built, In Service, # To Build with + and -, Build & Continue, Scrap All, Max Out, Cancel, OK; bought at OK or Build & Continue (as the Windows 4.0.5's, the same program). Left: the window opens centred, the original at its DLOG place (7, 29). |
+| Build / Design Ships | `BuildDesignShips` @f0d8e, DLOG / DITL 6000 (500 x 318, its 45 items read from the resource fork) | close | `build405` (js/skins/mac12/ui.js), beside shot 015: the types list on white (the one shown on black), its scroll bar, the picture, name, class, costs, the five System 7.5 scroll bars, Savings and Metal (no dollar sign) with their coins and bars (PICT 4050 / 4052 / 4060: DRAWSHIPMONEYCHIPS, DRAWMETALCHIPS), Built, In Service, # To Build with + and -, Build & Continue, Scrap All, Max Out, Cancel, OK; bought at OK or Build & Continue (as the Windows 4.0.5's, the same program). Its place: centred, as 4.0.5's (ShowCentered, read in DoAlliancesDlg). |
 
 | List of All Fleets | DLOG / DITL 6030 (486 x 296, the same items as 3.0.1's) | close | 3.0.1's window (`fleets301`), beside shot 016: now with the list's own scroll bar (`listBar20`: System 7.5's, inactive pale grey with outlined arrows when the list fits, as the shot). Left: the window's place (centred). |
 
@@ -76,7 +76,7 @@ against. "close" lists what is still off.
 | Give Stuff | DLOG 6120 | close | beside shot 021: the same. |
 | Send Message | DLOG 6070 | close | beside shot 022; Everyone, Your Allies, Your Buddies now 4.0.5's ICON 1402 and 4018 (pixel matches). |
 | Alliances | `DoAlliancesDlg` @10349a, `SetAllianceLists` @103880, DLOG / DITL 6110 (472 x 302) | close | `alliances405`, beside shot 020: three lists (I Really Like Them: best buddy and ally; I Like Them: ally; I Don't Like Them), each with its scroll bar, three cells across; each player's icon their opinion of you (ICON 4021 best buddy, 4020 ally, 4019 neither); a click moves a player one column round (not liked, liked, really liked); yourself: a beep. Left: the first line wraps a word later than the shot's; position. |
-| Graph History | DLOG 6150 | wrong | opens the remake's Players window (shot 018: the history graph with its icon strip). |
+| Graph History | `GraphHistory` @102922, DLOG / DITL 6055 (6056 black and white) | close | `graph405`, beside shot 018: the legends in their colours (Income #996633, Metal #dd0000, Ship Money #330099, sampled), the grey plot in its black frame, the axis and years, a line a series; the ten icons (black behind the chosen), their names condensed, their colour lines; the first three chosen to start. Left: Ship Power has no history in the remake; the other series' colours are the Windows table's (not seen in a capture). |
 | Statistics | | wrong | dimmed (shot 019: Cumulative Statistics; the engine keeps no counters). |
 
 Not started: the other windows from the menus (shots 014, 023-024: Preferences, Halls, Master Points, Auto Play, Dip, Surrender, Explored Stars, Organize), New Game and start-up (001-007, 188-192), battles (033-157, 204-246),

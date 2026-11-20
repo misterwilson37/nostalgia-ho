@@ -211,7 +211,7 @@ function menuLayout301() {
       it(() => (lastBattle() ? S(5).replace('%s', selStar().name) : S(6)), () => { const b = lastBattle(); if (b) A().openBattle(b.id); }, { ghost: () => noGame() || !lastBattle(), key: 'R' })],
     Galaxy: [
       it('Compare Players…', () => A().openCompare(), { ghost: noGame }),
-      it('Graph History…', () => A().openPlayers(), { ghost: noGame }),
+      it('Graph History…', () => (V4 ? graph405() : A().openPlayers()), { ghost: noGame }),
       it('List All Explored Stars…', () => A().openStarList(), { ghost: noGame }),
       '-',
       it('Fix Spending', cmd(/^fix spending/i), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' }),
@@ -1929,6 +1929,81 @@ function give301() {
   return true;
 }
 
+// 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
+// SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
+// legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
+// 2-pixel black frame, the axis a sixth up from the foot, the years every max(100, span / 4) under it; a line per chosen series, one point
+// a turn, 100 turns across (the same program as the Windows 4.0.5's Graph History: js/skins/w95/screen.js graphDialog, whose reading of
+// the record this follows). The icons (247, 4, 294, 456): ten cells of 45, ICON 3110, 3162, 3117, 4011, 4017, 3100-3104, black behind
+// a chosen one, their names under them (Geneva 9); their colours' lines under the row (295, 4, 302, 456); a click flips one (the
+// preferences' +0x7e, kept in this browser). Colours: Income #996633, Metal #dd0000, Ship Money #330099 (shot 018); the others as the
+// Windows program's table. Ship Power: not in the remake's history (its line stays empty).
+const GRAPH405 = {
+  pics: [3110, 3162, 3117, 4011, 4017, 3100, 3101, 3102, 3103, 3104],
+  names: ['Net Income', 'Metal', 'Ship Money', 'Ship Power', 'Population', 'Range', 'Speed', 'Weapons', 'Shields', 'Mini'],
+  colors: ['#996633', '#dd0000', '#330099', '#1fb814', '#562c05', '#800000', '#ff6402', '#0000d5', '#404040', '#000000'],
+  fmt: ['$%s', '%sM', '$%s', '%sP', '%s'], start: [100000, 50000, 100000, 10000, 1000000],
+  get mask() { try { const v = localStorage.getItem('ho5.mac4.graph'); return v == null ? 7 : +v || 0; } catch (e) { return 7; } },
+  set mask(v) { try { localStorage.setItem('ho5.mac4.graph', String(v)); } catch (e) {} },
+};
+function graph405() {
+  const a = A(), el = a.el, g = G(), p = a.me();
+  const h = (p.hist || []).filter(e => e && e.y != null);
+  let sr = null;
+  if (h.length) {
+    const end = h[h.length - 1].y, first = Math.max(h[0].y, end - 990), rows = h.filter(e => e.y >= first);
+    const val = [(e) => e.inc, (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, () => null, (e) => e.pop];
+    const max = GRAPH405.start.slice();
+    val.forEach((f, i) => rows.forEach(e => { const v = f(e); if (v == null) return; const m = v < 1 ? v * -5 : v; if (m > max[i]) max[i] = Math.ceil(m / 50000) * 50000; }));
+    const pts = [];
+    for (let i = 0; i < 10; i++) pts.push(rows.map(e => { const b = Math.round((e.y - first) / 10); if (i < 5) { const v = val[i](e), q = Math.trunc(max[i] / 127); return [b, v == null || !q ? 0 : Math.max(-128, Math.min(127, Math.trunc(v / q)))]; } const t = e.hx && e.hx.tr ? e.hx.tr[i - 5] : null; return [b, t == null ? 0 : t * 127 / 100]; }));
+    sr = { first, end, n: Math.round((end - first) / 10), max, pts };
+  }
+  const W = 484, Hh = 223, K = 2, cv = el('canvas', { width: W * K, height: Hh * K, style: at20([20, 4, 243, 488]), 'aria-label': 'History graph', role: 'img' });
+  const icons = GRAPH405.pics.map((pic, i) => {
+    const im = a.IMG['dos:i' + pic];
+    const c = el('div', { role: 'button', tabindex: 0, 'aria-label': GRAPH405.names[i], style: `position:absolute;left:${4 + 45 * i}px;top:248px;width:45px;height:46px;cursor:pointer;text-align:center;font:12px 'DOS Geneva 9',Geneva,sans-serif;line-height:10px;overflow:hidden` },
+      im ? el('img', { src: im.src, alt: '', style: 'display:block;margin:1px auto 0;width:32px;height:32px;image-rendering:pixelated' }) : null, raw('span', GRAPH405.names[i], { style: 'display:inline-block;white-space:nowrap;transform-origin:center' }));
+    const flip = () => { GRAPH405.mask = GRAPH405.mask ^ (1 << i); paint(); };
+    c.addEventListener('click', flip); c.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } });
+    return c;
+  });
+  const lines = el('canvas', { width: 452 * K, height: 7 * K, 'aria-hidden': 'true', style: at20([295, 4, 302, 456]) });
+  const kfmt = (n) => nice(n);
+  function paint() {
+    const m = GRAPH405.mask;
+    icons.forEach((c, i) => { const on = !!(m & (1 << i)); c.style.background = on ? '#000' : '#fff'; c.style.color = on ? '#fff' : '#000'; c.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    const y = lines.getContext('2d'); y.setTransform(K, 0, 0, K, 0, 0); y.clearRect(0, 0, 452, 7); GRAPH405.colors.forEach((col, i) => { y.fillStyle = col; y.fillRect(45 * i + 4, 2, 37, 2); });
+    const x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.clearRect(0, 0, W, Hh);
+    const L = 80, T0 = 0, R = W, B = Hh;
+    x.fillStyle = '#cccccc'; x.fillRect(L, T0, R - L, B - T0); x.fillStyle = '#000'; x.fillRect(L, T0, R - L, 2); x.fillRect(L, B - 2, R - L, 2); x.fillRect(L, T0, 2, B - T0); x.fillRect(R - 2, T0, 2, B - T0);
+    const d0 = Math.round(B - Hh / 6), cH = d0 - T0 - 13, col = Math.trunc((R - L) / 100);
+    x.fillRect(L, d0, R - L, 2); x.fillRect(L - 3, T0 + 13, 4, 1);
+    x.font = G9; x.textBaseline = 'alphabetic';
+    let ink = '#000';
+    if (sr) for (let e = 0; e < 5; e++) if (m & (1 << e)) { ink = GRAPH405.colors[e]; x.fillStyle = ink; x.textAlign = 'right'; x.fillText(GRAPH405.fmt[e].replace('%s', kfmt(sr.max[e])), L - 4, T0 + 9 + e * 10); }
+    if (sr) {
+      let step = Math.trunc((sr.end - sr.first) / 4); if (step < 101) step = 100; step -= step % 10;
+      x.textAlign = 'center';
+      for (let yr = sr.first; yr <= sr.end; yr += step) { const px = R - 20 - (Math.trunc((sr.end - yr) / 10) + 1) * col; x.fillStyle = '#000'; x.fillRect(px, d0 - 2, 1, 5); x.fillText(String(yr), px, d0 + 14); }
+      for (let i = 0; i < 10; i++) {
+        if (!(m & (1 << i))) continue;
+        for (const [pen, dy] of [['#fff', 1], [GRAPH405.colors[i], 0]]) {
+          x.strokeStyle = pen; x.lineWidth = 2; x.beginPath(); let on = false;
+          for (const [b, v] of sr.pts[i]) { if (!(v > 0)) continue; const px = R - (sr.n + 1 - b) * col - 19, py = d0 - Math.trunc(v * cH / 127) + dy; if (!on) { x.moveTo(px, py); on = true; } else x.lineTo(px, py); }
+          x.stroke();
+        }
+      }
+    }
+  }
+  a.modal('', dlog20(531, 303, txt20('Select an icon to see recent recorded history:', [1, 4, 18, 456]), cv,
+    el('div', { style: at20([247, 4, 295, 456]) + ';border:1px solid #000;box-sizing:border-box' }), ...icons, lines,
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([266, 468, 286, 522]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Graph History' });
+  paint();
+  requestAnimationFrame(() => icons.forEach((c) => { const sp = c.querySelector('span'); if (!sp) return; const w = sp.scrollWidth; if (w > 44) sp.style.transform = `scaleX(${44 / w})`; })); // (a name wider than its cell condensed, as the list draws it: shot 018)
+  return true;
+}
 // 4.0.5's DLOG 6110 "Alliances" (DoAlliancesDlg @10349a, SetAllianceLists @103880; 472 x 302, DITL 6110; Jake's shot 020): "Click on a
 // player's icon to move it horizontally ..." (4, 4) and "Their icon represents what their current opinion of you is." (36, 4); three lists
 // (80, 4 / 160 / 316, each 152 x 182, cells three across), headed "I Really Like Them" (60, 16), "I Like Them" (60, 200), "I Don't Like
