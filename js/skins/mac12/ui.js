@@ -1218,10 +1218,16 @@ function status20(text, max) {
 function turnProgress(g, go) {
   const a = A(), el = a.el, W = PASSES[lang()], n = g.players.length;
   const steps = [W[0]];
+  if (V4) { // (4.0.5: PerformEndTurn @c000c, DoOneTurn: "Processing Year %d..." for each ten years of the turn, then "Seeing What Happened...": shots 194-201)
+    steps.length = 0; const yp = (g.opts && +g.opts.yearsPerTurn) || 10;
+    for (let y = 10; y <= yp; y += 10) { steps.push(`Processing Year ${g.year + y}...`); steps.push(`Processing Year ${g.year + y}...`); }
+    steps.push('Seeing What Happened...', 'Seeing What Happened...');
+  } else {
   for (let i = 1; i <= n; i++) steps.push(fill(W[1], i));
   steps.push(W[2]);
   for (let i = 1; i <= n; i++) steps.push(fill(W[3], i));
   steps.push(W[4]);
+  }
   const st = status20(steps[0], steps.length), txt = st.txt, bar = st;
   a.modal('', st.box, { cls: 'small mac12 dl20w', label: steps[0] });
   let i = 0;

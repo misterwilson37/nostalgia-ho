@@ -66,8 +66,9 @@ against. "close" lists what is still off.
 
 ## Seen in the lost game's shots, not built yet (20 Nov)
 
-- **The turn's progress windows:** "Processing Year 2010…" and "Seeing What Happened…" with a progress bar (shots 194-201), over the map
-  while the turn is worked out. The remake shows none.
+- **The turn's progress windows:** done (20 Nov): DLOG 7000's "Processing Year 2010..." for each ten years, then "Seeing What
+  Happened..." (PerformEndTurn @c000c, DoOneTurn; shots 194-201), the same checker bar as before. Seen on the way: the bitmap fonts draw
+  the digit 1 with a gap after it ("201 0", "$1 00,000"); the shots don't (a font matter, js/os/pixel-fonts.css: for Jake).
 - **The players list's second line:** each player's home gravity and temperature under the name ("1.0, 33°", shot 204, 2160); when 4.0.5
   shows it (a preference, or after contact) is to be read in `DrawIconRect` @11537c.
 
