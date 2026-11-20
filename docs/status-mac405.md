@@ -89,9 +89,10 @@ game itself (another galaxy, other players). Fixed on the way:
 | Master Point List | DLOG 6180, doMasterListDlg, DRAWMASTERICON | 3 columns of 136; points as plain digits; the picked player's cicn 3030-3033 by points |
 | Surrender | DLOG 6130, DoSurrenderToDlg, ALRT 3380 / 3390 | the Give window's cells and a last "No One" cell (ICON 1402); Really / Cancel |
 | Auto Play Options, Config… | DLOG 4020 / 4021, doAutoPlayDialog, DoConfigAutoPlayDialog | four modes ("until something interesting happens": a battle or a message stops it); the seconds 0-15; Config's two sliders on rules autoPlaySettings |
+| Organize Fleets | DLOG 6060, OrganizeFleets | 3.0.1's window at 4.0.5's size and places, with Split All (each pile that held more than one gives half to the next empty pile) |
 | Dip Into Savings | DLOG 4070, DipIntoSavings | an amount, not a share (rules-405 dipAmount; the program takes it at once, the remake at the turn's end, counting a dip already asked for) |
 Still to do: List All Explored Stars (DLOG 6040: 20-pixel rows drawn by its own list routine, a sort pop-up, CNTL 6040; asked Jake for a
-capture), Organize (6060).
+capture).
 
 ## Seen in the lost game's shots, not built yet (20 Nov)
 
