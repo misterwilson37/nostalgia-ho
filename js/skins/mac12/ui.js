@@ -253,7 +253,7 @@ function menuLayout405(M, o) {
     Edit: M.Edit,
     Options: [
       p('Options', 'Auto Play…'), '-', p('Options', 'Sound'), '-',
-      it('Master Point List…', o.cmd(/master point/i), { ghost: () => !Object.keys(ITEMS).some(n => /master point/i.test(n)) }),
+      it('Master Point List…', o.cmd(/master point/i), { ghost: () => noGame() || !(A().hasHall && A().hasHall(G())) || (H().rules(G()).hall || {}).master === false || !Object.keys(ITEMS).some(n => /master point/i.test(n)) }), // (only where the rules keep the list, as the classic menu: a 3.0.1 game in this skin has none)
       named(p('Options', 'Hall Of Fame…'), 'Hall of Fame…'), named(p('Options', 'Hall Of Shame…'), 'Hall of Shame…'), '-', p('Options', 'Preferences…')],
     Ships: M.Ships,
     Galaxy: [
