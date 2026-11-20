@@ -29,8 +29,7 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
 - **How:** `js/os/system7.css` (System 6, 7, 7.5 all build on it) declares `Chicago` and `Geneva` themselves as the bitmaps (Chicago with `size-adjust: 125%`, so a
   12px request is drawn at the font's own 15px; Geneva 400 / 700 = Geneva 9 / Geneva 9 Bold), so every `Chicago`/`Geneva` in a skin's CSS is pixel type, not a system font.
   `js/os/dos.css` (imports `js/os/pixel-fonts.css`, the faces) sets the DOS look's `--ui` to Geneva 9, buttons and menus in the 8x14. Windows 3.1 (`win31.css`) keeps MS Sans Serif.
-- **Checked** with a script that asks Chrome which font file each visible text really rendered in (CDP `CSS.getPlatformFontsForNode`; kept in the private repo,
-  `originals/mac-system/turkish/tools/fontaudit.js`), over the title, New Game, the game screen, every menu, About, Help, Skills, Hall, Reports, Account, Split and a toast:
+- **Checked** with a script that asks Chrome which font file each visible text really rendered in (CDP `CSS.getPlatformFontsForNode`; `tools/font-audit.js`), over the title, New Game, the game screen, every menu, About, Help, Skills, Hall, Reports, Account, Split and a toast:
   mac12, mac2, mac2c, mac3, mac3c, mac4, mac4c and dos with their rulesets: no system font left. Before: title, New Game, About, Help, the toasts, Hall and Account
   were Chicago / Geneva / MS Sans Serif smoothed, and the 4.0.5 panel's numbers and labels were system Geneva.
 - **Sizes** still follow each rule's own px (Chicago 11, 13, 14; Geneva 10, 11, 13): off the font's native 15 / 12, so a little soft. Snapping them is the next step.
