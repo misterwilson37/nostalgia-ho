@@ -95,6 +95,7 @@ game itself (another galaxy, other players). Fixed on the way:
 | Where the dialogs go | every DLOG's position word 0x300A | close: centred across, a fifth of the free height above (frame included), no dimming; checked on shots 033, 163, 164 |
 | You won / You lost | DLOG 5041 / 5051 (5040 / 5050 b&w) | close: beside shot 163 (frame at (200, 57)), PICT 3530 / 3540 |
 | Name a Star | NameAStar @10244c, DLOG 4050 | close: beside shot 164; the field starts empty ("Winner!" was typed) |
+| Armageddon question | ALRT 3240-3244 | close: beside shot 167 (frame, text rows, the black-and-white PICT 3020, buttons) |
 Still to do: List All Explored Stars (DLOG 6040: 20-pixel rows drawn by its own list routine, a sort pop-up, CNTL 6040; asked Jake for a
 capture).
 
