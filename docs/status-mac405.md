@@ -63,12 +63,10 @@ won (163-165), armageddon (167-187), lost (247-251). The 3.0.1 skin's versions s
 
 - **Mac 3.0.1 (20 Nov):** the same System 7.5 screen (its shot 012 has the same frame, title bar, desktop and windoids; 3.0.1's End Turn
   button at the map's (3, 2)); the remake had none of it.
-- **Every skin (Jake, 20 Nov): a galaxy that doesn't fill the screen zooms to fit it, the same space either side.** The Mac skins had it (the 1.2
-  round); the 5.0.5 family (classic, Palm, Cozy, Gemini) fitted the galaxy's whole rectangle, which a small galaxy fills only in part:
-  `fit()` in js/skins/classic/ui.js now zooms in to the stars' own extent when they leave room (never past the map's closest zoom, and never
-  further out than before: Jake, 20 Nov, "fit it if it was smaller than the real estate the screen provided ... we don't need to zoom out
-  automatically"). DOS, Windows 95, Amiga, iOS and Android checked at 1920 x 1080: they fill. Jake (20 Nov): 5.0.5 keeps its opening
-  unless that leaves a lot of empty space, as every other version: which is what it now does. human-play's copy of the old fit formula (`mapPos`) now reads the skin's own view (HOVIEW).
+- **Opening zoom (Jake, 20 Nov):** every version opens at its program's own zoom and zooms in only when that leaves dead space. The Mac
+  skins do (17 pixels a cell, `fillZoom`; 4.0.5's planets in shot 008 are the remake's size at 17, by eye). The 5.0.5 family doesn't yet:
+  a try that fitted the stars was taken back (it didn't start from 5.0.5's own zoom): docs/brief-opening-zoom.md. human-play's copy of the
+  old fit formula (`mapPos`) now reads the skin's own view (HOVIEW).
 - **4.0.5 rules in French, Turkish, German and Spanish (20 Nov):** the fleet descriptions of the 19 Nov change ("one Intrépide (1/1) Scout")
   stayed English; they now go through the same translation as 3.0.1's (js/languages.js `fleetSay`, with 4.0.5's Dreadnought, Tanker,
   Biological and Decoy). Found by ui-lang-audit.
