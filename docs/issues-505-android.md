@@ -51,7 +51,14 @@ sometimes you must drag random bars before Build works.
   Ship, Eye Satellite). Whether choosing a row there should select that design for building, and why it
   didn't, is the code question.
 
-### M3. Can't scrap old fleets or designs (REPORTED; menus SEEN 014, 018-019, 089-092)
+### M3. Can't scrap old fleets or designs (REPORTED, confirmed by Jake 20 Nov; menus SEEN 014, 018-019, 089-092)
+
+Jake (20 Nov): he hit the 24-design warning, and scrapping did nothing: he tried to scrap several Satellite
+types and they stayed. With no way to free a design slot he finished the game with exactly the fleets he had
+("glad I was playing dummies"). He thought he had shots of the attempt; the captures hold only Scrap Ship
+Types at the start of the game (019), none of the failed scrap. The demo copy behaved the same, so the crack
+alone doesn't explain it, though a paid copy could still differ (the registration check is in the code too):
+**check the code**, not another play.
 
 - What 5.0.5 has: Ships > **Dismantle Fleet** (cmd-D; dimmed in 014, where no fleet was selected), Ships >
   **Scrap Ship Types** (019, a list with "Number In Existence"), and the Build window's mark. Group Fleets
@@ -59,8 +66,8 @@ sometimes you must drag random bars before Build works.
 - Marks are carried out at the **start of the next End Turn**, not at once (CONFIRMED,
   `docs/original-findings.md` "Dismantling"), which can look like "nothing happened".
 - Group Fleets leaves **"Empty Fleet" rows** behind after Split (089-092: three of them).
-- Wanted from Jake: did he try Dismantle Fleet with a fleet selected on the map, and did the fleet survive the
-  next End Turn? Did Scrap Ship Types' OK do nothing, or did the types come back?
+- To read: `FUN_100601e0` (Scrap Ship Types), `FUN_10062c10` (Dismantle), `FUN_10074580` (the End Turn
+  pass that carries the marks out), and whether any of them tests the registration / demo state.
 
 ### M4. A ship with a nameless, impossible design: "one (0/514) Scout" (SEEN part01)
 
@@ -68,8 +75,10 @@ sometimes you must drag random bars before Build works.
   "one (0/514) Scout", no design name, against "47/48 Patton (6/5) Fighters". The battle label's numbers are
   the design's own **Weapons/Shields** (`FUN_1007c250`, design +6, +8), so this design has Weapons 0 and
   Shields 514, and an empty name.
-- Jake saw the same on Android (A3): a stranded scout with Range 0 and 0/456 that beat 40-odd fighters. Two
-  platforms, so most likely a bug in the shared rule code, not the crack.
+- This is Jake's stranded scout (20 Nov: it was on the Mac, not Android; he had the two sessions swapped, and
+  "0/456" was from memory): Range 0, so it couldn't move, and with Shields 514 it held off the 47 Pattons
+  alone. Mac only so far. The demo showed the Build Ships trouble too, so the crack is not the obvious cause,
+  but the code has to say.
 - GUESS: the design is written from an uninitialised or overrun record. Leads: M1's empty name field (a design
   built from a window that never filled its fields), the 24-design cap (M2) being exceeded, or the Radical
   "Build a set of ships without development" research (offered in 055). To read: design creation
@@ -86,6 +95,7 @@ Jake can't find the ships' fuel and population.
   (020).
 - Android/iOS show them on the map: tapping a fleet gives its label with "Fuel: n" (Android 181218: "1 Col
   (2/2) Fuel: 6", "1 Sco (1/1) Fuel: 6").
+- Jake (20 Nov): List All Fleets is "too far away from useful"; he likes the modern-conveniences label.
 - Remake: add the fuel (and colonists) line to the classic skin's fleet label **under modern conveniences**,
   in iOS's wording, `MODERN_TEXT` in five languages. Not a patch item (the original's data is right, only
   hidden).
@@ -117,12 +127,6 @@ off the top/bottom (182310 shows four dead groups stacked down the right, no X),
 - Patch: cap the window at the screen and shrink or scroll the groups (iOS's own layout first: check what the
   iPhone build does with as many groups).
 
-### A3. The stranded "0/456" scout (REPORTED, no capture)
-
-Range 0, Weapons 0 / Shields 456, won against 40+ fighters. Same bug as M4 (seen on the Mac as 0/514). Wanted
-from Jake: anything he remembers about where the scout came from (built in the Build window? a Radical
-discovery? the first turn's set-up?).
-
 ### A4. Battle animation (asked)
 
 Jake couldn't burst-capture Android battles. The Mac bursts (035-043, 044-050, 056-088, 093-096, 098-113,
@@ -139,10 +143,13 @@ group 183610). Android's timing and drawing are in the iOS decompile (`CBattleSt
 
 ## What I'd like from Jake (only if easy)
 
-1. M1: one failing Build Ships case with the numbers visible.
-2. M3: whether Dismantle Fleet with a fleet selected was tried, and what the next turn did.
-3. M4/A3: anything about where the 0/514 and 0/456 scouts came from.
-4. To rule out the crack: one try of Build Ships in the clean DEMO copy (it has the same window).
+1. M1, next time it happens: when Build Ships says you can build some (the `<10>`) but Build does nothing, one
+   screenshot with the Build window open **and** the star's planet box visible (its population), plus money
+   and metal at the top left. Not a deliberate test with no money: just a capture of a real failure, so the
+   numbers can be checked against the code.
+
+Answered 20 Nov: M3 (24-design warning reached; scrapping did nothing; demo the same), M4 (Mac only), M5
+(Jake wants the modern-conveniences label; List All Fleets is too far away to be useful).
 
 ## Next (when this is picked up)
 
