@@ -202,7 +202,7 @@ function menuLayout301() {
       it('Hall Of Fame…', () => A().openHall('fame')),
       it('Hall Of Shame…', () => A().openHall('shame'))],
     Ships: [
-      it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) build301(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
+      it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) (V4 ? build405 : build301)(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
       '-',
       it('List All Fleets…', () => A().openFleetList(), { ghost: noGame, key: 'L' }),
       it(() => (noGame() || fleetHere() ? S(7) : S(8)), () => { const s = selStar(); if (fleetHere()) organize301(s.id); }, { ghost: () => noGame() || !fleetHere(), key: 'G' }),
@@ -1723,6 +1723,124 @@ function build301(sid) {
     L(mine ? (S4[39] || 'Building At:') : (S4[40] || 'Viewing At:'), [249, 15, 265, 93]), L(star ? star.name : '', [249, 96, 265, 171]),
     scrapB, ok20('Cancel', [247, 354, 267, 412], () => a.closeModal()),
     el('button', { type: 'button', class: 'ok20 def20', style: at20([246, 426, 266, 484]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK')));
+  a.modal('', box, { cls: 'mac12 dl20w', label: 'Build / Design Ships' });
+  refresh();
+  return true;
+}
+// 4.0.5's DLOG 6000 "Build / Design Ships" (BuildDesignShips @f0d8e; 500 x 318, DITL 6000 read from the program's resource fork, items
+// as (top, left, bottom, right); Jake's shot 015). Left (9: 2, 2, 269, 139): your types, newest first, each its 120 x 40 picture and
+// "Name (W/S) Class" under it (Geneva 9), the one shown on black, with its scroll bar. The picture (10: 4, 184, 44, 304) on black, the
+// name (11) and the class menu (12, CNTL 6015); Dev. Cost (33/13), Pro. Cost (34/14), Metal Cost (35/15); Range ... Mini (36-40) with
+// "n/most" (16-20) and their scroll bars (21-25, 70 wide). Right: Savings: (43) and the money left (30) with the coins (28: PICT 4050, 4052
+// in debt; DRAWSHIPMONEYCHIPS: at most 36 coins, one a 36th of five times the income, at least $250,000, three piles), Metal: (44, 31)
+// and its bars (29: PICT 4060, one a 2,778 metal, DRAWMETALCHIPS); Built: (41, 26), In Service: (42, 27); # To Build: (45) and its field
+// (7) with + (5) and - (6); Build & Continue (2); Scrap All / Don't Scrap (8), Max Out (32), Cancel (3), OK (1, default, its ring 4).
+// The money and metal shown follow # To Build as it changes (BuildSomeShips / UnbuildSomeShips @f1552 / @f1870, the prototype's price with
+// the first of an unbuilt type); the ships are bought at OK or Build & Continue, which keeps the window open; Cancel buys nothing. The
+// window opens on the type it last showed (the preferences' +0x82), else the newest. (The same program as the Windows 4.0.5's dialog 176:
+// js/skins/w95/screen.js buildDialog, whose rules this follows.)
+function build405(sid) {
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g), star = g.stars[sid];
+  if (!star || star.owner !== a.ME) return false;
+  const types = CLASSES(), K = ['R', 'V', 'W', 'S', 'M'], KW = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'];
+  const live = () => p.designs.filter(d => !d.scrapped && types.includes(d.type));
+  let spec = null, name = '', want = 0;
+  const same = (d) => d.type === spec.type && K.every(k => d[k] === spec[k]);
+  const clampSpec = () => { const L = H().designLimits(g, p, spec.type); for (const k of K) { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo); spec[k] = Math.max(lo, Math.min(hi, spec[k] == null ? hi : spec[k])); } return L; };
+  const pickD = (d) => { spec = { type: d.type, R: d.R, V: d.V, W: d.W, S: d.S, M: d.M }; name = d.name; BUILD301 = d.id; };
+  const fresh = (type) => { spec = { type }; clampSpec(); const d = live().find(same); name = d ? d.name : H().designName(g, p, type); };
+  const d0 = live().find(d => d.id === BUILD301) || live()[live().length - 1];
+  if (d0) pickD(d0); else fresh(types[0] || 'scout');
+  const cur = () => live().find(same) || null;
+  const R = (t, l, b, r) => [t, l, b, r];
+  // the list (9)
+  const list = el('div', { class: 'lst405 nosb12', role: 'listbox', 'aria-label': 'Ship types', style: at20(R(3, 3, 268, 122)) + ';overflow-y:auto;background:#fff' });
+  // its scroll bar (System 7.5's, 16 wide, inside the list's frame at its right: shot 015), the list's place in it; arrows a row of 54, the grey a page
+  const lbar = el('canvas', { width: 32, height: 2 * 267, 'aria-hidden': 'true', style: at20(R(2, 123, 269, 139)) + ';image-rendering:pixelated;touch-action:none' });
+  const drawLbar = () => { const x = lbar.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); const max = Math.max(0, list.scrollHeight - list.clientHeight), v = list.scrollTop, o = { on: true, value: max ? v : 0, max }; if (COLOUR3) drawBar75(x, 0, 0, true, 267, o); else drawBar(x, 0, 0, true, 267, 16, o); };
+  list.addEventListener('scroll', drawLbar);
+  lbar.addEventListener('pointerdown', (e) => { const r = lbar.getBoundingClientRect(), v = (e.clientY - r.top) * 267 / r.height; list.scrollTop += v < 16 ? -54 : v >= 251 ? 54 : v < 133 ? -list.clientHeight : list.clientHeight; drawLbar(); });
+  const unBlack = (c) => { const x = c.getContext('2d'), W = c.width, H2 = c.height; let im; try { im = x.getImageData(0, 0, W, H2); } catch (e) { return; } const D = im.data, seen = new Uint8Array(W * H2), st = [];
+    const dark = (i) => D[i * 4] < 24 && D[i * 4 + 1] < 24 && D[i * 4 + 2] < 24 && D[i * 4 + 3] > 0;
+    for (let i = 0; i < W; i++) { st.push(i, (H2 - 1) * W + i); } for (let j = 0; j < H2; j++) { st.push(j * W, j * W + W - 1); }
+    while (st.length) { const i = st.pop(); if (seen[i] || !dark(i)) continue; seen[i] = 1; D[i * 4 + 3] = 0; const xx = i % W, yy = (i - xx) / W; if (xx > 0) st.push(i - 1); if (xx < W - 1) st.push(i + 1); if (yy > 0) st.push(i - W); if (yy < H2 - 1) st.push(i + W); }
+    x.putImageData(im, 0, 0); };
+  const picCv = (d, w, h, bg) => { const c = el('canvas', { width: w * 2, height: h * 2, style: `display:block;width:${w}px;height:${h}px;background:${bg || 'transparent'}` }); const x = c.getContext('2d'); x.scale(2, 2); const im = a.shipPic ? a.shipPic(d, a.ME) : null; if (im) { const k = Math.min(w / im.width, h / im.height); x.drawImage(im, (w - im.width * k) / 2, (h - im.height * k) / 2, im.width * k, im.height * k); } return c; };
+  const drawList = () => {
+    list.textContent = ''; const c = cur();
+    for (const d of live().slice().reverse()) {
+      const on = c && d.id === c.id, row = el('div', { class: 'tr405' + (on ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''), role: 'option', 'aria-selected': on ? 'true' : 'false', style: `padding:2px 0 3px;text-align:center;background:${on ? '#000' : '#fff'};color:${on ? '#fff' : '#000'};font:12px 'DOS Geneva 9',Geneva,sans-serif;cursor:pointer`, onclick: () => { pickD(d); want = 0; refresh(); } });
+      const pc = picCv(d, 120, 40); if (!on) unBlack(pc); pc.style.margin = '0 auto'; /* (on white, but the type shown on black: shot 015) */ row.append(pc, raw('div', desc0(d), { style: 'white-space:nowrap;overflow:hidden' })); list.append(row);
+    }
+    const sel = list.querySelector('.sel'); requestAnimationFrame(() => { if (sel) sel.scrollIntoView({ block: 'nearest' }); drawLbar(); });
+  };
+  // the picture (10), the name (11), the class (12)
+  const big = el('div', { style: at20(R(4, 184, 44, 304)) + ';background:#000' });
+  const nameIn = el('input', { type: 'text', maxlength: 15, style: at20(R(52, 176, 68, 316)), 'aria-label': 'Name' });
+  const clsSel = el('select', { style: at20(R(78, 156, 98, 332)), 'aria-label': 'Class' }, ...types.map(t => el('option', { value: t }, cls(t))));
+  const T = {}; const tx = (k, r, right) => (T[k] = raw('span', '', { class: 'dt20', style: at20(r) + (right ? ';text-align:right' : '') }));
+  // the five scroll bars (21-25): System 7.5's, 70 x 16
+  const bars = K.map((k, i) => { const c = el('canvas', { width: 140, height: 32, 'aria-label': KW[i], role: 'slider', tabindex: 0, style: at20(R(166 + 20 * i, 260, 182 + 20 * i, 330)) + ';image-rendering:pixelated;touch-action:none' }); return c; });
+  const drawSlider = (c, v, lo, hi, on) => { const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); x.imageSmoothingEnabled = false; if (COLOUR3) drawBar75(x, 0, 0, false, 70, { on: true, value: v - lo, max: on ? hi - lo : 0 }); else drawBar(x, 0, 0, false, 70, 16, { on: true, value: v - lo, max: on ? hi - lo : 0 }); };
+  bars.forEach((c, i) => {
+    const k = K[i];
+    const set = (v) => { const L = H().designLimits(g, p, spec.type), lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo); spec[k] = Math.max(lo, Math.min(hi, v)); const d = cur(); name = d ? d.name : (nameIn.value && !cur() ? nameIn.value : H().designName(g, p, spec.type)); refresh(); };
+    c.addEventListener('pointerdown', (e) => {
+      const r = c.getBoundingClientRect(), h = (e.clientX - r.left) * 70 / r.width, L = H().designLimits(g, p, spec.type), lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo);
+      if (hi <= lo) return; e.preventDefault();
+      if (h < 16) set(spec[k] - 1); else if (h >= 54) set(spec[k] + 1); else set(lo + Math.round((h - 24) / 22 * (hi - lo)));
+    });
+    c.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') set(spec[k] - 1); if (e.key === 'ArrowRight') set(spec[k] + 1); });
+  });
+  // the piles (28, 29)
+  const coins = el('canvas', { width: 126, height: 100, style: at20(R(4, 434, 54, 497)) + ';image-rendering:pixelated' }), mbars = el('canvas', { width: 126, height: 100, style: at20(R(64, 434, 114, 497)) + ';image-rendering:pixelated' });
+  const pile = (c, pic, count) => { const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); x.clearRect(0, 0, 63, 50); const im = a.IMG[pic]; if (!im || !im.width) return; const n = Math.min(36, count), n1 = Math.trunc(n / 2), n2 = Math.trunc(n / 3), n3 = n - n1 - n2, base = 50 - im.height - 7; [[n1, 0, 0], [n2, 14, 3], [n3, 28, 6]].forEach(([m, dx, dy]) => { for (let j = 0; j < m; j++) x.drawImage(im, dx, base + dy - 2 * j); }); };
+  const numIn = el('input', { type: 'text', inputmode: 'numeric', value: '0', style: at20(R(208, 428, 224, 455)), 'aria-label': '# To Build' });
+  const plus = ok20('+', R(196, 460, 216, 480), () => { want = Math.min(999, want + 1); refresh(); }), minus = ok20('-', R(220, 460, 240, 480), () => { want = Math.max(0, want - 1); refresh(); });
+  const scrapB = ok20('Scrap All', R(284, 108, 304, 188), () => { const d = cur(); if (!d) return; if (rs.flagScrapDesign) rs.flagScrapDesign(g, p, d, 'command'); else d.scrap301 = !d.scrap301; a.save(); a.renderPanel(); refresh(); });
+  const maxOut = ok20('Max Out', R(284, 230, 304, 294), () => { const L = H().designLimits(g, p, spec.type); K.forEach(k => { spec[k] = L[k]; }); clampSpec(); const d = cur(); name = d ? d.name : H().designName(g, p, spec.type); refresh(); });
+  const queued = () => { if (!want) return { money: 0, metal: 0 }; const d = cur() || Object.assign({ built: 0, free: false }, spec), c = H().designCost(g, d), proto = d.built === 0 && !d.free && rs.paysPrototype(g, p, d) ? c.proto : 0; return { money: want * c.money + proto, metal: want * c.metal }; };
+  const inService = (did) => g.fleets.filter(f => f.owner === a.ME).reduce((t, f) => t + (f.ships[did] || 0), 0);
+  function refresh() {
+    const L = clampSpec(), d = cur(), c = H().designCost(g, spec);
+    big.textContent = ''; big.append(picCv(Object.assign({ name }, spec), 120, 40, '#000'));
+    if (document.activeElement !== nameIn || !nameIn.dataset.typed) nameIn.value = d ? d.name : name; clsSel.value = spec.type;
+    T.dev.textContent = '$' + nice(c.protoTotal != null ? c.protoTotal : (c.money + (c.proto || 0))); T.pro.textContent = '$' + nice(c.money); T.mc.textContent = nice(c.metal);
+    K.forEach((k, i) => { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo), sat = k === 'R' && spec.type === 'satellite'; T['l' + k].textContent = sat ? '0/0' : `${spec[k]}/${hi}`; drawSlider(bars[i], spec[k], lo, hi, !sat && hi > lo); });
+    const q = queued(), sv = p.savings - q.money, mt = p.metal - q.metal;
+    T.sav.textContent = nice(Math.round(sv)); /* (no dollar sign: shot 015, "169,204") */ T.met.textContent = nice(Math.round(mt));
+    const scale = Math.max(50000, Math.round(H().projected(g, p).income || 0)) * 5;
+    pile(coins, sv < 0 ? 'dos:p4053' : 'dos:p4051', Math.trunc(Math.abs(sv) / Math.trunc((scale + 35) / 36)) + 1); pile(mbars, 'dos:p4061', Math.trunc(Math.max(0, mt) / 2778) + 1);
+    T.built.textContent = d ? String(d.built || 0) : '0'; T.serv.textContent = d ? String(inService(d.id)) : '0';
+    numIn.value = String(want); minus.disabled = want <= 0;
+    scrapB.disabled = !d; scrapB.firstChild.textContent = d && d.scrap301 ? 'Don’t Scrap' : 'Scrap All';
+    drawList();
+  }
+  clsSel.addEventListener('change', () => { fresh(clsSel.value); want = 0; refresh(); });
+  nameIn.addEventListener('input', () => { nameIn.dataset.typed = '1'; name = nameIn.value.slice(0, 15); const d = cur(); if (d && name.trim()) { d.name = name; drawList(); } }); // (the name renames the type shown, as 3.0.1's)
+  numIn.addEventListener('change', () => { let v = parseInt(numIn.value, 10); want = v >= 0 ? Math.min(999, v) : 0; refresh(); });
+  const buy = () => {
+    if (!want) return true;
+    let d = cur();
+    if (!d) { const lim = rs.maxDesigns; if (lim && H().liveDesigns(p) >= lim) { a.toast(H().say(g, H().DATA.alerts[15] || 'Your assembly lines are full.')); return false; }
+      const sp = Object.assign({}, spec); if (name && name.trim()) sp.name = name.trim(); d = H().findOrCreateDesign(g, p, sp); }
+    if (d.scrap301) { a.toast(`${d.name} is marked for scrapping.`); return false; }
+    let made = 0; for (let i = 0; i < want; i++) { if (H().buildShips(g, a.ME, sid, d.id, 1)) made++; else break; }
+    if (made < want) a.toast(made ? `Built ${made} of ${want}: not enough money, metal or people.` : 'Not enough money or metal.');
+    BUILD301 = d.id; want = 0; a.save(); a.renderPanel(); a.draw(); return made > 0 || !want;
+  };
+  const okB = el('button', { type: 'button', class: 'ok20 def20', style: at20(R(284, 420, 304, 478)) + ';min-width:0;padding:0', onclick: () => { if (buy() !== false) a.closeModal(); else refresh(); } }, raw('span', 'OK'));
+  const Lb = (t, r) => txt20(t, r);
+  const box = dlog20(500, 318,
+    el('div', { style: at20(R(2, 2, 269, 139)) + ';border:1px solid #000;box-sizing:border-box;background:#fff' }), list, lbar,
+    big, nameIn, clsSel,
+    Lb('Dev. Cost:', R(102, 160, 118, 239)), tx('dev', R(102, 240, 118, 322)), Lb('Pro. Cost:', R(122, 160, 138, 239)), tx('pro', R(122, 240, 138, 322)), Lb('Metal Cost:', R(142, 160, 158, 238)), tx('mc', R(142, 240, 158, 322)),
+    ...KW.map((w, i) => Lb(w, R(166 + 20 * i, 152, 182 + 20 * i, 213))), ...K.map((k, i) => tx('l' + k, R(166 + 20 * i, 215, 182 + 20 * i, 257))), ...bars,
+    Lb('Savings:', R(6, 344, 23, 400)), tx('sav', R(26, 344, 42, 432)), coins, Lb('Metal:', R(66, 344, 82, 390)), tx('met', R(86, 344, 102, 432)), mbars,
+    Lb('Built:', R(132, 348, 148, 386)), tx('built', R(132, 388, 148, 427)), Lb('In Service:', R(156, 348, 172, 421)), tx('serv', R(156, 424, 172, 463)),
+    Lb('# To Build:', R(208, 348, 224, 423)), numIn, plus, minus,
+    ok20('Build & Continue', R(252, 368, 272, 479), () => { buy(); refresh(); }),
+    scrapB, maxOut, ok20('Cancel', R(284, 348, 304, 406), () => a.closeModal()), okB);
   a.modal('', box, { cls: 'mac12 dl20w', label: 'Build / Design Ships' });
   refresh();
   return true;
@@ -4062,7 +4180,7 @@ if (V3) {
     window(name, ...x) {
       if (!G() || !own()) return false;
       if (name === 'fleets') return fleets301();
-      if (name === 'build') return build301(x[0]);
+      if (name === 'build') return V4 ? build405(x[0]) : build301(x[0]);
       if (name === 'give') return give301();
       if (name === 'chat') return chat301();
       if (name === 'organize' || name === 'group') return organize301(x[0]);
