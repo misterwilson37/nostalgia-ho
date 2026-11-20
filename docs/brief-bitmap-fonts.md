@@ -49,7 +49,7 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
 - **Left on Arial on purpose** (the Windows program itself draws them in Arial; docs/405-windows.md, win20-findings): the player names and the clock in the w95 skin, the budget strip's "0% Linear 100%" in the
   Windows 3.1 look, the Windows 95 New Game window's labels (15px Arial from shot 002).
 - Smoothing off where a browser allows it: `-webkit-font-smoothing: none` (Mac WebKit only), `text-rendering: optimizeSpeed`; the fonts are squares, so at their native size they are crisp anyway.
-- The pixel fonts work only when the page loads the look's own CSS; the single-file build (tools/bundle.py) inlines only assets/fonts/*.woff2, so its looks still fall back to system fonts.
+- The single-file build (tools/bundle.py) inlines the pixel fonts (assets/skins/*/fonts) in the looks each skin itself lists (js/skins.js `os:`), not in every look (that would add about 8 MB); another look picked there falls back to system fonts. Sizes 10.5 to 15.5 MB, all under 16.
 
 ## Done, 19 Nov 2026 (third pass: symbols, punctuation, Palm Turkish)
 - **Symbols none of the pixel fonts has** (minus U+2212, multiplication sign, a small X U+2715, the solid triangles) are drawn in pixels at each font's scale (`tools/extract/pixelextras.py` ->
