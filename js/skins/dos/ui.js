@@ -803,7 +803,9 @@ function dq(w, h, label) {
       x.font = wf(font || F9); x.fillStyle = o.color || '#000'; x.textAlign = o.right != null ? 'right' : o.center != null ? 'center' : 'left';
       const ax = o.right != null ? o.right : o.center != null ? o.center : px;
       // (Arial, standing in for the Windows program's MS Sans Serif, is about a tenth wider: narrowed to its widths)
-      if (winOn()) { x.save(); x.translate(ax, 0); x.scale(WK, 1); x.fillText(t, 0, y); x.restore(); } else x.fillText(t, ax, y);
+      if (winOn()) { x.save(); x.translate(ax, 0); x.scale(WK, 1); x.fillText(t, 0, y); x.restore(); }
+      // (centred on a whole pixel: an odd width put the bitmap face on a half pixel and blurred it, the planet's name, Jake 20 Nov)
+      else if (o.center != null) { x.textAlign = 'left'; x.fillText(t, Math.floor(ax - x.measureText(t).width / 2), y); } else x.fillText(t, ax, y);
     },
     width(t, font) { x.font = wf(font || F9); return x.measureText(t).width * (winOn() ? WK : 1); },
     hline(x0, x1, y) { x.fillStyle = '#000'; x.fillRect(x0, y, x1 - x0, 1); },
@@ -936,7 +938,7 @@ function fleetBoxDos() {
   FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
   if (sel && r12) {
     const L = (rs.fleetInfo || r12.fleetInfo)(enView(g), sel), first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
-    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(fl(m[1] + ' x').replace(/ x$/, ''), 3, 11); q.text(m[2], 70, 11); } else q.text(fl(first), 3, 11);
+    if (m && !sel.scrap301 && !/ via /.test(first)) { const lb = fl(m[1] + ' x').replace(/ x$/, ''); q.text(lb, 3, 11); q.text(m[2], winOn() ? 70 : 3 + Math.round(q.width(lb + ' ')), 11); } else q.text(fl(first), 3, 11); // (DOS: the name after the label and a space, 64 in English: v20dos-orig-turn1, -turn2, -fleets)
     if (L[1]) q.text(fl(L[1]), 3, G.y2); if (L[2]) q.text(fl(L[2]), 70, G.y2); if (L[3]) q.text(fl(L[3]), 127, G.y2);
   }
   if (!here.length) q.text(W.noFleets || 'There are no fleets at this planet.', 3, 36);

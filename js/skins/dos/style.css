@@ -286,3 +286,5 @@ html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-vis
 .dd-tracklayer { position: fixed; inset: 0; z-index: 100; cursor: move; touch-action: none; }
 .dd-grip { position: absolute; z-index: 2; cursor: nwse-resize; touch-action: none; }
 .dd .dd-title.teal { cursor: default; touch-action: none; }
+/* (the report bubble keeps a focus mark for the keyboard, in the program's own dotted style, not the remake's gold ring: v20dos-orig-turn2's bubble has a plain black frame) */
+html.dosframe .card:focus-visible { outline: calc(1 * var(--du)) dotted #000; outline-offset: calc(-3 * var(--du)); }
