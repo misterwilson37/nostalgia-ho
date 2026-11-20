@@ -1967,7 +1967,7 @@ function prefs405() {
     sort.lb, show.lb, imp.lb, rev.lb, hint.lb, paths.lb, cel.lb, txt20('Your Password:', R(92, 282, 108, 418)), pw,
     txt20('When Reviewing Battles:', R(154, 8, 169, 180)), txt20('Battle Speed:', R(174, 16, 190, 111)), txt20('Fast', R(174, 116, 190, 150)), bs.cv, txt20('Slow', R(174, 292, 190, 335)), full.lb, grp.lb,
     txt20('When Checking To See If All Players Have Ended Their Turn:', R(218, 6, 234, 400)), txt20('Polling Time:', R(238, 22, 254, 112)), txt20('Fast', R(238, 118, 254, 151)), po.cv, txt20('Slow', R(238, 294, 254, 329)), pv, txt20('Seconds', R(238, 358, 254, 433)),
-    ok20('Remake options…', R(266, 8, 286, 150), () => { a.closeModal(); a.openPrefs(); }),
+    (() => { const b = ok20('Remake options…', R(266, 8, 286, 150), () => { a.closeModal(); a.openPrefs(); }); b.classList.add('ios-bremake'); return b; })(), // (the class the test tools know the remake's options button by, as the w95 skin's)
     ok20('Cancel', R(266, 324, 286, 382), () => a.closeModal()),
     el('button', { type: 'button', class: 'ok20 def20', style: at20(R(266, 400, 286, 458)) + ';min-width:0;padding:0', onclick: okFn }, raw('span', 'OK'))),
     { cls: 'mac12 dl20w', label: 'Preferences' });
