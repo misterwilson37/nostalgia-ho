@@ -64,6 +64,13 @@ against. "close" lists what is still off.
 - **New Game:** opens on the skin's own rules (SKIN_RULES, every skin) and has its Create button above the line ("Create", 3.0.1's and
   4.0.5's DITL 6080), so a game starts without scrolling to the remake's choices.
 
+## Seen in the lost game's shots, not built yet (20 Nov)
+
+- **The turn's progress windows:** "Processing Year 2010…" and "Seeing What Happened…" with a progress bar (shots 194-201), over the map
+  while the turn is worked out. The remake shows none.
+- **The players list's second line:** each player's home gravity and temperature under the name ("1.0, 33°", shot 204, 2160); when 4.0.5
+  shows it (a preference, or after contact) is to be read in `DrawIconRect` @11537c.
+
 ## Windows, battles, start-up, end of the game
 
 | Window | 4.0.5 routine | Status | Evidence / what is left |
