@@ -4938,6 +4938,10 @@ function place405(win) {
   const sc = win.closest('.scrim'); if (sc) { sc.style.placeItems = 'start'; sc.style.padding = '0'; sc.style.background = 'none'; }
   win.style.position = 'fixed'; win.style.margin = '0';
   win.style.left = (r.left / k + Math.trunc((W - w) / 2)) + 'px'; win.style.top = (top0 + 20 + Math.trunc((H - 20 - h) / 5)) + 'px';
+  // (the skills list, DITL 6100 user item 3 (13, 26)-(363, 252): its List Manager scroll bar, 16 wide inside the frame, as Jake's System 7
+  // capture 9 shows it; the classic page's list has none of its own)
+  const sk = V4 && d.matches('.origdlg.skills') ? d.querySelector('.skillist') : null;
+  if (sk && !d.querySelector('canvas.skbar405')) { const bar = listBar20(sk, [26, 347, 252, 363], 16); bar.classList.add('skbar405'); d.append(bar); }
 }
 if (V4) new MutationObserver((ms) => { for (const mu of ms) for (const n of mu.addedNodes) if (n.nodeType === 1) { const q = '.win.dl20w, .win:has(> .wbody > .origdlg)', w = n.matches(q) ? n : n.querySelector && n.querySelector(q); if (w) requestAnimationFrame(() => place405(w)); } }).observe(document.body, { childList: true, subtree: true });
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
