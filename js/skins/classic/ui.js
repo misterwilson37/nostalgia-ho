@@ -548,6 +548,9 @@ function resize() {
   cv.width = Math.round(rw * dpr); cv.height = Math.round(rh * dpr);
   cv.style.width = rw + 'px'; cv.style.height = rh + 'px';
   if (G && !UI.fitted) fit();
+  // (fitted while the map's box was still being laid out, and the view not touched since: fitted again to the box it has now; a w95 game
+  // begun from the title at a phone's size opened at a fifth of the zoom, the galaxy a speck: real-play's send-fleet at phone-l)
+  else if (G && UI.fitMap && UI.view === UI.fitMap.view && UI.view.s === UI.fitMap.s && UI.view.ox === UI.fitMap.ox && UI.view.oy === UI.fitMap.oy && (Math.abs(mapW - UI.fitMap.w) > 1 || Math.abs(mapH - UI.fitMap.h) > 1)) fit();
   draw();
 }
 function fit() {
@@ -560,6 +563,7 @@ function fit() {
   // T.fitView(view, ctx): a skin's own first view (the Amiga's zoom, on your home)
   if (T.fitView) T.fitView(UI.view, { G, ME, mapW, mapH, sel: UI.sel, redraw: draw });
   UI.fitted = true;
+  UI.fitMap = { view: UI.view, s: UI.view.s, ox: UI.view.ox, oy: UI.view.oy, w: mapW, h: mapH }; // (what resize compares)
 }
 // right-click on a star: the commands that apply to it (5.0.5 had a
 // contextual menu in the map window; its items are the menu-bar commands)

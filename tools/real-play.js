@@ -223,7 +223,7 @@ async function playRun(browser, job, outDir, idx) {
     }
     await step('new-game', async () => {
       if (!await press('#tnew', { what: 'New game button' })) return;
-      const form = page.locator('form.newgame'); await form.waitFor({ timeout: 6000 }); await sleep(250); await shot('new-game-form');
+      const form = page.locator('form.newgame'); await form.waitFor({ state: 'attached', timeout: 6000 }); await sleep(250); await shot('new-game-form');
       const has = await ev((r) => !!document.querySelector(`form.newgame select[name=rules] option[value="${r}"]`), job.rules);
       if (!has) { fail(`the New game window has no ruleset "${job.rules}"`); return; }
       // (a person picks the ruleset from the list; a skin with its own New game window keeps this form as its model, hidden: set through it)

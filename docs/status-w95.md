@@ -186,3 +186,8 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
 
 - **21 Nov:** Ship Power is in the history now (engine `recordHistory`, `hx.pw`, from rs.shipPower: FUN_0041adc6), so the Graph History's Ship Power line draws (both 4.0.5 skins). Digests unchanged.
 - **21 Nov:** Statistics (dialog 355) built: `statsDialog`, the six numbers from the 405 rules' counters (p.st405), beside shot 079 (same layout; a game begun before the counters keeps it dimmed).
+- **21 Nov, the phone-sized runs:** (1) the classic page now lets a finger that lands on one of your fleets' dots drag it as the mouse does
+  (it had only the iOS app's gestures, where a drag from a star is a ruler): the long-known send-fleet failure at phone-l and pad, every
+  skin on this code. (2) A game begun from the title at a phone's size was fitted while the map's box was still being laid out (a fifth of
+  the zoom: the galaxy a speck, no star in reach to tap); `resize` now fits again while the view is the untouched fitted one. (3) real-play
+  waits for a hidden New Game form (the iOS skin's own screen) and answers the Amiga's question and name prompt, so both games start.
