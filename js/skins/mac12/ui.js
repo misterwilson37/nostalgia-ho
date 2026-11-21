@@ -3394,7 +3394,9 @@ function pieChart301(q, h, v, s, T, X) {
 // at (-slide, 26 + n); then the night side, blended 0xBFFF of black over it (a quarter of the picture left), the region by the count: a half
 // (left under 112, right from it) less (count < 56, >= 168) or with (else) an oval as tall as the planet and as wide as how far the count is from 56,
 // 112 or 168 or 224; then through the oval into the window.
-const GRAT = { c: 0, stars: Array.from({ length: 14 }, () => ({ v: 0, h: 0 })), timer: null };
+// (4.0.5's SetupMiscStructures @1a0cba deals each star its own place, h aSynchRand(0, 127) and v (1, 64), so they start scattered and stay
+// so, each put back at 127 on its own (Jake's shot 008); 3.0.1 starts them all at 0, 0: a column)
+const GRAT = { c: 0, stars: Array.from({ length: 14 }, () => (V4 ? { v: 1 + Math.floor(Math.random() * 64), h: Math.floor(Math.random() * 128) } : { v: 0, h: 0 })), timer: null };
 // (4.0.5's region starts at 108 and its planet at 139, 4: Jake's shots 008, 027, 158; 3.0.1's at 96 and 132)
 const GREG = { l: V4 ? 108 : 96, r: V4 ? 226 : 224 };
 const OVAL301 = { h: V4 ? 139 : 132, v: 4, d: 56 }, inOval301 = (h, v) => { const r = OVAL301.d / 2, dx = h + 0.5 - (OVAL301.h + r), dy = v + 0.5 - (OVAL301.v + r); return dx * dx + dy * dy <= r * r; };
@@ -3406,7 +3408,7 @@ function gratuitous301(x, s, idle) {
     const put = (fill) => { const h = GREG.l + st.h, v = st.v; if (h >= GREG.l && h < GREG.r && v >= 0 && v < 65 && !inOval301(h, v)) { x.fillStyle = fill; x.fillRect(h, v, 1, 1); } };
     put('#000');
     if (idle) st.h -= 1;
-    if (st.h < 0) { st.h = GREG.r - GREG.l - 1; st.v = 1 + Math.floor(Math.random() * 64); }
+    if (st.h < 0) { st.h = V4 ? 127 : GREG.r - GREG.l - 1; st.v = 1 + Math.floor(Math.random() * 64); }
     put('#fff');
   });
   const r = Math.trunc(100 * Math.max(s.g, p.homeG) / Math.max(0.01, Math.min(s.g, p.homeG)));
