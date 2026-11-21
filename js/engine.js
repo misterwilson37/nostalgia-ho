@@ -1994,7 +1994,12 @@ function recordHistory(G, p) {
     let sum = 0, cnt = 0; for (const q of G.players) if (q.alive) { cnt++; if (q !== p) { const a = (q.tech || {})[t] || 0, b = (p.tech || {})[t] || 0; sum += a === b ? 5 : a < b ? 10 : 0; } }
     return cnt < 2 ? (n < 2 ? 50 : 100) : Math.trunc(sum * 100 / (10 * (cnt - 1)));
   });
-  p.hist.push({ y: G.year, pop: Math.round(cols.reduce((a, s) => a + s.pop, 0)), cols: cols.length, ships, tech: techSum(p) + p.tech.mini, inc: Math.round(p.lastGross), hx: { met: Math.round(p.metal), sav: Math.round(p.savings), rk, tr } });
+  const hx = { met: Math.round(p.metal), sav: Math.round(p.savings), rk, tr };
+  // (rs.shipPower, 4.0.5: the Graph History's Ship Power, FUN_0041adc6 of the Windows program (the Mac's the same): over the player's fleets,
+  // each type's attack (the type record's +0x84) times its count, satellites out of hyperspace left out)
+  const rsh = rules(G);
+  if (rsh.shipPower) { let pw = 0; for (const f of G.fleets) if (f.owner === p.id) for (const k in f.ships) { const d = getDesign(G, p.id, +k); if (!d || (d.type === 'satellite' && f.sat)) continue; pw += f.ships[k] * (rsh.shipPower(G, d) || 0); } hx.pw = Math.round(pw); }
+  p.hist.push({ y: G.year, pop: Math.round(cols.reduce((a, s) => a + s.pop, 0)), cols: cols.length, ships, tech: techSum(p) + p.tech.mini, inc: Math.round(p.lastGross), hx });
   if (p.hist.length > 400) p.hist.shift();
 }
 function score(G, p) {

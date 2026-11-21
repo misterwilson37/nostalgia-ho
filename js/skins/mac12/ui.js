@@ -2391,7 +2391,7 @@ function armAsk405(text, yes) {
 // the record this follows). The icons (247, 4, 294, 456): ten cells of 45, ICON 3110, 3162, 3117, 4011, 4017, 3100-3104, black behind
 // a chosen one, their names under them (Geneva 9); their colours' lines under the row (295, 4, 302, 456); a click flips one (the
 // preferences' +0x7e, kept in this browser). Colours: Income #996633, Metal #dd0000, Ship Money #330099 (shot 018); the others as the
-// Windows program's table. Ship Power: not in the remake's history (its line stays empty).
+// Windows program's table. Ship Power: the history's hx.pw (engine recordHistory with rs.shipPower; turns recorded before it have none).
 const GRAPH405 = {
   pics: [3110, 3162, 3117, 4011, 4017, 3100, 3101, 3102, 3103, 3104],
   names: ['Net Income', 'Metal', 'Ship Money', 'Ship Power', 'Population', 'Range', 'Speed', 'Weapons', 'Shields', 'Mini'],
@@ -2406,7 +2406,7 @@ function graph405() {
   let sr = null;
   if (h.length) {
     const end = h[h.length - 1].y, first = Math.max(h[0].y, end - 990), rows = h.filter(e => e.y >= first);
-    const val = [(e) => e.inc, (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, () => null, (e) => e.pop];
+    const val = [(e) => e.inc, (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, (e) => (e.hx && e.hx.pw != null ? e.hx.pw : null), (e) => e.pop];
     const max = GRAPH405.start.slice();
     val.forEach((f, i) => rows.forEach(e => { const v = f(e); if (v == null) return; const m = v < 1 ? v * -5 : v; if (m > max[i]) max[i] = Math.ceil(m / 50000) * 50000; }));
     const pts = [];

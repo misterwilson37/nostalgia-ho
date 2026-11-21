@@ -1100,8 +1100,8 @@ const prevWindow = T.window;
 // 50,000 above any value, a negative value counting five times), their legends "$%s" "%sM" "$%s" "%sP" "%s" right-aligned at 72,
 // a row of 10 each; the techs are the player's standing (6 for each living rival behind, 3 for each level with him, of 6 per
 // rival), which is the remake's history's `hx.tr` in hundredths. Income: the record's player +8, the remake's `inc`; Metal `hx.met`;
-// Ship Money (+0x10, the savings) `hx.sav`; Population `pop`. Ship Power (FUN_0041adc6) isn't in the remake's history: its line
-// stays empty (docs/status-w95.md, needs a shared file).
+// Ship Money (+0x10, the savings) `hx.sav`; Population `pop`; Ship Power (FUN_0041adc6) `hx.pw` (engine recordHistory, rs.shipPower): its line
+// is empty only for turns recorded before it.
 const GRAPH = {
   pics: [3110, 3162, 3117, 4011, 4017, 3100, 3101, 3102, 3103, 3104],
   names: ['Income', 'Metal', 'Ship Money', 'Ship Power', 'Population', 'Range', 'Speed', 'Weapons', 'Shields', 'Mini'],
@@ -1115,7 +1115,7 @@ function graphSeries(g, p) {
   const h = (p.hist || []).filter(e => e && e.y != null); if (!h.length) return null;
   const end = h[h.length - 1].y, first = Math.max(h[0].y, end - 990);
   const rows = h.filter(e => e.y >= first);
-  const val = [(e) => e.inc, (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, () => null, (e) => e.pop];
+  const val = [(e) => e.inc, (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, (e) => (e.hx && e.hx.pw != null ? e.hx.pw : null), (e) => e.pop];
   const max = GRAPH.start.slice();
   val.forEach((f, i) => rows.forEach(e => { const v = f(e); if (v == null) return; const m = v < 1 ? v * -5 : v; if (m > max[i]) max[i] = Math.ceil(m / 50000) * 50000; }));
   const pts = [];

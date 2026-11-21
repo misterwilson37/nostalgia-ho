@@ -183,3 +183,5 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
 
 - **20 Nov (Mac 4.0.5 round):** the 405 rules now keep 4.0.5's Statistics counters (`p.st405`, docs/status-mac405.md); the w95 skin's
   Statistics (dialog 355) can be built on them. Digests: 405 d9ff9858e51b92af, mac405 9fc3fa9801f815ff (the field only).
+
+- **21 Nov:** Ship Power is in the history now (engine `recordHistory`, `hx.pw`, from rs.shipPower: FUN_0041adc6), so the Graph History's Ship Power line draws (both 4.0.5 skins). Digests unchanged.
