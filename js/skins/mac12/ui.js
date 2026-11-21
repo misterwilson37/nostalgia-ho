@@ -4812,7 +4812,12 @@ function fleetPaths301(cx, i) {
     if (f.to != null) { const a0 = g.stars[f.from], t = Math.min(1, (f.prog || 0) / (f.dist || 1)); x1 = i.sx(a0.x + (b.x - a0.x) * t); y1 = i.sy(a0.y + (b.y - a0.y) * t); }
     else { x1 = i.sx(g.stars[f.star].x); y1 = i.sy(g.stars[f.star].y); }
     const colony = H().fleetDesigns(g, f).some(d => d.type === 'colony');
-    cx.strokeStyle = col ? orPat(cx, GRAY, colony ? '#008011' : '#02abea') : 'rgba(0,0,0,0)';
+    // (4.0.5 draws the pattern in copy mode: its 0 bits the back colour, white, the 1 bits the colour through the 8-bit screen's table: cyanColor
+    // shows as (0, 153, 255) beside white, Jake's shot 011, pixel by pixel)
+    if (V4 && col) { const t = document.createElement('canvas'); t.width = t.height = 8; const c = t.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, 8, 8);
+      c.fillStyle = css8(colony ? [0x0000, 0x8000, 0x11B0] : [0x0241, 0xAB54, 0xEAFF]); GRAY.forEach((r, v) => { for (let h = 0; h < 8; h++) if (r & (0x80 >> h)) c.fillRect(h, v, 1, 1); });
+      cx.strokeStyle = cx.createPattern(t, 'repeat'); }
+    else cx.strokeStyle = col ? orPat(cx, GRAY, colony ? '#008011' : '#02abea') : 'rgba(0,0,0,0)';
     cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(i.sx(b.x), i.sy(b.y)); cx.stroke();
   }
   cx.restore();
