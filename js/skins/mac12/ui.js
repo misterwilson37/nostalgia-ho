@@ -1774,13 +1774,36 @@ function join405(f) {
   const go = () => {
     if (sk) { sk.value = skill; sk.dispatchEvent(new Event('change', { bubbles: true })); }
     if (fe) { fe.value = female ? '1' : '0'; fe.dispatchEvent(new Event('change', { bubbles: true })); }
-    L.close(); f.requestSubmit();
+    L.close(); wait405(f);
   };
   const L = layer405(dlog20(360, 223, txt20('Your Name:', [4, 8, 19, 104]), txt20(nm ? nm.value : '', [4, 116, 22, 315]), txt20('Password:', [24, 8, 40, 83]),
     pic, txt20('Skill Level:', [54, 117, 70, 202]), ...radios, txt20('Sex:', [54, 260, 70, 335]), ...sex,
     ok20('Cancel', [180, 208, 200, 266], () => L.close()),
     el('button', { type: 'button', class: 'ok20 def20', style: at20([180, 284, 200, 342]) + ';min-width:0;padding:0', onclick: go }, raw('span', 'Join'))), 'Join');
   setTimeout(() => { const b = L.el.querySelector('.def20'); if (b) b.focus(); }, 0);
+}
+// The server's waiting window after Join (Jake's shots 007, 192; measured from them, the routines not read): PICT 3020 at (15, 8); in Geneva 9
+// from (100, 19), ten pixels a line, "Current Game: %s", "Current Player: %s", "The game is waiting to start. Humans: %d", "Computer Players:
+// %d"; the galaxy's Style, Size, Density and Intelligence icons (32 x 32 at 100, 150, 200, 250, top 55) with their names under them; "I'm
+// Playing Alone" (195, 106), which starts the game. A windoid with a striped title bar, about 300 x 136.
+function wait405(f) {
+  const a = A(), el = a.el, v = (n) => { const e = f.querySelector(`[name="${n}"]`); return e ? e.value : ''; };
+  const opt = (n) => { const e = f.querySelector(`[name="${n}"]`); return e && e.selectedOptions[0] ? e.selectedOptions[0].textContent : ''; };
+  const ICON = { w_shape: { circle: 3020, random: 3021, ring: 3022, spiral: 3023, grid: 3024, cluster: 3025 }, w_size: { small: 3040, medium: 3041, large: 3042, xl: 3043, huge: 3044 },
+    w_density: { dense: 3050, sparse: 3051 }, w_iq: { dumb: 3030, average: 3031, smart: 3032, diabolical: 3033 } };
+  const NAME = { xl: 'ExtraLarge', huge: 'Humongous' };
+  const t = (s0, top) => raw('span', s0, { style: `position:absolute;left:100px;top:${top}px;white-space:nowrap;font:12px/10px 'Mac Geneva 9', Geneva, sans-serif` });
+  const icons = ['w_shape', 'w_size', 'w_density', 'w_iq'].flatMap((n, i) => { const val = v(n), im = a.IMG['dos:i' + ICON[n][val]], x0 = 100 + 50 * i;
+    return [im ? el('img', { src: im.src, alt: '', style: `position:absolute;left:${x0}px;top:55px;width:32px;height:32px;image-rendering:pixelated` }) : null,
+      raw('span', NAME[val] || opt(n), { style: `position:absolute;left:${x0 - 9}px;top:92px;width:50px;text-align:center;font:12px/10px 'Mac Geneva 9', Geneva, sans-serif` })]; });
+  const pic = a.IMG['dos:p3020'];
+  const humans = +v('humans') || 1, comps = v('computers') === 'any' ? '?' : v('computers');
+  const go = () => { L.close(); f.requestSubmit(); };
+  const L = layer405(dlog20(300, 136, pic ? el('img', { src: pic.src, alt: '', style: 'position:absolute;left:15px;top:8px;width:74px;height:74px;image-rendering:pixelated' }) : null,
+    t('Current Game: ' + v('galaxy'), 19), t('Current Player: ' + v('name'), 29), t('The game is waiting to start. Humans: ' + humans, 39), t('Computer Players: ' + comps, 49), ...icons,
+    el('button', { type: 'button', class: 'ok20', style: at20([106, 195, 122, 292]) + ";min-width:0;padding:0;font:12px 'Mac Geneva 9', Geneva, sans-serif !important", onclick: go }, raw('span', 'I’m Playing Alone'))), 'Waiting to start');
+  const w = L.el.querySelector('.win'); if (w) w.style.borderTop = '9px solid transparent', w.style.borderImage = 'repeating-linear-gradient(#000 0 1px, #fff 1px 2px) 9 0 0 0';
+  setTimeout(() => { const b = L.el.querySelector('button'); if (b) b.focus(); }, 0);
 }
 // DLOG 4120 (doYearsPerTurnDialog @f0c28, 293 x 228; DITL 4120): "How many years should go by every time the turn is ended?" (12, 12), five
 // radio buttons 10 (Normal), 20, 30, 50, 100 Years (56, 80, 104, 128, 152 at 12), Cancel (192, 144) and OK (192, 220, default ring);
