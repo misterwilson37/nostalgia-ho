@@ -4071,7 +4071,7 @@ function frame75() {
   // isn't left under the windows there: real-play's 4k select-colony failures, 19-20 Nov)
   if (TB75.on !== on) { TB75.on = on; requestAnimationFrame(() => { const a = A(); if (a && a.G) { a.UI.fitted = false; a.resize(); a.renderPanel(); } }); }
   const main = document.getElementById('main'); let mw = document.getElementById('mapwin301');
-  if (!on) { if (mw) mw.remove(); const ck = document.getElementById('clock405'); if (ck) ck.remove(); return; }
+  if (!on) { if (mw) mw.remove(); for (const id of ['clock405', 'mbclock75', 'mbapp75']) { const e = document.getElementById(id); if (e) e.remove(); } return; }
   if (!mw) { mw = A().el('div', { id: 'mapwin301', 'aria-hidden': 'true' }, A().el('canvas', { class: 'tb75' })); main.prepend(mw); }
   const t = document.getElementById('title');
   if (t && !TB75.obs) { TB75.obs = new MutationObserver(() => frame75()); TB75.obs.observe(t, { childList: true, characterData: true, subtree: true }); }
@@ -4085,6 +4085,25 @@ function frame75() {
   const cn = document.querySelector('#mapwrap .mapcorner12');
   if (cn && BAR75() && !cn.querySelector('canvas')) { const c = A().el('canvas', { width: 64, height: 64, 'aria-hidden': 'true' }); const x = c.getContext('2d'); x.setTransform(4, 0, 0, 4, 0, 0); drawGrow75(x); cn.append(c); }
   if (V4) clock405();
+  menuClock75();
+}
+// The menu bar's right end under System 7.5 (Jake's shots, 4.0.5's 008 and 3.0.1's 012): the Date & Time control panel's clock, the day and
+// the time to the second ("Sun 7:25:45 PM"), Chicago 12 in (102, 51, 204), ending at 569; then the Help menu's icon (Apple's, not drawn
+// here) and the application menu's icon at 611: the program's icl8 200 shrunk to 16 x 16 (assets/skins/mac4c/sprites/app16.png; colour
+// 4.0.5 only). The time is this computer's.
+function menuClock75() {
+  const mb = document.getElementById('menubar'); if (!mb) return;
+  let ck = document.getElementById('mbclock75');
+  if (!ck) {
+    mb.style.position = 'relative';
+    ck = A().el('span', { id: 'mbclock75', 'aria-hidden': 'true', style: `position:absolute;right:70px;top:0;height:20px;line-height:20px;white-space:nowrap;pointer-events:none;color:${COLOUR3 ? '#6633cc' : '#000'};font:15px/20px 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif` });
+    mb.append(ck);
+    if (V4 && COLOUR3) mb.append(A().el('img', { id: 'mbapp75', src: 'assets/skins/mac4c/sprites/app16.png', alt: '', style: 'position:absolute;left:auto;right:17px;top:2px;width:16px;height:16px;image-rendering:pixelated;pointer-events:none' }));
+    const D = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const tick = () => { const c = document.getElementById('mbclock75'); if (!c) return; const d = new Date(), h = d.getHours() % 12 || 12;
+      c.textContent = `${D[d.getDay()]} ${h}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')} ${d.getHours() < 12 ? 'AM' : 'PM'}`; setTimeout(tick, 1000 - d.getMilliseconds()); };
+    tick();
+  }
 }
 // 4.0.5's clock (DrawTimeClock @115af2; EndTurnButtonShowing @111944: shown whenever the turn is open, reports read or not): PICT 5500, the time
 // the turn has taken (no time limit: hours and minutes, "%d:%02d") in its black window, green (0, 187, 0) in Geneva 9, and a seconds hand 23
