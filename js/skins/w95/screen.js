@@ -59,7 +59,7 @@ T.menuLayout = {
     [lab('List All Fleets'), 'Ships/List all fleets…'], [lab('Organize Ships...'), () => { const a = HOAPI; if (a && a.G && a.UI.sel != null) (W95ON() ? organizeDialog(a.UI.sel) : a.openOrganize(a.UI.sel)); }, null, null, () => noGame() || HOAPI.UI.sel == null], [() => { const f = HOAPI.curFleet && HOAPI.curFleet(); return TL(f && f.scrap301 ? "Don't Scrap Current Fleet" : 'Scrap current fleet'); }, 'Ships/#3'], '-', // (shots 042 / 046)
     // (the last item names the selected star's battle, or reads "No Battles here..." dimmed: shot 042)
     [null, 'Ships/#1']],
-  Galaxy: [[lab('Compare Players...'), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('Statistics...'), () => {}, null, null, dim], // (shot 047; dialog 355 needs counters the engine doesn't keep yet: dimmed)
+  Galaxy: [[lab('Compare Players...'), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('Statistics...'), () => statsDialog(), null, null, () => noGame() || !(A().me() && A().me().st405)], // (shot 047; dialog 355 from the 405 rules' counters, p.st405: a game begun before them dimmed)
      [lab('List All Explored Stars...'), 'Galaxy/List explored stars…'], '-',
     [lab('Dip Into Savings'), 'Galaxy/Dip into savings…'], [() => (abandonMarked() ? TL("Don't Abandon Planet") : TL('Abandon Planet')), () => abandonPlanet(), null, null, () => !abandonable(), 'A'], '-',
     [lab('Alliances...'), () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], [lab('Give Money/Metal...'), 'Galaxy/Give money or metal…'], [lab('Surrender To...'), 'Galaxy/#9'], [lab('Send Message...'), 'Galaxy/Send a message…'], '-',
@@ -657,6 +657,18 @@ function fleetsDialog() {
   dl.by[1176].addEventListener('click', () => { const f = g.fleets.find(x => x.id === sel); if (f) go(f); });
   dl.by[1].addEventListener('click', () => a.closeModal());
   fill(); showDlg(dl, 'List of All Fleets');
+  return true;
+}
+
+// Statistics (dialog 355, shot 079): "Cumulative Statistics:" and six lines, their numbers in the STATICs 1120-1125 with commas: the player's
+// counters kept by the 405 rules (p.st405: population gained, killed, enemy population killed, ships built, destroyed, enemy ships destroyed,
+// where the program adds to its own; the Mac's DLOG 6160 shows the same). OK closes.
+function statsDialog() {
+  const a = A(), st = a.me() && a.me().st405; if (!st) return false;
+  const dl = W95DLG(355); if (!dl) return false;
+  [st.g, st.k, st.ek, st.b, st.d, st.ed].forEach((v, i) => { const e = dl.by[1120 + i]; if (e) e.textContent = H().niceNum(Math.max(0, Math.round(v || 0))); });
+  dl.by[1].addEventListener('click', () => a.closeModal());
+  showDlg(dl, 'Statistics');
   return true;
 }
 
