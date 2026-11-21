@@ -570,6 +570,13 @@ function stars6040() {
 // then "%d.%1.1d°F", "%d.%2.2dG" (100 x the star's gravity over your home's) and the metal with commas; a star never explored has STR#
 // "No Climate Info." across 150. Chicago 12. A double click, or Go To Star, selects the star and centres the map on it (SelectNewStar,
 // CenterOnStar). Checked beside Jake's System 7 capture (index 6, 20 Nov): the frame at (13, 26), the columns at 35, 135, 210, 285.
+// CreateTempString @172758 and CalcDisplayTemp @1726f6: a temperature from d, the star's over your home's in tenths: 720 + d tenths of a degree
+// Fahrenheit ("%d.%1.1d°F", STR# 6170.2), or, with the Preferences' "Temp. in Celsius" (the setup's +0x8c), (396 + d) x 5 / 9 truncated
+// ("%d.%1.1d°C", .3: the program's own 396, so 72°F shows as 22.0°C)
+function temp405(d) {
+  const c = !!(A().Prefs && A().Prefs.celsius), v = c ? Math.trunc((396 + d) * 5 / 9) : 720 + d, S7 = STR405(6170);
+  return cfmt((c ? S7[3] : S7[2]) || (c ? '%d.%1.1d°C' : '%d.%1.1d°F'), Math.trunc(v / 10), Math.abs(v % 10));
+}
 let EX405 = null;
 function stars405() {
   const a = A(), el = a.el, p = a.me(), X = a.exploredData ? a.exploredData() : null; if (!X) return false;
@@ -591,8 +598,8 @@ function stars405() {
     list.forEach((s, i) => {
       const k = rec(s), im = icon(s), kids = [im ? el('img', { src: im.src, alt: '', style: 'position:absolute;left:2px;top:2px;width:16px;height:16px;image-rendering:pixelated' }) : null, cell(s.name, 21, 99)];
       if (k.explored) {
-        const t10 = Math.round(10 * (72 + (k.t - p.homeT))), gr = Math.trunc(100 * k.g / Math.max(0.01, p.homeG));
-        kids.push(cell(cfmt('%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10)), 121, 74), cell(cfmt('%d.%2.2dG', Math.trunc(gr / 100), gr % 100), 196, 74), cell(H().niceNum(Math.max(0, Math.round(k.metal || 0))), 271, 74));
+        const gr = Math.trunc(100 * k.g / Math.max(0.01, p.homeG));
+        kids.push(cell(temp405(Math.round(10 * (k.t - p.homeT))), 121, 74), cell(cfmt('%d.%2.2dG', Math.trunc(gr / 100), gr % 100), 196, 74), cell(H().niceNum(Math.max(0, Math.round(k.metal || 0))), 271, 74));
       } else kids.push(cell(L.noClimate || 'No Climate Info.', 121, 149));
       box.append(el('div', { class: 'li405' + (i === pick ? ' sel' : ''), role: 'option', 'aria-selected': i === pick ? 'true' : 'false', 'aria-label': s.name,
         onclick: () => { pick = i; show(); }, ondblclick: () => { pick = i; go(); } }, ...kids));
@@ -3486,7 +3493,7 @@ function planetBox405() {
       const src = yours ? s : k, L = (t, v) => T(t, 0, v, { right: 40 }), at = (t, v) => T(t, 45, v);
       L(S[12] || 'Pop:', 32); L(S[13] || 'Temp:', 42); L(S[14] || 'Gravity:', 52); L(S[15] || 'Metal:', 62);
       const t10 = Math.round(10 * (72 + (src.t - p.homeT))), gr = Math.trunc(100 * src.g / Math.max(0.01, p.homeG));
-      at(cfmt(S7[2] || '%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10)), 42);
+      at(temp405(Math.round(10 * (src.t - p.homeT))), 42); // (CreateTempString: °F, or °C with the Preferences' box)
       at(cfmt(S7[4] || '%d.%2.2dG', Math.trunc(gr / 100), gr % 100), 52);
       at(H().niceNum(Math.round(src.metal)), 62);
       if (yours) { T(S[11] || 'Income:', 5, 22); at(fill(S[8] || '$%s', H().niceNum(Math.round(H().planetIncome(g, p, s)))), 22); at(H().niceNum(H().popNum(g, s.pop)), 32); }
