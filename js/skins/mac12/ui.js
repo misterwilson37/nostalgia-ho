@@ -4317,6 +4317,7 @@ function battleWindow(b, k) {
           await explosion(t, ev, deadline);
           await wait(deadline);
           if (kill && VB.full && !stop && !skip) drawGroup(t); // (then the whole group again: the ovals and bursts gone)
+          else if (!stop && !skip && !t.planet && !t.units.some(i => alive[i])) drawGroup(t, true); // (a group just wiped out keeps the grey over its whole cell, as Jake's System 7 battle frames show: "4 dead Talon", "8 dead Sun Dog")
         } else apply(ev);
         e += n;
       }

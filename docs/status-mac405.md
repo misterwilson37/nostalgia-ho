@@ -120,7 +120,7 @@ labels from 12 on were a few places off (from thumbnails): corrected in the priv
   so the digests stay) and keeps it with the game (`G.deal318`; Jake, 21 Nov: "give them a random number at the start").
 - Checked the same: Master Points, Hall of Fame / Shame (empty), Preferences, Surrender, Organize, List All Fleets, You won (5041), Name a
   Star (4050), the eliminated and won bubbles. The Hall's "All editions…" stays (Jake, 21 Nov: always), opening on this game's edition each time. Left:
-  Surrender's names look a size smaller, the battle frames (12-66) not yet compared. The filled Master Points (73), Hall of Fame (74) and Summary of Game Victory (75) match (21 Nov); the Hall now opens with its first game picked, as 74 shows.
+  Surrender's names look a size smaller, the battle frames (12-66) compared (21 Nov): the frame, sides, Round line, the won ending and OK match; a group just wiped out now keeps its grey over the whole cell (the redraw after a kill ran only with the kill sound 3003, and the explosion put the picture back). The filled Master Points (73), Hall of Fame (74) and Summary of Game Victory (75) match (21 Nov); the Hall now opens with its first game picked, as 74 shows.
 - **Shot 204's players list without Jake: answered.** DrawIconRect @11537c sorts the players before drawing: those still in by Total
   Money (the player record's +0, last turn's income) from the most down, then those out from the latest out (+0x2dc). Jake, losing, is
   below seven richer rivals, scrolled out of sight; shot 200 (2000) has him fifth already (every Total Money starts with rand(1, 100)
