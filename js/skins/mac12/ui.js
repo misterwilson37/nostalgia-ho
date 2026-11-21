@@ -2486,7 +2486,7 @@ function alliances405() {
   }
   const ok = () => { for (const q of g.players) if (q.id !== ME) { H().setPact(g, ME, q.id, 'ally', ally.has(q.id)); H().setPact(g, ME, q.id, 'buddy', bud.has(q.id)); } a.closeModal(); a.save(); a.renderPanel(); a.draw(); };
   draw();
-  a.modal('', dlog20(472, 302, txt20('Click on a player’s icon to move it horizontally to specify whether you would or would not like to ally with that player.', [4, 4, 37, 425]),
+  a.modal('', dlog20(472, 302, Object.assign(txt20('Click on a player’s icon to move it horizontally to specify whether you would or would not like to ally with that player.', [4, 4, 37, 425]), { style: at20([4, 4, 37, 425]) + ';line-height:16px' }), // (Chicago 12's 16-pixel lines: shot 020)
     txt20('Their icon represents what their current opinion of you is.', [36, 4, 52, 464]),
     txt20('I Really Like Them', [60, 16, 75, 137]), txt20('I Like Them', [60, 200, 75, 279]), txt20('I Don’t Like Them', [60, 336, 75, 458]),
     ...R.map(r => el('div', { style: at20(r) + ';border:1px solid #000;box-sizing:border-box;background:#fff' })), ...lists.map(c => c.el), ...lists.map((c, i) => listBar20(c.el, [R[i][0], R[i][3] - 16, R[i][2], R[i][3]], 45)),
