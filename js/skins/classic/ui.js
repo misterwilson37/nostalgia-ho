@@ -492,10 +492,16 @@ function setupMap() {
   new ResizeObserver(resize).observe(cv.parentElement);
   // a finger (pointerType 'touch') gets iOS 1.2.9's gestures (Touch.map*,
   // below); a mouse and a pen keep these, so a hybrid laptop has both
-  cv.addEventListener('pointerdown', guard((e) => { if (T.mouseAsTouch && e.pointerType === 'mouse' && e.button !== 0) return; isTouch(e) ? Touch.mapDown(e) : onDown(e); })); // guard(): an exception shows the bug report window
-  cv.addEventListener('pointermove', guard((e) => isTouch(e) ? Touch.mapMove(e) : onMove(e)));
-  cv.addEventListener('pointerup', guard((e) => isTouch(e) ? Touch.mapUp(e) : onUp(e)));
-  cv.addEventListener('pointercancel', guard((e) => { if (isTouch(e)) Touch.mapCancel(e); else { UI.drag = null; draw(); } }));
+  // (a finger that lands on one of your fleets' dots drags the fleet as the mouse does: the dots are drawn to be dragged, and the iOS model has
+  // no other way to send one from the map; real-play's send-fleet at phone-l and pad, failing since 16 Nov in every skin on this code. Not in
+  // the iOS skin, whose own move button and fleet dialog are the app's)
+  const fingerFleet = new Set();
+  const fingerDot = (e) => { if (!G || G.over || document.documentElement.classList.contains('skin-ios') || Touch.pts.size) return false; const px = ox(e), py = oy(e);
+    return (UI.dots || []).some(d => d.mine && !d.sat && !d.transit && px >= d.x - 8 && px <= d.x + d.w + 8 && py >= d.y - 8 && py <= d.y + d.h + 8); };
+  cv.addEventListener('pointerdown', guard((e) => { if (T.mouseAsTouch && e.pointerType === 'mouse' && e.button !== 0) return; if (isTouch(e) && fingerDot(e)) { fingerFleet.add(e.pointerId); onDown(e, 8); return; } isTouch(e) ? Touch.mapDown(e) : onDown(e); })); // guard(): an exception shows the bug report window
+  cv.addEventListener('pointermove', guard((e) => fingerFleet.has(e.pointerId) ? onMove(e) : isTouch(e) ? Touch.mapMove(e) : onMove(e)));
+  cv.addEventListener('pointerup', guard((e) => { if (fingerFleet.delete(e.pointerId)) { onUp(e); return; } isTouch(e) ? Touch.mapUp(e) : onUp(e); }));
+  cv.addEventListener('pointercancel', guard((e) => { if (fingerFleet.delete(e.pointerId)) { UI.drag = null; draw(); return; } if (isTouch(e)) Touch.mapCancel(e); else { UI.drag = null; draw(); } }));
   cv.addEventListener('dblclick', guard((e) => { if (lastPointer !== 'touch') onDbl(e); })); // iOS: a double tap on the map does nothing
   cv.addEventListener('contextmenu', guard((e) => { if (!G) return; e.preventDefault(); if (lastPointer === 'touch') return; const s = starAt(ox(e), oy(e)); if (s != null) starMenu(s, e.clientX, e.clientY); }));
   // T.modernPan(): the skin's map is scrolled by its scroll bars (the Mac 1.2 / 2.0.1 skins); dragging it with a mouse and zooming by the wheel are then
@@ -608,8 +614,8 @@ function starAt(px, py) {
   for (const s of G.stars) { const d = Math.hypot(sx(s.x) - px, sy(s.y) - py); if (d < r && d < bd) { bd = d; best = s.id; } }
   return best;
 }
-function dotAt(px, py) {
-  for (let i = UI.dots.length - 1; i >= 0; i--) { const d = UI.dots[i]; if (px >= d.x - 2 && px <= d.x + d.w + 2 && py >= d.y - 2 && py <= d.y + d.h + 2) return d; }
+function dotAt(px, py, slop = 2) { // (slop: how far outside the dot still counts; a finger's 8)
+  for (let i = UI.dots.length - 1; i >= 0; i--) { const d = UI.dots[i]; if (px >= d.x - slop && px <= d.x + d.w + slop && py >= d.y - slop && py <= d.y + d.h + slop) return d; }
   return null;
 }
 function countBucket(n) { return n <= 1 ? 0 : n <= 10 ? 1 : n <= 30 ? 2 : 3; }
@@ -1016,11 +1022,11 @@ function arrowHead(x1, y1, x2, y2, color) {
 }
 
 // ---------- pointer ----------
-function onDown(e) {
+function onDown(e, slop) {
   if (!G) return;
   cv.setPointerCapture(e.pointerId);
   const px = ox(e), py = oy(e);
-  const dot = dotAt(px, py);
+  const dot = dotAt(px, py, slop);
   if (dot && dot.mine && !dot.sat && !dot.transit && !G.over) {
     UI.drag = { fleet: dot.f, x: px, y: py, sx: px, sy: py, moved: false, t: performance.now() };
     UI.selFleet = dot.f; UI.sel = dot.star; renderPanel(); draw();

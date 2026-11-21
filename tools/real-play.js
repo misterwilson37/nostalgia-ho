@@ -235,7 +235,13 @@ async function playRun(browser, job, outDir, idx) {
       let sub = await ev(() => { const b = document.querySelector('form.newgame button[type=submit]'); return !!(b && window.__rp.vis(b)); }) ? await aim('form.newgame button[type=submit]', { what: 'New game start button', soft: true }) : null;
       if (!sub) sub = await aim('.scrim .win button, .win button, .ios-gdlg button, button', { re: /^(big bang|start|play|begin|ok|new galaxy)$/i, what: 'the skin\'s own start button', soft: true });
       if (sub) await ptr.tap(sub.x, sub.y); else { note('started through the hidden form'); await ev(() => document.querySelector('form.newgame button[type=submit]').click()); }
-      await page.waitForFunction(() => window.HOAPI && HOAPI.G, null, { timeout: 15000 }).catch(() => fail('the game did not start'));
+      // (some skins ask for a name before the game exists, the Amiga's "Enter game": answer it while waiting, as a person would)
+      for (let k = 0; k < 30 && !await G(() => !!(window.HOAPI && HOAPI.G)); k++) {
+        // (and the Amiga's question after Big Bang, "Ok, ok" / Cancel, before the game is made)
+        if (await aim('.am-enname', { soft: true, what: 'name field' }) || await ev(() => [...document.querySelectorAll('.scrim button, .win button')].some(b => b.offsetParent && /^ok, ok$/i.test(b.textContent.trim())))) await press('button', { re: /^(ok|ok, ok|enter|start)/i, soft: true, what: 'Enter game OK' });
+        await sleep(500);
+      }
+      await page.waitForFunction(() => window.HOAPI && HOAPI.G, null, { timeout: 2000 }).catch(() => fail('the game did not start'));
       await sleep(700);
       const sk = await G(() => window.HOSKINS && HOSKINS.current); if (sk && sk !== job.skin) fail(`the game started in skin "${sk}", not "${job.skin}" (the New game window's skin choice)`);
       const r = await G(() => HOAPI.G && HOAPI.G.rules); if (r !== job.rules) fail(`the game started with rules "${r}", not "${job.rules}"`);
