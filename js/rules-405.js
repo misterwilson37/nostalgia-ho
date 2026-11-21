@@ -2091,6 +2091,9 @@ function canned405(words) {
   const star = [[P[2], 'nearby']], who = [[P[4], 'players']];
   return E.cannedSteps({
     base: 0x40e, order: order405, explore: (G, q, sid) => exploreStar(G, q, sid),
+    // (My Stats, 0x419: Mac DoOneTurn @c0142 puts the sender's home gravity and temperature in the receiver's header (+0x77c, +0x7a4): a human's
+    // players list then shows them under the sender's name, as for a best buddy)
+    stats: (G, q, from) => { if (q.human && from !== q.id) (q.knows405 = q.knows405 || {})[from] = 1; },
     prompts: [P[0], P[1]],
     actions: [S(L[0], star), S(L[1], star), S(L[2], who), S(L[3], who), S(L[4], [[P[2], 'owned']]), S(L[5]), S(L[6]), S(L[7], star), S(L[8]), S(L[9]), S(L[10]), S(L[11]),
       S(L[12], [[P[4], 'players'], [P[5], 'nearby']]), S(L[13], [[P[2], 'known']]), Object.assign(S(L[14], [[P[2], 'text', 24]]), { at: 15 })],

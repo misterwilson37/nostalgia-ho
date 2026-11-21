@@ -502,6 +502,7 @@ function say(C, to, code, text, extra) {
   }
   const q = G.players[to];
   if (!q || to === p.id) return;
+  if (code === 0x419 && q.human) (q.knows405 = q.knows405 || {})[p.id] = 1; // (a computer's My Stats: the human now knows its home, Mac DoOneTurn @c0142)
   const before = (q.news || []).length;
   if (E.sendChat(G, p.id, to, text) === 'limit') return;
   const n = q.news || [];

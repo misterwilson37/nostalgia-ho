@@ -1327,6 +1327,7 @@ function cannedSteps(o) {
       const i = m.code - base;
       if (i === 4 && G.stars[m.a] && G.stars[m.a].owner === m.from) know(G, q, m.a).owner = m.from;
       if (i === 13 && G.stars[m.a]) o.explore(G, q, m.a);
+      if (i === 11 && o.stats) o.stats(G, q, m.from); // (My Stats: the receiver now knows the sender's home, Mac 4.0.5's DoOneTurn)
     },
   };
 }

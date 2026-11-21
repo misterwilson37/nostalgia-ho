@@ -134,7 +134,7 @@ labels from 12 on were a few places off (from thumbnails): corrected in the priv
   Happened..." (PerformEndTurn @c000c, DoOneTurn; shots 194-201), the same checker bar as before. Seen on the way: the bitmap fonts draw
   the digit 1 with a gap after it ("201 0", "$1 00,000"); the shots don't (a font matter, js/os/pixel-fonts.css: for Jake).
 - **The players list's second line: done (20 Nov, late)**, beside shot 204: known once best buddies (rules-405 `p.knows405`) or all of them
-  when you are out or the game is over. Report 0x419 (a rival telling you) is not modelled. Shot 204's list starting with Willy: the
+  when you are out or the game is over. Report 0x419 (My Stats) now counts too (21 Nov): a human told a sender's home, by a computer's reply (ai-405 say) or another human's message (the canned `stats` hook), has that player's second line shown (DoOneTurn @c0142, +0x77c / +0x7a4). Shot 204's list starting with Willy: the
   program's order by Total Money (above, "Jake's System 7 captures").
 - (the original note) **The players list's second line** (shot 204): read in `DrawIconRect` @11537c: for a rival whose home you know (the header's +0x77c,
   -1 until then, set by `SetCompAttrs`), the name 4 higher and under it "%d.%d, %d°": their home's gravity relative to yours (x 100 / your
