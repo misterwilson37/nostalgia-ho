@@ -2141,15 +2141,15 @@ function stats405() {
 // 4.0.5's Hall of Fame and Hall of Shame (doHallOfFameDlg @105020, InitHOFList @105166: DLOG 4080 / 4090, 344 x 247). "Hall Of Fame" /
 // "Hall Of Shame" (16, 8), the heads Name, When, Difficulty (16 / 116 / 216, 32); the list (user item 3, 16..333 x 48..200, a List Manager
 // list inset a pixel, its scroll bar on the right): three columns 100 wide, rows 15 high, each game's name, its date ("%d/%d/%d") and its
-// difficulty ("%d"); nothing picked when it opens (Details then shows the first). Details (Fame's at 20, Shame's at 104; dimmed with no
+// difficulty ("%d"); the first game picked when it opens (Jake's System 7 capture 74). Details (Fame's at 20, Shame's at 104; dimmed with no
 // games) or a double-click opens the game's summary (DLOG 4100 / 4110); OK closes. The games are the remake's Hall for this edition
 // (hallTables); the remake's own window (every edition's games, everyone's online) is a button away: "All editions…" (a modern convenience).
-// Not checked against a capture (none yet): the cells' text inset (LDEF 1000's drawing) is taken as 3 pixels, as the program's other lists.
+// Checked beside Jake's System 7 captures 1 (empty) and 74 (one game), and its Details beside 75 (Summary of Game Victory).
 function hall405(kind) {
   const a = A(), el = a.el, g = G(), Hh = H().rules(g).hall; if (!Hh || !a.hallTables) return false;
   const shame = kind === 'shame', L = a.hallTables(g)[shame ? 'shame' : 'fame'] || [];
   const date = (e) => Hh.date ? Hh.date(e.time, g) : '';
-  let cur = 0, picked = -1;
+  let cur = 0, picked = L.length ? 0 : -1;
   const box = el('div', { class: 'lst301 hall405', role: 'listbox', 'aria-label': shame ? 'Hall Of Shame' : 'Hall Of Fame', style: at20([49, 17, 199, 317]) });
   const show = () => {
     box.textContent = '';
