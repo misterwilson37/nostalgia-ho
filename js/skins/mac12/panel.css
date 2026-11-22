@@ -342,3 +342,6 @@ html.mac405 .cg20 .cl20 .c20.sel img { filter: none; }
 html.mac405 .cg20 .cl20 .c20 img { background: #000011; }
 /* System 7.5's menu bar (3.0.1's shot 012, 4.0.5's 008): white, a black line under it; not the remake's grey 7.5 look (js/os/system75.css) */
 html.mac75 #menubar { background: #fff !important; box-shadow: none !important; border-bottom: 1px solid #000; }
+/* the map window inactive while a dialog is in front (System 7.5: its frame's lines dark grey; the title bar drawn by drawTb75) */
+html.mac75.inact75 #mapwin301 { border-color: #555; }
+html.mac75.inact75 #mapwin301 canvas.tb75 { border-bottom-color: #555; }

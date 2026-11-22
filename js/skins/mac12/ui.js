@@ -4056,6 +4056,13 @@ function tbBox75(x, cx0, l, t, zoom) { // the close and zoom boxes' colours: dar
 function drawTb75(cv, W, title) {
   const K = QK(); if (cv.width !== W * K || cv.height !== 17 * K) { cv.width = W * K; cv.height = 17 * K; }
   const x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.imageSmoothingEnabled = false;
+  // (inactive, while a dialog is in front: System 7.5 draws the title bar white, no stripes or boxes, the title in grey (136, 136, 136), and
+  // the frame's lines (85, 85, 85): Jake's shots 016-022 with a dialog open, beside 008 without)
+  if (document.documentElement.classList.contains('inact75')) {
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, 17); x.font = SYS;
+    if (title) { const tw0 = Math.ceil(x.measureText(title).width); x.fillStyle = '#888888'; x.textBaseline = 'alphabetic'; x.fillText(title, Math.floor((W + 2 - tw0) / 2) - 1, 13); }
+    return;
+  }
   const C = COLOUR3, R = (h, v, w, hh, c) => { x.fillStyle = c; x.fillRect(h, v, w, hh); };
   R(0, 0, W, 17, C ? '#eeeeee' : '#fff'); if (C) { R(0, 0, W, 1, '#ccccff'); R(0, 0, 1, 16, '#ccccff'); R(W - 1, 0, 1, 17, '#9999cc'); R(0, 16, W, 1, '#9999cc'); }
   x.font = SYS; const tw = title ? Math.ceil(x.measureText(title).width) : 0, tx = Math.floor((W + 2 - tw) / 2) - 1; // (centred in the window, its frame counted)
@@ -4095,6 +4102,16 @@ function frame75() {
   if (cn && BAR75() && !cn.querySelector('canvas')) { const c = A().el('canvas', { width: 64, height: 64, 'aria-hidden': 'true' }); const x = c.getContext('2d'); x.setTransform(4, 0, 0, 4, 0, 0); drawGrow75(x); cn.append(c); }
   if (V4) clock405();
   menuClock75();
+  watchInact75();
+}
+// the map window goes inactive while a dialog or alert of the program's is in front (a .scrim, or a layer over the New Game window), and
+// active again when it goes
+const INACT75 = { obs: null };
+function watchInact75() {
+  if (INACT75.obs || !V3) return;
+  const check = () => { const on = !!document.querySelector('body > .scrim, body > .yp301, .scrim .win'); const de = document.documentElement;
+    if (on !== de.classList.contains('inact75')) { de.classList.toggle('inact75', on); const mw = document.getElementById('mapwin301'), t = document.getElementById('title'); if (mw && mw.firstChild && de.classList.contains('mac75')) drawTb75(mw.firstChild, Math.round(mw.clientWidth / (MACS.s || 1)), t ? t.textContent : ''); } };
+  INACT75.obs = new MutationObserver(check); INACT75.obs.observe(document.body, { childList: true }); check();
 }
 // The menu bar's right end under System 7.5 (Jake's shots, 4.0.5's 008 and 3.0.1's 012): the Date & Time control panel's clock, the day and
 // the time to the second ("Sun 7:25:45 PM"), Chicago 12 in (102, 51, 204), ending at 569; then the Help menu's icon (Apple's, not drawn

@@ -140,7 +140,7 @@ labels from 12 on were a few places off (from thumbnails): corrected in the priv
   -1 until then, set by `SetCompAttrs`), the name 4 higher and under it "%d.%d, %d°": their home's gravity relative to yours (x 100 / your
   +0x32, rounded to tenths) and its temperature (`CalcDisplayTemp`, F or C). Known when you become best buddies (`ConformPlayerAlliances`
   @c2ce4), when they tell you (report 0x419, `DoOneTurn`), or all at once (`ExploreEverything` @8464a). Needs a rules record of which
-  rivals' homes each player knows (the w95 list's "rivals' home stats"): not built yet.
+  rivals' homes each player knows (the w95 list's "rivals' home stats"): built since (p.knows405, above).
 
 ## Windows, battles, start-up, end of the game
 
@@ -148,18 +148,18 @@ labels from 12 on were a few places off (from thumbnails): corrected in the priv
 |---|---|---|---|
 | Build / Design Ships | `BuildDesignShips` @f0d8e, DLOG / DITL 6000 (500 x 318, its 45 items read from the resource fork) | close | `build405` (js/skins/mac12/ui.js), beside shot 015: the types list on white (the one shown on black), its scroll bar, the picture, name, class, costs, the five System 7.5 scroll bars, Savings and Metal (no dollar sign) with their coins and bars (PICT 4050 / 4052 / 4060: DRAWSHIPMONEYCHIPS, DRAWMETALCHIPS), Built, In Service, # To Build with + and -, Build & Continue, Scrap All, Max Out, Cancel, OK; bought at OK or Build & Continue (as the Windows 4.0.5's, the same program). Its place: centred, as 4.0.5's (ShowCentered, read in DoAlliancesDlg). |
 
-| List of All Fleets | DLOG / DITL 6030 (486 x 296, the same items as 3.0.1's) | close | 3.0.1's window (`fleets301`), beside shot 016: now with the list's own scroll bar (`listBar20`: System 7.5's, inactive pale grey with outlined arrows when the list fits, as the shot). Left: the window's place (centred). |
+| List of All Fleets | DLOG / DITL 6030 (486 x 296, the same items as 3.0.1's) | done | 3.0.1's window (`fleets301`), beside shot 016: now with the list's own scroll bar (`listBar20`: System 7.5's, inactive pale grey with outlined arrows when the list fits, as the shot). Its place matches shot 016 (21 Nov). |
 
-| Compare Players | (3.0.1's window) | close | beside shot 017 (a 2020 game): the same layout. Left: position. |
+| Compare Players | (3.0.1's window) | done | beside shot 017 (a 2020 game): the same layout and place (21 Nov). |
 | Give Stuff | DLOG 6120 | close | beside shot 021: the same. |
 | Send Message | DLOG 6070 | close | beside shot 022; Everyone, Your Allies, Your Buddies now 4.0.5's ICON 1402 and 4018 (pixel matches). |
-| Alliances | `DoAlliancesDlg` @10349a, `SetAllianceLists` @103880, DLOG / DITL 6110 (472 x 302) | close | `alliances405`, beside shot 020: three lists (I Really Like Them: best buddy and ally; I Like Them: ally; I Don't Like Them), each with its scroll bar, three cells across; each player's icon their opinion of you (ICON 4021 best buddy, 4020 ally, 4019 neither); a click moves a player one column round (not liked, liked, really liked); yourself: a beep. The wrap matches (21 Nov); the first item's lines now 16 pixels apart, as the shot's. Left: position (a pixel). |
+| Alliances | `DoAlliancesDlg` @10349a, `SetAllianceLists` @103880, DLOG / DITL 6110 (472 x 302) | close | `alliances405`, beside shot 020: three lists (I Really Like Them: best buddy and ally; I Like Them: ally; I Don't Like Them), each with its scroll bar, three cells across; each player's icon their opinion of you (ICON 4021 best buddy, 4020 ally, 4019 neither); a click moves a player one column round (not liked, liked, really liked); yourself: a beep. The wrap matches (21 Nov); the first item's lines now 16 pixels apart, as the shot's. Its place matches shot 020 (21 Nov). |
 | Graph History | `GraphHistory` @102922, DLOG / DITL 6055 (6056 black and white) | close | `graph405`, beside shot 018: the legends in their colours (Income #996633, Metal #dd0000, Ship Money #330099, sampled), the grey plot in its black frame, the axis and years, a line a series; the ten icons (black behind the chosen), their names condensed, their colour lines; the first three chosen to start. Ship Power drawn from 21 Nov: the history now keeps it (engine recordHistory `hx.pw` with rs.shipPower; FUN_0041adc6: each type's attack times its count; digests unchanged). Left: the other series' colours are the Windows table's (not seen in a capture). |
 | Statistics | `DoStatisticsDlg` @52080, DLOG / DITL 6160 (359 x 236) | close | `stats405`, beside shot 019 (Population Gained = the game's population, Ships Built 3 in both). The counters are new in the 4.0.5 rules (js/rules-405.js `p.st405`, where 4.0.5 adds to its +0x18d6..+0x18ea: CreatePlayer, ComputeIncomeAndPopulation, ColonizeStar, MakeResultMessages, ZeroFleetsAtStar, ResolveVictorFleetsAtStar, ReactToSupernova, the meteors, BuildAShip, BuildAFleet, ScrapCurrentFleet). A game begun before them: dimmed. Digests 405 d9ff9858e51b92af, mac405 9fc3fa9801f815ff (the counters' field only: the same games, end turn, battles, captures, winner). |
 
 | Preferences | DLOG / DITL 6150 (482 x 297) | close | `prefs405`, from the DITL alone (no capture): After Every Turn Update (Sort Planet List, Show Event Messages, Only The Most Important Ones, Review Event Battles, Hints), On The Star Map (Fleet Paths, Celsius), Your Password (dimmed), Battle Speed and Polling Time with their System 7.5 scroll bars, Fully Animated, Groups Shoot Together; wired as the Windows 4.0.5's dialog 350; "Remake options…" for the remake's own window. |
 
-Not started: the other windows from the menus (shots 014, 023-024: Halls, Master Points, Auto Play, Dip, Surrender, Explored Stars, Organize), New Game and start-up (001-007, 188-192), battles (033-157, 204-246),
+All the windows from the menus, New Game and start-up, battles, won, armageddon and lost have been put beside the captures (20-21 Nov): the rows above.
 won (163-165), armageddon (167-187: the question and the map effects done 21 Nov), lost (247-251). The 3.0.1 skin's versions show meanwhile.
 
 ## Found on the way (other versions)
@@ -210,3 +210,7 @@ won (163-165), armageddon (167-187: the question and the map effects done 21 Nov
   failure (the handoff's list).
 - 405 / mac405 digests: moved only by the arrivals' stored labels (above); 301, dos and the others untouched (no engine change).
 - human-play 405, mac405, 301 ok; notes-check ok; ui-lang-audit mac4, mac4c: 10 of 10 ok.
+
+- **The map window inactive under a dialog (21 Nov):** System 7.5 draws a window behind a modal dialog inactive: the title bar white with no
+  stripes or boxes, its words grey (136, 136, 136), the frame's lines (85, 85, 85) (Jake's shots 016-022 with a dialog open). The remake
+  now does (`inact75`, drawTb75), back to active when the dialog closes.
