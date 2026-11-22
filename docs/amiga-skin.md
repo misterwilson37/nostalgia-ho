@@ -653,3 +653,10 @@ skin writes it so (`amigaSay`), with the patch's real tenths. `docs/dos-findings
 ## The explored-stars list's columns (October 2026)
 
 The row function @12393a builds one string: the name padded to 10 characters (`FUN_00123844`, in pixels: the font's width times 10, with 8-pixel and thinner space glyphs), the temperature piece padded to 8, the gravity piece to 9, the metal piece to 9, the whole padded to 40 (or "Kein Klima" in place of the three), then the status. So the columns are 80, 64, 72 and 72 pixels and the status begins at 320; the skin had the gravity 60 wide. `docs/dos-findings.md`, "The explored-stars lists".
+
+## Filling the window: a modern convenience (22 Nov 2026)
+
+The Amiga game opened its own 640 x 256 screen and could not be made bigger. With modern conveniences on, in a game, on a desktop
+(`html.am-grow`, set in layout()), the screen takes the whole window at the same pixel scale: the panel keeps the program's 241 pixels, the
+map window (#mapview and its proportional scroll bars) takes the rest (`--aw` x `--ah` pixels, at least 640 x 256). The phone layout,
+which already reflows, is unchanged; off, the screen is the program's as before.

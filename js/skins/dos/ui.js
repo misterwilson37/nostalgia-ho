@@ -741,15 +741,17 @@ function dWire(b) {
 }
 function dEnsureBars() {
   const win = winOn();
-  if (DB.wrap && DB.wrap.isConnected && DB.win === win) return true;
+  // (with the modern convenience's bigger frame the bars run the map window's length: 433 and 391 on the program's 640 x 476)
+  const lv = DOSGROW.on ? DOSGROW.h - 43 : 433, lh = DOSGROW.on ? DOSGROW.w - 249 : 391;
+  if (DB.wrap && DB.wrap.isConnected && DB.win === win && (win || (DB.lv === lv && DB.lh === lh))) return true;
   if (DB.v) { DB.v.el.remove(); DB.h.el.remove(); }
   const a = window.HOAPI, host = document.getElementById('mapwrap'); if (!a || !host) return false;
   // (the Windows program's: Windows' bars, 17 across, the vertical 293 long, the horizontal 375 (measured); the arrow boxes and the thumb 17 and 15 along: wBar)
   const mk = (vertical) => {
-    const L = win ? (vertical ? 293 : 375) : vertical ? 433 : 391, T = win ? 17 : vertical ? 7 : 13, q = dq(vertical ? T : L, vertical ? L : T, vertical ? 'Vertical scroll bar' : 'Horizontal scroll bar'), el = a.el('div', { class: 'dosbar ' + (vertical ? 'v' : 'h'), role: 'scrollbar', tabindex: 0, 'aria-orientation': vertical ? 'vertical' : 'horizontal', 'aria-controls': 'map', 'aria-label': vertical ? 'Map, up and down' : 'Map, left and right' }, q.c);
+    const L = win ? (vertical ? 293 : 375) : vertical ? lv : lh, T = win ? 17 : vertical ? 7 : 13, q = dq(vertical ? T : L, vertical ? L : T, vertical ? 'Vertical scroll bar' : 'Horizontal scroll bar'), el = a.el('div', { class: 'dosbar ' + (vertical ? 'v' : 'h'), role: 'scrollbar', tabindex: 0, 'aria-orientation': vertical ? 'vertical' : 'horizontal', 'aria-controls': 'map', 'aria-label': vertical ? 'Map, up and down' : 'Map, left and right' }, q.c);
     q.c.removeAttribute('role'); q.c.setAttribute('aria-hidden', 'true'); return { vertical, q, el, L, key: '', win, e: win ? 17 : vertical ? 14 : 8, th: win ? 15 : vertical ? 13 : 7 };
   };
-  DB.v = mk(true); DB.h = mk(false); host.append(DB.v.el, DB.h.el); DB.wrap = host; DB.win = win; [DB.v, DB.h].forEach(dWire); return true;
+  DB.v = mk(true); DB.h = mk(false); host.append(DB.v.el, DB.h.el); DB.wrap = host; DB.win = win; DB.lv = lv; DB.lh = lh; [DB.v, DB.h].forEach(dWire); return true;
 }
 function dBars() {
   const a = window.HOAPI; if (!a || !frameOn() || !a.G || !dEnsureBars()) { if (DB.v) { DB.v.el.style.display = DB.h.el.style.display = 'none'; } return; }
@@ -775,7 +777,17 @@ function setUnit() {
   const de = document.documentElement, u0 = Math.min(window.innerWidth / 640, window.innerHeight / (winOn() ? 480 : 476));
   U = u0 >= 1 ? Math.floor(u0 * 2) / 2 : Math.max(0.4, u0);
   de.style.setProperty('--u', String(U));
+  // (a modern convenience, Jake 22 Nov 2026: DOS had one 640 x 476 screen and no way to make it bigger; with the conveniences on, in a
+  // game, the frame takes the whole window at the same scale, the left column the program's 240 and the map window all the rest)
+  const a = window.HOAPI, grow = frameOn() && !winOn() && !!(a && a.G && a.modern && a.modern()) && !!(document.getElementById('titlescreen') || {}).hidden;
+  de.classList.toggle('dosgrow', grow);
+  DOSGROW.w = grow ? Math.max(640, Math.floor(window.innerWidth / U)) : 640; DOSGROW.h = grow ? Math.max(476, Math.floor(window.innerHeight / U)) : 476;
+  if (grow) { de.style.setProperty('--dw', String(DOSGROW.w)); de.style.setProperty('--dh', String(DOSGROW.h)); }
+  DOSGROW.on = grow;
 }
+const DOSGROW = { on: false, w: 640, h: 476 };
+// (the setting and the game come and go without a resize: looked at twice a second, and the map fitted again when the frame changes)
+setInterval(() => { const was = [DOSGROW.on, DOSGROW.w, DOSGROW.h].join(); setUnit(); if (was !== [DOSGROW.on, DOSGROW.w, DOSGROW.h].join()) { const a = window.HOAPI; if (a && a.G && a.resize) { a.resize(); a.renderPanel(); a.draw(); } window.dispatchEvent(new Event('hoframe')); } }, 500);
 const F9 = "12px 'DOS Geneva 9'", F9B = "12px 'DOS Geneva 9 Bold'", C12 = "15px 'DOS Chicago 12'";
 // the Windows program's panels are in MS Sans Serif 8 (measured: capitals 8 pixels, lines 14 apart) and the planet's name in the bold System font
 // (capitals 10); neither font is in the repo, so the look's MS Sans Serif / Arial at those sizes (docs/win20-findings.md)

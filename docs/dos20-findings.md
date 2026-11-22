@@ -98,3 +98,14 @@ language, skin, look and the rest) are behind a "Remake options…" link under t
 no longer spilled under the window. Why only the DOS look keeps one shape: DOS had no windows, so the program is one 640 x 480 screen,
 scaled whole (setUnit: in half steps to the largest that fits); the Mac skins give the room left over to the map window, as the Mac program
 could on a bigger monitor.
+
+## Filling the window: a modern convenience (22 Nov 2026)
+
+Jake: "Let's do resizing as a modern conveniences thing for any system that lacked the ability." The DOS program drew on one fixed 640 x 476
+VGA screen (setUnit scales it whole, so the remake kept its aspect locked). With modern conveniences on, in a game, in the DOS look,
+`html.dosgrow` makes the frame the whole window at the same scale U: the left column keeps its 240 program pixels, the map window takes the
+rest (`--dw` x `--dh` program pixels, at least 640 x 476), and the map's scroll bars run its new length (433 and 391 become dh − 43 and
+dw − 249). Off, or on the title screen and the New Game window, the screen is the program's 640 x 476 as before. Looked at twice a second,
+so turning the setting on or off in Preferences changes it at once. Not for the Windows 3.1 look: WINHO's main window had its own sizing
+frame and maximize box, so Windows could resize it (the remake's Windows desktop is still the fixed 640 x 480; making its window sizable is
+its own job). The Amiga skin does the same (docs/amiga-skin.md).

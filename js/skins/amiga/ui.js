@@ -265,7 +265,12 @@ function layout() {
   S.setProperty('--tx', tx + 'px'); S.setProperty('--ty', tx * r + 'px');
   root.classList.toggle('am-tall', r === 2); root.classList.toggle('am-square', r === 1);
   root.classList.toggle('am-phone', phone); root.classList.toggle('am-desk', !phone);
-  const a = api();
+  // (a modern convenience, Jake 22 Nov 2026: the Amiga game had its own 640 x 256 screen and no way to make it bigger; with the conveniences
+  // on, in a game, the screen takes the whole window at the same scale, the panel the program's 241 pixels and the map window all the rest)
+  const a = api(), ts = document.getElementById('titlescreen'), grow = !phone && !!(a && a.G && a.modern && a.modern()) && !!(ts && ts.hidden);
+  root.classList.toggle('am-grow', grow);
+  AMGROW.w = grow ? Math.max(640, Math.floor(vw / x)) : 640; AMGROW.h = grow ? Math.max(256, Math.floor(vh / (x * r))) : 256;
+  S.setProperty('--aw', String(AMGROW.w)); S.setProperty('--ah', String(AMGROW.h));
   if (a && a.map().ready) { a.resize(); }
 }
 function setPixels(m) {
@@ -274,9 +279,12 @@ function setPixels(m) {
   for (const s of document.querySelectorAll('select.am-pixsel')) s.value = pixMode();
   const a = api(); if (a && a.G) { a.renderPanel(); a.draw(); }
 }
+const AMGROW = { w: 640, h: 256 };
 document.documentElement.classList.add('amiga');
 layout();
 window.addEventListener('resize', () => layout());
+// (the setting and the game come and go without a resize: looked at twice a second, and the map fitted again when the screen changes)
+setInterval(() => { const was = [AMGROW.w, AMGROW.h, document.documentElement.classList.contains('am-grow')].join(); layout(); if (was !== [AMGROW.w, AMGROW.h, document.documentElement.classList.contains('am-grow')].join()) { const a = api(); if (a && a.G) { a.renderPanel(); a.draw(); } } }, 500);
 
 // ---------- little helpers ----------
 // (the classic page's el, without a class when none is given)

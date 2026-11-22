@@ -256,6 +256,8 @@ html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-vis
 .dosbar { position: absolute; z-index: 6; }
 .dosbar.v { left: calc(393 * var(--du)); top: calc(1 * var(--du)); width: calc(7 * var(--du)); height: calc(433 * var(--du)); }
 .dosbar.h { left: calc(1 * var(--du)); top: calc(435 * var(--du)); width: calc(391 * var(--du)); height: calc(13 * var(--du)); }
+html.dosgrow .dosbar.v { left: calc((var(--dw) - 247) * var(--du)); height: calc((var(--dh) - 43) * var(--du)); }
+html.dosgrow .dosbar.h { top: calc((var(--dh) - 41) * var(--du)); width: calc((var(--dw) - 249) * var(--du)); }
 .dosbar canvas { display: block; image-rendering: pixelated; }
 .dosbar:focus-visible { outline: 1px dotted #fff; outline-offset: -2px; }
 
@@ -310,3 +312,6 @@ html:not(.os-win31) .dd-vs .a.d::after { background-image: url("data:image/svg+x
 .dd-stage > .dd-st-vbar, .dd-stage > .dd-st-hbar { background: #aaa; }
 .dd-morerow { position: fixed; right: 10px; bottom: 6px; z-index: 5; }
 .dd-morerow .dd-more { color: #ccc; }
+/* the frame grown to the window (a modern convenience, html.dosgrow, setUnit): the same scale, the left column the program's, the map the rest */
+html.dosframe.dosgrow #app { left: 0; top: 0; margin: 0; width: calc(var(--dw) * var(--du)); height: calc(var(--dh) * var(--du)); }
+html.dosframe.dosgrow #main { height: calc((var(--dh) - 28) * var(--du)); }

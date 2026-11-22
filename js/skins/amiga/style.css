@@ -64,6 +64,12 @@ html.amiga button { font: inherit; color: inherit; letter-spacing: 0; }
 /* ---------- the screen: 640 x 256 ---------- */
 html.amiga.am-desk body { overflow: hidden; }
 html.amiga #app { display: block; position: fixed; left: calc((100vw - 640 * var(--u)) / 2); top: calc((100vh - 256 * var(--v)) / 2); width: calc(640 * var(--u)); height: calc(256 * var(--v)); background: #000; overflow: hidden; }
+html.amiga.am-grow #app { left: 0; top: 0; width: calc(var(--aw) * var(--u)); height: calc(var(--ah) * var(--v)); }
+html.amiga.am-grow #main { height: calc((var(--ah) - 17) * var(--v)); }
+html.amiga.am-grow #mapwrap { width: calc((var(--aw) - 241) * var(--u)); }
+html.amiga.am-grow #mapview { width: calc(100% - 16 * var(--u)); height: calc(100% - 9 * var(--v)); }
+html.amiga.am-grow #mapwrap > .am-pv { height: calc(100% - 9 * var(--v)); }
+html.amiga.am-grow #mapwrap > .am-ph { width: calc(100% - 16 * var(--u)); }
 html.amiga #main { display: block; position: absolute; left: 0; top: calc(17 * var(--v)); width: 100%; height: calc(239 * var(--v)); }
 /* the title bar (rows 0-15) and its white line; its menus show while the pointer is on it */
 html.amiga #menubar { position: absolute; left: 0; top: 0; width: 100%; height: calc(17 * var(--v)); padding: 0; gap: 0; background: var(--am-blue); border: 0; border-bottom: calc(1 * var(--v)) solid #fff; box-sizing: border-box; display: flex; align-items: stretch; box-shadow: none; z-index: 20; }
