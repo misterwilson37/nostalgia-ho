@@ -345,3 +345,9 @@ html.mac75 #menubar { background: #fff !important; box-shadow: none !important; 
 /* the map window inactive while a dialog is in front (System 7.5: its frame's lines dark grey; the title bar drawn by drawTb75) */
 html.mac75.inact75 #mapwin301 { border-color: #555; }
 html.mac75.inact75 #mapwin301 canvas.tb75 { border-bottom-color: #555; }
+/* System 7's check box in the program's dialogs (Jake's System 7 captures, Preferences): a 12-pixel box with a one-pixel black line, an X of
+   one-pixel lines corner to corner when on; not the browser's */
+html.mac301 .dl20 input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 12px; height: 12px; margin: 0; flex: none; box-sizing: border-box;
+  border: 1px solid #000; border-radius: 0; background: #fff; box-shadow: none; outline: none; }
+html.mac301 .dl20 input[type=checkbox]:checked { background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h1v1h1v1h1v1h2v-1h1v-1h1v-1h1v-1h1v1h-1v1h-1v1h-1v1h-1v2h1v1h1v1h1v1h1v1h-1v-1h-1v-1h-1v-1h-1v-1h-2v1h-1v1h-1v1h-1v1h-1v-1h1v-1h1v-1h1v-1h1v-2h-1v-1h-1v-1h-1v-1h-1z'/%3E%3C/svg%3E") no-repeat 0 0; }
+html.mac301 .dl20 input[type=checkbox]:disabled { border-color: #999; }

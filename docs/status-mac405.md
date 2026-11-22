@@ -214,3 +214,6 @@ won (163-165), armageddon (167-187: the question and the map effects done 21 Nov
 - **The map window inactive under a dialog (21 Nov):** System 7.5 draws a window behind a modal dialog inactive: the title bar white with no
   stripes or boxes, its words grey (136, 136, 136), the frame's lines (85, 85, 85) (Jake's shots 016-022 with a dialog open). The remake
   now does (`inact75`, drawTb75), back to active when the dialog closes.
+- **Preferences against Jake's System 7 capture (21 Nov):** the 405 rules now start where the program does (doPreferencesDialog: Battle Speed
+  4 to 60 ticks, 10 to start; Polling Time 1 to 12 seconds, 1 to start; Windows the same but its polling range), so both sliders' thumbs sit
+  where the capture's do; the seconds from the item's left; System 7's check boxes (a thin box, a thin X) in every 3.0.1 / 4.0.5 dialog.

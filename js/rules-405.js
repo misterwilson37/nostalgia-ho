@@ -2485,7 +2485,11 @@ const TIME_LIMIT_405 = {
 E.registerRules('405', Object.assign({}, D, {
   // CONFIRMED (the profile's fallbacks at FUN_0047d8e8's callers: reviewBattles 1; shot 040 has Review ticked): Review Announced
   // Battles starts on, so a battle opens as its report is announced (it had started off, DOS 2.0's). Jake, 18 Nov.
-  options: Object.assign({}, D.options || {}, { reviewDefault: true }),
+  // CONFIRMED (Windows FUN_00410d1c and the profile's fallbacks, shipShootDelay 10, pollTicks 60; Mac doPreferencesDialog @1045fe: SetCtlMin 4,
+  // SetCtlMax 60 for Battle Speed): the battle speed 4 to 60 ticks a shot, 10 to start; the polling time 1 second to start (Jake's Mac shot of
+  // Preferences: "1 Seconds"); Review Announced Battles on
+  options: Object.assign({}, D.options || {}, { reviewDefault: true,
+    battleSpeed: Object.assign({}, (D.options || {}).battleSpeed, { min: 4, max: 60, def: 10 }), poll: Object.assign({}, (D.options || {}).poll, { def: 1 }) }),
   label: 'Windows 95 4.0.5 (1996)',
   // CONFIRMED (Windows FUN_004540a8 / FUN_0045470f, the dialog 356 "List of All Explored Stars:" with the Sort By box; Mac ListExploredStars,
   // InitStarsList @1001a2, MakeOneListedStar; MENU 6040): 3.0.1's list again (js/rules-301.js): Sort By Metal, Quality, Gravity or

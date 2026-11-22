@@ -217,6 +217,8 @@ E.registerRules('mac405', Object.assign({}, W, {
     layout: { w: 478, h: 292, title: [13, 2, 454, 19], chart: [13, 26, 455, 225], skills: [290, 260, 87, 20], ok: [400, 260, 58, 20] },
     texts: { none: 'Sorry, no comparisons in the year 2000.', out: 'You were elminated in %d.', ranks: 'Your rankings among the %d remaining players in %d:' },
     skillsLayout: { w: 377, h: 294, title: [13, 2, 286, 20], list: [13, 26, 350, 226], label: [13, 260, 155, 19], iq: [169, 260, 97, 20], ok: [277, 262, 82, 20] } }), // (DITL 6100)
+  // CONFIRMED (doPreferencesDialog @1045fe: SetCtlMin 1, SetCtlMax 12 for the Polling Time, in seconds)
+  options: Object.assign({}, W.options, { poll: Object.assign({}, W.options.poll, { max: 12 }) }),
   // CONFIRMED (DrawIncomeRect @113340: LongToNiceShortString of the interest, STR# 6070.10 "(Int: $%s)")
   interestRow: (n, cur) => '(Int: ' + cur + E.niceShort(n) + ')',
   // the colour-monitor joke on a black-and-white skin, in p.colorJoke's year (AddEasterEggs @b000c, string 1111; engine.js endTurn)

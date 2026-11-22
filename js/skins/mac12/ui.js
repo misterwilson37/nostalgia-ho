@@ -2136,7 +2136,7 @@ function prefs405() {
   // the two scroll bars (CNTL 4040, 4060): System 7.5's (sbar405)
   const bar = (r, C, key) => { const c0 = C || { min: 1, max: 10, def: 5 }; return sbar405(r, c0, P[key] != null ? P[key] : c0.def); };
   const bs = bar(R(174, 156, 190, 286), O.battleSpeed, 'battleSpeed'), po = bar(R(238, 158, 254, 288), O.poll, 'poll');
-  const pv = raw('span', '', { class: 'dt20', style: at20(R(238, 334, 254, 354)) + ';text-align:right' });
+  const pv = raw('span', '', { class: 'dt20', style: at20(R(238, 334, 254, 354)) }); // (from the item's left, as Jake's System 7 capture of Preferences shows: "Slow 1   Seconds")
   po.onset = () => { pv.textContent = String(po.v); };
   const okFn = () => {
     P.sortPlanets = sort.i.checked; P.showMsgs = show.i.checked; P.important = imp.i.checked; P.review = rev.i.checked; P.hints = hint.i.checked;
