@@ -139,6 +139,14 @@ const WORDS = {
   mBuildAt: ['Schiffbau auf %1', 'Build Ships at %1', 'Construction à %1', '%1 üzerinde gemi yapımı', 'Construir en %1'], mScrap: ['Verschrotten', 'Scrap Current Fleet', 'Recycler', 'Hurdaya çıkar', 'Desguazar'],
   // (strings 17 and 23: the Ships menu's Build and Organize items as the Amiga writes them while they can't be used, Jake's capture 55)
   consTitle: ['Konstruktion', 'Construction', 'Construction', 'İnşa', 'Construcción'], consName: ['Name des neuen Typs', 'Name of new ship type', 'Nom du nouveau type', 'Yeni gemi tipinin adı', 'Nombre del tipo nuevo'],
+  compN: ['Comp %1', 'Comp %1', 'Ordi %1', 'Bilg %1', 'Ord %1'], // (string 720: a computer player's entry in the list of players)
+  smTitle: ['Bildschirmeinstellung', 'Sreenmode Preferences', 'Préférences d’écran', 'Ekran ayarları', 'Preferencias de pantalla'], smLine1: ['Wählen Sie die Auflösung', 'Select screen resolution', 'Choisissez la résolution', 'Çözünürlüğü seçin', 'Elige la resolución'],
+  smLine2: ['und die Farbanzahl', 'and number of colors', 'et le nombre de couleurs', 've renk sayısını', 'y el número de colores'], colors16: ['16 Farben', '16 Colors', '16 couleurs', '16 renk', '16 colores'],
+  battleRep: ['Kampfbericht', 'Battle Report', 'Rapport de combat', 'Savaş raporu', 'Informe de combate'], battleOf: ['von %1 (%2)', 'of %1 (%2)', 'à %1 (%2)', '%1 (%2)', 'en %1 (%2)'],
+  turnN: ['Runde %1', 'Turn %1', 'Tour %1', 'Tur %1', 'Turno %1'], skipBattle: ['Ende', 'Skip Battle', 'Passer', 'Geç', 'Saltar'], destroyedN: ['%1 %2 besiegt', '%1 %2 destroyed', '%1 %2 détruit(s)', '%1 %2 yok edildi', '%1 %2 destruido(s)'],
+  bWon1: ['Glückwunsch!', 'Congratulations!', 'Félicitations !', 'Tebrikler!', '¡Enhorabuena!'], bWon2: ['Sie haben gewonnen!', 'You won!', 'Vous avez gagné !', 'Kazandın!', '¡Has ganado!'],
+  bLost1: ['Leider haben', 'Unfortunately', 'Malheureusement', 'Ne yazık ki', 'Por desgracia'], bLost2: ['Sie den Kampf verloren...', 'You lost the battle.', 'vous avez perdu le combat.', 'savaşı kaybettin.', 'has perdido el combate.'],
+  noInfo: ['Sie haben keine Information erlangt.', 'You got no information...', 'Vous n’avez obtenu aucune information...', 'Hiç bilgi alamadın...', 'No has obtenido información...'], destroyedNow: ['Sie wurden sofort besiegt.', 'You were destroyed immediately', 'Vous avez été détruit immédiatement', 'Hemen yok edildin', 'Fuiste destruido de inmediato'],
   mNoBuild: ['Kein Bau hier möglich', 'Can`t Build Ships Here', 'Pas de construction ici', 'Burada gemi yapılamaz', 'Aquí no se puede construir'],
   mNoOrganize: ['Keine Schiffe da', 'No Ships to Organize', 'Aucun vaisseau à répartir', 'Bölünecek gemi yok', 'No hay naves que dividir'],
   mScrap2: ['Nicht verschrotten', 'Don`t Scrap Fleet', 'Ne pas recycler', 'Hurdaya çıkarma', 'No desguazar'], mBattle: ['Kampf ansehen', 'Review Battle on %1', 'Revoir le combat', 'Savaşı gözden geçir', 'Revisar el combate'], mNoBattle: ['Kein Kampf hier', 'No Battle here', 'Pas de combat ici', 'Burada savaş yok', 'Aquí no hay combate'],
@@ -560,6 +568,9 @@ function fleetPanel() {
   const list = [...a.fleetOrder(here.filter(f => f.owner === ME)), ...here.filter(f => f.owner !== ME), ...a.fleetOrder(inbound)];
   let f = list.find(x => x.id === UI.selFleet);
   if (!f && UI.selFleet != null) { const g = G.fleets.find(x => x.id === UI.selFleet && x.owner === ME); if (g) f = g; }
+  // (with none chosen, the program has the first of your fleets here selected: its Fuel / Speed / Scrap line and its row lit,
+  // Jake's capture 060)
+  if (!f && UI.selFleet == null) { const first = list.find(x => x.owner === ME && x.to == null); if (first) { f = first; UI.selFleet = first.id; } }
   const head = el('div', { class: 'am-fhead' });
   if (f && f.owner === ME) {
     const where = fleetWhere(G, f);
@@ -953,7 +964,20 @@ function afterMsg(box, ctx) {
     if (im && api().A.img[want]) im.src = api().A.img[want];
     clock.setAttribute('aria-label', w('endTurn'));
   }
-  renderNews(clock ? ctx.inbox : null);
+  // (2.1, Jake's captures 060-061 and 131-139: with the Reports window open the turn's reports are all in it at once and no card is
+  // shown; the cards are stepped through unseen, so each report still does what it does (its sound, its battle, its star), waiting
+  // while a window such as a battle review is open; with the window closed, the cards as before)
+  const auto = !!card && !card.classList.contains('end') && !card.classList.contains('waiting') && newsOpen() && !!game();
+  box.classList.toggle('am-newsmode', auto);
+  renderNews(clock || auto ? ctx.inbox : null);
+  if (auto) {
+    const step = () => {
+      if (!card.isConnected) return;
+      if (document.querySelector('.scrim')) { setTimeout(step, 250); return; }
+      const T = TH(), q = T.quietNext; T.quietNext = true; card.click(); T.quietNext = q;
+    };
+    setTimeout(step, 0);
+  }
 }
 function newsIcon(m) {
   const a = api(), G = a.G;
@@ -1122,6 +1146,150 @@ function openTypes() {
   amWin(w('typeMgr'), body, 'am-wtypes', { onClose: () => a.save() });
   return true;
 }
+// Battle Report / Kampfbericht (Jake's captures 097-129 and 146 of the English 2.1; FUN_0011ef16 draws it, the window table at 201ed0 for
+// a screen of 256 to 399 lines: 440 x 245, "Skip Battle" (string 639) 60 x 20). Measured inside the window (440 x 235 under the title):
+// your face at 25 and the other side's at 300 (32 x 32, their names 32 on), "of %s (%ld)" (631) in the middle at the top; under each
+// face a column of rows 52 apart from 34, the defender's planet first with its population under it, then each group of ships, the picture
+// 120 x 40 and its caption ("2 Killer (2/2) Fighter", or "1 Viking (1/1) Scout destroyed", 629, the picture darkened, once a group is
+// gone); "Turn %ld" (632) at the bottom middle. A shot is a yellow bolt from the shooter to the target and a spark where it hits; a ship
+// that dies is covered by yellow rings. At the end "Congratulations! / You won!" (633-634) or "Unfortunately / You lost the battle."
+// (635-636) with the big cowboy (d3510), a side with nothing left has its face crossed out, and the button reads "Ok, ok". A battle
+// you saw nothing of: "You got no information..." / "You were destroyed immediately" (638, 637). The ships and their order are the
+// ruleset's battle (b.rounds), played as the DOS skin's battleDos plays them.
+function battleAmiga(b, k) {
+  const a = api(), G = a.G, H = HO, rs = H.rules(G), ME = a.ME, IMG = a.IMG;
+  const VB = k.verBattle(), TICK = 1000 / 60, speed = Math.max(1, Math.round(30 * VB.f));
+  const alive = b.start.map(() => true), hurt = []; let seq = 0, pop = b.pop0;
+  const P0 = rs.battlePanel(G, b, { alive, hurt, pop, over: false, won: false }, ME);
+  const fAlive = b.start.map(() => true); let fPop = b.pop0;
+  for (const r of b.rounds) for (const ev of r) if (ev.k && !ev.p) fAlive[ev.ti] = false;
+  if (b.popR && b.popR.length) fPop = b.popR[b.popR.length - 1];
+  const viewer = b.sides.includes(ME) ? ME : b.sides[0], foe = (o) => o !== viewer && !H.isAllied(G, o, viewer);
+  const liveF = (pred) => b.start.some((u, i) => fAlive[i] && pred(u.o));
+  const won = (liveF(o => !foe(o)) || (b.planetOwner >= 0 && !foe(b.planetOwner) && fPop > 0.0005)) && !liveF(foe) && !(b.planetOwner >= 0 && foe(b.planetOwner) && fPop > 0.0005);
+  let sides;
+  if (b.grp) sides = b.grp.map(L => L.map(x => (x === -1 ? { planet: true, units: [] } : { units: x })));
+  else { sides = [[], []]; P0.cols.forEach((c, ci) => c.forEach(r => sides[ci].push({ planet: r.planet, units: r.units }))); }
+  const ownerOf = (L) => { const x = L.find(y => !y.planet && y.units.length); return x ? b.start[x.units[0]].o : b.planetOwner; };
+  // (yours on the left: the program puts the player it shows the battle to at 25, the other at 300)
+  if (ownerOf(sides[0]) !== viewer && ownerOf(sides[1]) === viewer) sides.reverse();
+  const owners = [viewer, b.sides.find(o => o !== viewer)];
+  const cols = sides.map((L, ci) => L.slice().sort((p, q) => (q.planet ? 1 : 0) - (p.planet ? 1 : 0)).map((x, row) => Object.assign(x, { o: x.planet ? b.planetOwner : b.start[x.units[0]] ? b.start[x.units[0]].o : -1, ci, row, n0: x.units.length })));
+  const where = new Map(), planetAt = {};
+  cols.forEach(L => L.forEach(x => { x.units.forEach(i => where.set(i, x)); if (x.planet) planetAt[x.o] = x; }));
+  const hidden = [0, 1].map(ci => !won && b.rounds.length === 1 && owners[ci] !== ME && !(owners[ci] != null && H.isAllied(G, owners[ci], ME)));
+  const W = 440, Hh = 235, FX = [25, 300], COLX = [23, 300], ROW0 = 34, PIT = 52;
+  const c = el('canvas', { class: 'am-bcv', width: W, height: Hh, role: 'img', 'aria-label': w('battleRep') });
+  const x = c.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = false; x.textBaseline = 'top';
+  let stop = false, skip = false, done = false;
+  const button = btn(w('skipBattle'), () => { if (done) a.closeModal(); else skip = true; });
+  const body = el('div', { class: 'am-battle' }, c, button);
+  amWin(w('battleRep'), body, 'am-wbattle', { onClose: () => { stop = true; } });
+  const FONT = { f11: '16px HoFont11, sans-serif', f9: '16px HoFont9, sans-serif', fc9: '16px HoCond9, sans-serif' };
+  const text = (t, h, v, f, center) => { x.font = FONT[f || 'f11']; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
+  let seed = (b.id | 0) * 7919 + 13; const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
+  const stars = Array.from({ length: 40 }, () => [rnd(2, W - 3), rnd(2, Hh - 3)]);
+  const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) if (x.getImageData(h, v, 1, 1).data[0] === 0) x.fillRect(h, v, 1, 1); };
+  const pic = (name) => { const im = IMG[P + name]; return im && im.complete && im.naturalWidth ? im : null; };
+  const faceOf = (o) => { const p = G.players[o]; if (!p) return null; return pic('i' + (o === ME ? (p.female ? 1500 : 1000) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20))) || pic('i' + (p.female ? 1500 : 1000)); };
+  const crossed = [false, false];
+  const head = () => {
+    text(w('battleOf', G.stars[b.star].name, b.year), 218, 12, 'f11', true);
+    [0, 1].forEach(ci => {
+      const o = owners[ci]; if (o == null) return; const im = faceOf(o);
+      x.fillStyle = '#000'; x.fillRect(FX[ci], 0, 32, 32); if (im) x.drawImage(im, FX[ci], 0, 32, 32);
+      text((G.players[o] || {}).name || '', FX[ci] + 32, 15, 'f11');
+      if (crossed[ci]) { x.strokeStyle = '#fff'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(FX[ci], 0); x.lineTo(FX[ci] + 30, 31); x.moveTo(FX[ci] + 30, 0); x.lineTo(FX[ci], 31); x.stroke(); }
+    });
+  };
+  const designOf = (gr) => { const u = b.start[gr.units[0]]; return H.getDesign(G, u.o, u.did) || { type: u.t, name: '', R: 1, V: 1, W: 1, S: 1 }; };
+  const words = (gr) => {
+    if (gr.planet) return num(Math.round(pop * 1000));
+    const d = designOf(gr), n = gr.units.filter(i => alive[i]).length, what = `${d.name} (${d.W}/${d.S}) ${className(d.type)}`;
+    return n ? `${countWord(n)} ${what}` : w('destroyedN', gr.n0, what);
+  };
+  const shipIm = new Map();
+  const drawGroup = (gr) => {
+    const gx = COLX[gr.ci], gy = ROW0 + PIT * gr.row;
+    x.fillStyle = '#000'; x.fillRect(gx - 22, gy - 4, 164, PIT); // (the row's picture and its caption, which can be wider than the picture)
+    if (gr.planet) {
+      const look = a.starLook(b.star), im = look && (IMG[look.base] || null);
+      if (im) x.drawImage(im, gx + 41, gy - 4, 38, 38);
+    } else {
+      let im = shipIm.get(gr); if (im === undefined) { im = a.shipPic(designOf(gr), b.start[gr.units[0]].o) || null; shipIm.set(gr, im); }
+      if (im) x.drawImage(im, gx, gy, 120, 40);
+      if (!gr.units.some(i => alive[i])) { x.fillStyle = 'rgba(0,0,0,0.55)'; x.fillRect(gx, gy, 120, 40); }
+    }
+    const t = words(gr);
+    text(t, gx + 60, gy + (gr.planet ? 34 : 36), capFont(t, 124), true);
+  };
+  const turnLabel = (n) => { x.fillStyle = '#000'; x.fillRect(180, 176, 80, 12); if (n) text(w('turnN', n), 213, 177, 'f11', true); };
+  const paint = (n) => { x.fillStyle = '#000'; x.fillRect(0, 0, W, Hh); head(); [0, 1].forEach(ci => { if (!hidden[ci]) cols[ci].forEach(drawGroup); }); turnLabel(n); drawStars(); };
+  const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, Math.max(0, until - performance.now())))); f(); });
+  const cellOf = (ev, shooter) => (shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti)));
+  const mid = (gr) => [COLX[gr.ci] + 60, ROW0 + PIT * gr.row + 20];
+  async function bolt(s, t) {
+    const [x1, y1] = mid(s), [x2, y2] = mid(t), sx = x1 + (x2 > x1 ? 62 : -62), ex = x2 + (x2 > x1 ? -62 : 62);
+    const save = x.getImageData(0, 0, W, Hh);
+    for (let i = 0; i < 8 && !stop && !skip; i++) {
+      const t0 = performance.now(), f0 = i / 8, f1 = (i + 1) / 8;
+      x.putImageData(save, 0, 0); x.strokeStyle = '#ffdd33'; x.lineWidth = 1.5; x.beginPath();
+      x.moveTo(sx + (ex - sx) * f0, y1 + (y2 - y1) * f0); x.lineTo(sx + (ex - sx) * f1, y1 + (y2 - y1) * f1); x.stroke();
+      await wait(t0 + TICK * 2);
+    }
+    x.putImageData(save, 0, 0);
+  }
+  const spark = (t, ev) => { const dm = ev.dm | 0, [h, v] = mid(t), px = h - 50 + (dm % 100), py = v - 14 + (dm % 28); x.fillStyle = '#ff3311'; x.fillRect(px - 2, py, 5, 1); x.fillRect(px, py - 2, 1, 5); x.fillStyle = '#ffee44'; x.fillRect(px, py, 1, 1); };
+  async function rings(t) {
+    const [h, v] = mid(t);
+    for (let r = 1; r <= 6 && !stop && !skip; r++) {
+      const t0 = performance.now(); x.strokeStyle = '#ffee00'; x.lineWidth = 1;
+      for (let j = 1; j <= r; j++) { x.beginPath(); x.ellipse(h, v, 10 * j, 3.3 * j, 0, 0, Math.PI * 2); x.stroke(); }
+      await wait(t0 + TICK * 4);
+    }
+  }
+  const apply = (ev) => { if (ev.p) { if (ev.php != null) pop = ev.php / 1000; } else { if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) alive[ev.ti] = false; } };
+  const finish = () => {
+    if (stop) return;
+    for (const r of b.rounds) for (const ev of r) apply(ev);
+    pop = fPop; done = true;
+    [0, 1].forEach(ci => { const o = owners[ci]; if (o == null) return; crossed[ci] = !(b.start.some((u, i) => alive[i] && u.o === o) || (b.planetOwner === o && pop > 0.0005)); });
+    // (the program's battle runs until one side has nothing left; a ruleset's can stop with both standing: then no verdict)
+    const blind = hidden[0] || hidden[1], lost = crossed[0] && !crossed[1], verdict = won ? 'bWon' : lost ? 'bLost' : null;
+    paint(blind || lost ? 0 : Math.max(1, b.rounds.length));
+    if (blind) { text(w('noInfo'), 150, 51, 'f11'); text(w('destroyedNow'), 150, 64, 'f11'); }
+    else if (verdict) {
+      text(w(verdict + '1'), 218, 44, 'f11', true); text(w(verdict + '2'), 218, 56, 'f11', true);
+      if (lost) { const im = pic('d3510'); if (im) x.drawImage(im, 190, 128, 56, 62); } // (the big cowboy where Turn was: capture 128)
+    }
+    button.textContent = w('ok');
+  };
+  // (a canvas can't make the page fetch a font: the bitmap fonts it uses are loaded first, then the window is drawn)
+  (async () => {
+    try { await Promise.all(['HoFont11', 'HoFont9', 'HoCond9'].map(f => document.fonts.load(`16px ${f}`))); } catch (e) { /* drawn in what there is */ }
+    if (stop) return;
+    paint(0);
+    if (hidden[0] || hidden[1]) { finish(); return; }
+    let deadline = performance.now() + speed * TICK;
+    for (let r = 0; r < b.rounds.length && !stop && !skip; r++) {
+      turnLabel(r + 1); const R = b.rounds[r];
+      for (let e = 0; e < R.length && !stop && !skip;) {
+        let n = 1; if (!VB.full) while (R[e + n] && R[e + n].si === R[e].si && R[e + n].a === R[e].a && !R[e + n - 1].k) n++;
+        for (let j = 0; j < n - 1; j++) apply(R[e + j]);
+        const ev = R[e + n - 1], s = cellOf(ev, true), t = cellOf(ev, false);
+        if (s && t) {
+          await bolt(s, t); if (stop || skip) break;
+          a.Sound.play(k.shotSnd(ev, 3000)); apply(ev); spark(t, ev);
+          if (ev.k && !ev.p && !t.units.some(i => alive[i])) await rings(t);
+          drawGroup(t); drawStars(); deadline += speed * TICK; await wait(deadline);
+        } else apply(ev);
+        e += n;
+      }
+      if (b.popR && b.popR[r] != null) pop = b.popR[r];
+    }
+    finish();
+  })();
+}
 // Konstruktion / Construction (Jake's captures 068-069 of the English 2.1; the gadget table at 2022cc of the English program,
 // decompiled/amiga-2.1-en-1.05/windows.txt, 502 x 182): the name of the new type in a string field, Range, Speed, Weapons, Shield
 // and Mini on proportional sliders with arrows (the figure, "8/8" where it can change, left of each), the type's picture, its class
@@ -1230,10 +1398,15 @@ function openPlayerList() {
   const a = api(), G = a.G;
   const SK = { novice: 0, beginner: 1, normal: 2, advanced: 3, expert: 4 };
   const IQ = { dumb: ['Dumm', 'Bundy', 'Stupide', 'Aptal', 'Torpe'], average: ['Normal', 'Normal', 'Moyen', 'Ortalama', 'Normal'], smart: ['Klug', 'Smart', 'Brillant', 'Akıllı', 'Listo'] };
-  const rows = el('div', { class: 'am-plrows' }, ...G.players.map(q => {
-    const k = SKILLS[SK[q.skill] != null ? SK[q.skill] : 2];
-    return el('div', { class: 'am-plrow' }, el('span', null, q.name), el('span', null, pick(k.slice(1))));
-  }));
+  // (the program lists the game file's entries, FUN_00124d5c: the computers' as "Comp 0", "Comp 1" … (string 720) with no level,
+  // made first, then each human's login name and level; each row a raised box, seven to the list: Jake's capture 074)
+  const comps = G.players.filter(q => !q.human), humans = G.players.filter(q => q.human);
+  const rows = el('div', { class: 'am-plrows' }, ...comps.map((q, i) => el('div', { class: 'am-plrow' }, el('span', null, w('compN', i)), el('span', null, ''))),
+    ...humans.map(q => {
+      const k = SKILLS[SK[q.skill] != null ? SK[q.skill] : 2];
+      return el('div', { class: 'am-plrow' }, el('span', null, q.name), el('span', null, pick(k.slice(1))));
+    }),
+    ...Array.from({ length: Math.max(0, 7 - G.players.length) }, () => el('div', { class: 'am-plrow am-lempty', 'aria-hidden': 'true' })));
   const iq = IQ[G.opts.iq] || IQ.average;
   const body = el('div', { class: 'am-plist2' }, frame('am-plframe', rows, scroller(rows, true)),
     el('p', { class: 'am-pliq' }, w('iqLine', pick(iq))),
@@ -1748,8 +1921,25 @@ function revertGame() {
 // Optionen > Bildschirm: the pixels (the screen mode the Amiga asked for here)
 let lastPointer = { x: 200, y: 40 };
 document.addEventListener('pointermove', (e) => { lastPointer = { x: e.clientX, y: e.clientY }; }, true);
+// Options > ScreenMode: "Sreenmode Preferences" (sic; the English program's table at 2032e2, 552 x 160; German "Bildschirmeinstellung";
+// Jake's capture 144): seven mode rows (the screen modes asl offers, empty in the capture), "Select screen resolution / and number
+// of colors" with the colours on a cycle button, Ok and Cancel. Here the rows are the remake's two pixel shapes (the Amiga monitor's
+// tall pixels, square ones); the colours button shows "16 Colors" dotted, as the remake has the 16-colour pictures only.
 function screenMenu() {
-  popup([{ label: w('tall'), checked: pixMode() === 'tall', fn: () => setPixels('tall') }, { label: w('square'), checked: pixMode() === 'square', fn: () => setPixels('square') }], lastPointer.x, lastPointer.y);
+  const a = api(); let pick = pixMode();
+  const modes = [['tall', w('tall')], ['square', w('square')]];
+  const rows = el('div', { class: 'am-smrows' });
+  const paint = () => rows.replaceChildren(...Array.from({ length: 7 }, (_, i) => {
+    const m = modes[i];
+    return el('div', { class: 'am-smrow' + (m && m[0] === pick ? ' sel' : '') + (m ? '' : ' am-lempty'), style: `top:calc(${10 + 20 * i} * var(--v))`, role: m ? 'option' : null, tabindex: m ? 0 : null,
+      onclick: m ? () => { pick = m[0]; paint(); } : null }, m ? m[1] : '');
+  }));
+  paint();
+  const cyc = btn(w('colors16'), () => {}, 'am-ccycle'); cyc.disabled = true;
+  const body = el('div', { class: 'am-smode' }, frame('am-smf1'), frame('am-smf2'), rows, scroller(rows, true),
+    el('span', { class: 'am-sml1' }, w('smLine1')), el('span', { class: 'am-sml2' }, w('smLine2')), cyc,
+    el('div', { class: 'am-smbtns' }, btn(w('ok'), () => { a.closeModal(); if (pick !== pixMode()) setPixels(pick); }), btn(w('cancel'), () => a.closeModal(), 'am-default')));
+  amWin(w('smTitle'), body, 'am-wsmode');
 }
 // Fenster > Fenster aufräumen: the windows back where the program put them
 function tidyWindows() {
@@ -1964,6 +2154,7 @@ window.HOTHEME_OVER = {
   // (the DOS skin's file loads after this one on the Amiga page, for its report looks, and its theme comes in under this one: its own menu bar,
   // the DOS program's File / Options / Ships / Galaxy / Window and their "[Ctrl+S]" keys, would take the place of the Amiga's six menus)
   menuLayout: undefined, menuLayoutNow: undefined, hoIntoLast: undefined, leftoversIntoHo: undefined,
+  battleWindow: (b, k) => battleAmiga(b, k), // (the Amiga's Battle Report, in place of the DOS program's window the DOS theme would bring)
   keyName: (k) => k, // (the item's key: the Amiga-key glyph before it is the stylesheet's, .mkey)
   menuName: (k) => (WORDS[k] ? W(k) : k), // the menus' names (menus above), in the language
   // no You Lost window: the Amiga game's words (texte.pff) have none, only the

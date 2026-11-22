@@ -686,6 +686,27 @@ ones of the English program to be compared. Put side by side with the remake at 
 - **Compare Players in 2000:** in English an empty title (string 739 is empty) and nothing drawn in the frame (shot 073).
 - **Ship Building:** the remake's "New type…" button on one line in every language.
 
+- **Reports (second pass):** with the Reports window open (the default on a desktop) the turn's reports are all listed in it at once and no
+  card shows (captures 060-061, 131-139); the cards are still stepped through, unseen, so each report's sound, battle and star happen,
+  waiting while a window such as a battle review is open. With the window closed, the cards as before.
+- **The fleet panel** has your first fleet at the selected star chosen when none is, with its Fuel / Speed / Scrap line (capture 060).
+- **List of Players** (Compare Players > Info): the game file's entries, the computers as "Comp 0", "Comp 1" … (string 720) with no
+  level, then the humans with theirs, each a raised row, the level at x 290 (capture 074; FUN_00124d5c).
+- **Sreenmode Preferences** (sic; Options > ScreenMode): the program's window (table 2032e2, capture 144) in place of the remake's
+  pop-up: seven mode rows, here the remake's two pixel shapes, "16 Colors" on a dotted cycle button (the remake has the 16-colour
+  pictures only), Ok, Cancel.
+- **Battle Report** (`battleAmiga`; captures 097-129): the Amiga's own window (table 201ed0, 440 x 245, "Skip Battle" 60 x 20) drawn
+  on a canvas at the Amiga's pixels, playing the ruleset's battle as battleDos does; layout measured from the captures (faces at 25 and
+  300, rows 52 apart from 34, captions under each picture, "Turn N", the yellow bolt, the spark, the yellow rings, the crossed-out
+  face, the verdicts, the cowboy for a lost battle, "Ok, ok" at the end). Not seen in a capture: a side with more than three rows (the
+  fourth runs into the button), and a battle that stops with both sides standing (the program's never does; no verdict is shown).
+  The DOS theme's battleWindow (added 22 Nov) had replaced the Amiga's battle with the DOS program's; the skin now gives its own.
+
+**The tool:** `tools/amiga-captures.js` starts an Amiga game at 1280 x 1024 (2 x 4 CSS pixels to the Amiga pixel), opens each window as a
+person does (its menu and item), and writes the remake's screen above the capture named for it (pair-<view>.png): main, the six menus,
+types, newtype, roster, organize, build, compare, players, stars, screen, about, battle, battleEnd (`--only=`, `--lang=de`). Every
+comparison above was made with it (or its scratch forerunner).
+
 Not changed, and why:
 - **The screen's title bar** is 14 rows and a white line in these captures (Kickstart 3.1), 16 and a line in the German 2.0 ones
   (Kickstart 2.04), and the program lays its windows out from the screen (`FUN_00107952`), so under 3.1 everything sits two rows

@@ -639,8 +639,8 @@ html.amiga .am-plist2 { position: absolute; inset: 0; }
 html.amiga .am-plist2 > * { position: absolute; }
 html.amiga .am-plframe { left: calc(16 * var(--u)); top: calc(8 * var(--v)); width: calc(328 * var(--u)); height: calc(144 * var(--v)); }
 html.amiga .am-plrows { position: absolute; left: calc(4 * var(--u)); top: calc(4 * var(--v)); width: calc(300 * var(--u)); height: calc(140 * var(--v)); overflow: hidden; }
-html.amiga .am-plrow { display: flex; height: calc(20 * var(--v)); padding: calc(3 * var(--v)) calc(4 * var(--u)) 0; box-sizing: border-box; white-space: nowrap; }
-html.amiga .am-plrow > span:first-child { width: calc(150 * var(--u)); overflow: hidden; }
+html.amiga .am-plrow { display: flex; height: calc(18 * var(--v)); margin-bottom: calc(2 * var(--v)); padding: calc(3 * var(--v)) calc(4 * var(--u)) 0; box-sizing: border-box; white-space: nowrap; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; } /* (raised boxes: capture 074) */
+html.amiga .am-plrow > span:first-child { width: calc(127 * var(--u)); overflow: hidden; } /* (the level at 290 on the screen: capture 074) */
 html.amiga .am-plframe > .am-prop { position: absolute; left: calc(306 * var(--u)); top: calc(4 * var(--v)); width: calc(18 * var(--u)); height: calc(139 * var(--v)); }
 html.amiga .am-pliq { left: calc(32 * var(--u)); top: calc(163 * var(--v)); margin: 0 !important; white-space: nowrap; }
 html.amiga .am-plbtns { inset: 0; pointer-events: none; }
@@ -857,3 +857,32 @@ html.amiga .am-cons .am-ccycle::before { content: ''; position: absolute; left: 
 html.amiga .am-cons .am-ccycle::after { content: ''; position: absolute; left: calc(17 * var(--u)); top: calc(3 * var(--v)); width: calc(1 * var(--u)); height: calc(12 * var(--v)); background: #000; }
 html.amiga .am-kbtns .am-btn { pointer-events: auto; top: calc(157 * var(--v)); width: calc(100 * var(--u)); height: calc(20 * var(--v)); }
 html.amiga .am-kbtns .am-btn:nth-child(1) { left: calc(71 * var(--u)); } html.amiga .am-kbtns .am-btn:nth-child(2) { left: calc(238 * var(--u)); } html.amiga .am-kbtns .am-btn:nth-child(3) { left: calc(385 * var(--u)); }
+
+/* the reports stepped through unseen while the Reports window lists them (afterMsg: 2.1's way, captures 060 and 131-139) */
+html.amiga #msg.am-newsmode .card { visibility: hidden; }
+
+/* Sreenmode Preferences (the English program's table at 2032e2, 552 x 160; capture 144) */
+html.amiga .win.am-wsmode { width: calc(560 * var(--u)); height: calc(178 * var(--v)); }
+html.amiga .am-smode { position: absolute; inset: 0; }
+html.amiga .am-smode > * { position: absolute; }
+html.amiga .am-smf1 { left: calc(16 * var(--u)); top: calc(8 * var(--v)); width: calc(328 * var(--u)); height: calc(144 * var(--v)); }
+html.amiga .am-smf2 { left: calc(360 * var(--u)); top: calc(8 * var(--v)); width: calc(176 * var(--u)); height: calc(64 * var(--v)); }
+html.amiga .am-smrows { inset: 0; pointer-events: none; }
+html.amiga .am-smrow { position: absolute; left: calc(20 * var(--u)); width: calc(300 * var(--u)); height: calc(18 * var(--v)); padding: calc(3 * var(--v)) calc(6 * var(--u)) 0; box-sizing: border-box; white-space: nowrap; pointer-events: auto; cursor: pointer;
+  box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; }
+html.amiga .am-smrow.am-lempty { cursor: default; }
+html.amiga .am-smrow.sel { background: var(--am-red); color: #fff; }
+html.amiga .am-smode > .am-prop { left: calc(322 * var(--u)); top: calc(10 * var(--v)); width: calc(16 * var(--u)); height: calc(138 * var(--v)); }
+html.amiga .am-sml1 { left: calc(376 * var(--u)); top: calc(13 * var(--v)); white-space: nowrap; } html.amiga .am-sml2 { left: calc(376 * var(--u)); top: calc(28 * var(--v)); white-space: nowrap; }
+html.amiga .am-smode .am-ccycle { left: calc(397 * var(--u)); top: calc(44 * var(--v)); width: calc(100 * var(--u)); padding-left: calc(22 * var(--u)); }
+html.amiga .am-smode .am-ccycle::before { content: ''; position: absolute; left: calc(5 * var(--u)); top: calc(5 * var(--v)); width: calc(8 * var(--u)); height: calc(9 * var(--v)); box-sizing: border-box; border: calc(1 * var(--u)) solid #000; border-right-width: calc(2 * var(--u)); }
+html.amiga .am-smode .am-ccycle::after { content: ''; position: absolute; left: calc(17 * var(--u)); top: calc(4 * var(--v)); width: calc(1 * var(--u)); height: calc(12 * var(--v)); background: #000; }
+html.amiga .am-smbtns { inset: 0; pointer-events: none; }
+html.amiga .am-smbtns .am-btn { pointer-events: auto; left: calc(397 * var(--u)); width: calc(100 * var(--u)); }
+html.amiga .am-smbtns .am-btn:nth-child(1) { top: calc(104 * var(--v)); } html.amiga .am-smbtns .am-btn:nth-child(2) { top: calc(129 * var(--v)); }
+
+/* Battle Report (the English program's window table at 201ed0, 440 x 245; Jake's captures 097-129): drawn at the Amiga's own pixels */
+html.amiga .win.am-wbattle { width: calc(448 * var(--u)); height: calc(253 * var(--v)); }
+html.amiga .am-battle { position: absolute; inset: 0; background: #000; }
+html.amiga .am-battle .am-bcv { position: absolute; left: 0; top: 0; width: calc(440 * var(--u)); height: calc(235 * var(--v)); image-rendering: pixelated; }
+html.amiga .am-battle .am-btn { left: calc(190 * var(--u)); top: calc(211 * var(--v)); width: calc(60 * var(--u)); height: calc(20 * var(--v)); white-space: nowrap; font-family: var(--am11), sans-serif !important; font-size: calc(16 * var(--v)) !important; padding: 0 !important; overflow: hidden; }
