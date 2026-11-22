@@ -2406,7 +2406,7 @@ function graph405() {
   let sr = null;
   if (h.length) {
     const end = h[h.length - 1].y, first = Math.max(h[0].y, end - 990), rows = h.filter(e => e.y >= first);
-    const val = [(e) => e.inc, (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, (e) => (e.hx && e.hx.pw != null ? e.hx.pw : null), (e) => e.pop];
+    const val = [(e) => (e.hx && e.hx.net != null ? e.hx.net : e.inc), (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, (e) => (e.hx && e.hx.pw != null ? e.hx.pw : null), (e) => e.pop];
     const max = GRAPH405.start.slice();
     val.forEach((f, i) => rows.forEach(e => { const v = f(e); if (v == null) return; const m = v < 1 ? v * -5 : v; if (m > max[i]) max[i] = Math.ceil(m / 50000) * 50000; }));
     const pts = [];

@@ -1996,6 +1996,7 @@ function recordHistory(G, p) {
     return cnt < 2 ? (n < 2 ? 50 : 100) : Math.trunc(sum * 100 / (10 * (cnt - 1)));
   });
   const hx = { met: Math.round(p.metal), sav: Math.round(p.savings), rk, tr };
+  if (p.net301 != null) hx.net = Math.round(p.net301); // (net income, the player record's +8, where a ruleset keeps it: what 4.0.5's Graph History draws as Income)
   // (rs.shipPower, 4.0.5: the Graph History's Ship Power, FUN_0041adc6 of the Windows program (the Mac's the same): over the player's fleets,
   // each type's attack (the type record's +0x84) times its count, satellites out of hyperspace left out)
   const rsh = rules(G);
