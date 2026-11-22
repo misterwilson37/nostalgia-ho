@@ -707,10 +707,15 @@ person does (its menu and item), and writes the remake's screen above the captur
 types, newtype, roster, organize, build, compare, players, stars, screen, about, battle, battleEnd (`--only=`, `--lang=de`). Every
 comparison above was made with it (or its scratch forerunner).
 
+- **The screen's layout (changed 22 Nov, after Jake's Kickstart 2.04 captures, `audit/amiga-2.1/captures-ks204`):** the English
+  2.1's title bar is rows 0-13 with its white line on 14 under Kickstart 2.04 as under 3.1, so it is the program's, not the
+  Kickstart's. The skin now has it: the bar 15 rows, the windows from row 15 to 248 (the star panel 65 rows, the fleet panel 44, the
+  totals from 109, Tech Spending from 136 with its black bottom edge on 248, the map 225 high with its scroll bars), and the screen's
+  grey below. The October German 2.0 captures had 16 rows and a line; whether that is 2.0's own layout is open (the skin shows V2.1).
+
 Not changed, and why:
-- **The screen's title bar** is 14 rows and a white line in these captures (Kickstart 3.1), 16 and a line in the German 2.0 ones
-  (Kickstart 2.04), and the program lays its windows out from the screen (`FUN_00107952`), so under 3.1 everything sits two rows
-  higher and the windows end at row 248 with the screen's grey below. The skin keeps the 2.04 layout.
+- **The fleets' order in the panel:** the program lists the two scouts before the colony ship at the start (captures 060, ks204 024);
+  the remake lists the ruleset's order (colony first). Not changed yet.
 - **Orange where the skin has dark red** (the selected fleet, the open menu title, the default button's frame): Jake's game ran
   in 256 colours (shot 144, ScreenMode); the skin keeps the 16-colour pens.
 - **The starting skill:** the program's Player Registration takes it from its preferences file (+0x34), so it has no fixed

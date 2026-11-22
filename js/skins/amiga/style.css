@@ -63,17 +63,18 @@ html.amiga button { font: inherit; color: inherit; letter-spacing: 0; }
 
 /* ---------- the screen: 640 x 256 ---------- */
 html.amiga.am-desk body { overflow: hidden; }
-html.amiga #app { display: block; position: fixed; left: calc((100vw - 640 * var(--u)) / 2); top: calc((100vh - 256 * var(--v)) / 2); width: calc(640 * var(--u)); height: calc(256 * var(--v)); background: #000; overflow: hidden; }
+html.amiga #app { background: var(--am-grey) !important; display: block; position: fixed; left: calc((100vw - 640 * var(--u)) / 2); top: calc((100vh - 256 * var(--v)) / 2); width: calc(640 * var(--u)); height: calc(256 * var(--v)); background: #000; overflow: hidden; }
 html.amiga.am-grow #app { left: 0; top: 0; width: calc(var(--aw) * var(--u)); height: calc(var(--ah) * var(--v)); }
-html.amiga.am-grow #main { height: calc((var(--ah) - 17) * var(--v)); }
+html.amiga.am-grow #main { height: calc((var(--ah) - 22) * var(--v)); }
 html.amiga.am-grow #mapwrap { width: calc((var(--aw) - 241) * var(--u)); }
 html.amiga.am-grow #mapview { width: calc(100% - 16 * var(--u)); height: calc(100% - 9 * var(--v)); }
 html.amiga.am-grow #mapwrap > .am-pv { height: calc(100% - 9 * var(--v)); }
 html.amiga.am-grow #mapwrap > .am-ph { width: calc(100% - 16 * var(--u)); }
-html.amiga #main { display: block; position: absolute; left: 0; top: calc(17 * var(--v)); width: 100%; height: calc(239 * var(--v)); }
-/* the title bar (rows 0-15) and its white line; its menus show while the pointer is on it */
-html.amiga #menubar { position: absolute; left: 0; top: 0; width: 100%; height: calc(17 * var(--v)); padding: 0; gap: 0; background: var(--am-blue); border: 0; border-bottom: calc(1 * var(--v)) solid #fff; box-sizing: border-box; display: flex; align-items: stretch; box-shadow: none; z-index: 20; }
-html.amiga #title { display: block; position: absolute; left: calc(6 * var(--u)); top: calc(-1 * var(--v)); right: calc(30 * var(--u)); margin: 0; color: #fff; line-height: calc(16 * var(--v)); text-align: left; overflow: hidden; white-space: nowrap; cursor: default; }
+/* the program's windows from row 15 to row 248 (234 rows), the screen's grey below them (captures 060, ks204 024 on) */
+html.amiga #main { display: block; position: absolute; left: 0; top: calc(15 * var(--v)); width: 100%; height: calc(234 * var(--v)); }
+/* the title bar (rows 0-13) and its white line (row 14: the English 2.1 on Kickstart 2.04 and 3.1 alike, Jake's captures of 16 and 22 Nov 2026); its menus show while the pointer is on it */
+html.amiga #menubar { position: absolute; left: 0; top: 0; width: 100%; height: calc(15 * var(--v)); padding: 0; gap: 0; background: var(--am-blue); border: 0; border-bottom: calc(1 * var(--v)) solid #fff; box-sizing: border-box; display: flex; align-items: stretch; box-shadow: none; z-index: 20; }
+html.amiga #title { display: block; position: absolute; left: calc(6 * var(--u)); top: calc(-1 * var(--v)); right: calc(30 * var(--u)); margin: 0; color: #fff; line-height: calc(15 * var(--v)); text-align: left; overflow: hidden; white-space: nowrap; cursor: default; }
 html.amiga #menubar .menu { display: none; position: relative; }
 html.amiga #menubar.am-menus .menu, html.amiga #menubar:has(.dropdown.open) .menu, html.amiga #menubar:focus-within .menu { display: block; }
 html.amiga #menubar.am-menus #title, html.amiga #menubar:has(.dropdown.open) #title, html.amiga #menubar:focus-within #title { visibility: hidden; }
@@ -83,12 +84,12 @@ html.amiga #menubar.am-menus #title, html.amiga #menubar:has(.dropdown.open) #ti
   html.amiga #menubar:hover #title { visibility: hidden; }
 }
 /* (each title's Menu.Width is its TextLength + 10, FUN_00102d98: 5 pixels each side) */
-html.amiga #menubar .mbtn { height: calc(16 * var(--v)); padding: 0 calc(5 * var(--u)); margin: 0; border: 0; border-radius: 0; background: none; color: #fff; line-height: calc(14 * var(--v)); font: inherit; box-shadow: none; cursor: pointer; }
+html.amiga #menubar .mbtn { height: calc(14 * var(--v)); padding: 0 calc(5 * var(--u)); margin: 0; border: 0; border-radius: 0; background: none; color: #fff; line-height: calc(13 * var(--v)); font: inherit; box-shadow: none; cursor: pointer; }
 html.amiga #menubar .mbtn.logo { margin-left: calc(2 * var(--u)); font-weight: 400; color: #fff; }
 /* the menus' colours: the screen's BlockPen 11 (blue) and DetailPen 14 (white) (the NewScreen at
    data+0x408); the item under the pointer complemented (each item's flags 0x52: HIGHCOMP), pen 4 on 1 */
 html.amiga #menubar .mbtn:hover, html.amiga #menubar .mbtn[aria-expanded=true], html.amiga #menubar .mbtn:focus-visible { background: #003399; color: #000; outline: none; }
-html.amiga .am-sdepth { position: absolute; right: 0; top: 0; width: calc(23 * var(--u)); height: calc(16 * var(--v)); background: var(--am-grey) var(--am-sdepth) no-repeat 0 0 / 100% 100%; }
+html.amiga .am-sdepth { position: absolute; right: 0; top: 0; width: calc(23 * var(--u)); height: calc(14 * var(--v)); background: var(--am-grey) var(--am-sdepth) no-repeat 0 0 / 100% 100%; }
 /* menus (Intuition's, old look: FUN_00102d98 builds plain MenuItems, no GadTools): the box filled with
    the screen's BlockPen 11 and framed in its DetailPen 14, 2 pixels at the sides and 1 at top and
    bottom; each item one line of the screen font (TxHeight 13), its text the program's IntuiText
@@ -98,7 +99,7 @@ html.amiga .am-sdepth { position: absolute; right: 0; top: 0; width: calc(23 * v
    as Intuition's own menu images; their shapes are not confirmed). A disabled item would be ghosted
    with BlockPen dots (0x8888 / 0x2222). The separators are the remake's own (the program has none),
    drawn as a GadTools bar label. */
-html.amiga .dropdown { position: absolute; top: calc(16 * var(--v)); left: 0; width: max-content; min-width: 0; padding: 0; background: var(--am-blue); border: calc(1 * var(--v)) solid #fff; border-left-width: calc(2 * var(--u)); border-right-width: calc(2 * var(--u)); box-shadow: none; border-radius: 0; z-index: 30; }
+html.amiga .dropdown { position: absolute; top: calc(14 * var(--v)); left: 0; width: max-content; min-width: 0; padding: 0; background: var(--am-blue); border: calc(1 * var(--v)) solid #fff; border-left-width: calc(2 * var(--u)); border-right-width: calc(2 * var(--u)); box-shadow: none; border-radius: 0; z-index: 30; }
 html.amiga .dropdown button[role=menuitem] { display: flex; align-items: center; width: 100%; text-align: left; padding: 0; height: calc(13 * var(--v)); line-height: calc(13 * var(--v)); border: 0; border-radius: 0; background: none; color: #000; white-space: nowrap; cursor: pointer; position: relative; }
 html.amiga .dropdown button.check { padding-left: calc(16 * var(--u)); }
 html.amiga .dropdown button.check.on::before { content: ''; position: absolute; left: 0; top: calc(2 * var(--v)); width: calc(14 * var(--u)); height: calc(9 * var(--v)); margin: 0; background: var(--am-mcheck) 0 0 / 100% 100% no-repeat; }
@@ -123,11 +124,11 @@ html.amiga #panel:empty { background:
   linear-gradient(90deg, #fff 0 calc(2 * var(--u)), transparent 0 calc(239 * var(--u)), #000 0), var(--am-grey); }
 html.amiga #panel > section { position: absolute; left: 0; width: calc(241 * var(--u)); box-sizing: border-box; background: var(--am-grey); border-left: calc(2 * var(--u)) solid #fff; border-right: calc(2 * var(--u)) solid #000; border-bottom: calc(1 * var(--v)) solid #000; margin: 0; padding: 0; overflow: hidden; }
 html.amiga #panel > section + section, html.amiga #panel > div + section { border-top: calc(1 * var(--v)) solid #fff; }
-html.amiga .am-star { top: 0; height: calc(66 * var(--v)); border-top: 0 !important; }
-html.amiga .am-fleet { top: calc(66 * var(--v)); height: calc(45 * var(--v)); }
-html.amiga .am-totals { top: calc(111 * var(--v)); height: calc(35 * var(--v)); }
+html.amiga .am-star { top: 0; height: calc(65 * var(--v)); border-top: 0 !important; }
+html.amiga .am-fleet { top: calc(65 * var(--v)); height: calc(44 * var(--v)); }
+html.amiga .am-totals { top: calc(109 * var(--v)); height: calc(35 * var(--v)); }
 html.amiga .am-bottom { position: absolute; left: 0; top: calc(146 * var(--v)); width: calc(241 * var(--u)); height: calc(93 * var(--v)); }
-html.amiga #am-tech { top: calc(139 * var(--v)); height: calc(100 * var(--v)); border: 0 !important; background: none; z-index: 2; }
+html.amiga #am-tech { top: calc(136 * var(--v)); height: calc(98 * var(--v)); border: 0 !important; background: none; z-index: 2; box-shadow: inset 0 calc(-1 * var(--v)) 0 #000; } /* (its black bottom edge on row 248: captures 060, ks204) */
 html.amiga .am-keep { display: none !important; }
 /* the star */
 html.amiga .am-sname { position: absolute; left: 0; top: calc(2 * var(--v)); width: calc(98 * var(--u)); text-align: center; white-space: nowrap; }
@@ -236,9 +237,9 @@ html.amiga .am-techbars .bval, html.amiga .am-techbars .grid { display: none; }
 
 /* ---------- the map window ---------- */
 html.amiga #mapwrap { position: absolute; left: calc(241 * var(--u)); top: 0; width: calc(399 * var(--u)); height: 100%; overflow: hidden; background: #000; border-left: calc(2 * var(--u)) solid #fff; box-sizing: border-box; }
-html.amiga #mapview { position: absolute; left: 0; top: 0; width: calc(381 * var(--u)); height: calc(230 * var(--v)); overflow: hidden; }
+html.amiga #mapview { position: absolute; left: 0; top: 0; width: calc(381 * var(--u)); height: calc(225 * var(--v)); overflow: hidden; }
 html.amiga #map { display: block; }
-html.amiga #mapwrap > .am-pv { position: absolute; right: 0; top: 0; width: calc(16 * var(--u)); height: calc(230 * var(--v)); }
+html.amiga #mapwrap > .am-pv { position: absolute; right: 0; top: 0; width: calc(16 * var(--u)); height: calc(225 * var(--v)); }
 html.amiga #mapwrap > .am-ph { position: absolute; left: 0; bottom: 0; width: calc(381 * var(--u)); height: calc(9 * var(--v)); }
 html.amiga .am-corner { position: absolute; right: 0; bottom: 0; width: calc(16 * var(--u)); height: calc(9 * var(--v)); background: var(--am-grey); border-left: calc(1 * var(--u)) solid #000; }
 /* a prop gadget: a dithered track (the map's) or a plain one, a white knob, two arrows */
@@ -559,9 +560,9 @@ html.amiga #titlescreen { display: flex; flex-direction: column; align-items: ce
 html.amiga #titlescreen[hidden] { display: none; }
 html.amiga #titlescreen.loading::after { font: 16px HoFont13, sans-serif; color: #bbb; }
 html.amiga .am-tscreen { position: relative; flex: none; width: calc(640 * var(--u)); height: calc(256 * var(--v)); overflow: hidden; background: #000; }
-html.amiga .am-tbar { position: absolute; left: 0; top: 0; width: 100%; height: calc(17 * var(--v)); box-sizing: border-box; background: var(--am-blue); border-bottom: calc(1 * var(--v)) solid #fff; color: #fff; }
+html.amiga .am-tbar { position: absolute; left: 0; top: 0; width: 100%; height: calc(15 * var(--v)); box-sizing: border-box; background: var(--am-blue); border-bottom: calc(1 * var(--v)) solid #fff; color: #fff; }
 html.amiga .am-tbar > span:first-child { position: absolute; left: calc(6 * var(--u)); top: calc(-1 * var(--v)); line-height: calc(16 * var(--v)); white-space: nowrap; }
-html.amiga .am-tback { position: absolute; left: 0; top: calc(17 * var(--v)); width: 100%; bottom: 0;
+html.amiga .am-tback { position: absolute; left: 0; top: calc(15 * var(--v)); width: 100%; bottom: 0;
   background: linear-gradient(90deg, #fff 0 calc(2 * var(--u)), var(--am-grey) 0 calc(239 * var(--u)), #000 0 calc(241 * var(--u)), #fff 0 calc(243 * var(--u)), #000 0); }
 html.amiga .win.am-wstartup { position: absolute; left: calc(12 * var(--u)); top: calc(19 * var(--v)); width: calc(616 * var(--u)); height: calc(218 * var(--v)); display: block; }
 html.amiga .am-wstartup > .wbody { position: absolute; left: calc(3 * var(--u)); top: calc(15 * var(--v)); width: calc(608 * var(--u)); height: calc(201 * var(--v)); padding: 0 !important; overflow: hidden; }
@@ -764,7 +765,7 @@ html.amiga .am-abtn2 .am-btn { top: 0; }
 html.amiga .am-abtn2 .am-btn:nth-child(1) { left: 0; width: calc(80 * var(--u)); }
 html.amiga .am-abtn2 .am-btn:nth-child(2) { right: 0; width: calc(80 * var(--u)); }
 /* the saving panel over the star panel (capture 31): "Neuer Spielstand wird gespeichert", "Speichern der Galaxis", a red bar and its percentage */
-html.amiga .am-saving { position: absolute; left: 0; top: calc(17 * var(--v)); width: calc(241 * var(--u)); height: calc(98 * var(--v)); box-sizing: border-box; background: var(--am-grey); z-index: 40; pointer-events: none; border-bottom: calc(1 * var(--v)) solid #000; }
+html.amiga .am-saving { position: absolute; left: 0; top: calc(15 * var(--v)); width: calc(241 * var(--u)); height: calc(98 * var(--v)); box-sizing: border-box; background: var(--am-grey); z-index: 40; pointer-events: none; border-bottom: calc(1 * var(--v)) solid #000; }
 html.amiga .am-sttl { height: calc(14 * var(--v)); padding: 0 calc(3 * var(--u)); white-space: nowrap; border-bottom: calc(1 * var(--v)) solid #000; }
 html.amiga .am-sfr { position: absolute; left: calc(2 * var(--u)); right: calc(2 * var(--u)); top: calc(15 * var(--v)); bottom: 0; }
 html.amiga .am-sfr p { position: absolute; left: calc(14 * var(--u)); top: calc(10 * var(--v)); margin: 0; white-space: nowrap; }
