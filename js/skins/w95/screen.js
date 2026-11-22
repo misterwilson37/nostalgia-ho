@@ -61,7 +61,7 @@ T.menuLayout = {
     [null, 'Ships/#1']],
   Galaxy: [[lab('Compare Players...'), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('Statistics...'), () => statsDialog(), null, null, () => noGame() || !(A().me() && A().me().st405)], // (shot 047; dialog 355 from the 405 rules' counters, p.st405: a game begun before them dimmed)
      [lab('List All Explored Stars...'), 'Galaxy/List explored stars…'], '-',
-    [lab('Dip Into Savings'), 'Galaxy/Dip into savings…'], [() => (abandonMarked() ? TL("Don't Abandon Planet") : TL('Abandon Planet')), () => abandonPlanet(), null, null, () => !abandonable(), 'A'], '-',
+    [lab('Dip Into Savings'), () => { if (!dipDialog()) A().openDip(); }], [() => (abandonMarked() ? TL("Don't Abandon Planet") : TL('Abandon Planet')), () => abandonPlanet(), null, null, () => !abandonable(), 'A'], '-',
     [lab('Alliances...'), () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], [lab('Give Money/Metal...'), 'Galaxy/Give money or metal…'], [lab('Surrender To...'), 'Galaxy/#9'], [lab('Send Message...'), 'Galaxy/Send a message…'], '-',
     [lab('Armageddon'), 'Galaxy/#10']],
   // (shot 050: no ticks; Chat Window is dimmed out of a network game; Zoom In dimmed at the closest zoom)
@@ -657,6 +657,26 @@ function fleetsDialog() {
   dl.by[1176].addEventListener('click', () => { const f = g.fleets.find(x => x.id === sel); if (f) go(f); });
   dl.by[1].addEventListener('click', () => a.closeModal());
   fill(); showDlg(dl, 'List of All Fleets');
+  return true;
+}
+
+// Dip Into Savings (dialog 358, FUN_00469757, Ctrl+D): "You currently have $%s in savings. You can take out up to $%s. How much would you
+// like?" (STATIC 1135), the amount (EDIT 1136) starting at the most (savings less the borrowing limit, which is negative: a dip can go into
+// debt), Cancel, OK: one sum, taken from savings into this turn's money (the 405 rules' dipAmount, at the turn's end, counting a dip already
+// asked for; the Mac's DLOG 4070 the same). A ruleset without dipAmount keeps the classic page's window.
+function dipDialog() {
+  const a = A(), g = a.G, p = a.me(), rs = H().rules(g); if (!rs.dipAmount || !rs.dipLimit) return false;
+  const dl = W95DLG(358); if (!dl) return false;
+  const pend = Math.max(0, Math.trunc(p.dipAmt || 0)), sav = Math.trunc(p.savings) - pend, max = Math.max(0, rs.dipLimit(g, p) - pend);
+  const t = dl.by[1135], f = dl.by[1136];
+  if (t) t.textContent = TL('You currently have $%s in savings. You can take out up to $%s. How much would you like?').replace('%s', H().niceNum(sav)).replace('%s', H().niceNum(max)); // (with commas; the field plain digits: shot 080)
+  let v = max; f.value = String(max); f.inputMode = 'numeric';
+  f.addEventListener('input', () => { const n = parseInt(f.value, 10); v = !(n >= 0) ? 0 : Math.min(n, max); if (f.value !== '' && String(v) !== f.value) f.value = String(v); });
+  const ok = () => { a.closeModal(); if (v > 0) { rs.dipAmount(g, p, pend + v); a.save(); a.renderPanel(); } };
+  dl.by[1].addEventListener('click', ok); dl.by[2].addEventListener('click', () => a.closeModal());
+  f.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); ok(); } });
+  showDlg(dl, 'Dip Into Savings');
+  setTimeout(() => { f.focus(); const n = f.value.length; f.setSelectionRange(n, n); }, 0); // (not selected: shot 080)
   return true;
 }
 
