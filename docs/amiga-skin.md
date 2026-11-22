@@ -660,3 +660,41 @@ The Amiga game opened its own 640 x 256 screen and could not be made bigger. Wit
 (`html.am-grow`, set in layout()), the screen takes the whole window at the same pixel scale: the panel keeps the program's 241 pixels, the
 map window (#mapview and its proportional scroll bars) takes the rest (`--aw` x `--ah` pixels, at least 640 x 256). The phone layout,
 which already reflows, is unchanged; off, the screen is the program's as before.
+
+## Against the English 2.1 captures (Jake, 16 Nov 2026; compared 22 Nov 2026)
+
+`audit/amiga-2.1/captures` in the sources repo: 148 shots of the English 2.1 under FS-UAE (A1200, Kickstart 3.1), the first
+ones of the English program to be compared. Put side by side with the remake at exactly 2 x 4 CSS pixels to the Amiga pixel
+(1280 x 1024), sampled back to 640 x 256. Fixed:
+
+- **The menus.** Since the DOS skin gained its own menu bar (its theme's `menuLayout`), and the DOS file loads after this one on
+  the Amiga page, the Amiga showed the DOS program's File / Options / Ships / Galaxy / Window with "[Ctrl+S]" keys, in every
+  language. The skin now blanks the DOS menu hooks in its own theme, so the six Amiga menus are back (Project, Options, Ships,
+  Galaxy, Windows, Info; Datei … Info in German), with the Amiga-key glyph and letter at each item's right (the classic page's
+  `.mkey`, drawn as `.am-akey`). The Ships menu's Organize and Build items take the Amiga's words while they can't be used:
+  "No Ships to Organize" / "Keine Schiffe da" (string 23) and "Can`t Build Ships Here" / "Kein Bau hier möglich" (17).
+- **Numbers in English** are the program's own, as in German: "$ 51.000", "750.000", not the locale's commas (shots 059-148).
+- **The totals in English:** the labels end at 86, the numbers begin at 93, the changes end at 233 (the German keep theirs).
+- **Construction** (Ships > New Ship Type, and Ship Building's "New type…"): the Amiga's own window, from the English program's
+  gadget table (502 x 182) and shots 068-069: the name field, five proportional sliders with arrows and their figures, the
+  picture, the class cycle button (Scout, Fighter, Colonyship, Satellite), Ok (dotted until there is a name), Name, Cancel. The
+  costs are filled in; the captures show them empty before a name is typed.
+- **Type Manager:** "# Built:" and "# Exist:" are labels (strings 663-664) with the number in a column 61 pixels on.
+- **Fleet Roster, List of explored Stars:** every row a raised box, seven to the list, the empty ones shown (shots 070, 141);
+  the list's class had a typo (am-lrows) that left it unstyled. The star list's columns measured: the temperature ends at 125
+  from the text's start, the gravity at 188, the metal at 251, the status begins at 280, the figures right-aligned.
+- **Compare Players in 2000:** in English an empty title (string 739 is empty) and nothing drawn in the frame (shot 073).
+- **Ship Building:** the remake's "New type…" button on one line in every language.
+
+Not changed, and why:
+- **The screen's title bar** is 14 rows and a white line in these captures (Kickstart 3.1), 16 and a line in the German 2.0 ones
+  (Kickstart 2.04), and the program lays its windows out from the screen (`FUN_00107952`), so under 3.1 everything sits two rows
+  higher and the windows end at row 248 with the screen's grey below. The skin keeps the 2.04 layout.
+- **Orange where the skin has dark red** (the selected fleet, the open menu title, the default button's frame): Jake's game ran
+  in 256 colours (shot 144, ScreenMode); the skin keeps the 16-colour pens.
+- **The starting skill:** the program's Player Registration takes it from its preferences file (+0x34), so it has no fixed
+  default; the captured game was a Novice's ($ 51.000, 20.000 metal, two scouts and a colony ship), which the DOS rules give.
+- **Sending a fleet** from the star's one fleet marker sends the fleet selected in the panel, or the last one when none is.
+  Which one the program sends with none selected isn't in the captures.
+- The real-play tool's Amiga failures (the spending bars under the Tech Spending window, the menus hidden until the pointer is on
+  the title bar, Ship Building's click-to-queue) are the tool not knowing the Amiga's ways; each works by hand.

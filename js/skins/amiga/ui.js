@@ -87,7 +87,7 @@ const WORDS = {
   build: ['Schiffsbau', 'Ship Building', 'Construction', 'Gemi yapımı', 'Astillero'], queueAt: ['Auftragsliste bei %1', 'Ship Building Queue at %1', 'Commandes à %1', '%1 sipariş listesi', 'Encargos en %1'], types: ['Vorhandene Typen', 'Typs available', 'Types existants', 'Var olan tipler', 'Tipos existentes'], waiting: ['Auf Warteliste:', 'Ship Building Queue:', 'En attente :', 'Sırada:', 'En espera:'],
   done: ['%1% fertig', '%1% ready', '%1 % fini', '%%1 bitti', '%1 % hecho'], newType: ['Neuer Typ…', 'New type…', 'Nouveau type…', 'Yeni tip…', 'Tipo nuevo…'], noShip: ['Keine Schiffsbaugelder: Schf. im Sternfenster.', 'No shipbuilding money: Ship bar in the star panel.', 'Pas d’argent pour la construction : barre Prod dans la fenêtre de l’étoile.', 'Gemi yapımına para yok: yıldız panelinde Gemi çubuğu.', 'No hay dinero para construir: barra Naves en el panel de la estrella.'],
   typeMgr: ['Spaceward Ho! Typen Manager', 'Spaceward Ho! Type Manager', 'Spaceward Ho! Gestion des types', 'Spaceward Ho! Gemi Tipleri', 'Spaceward Ho! Gestor de tipos'], name: ['Name:', 'Name:', 'Nom :', 'Ad:', 'Nombre:'], cls: ['Klasse:', 'Class:', 'Classe :', 'Sınıf:', 'Clase:'], devCost: ['Entw.kosten:', 'Res.cost:', 'Coût dév. :', 'Tasarım bedeli:', 'Coste diseño:'],
-  prodCost: ['Prod.kosten:', 'Prod.cost:', 'Coût prod. :', 'Üretim bedeli:', 'Coste unidad:'], built: ['# Gebaut: %1', '# Built: %1', '# Construits : %1', '# Yapılan: %1', '# Construidas: %1'], exist: ['# Existent: %1', '# Exist: %1', '# Existants : %1', '# Var olan: %1', '# Existentes: %1'], scrapType: ['Typ verschrotten', 'Scrap Type', 'Recycler le type', 'Tipi hurdaya çıkar', 'Desguazar el tipo'],
+  prodCost: ['Prod.kosten:', 'Prod.cost:', 'Coût prod. :', 'Üretim bedeli:', 'Coste unidad:'], built: ['# Gebaut:', '# Built:', '# Construits :', '# Yapılan:', '# Construidas:'], exist: ['# Existent:', '# Exist:', '# Existants :', '# Var olan:', '# Existentes:'], scrapType: ['Typ verschrotten', 'Scrap Type', 'Recycler le type', 'Tipi hurdaya çıkar', 'Desguazar el tipo'],
   nameBtn: ['Name', 'Name', 'Nom', 'Ad', 'Nombre'], rename: ['Neuer Name für %1:', 'New name for %1:', 'Nouveau nom pour %1 :', '%1 için yeni ad:', 'Nombre nuevo para %1:'], shields2: ['Schilde:', 'Shield:', 'Boucliers :', 'Kalkanlar:', 'Escudos:'], weite: ['Weite:', 'Range:', 'Distance :', 'Menzil:', 'Alcance:'], tempo: ['Tempo:', 'Speed:', 'Vitesse :', 'Hız:', 'Velocidad:'], waffen: ['Waffen:', 'Weapons:', 'Armes :', 'Silâhlar:', 'Armas:'], miniC: ['Mini:', 'Mini:', 'Mini :', 'Mini:', 'Mini:'],
   rnHelp1: ['Geben Sie einen neuen Namen ein', 'Type new name', 'Tapez un nouveau nom', 'Yeni bir ad yaz', 'Escribe un nombre nuevo'], rnHelp2: ["oder wählen Sie 'Benennen' an", 'or choose `Rename`', 'ou choisissez « Nommer »', "ya da 'Adlandır'ı seç", 'o elige «Nombrar»'],
   autoName: ['Benennen', 'Name', 'Nommer', 'Adlandır', 'Nombrar'], renameTitle: ['Schiff umbenennen', 'Rename Ship', 'Renommer le vaisseau', 'Gemiyi yeniden adlandır', 'Renombrar la nave'],
@@ -137,6 +137,10 @@ const WORDS = {
   mShipTypes: ['Schiffstypen', 'Ship Types', 'Types de vaisseaux', 'Gemi tipleri', 'Tipos de nave'], mNewType: ['Neuer Schiffstyp', 'New Ship Type', 'Nouveau type de vaisseau', 'Yeni gemi tipi', 'Tipo de nave nuevo'],
   mFleets: ['Liste der Flotten', 'Fleet Roster', 'Liste des flottes', 'Filo listesi', 'Lista de flotas'], mSplitFleets: ['Flottenaufteilung', 'Organize Ships', 'Répartition des flottes', 'Filo bölme', 'División de flotas'],
   mBuildAt: ['Schiffbau auf %1', 'Build Ships at %1', 'Construction à %1', '%1 üzerinde gemi yapımı', 'Construir en %1'], mScrap: ['Verschrotten', 'Scrap Current Fleet', 'Recycler', 'Hurdaya çıkar', 'Desguazar'],
+  // (strings 17 and 23: the Ships menu's Build and Organize items as the Amiga writes them while they can't be used, Jake's capture 55)
+  consTitle: ['Konstruktion', 'Construction', 'Construction', 'İnşa', 'Construcción'], consName: ['Name des neuen Typs', 'Name of new ship type', 'Nom du nouveau type', 'Yeni gemi tipinin adı', 'Nombre del tipo nuevo'],
+  mNoBuild: ['Kein Bau hier möglich', 'Can`t Build Ships Here', 'Pas de construction ici', 'Burada gemi yapılamaz', 'Aquí no se puede construir'],
+  mNoOrganize: ['Keine Schiffe da', 'No Ships to Organize', 'Aucun vaisseau à répartir', 'Bölünecek gemi yok', 'No hay naves que dividir'],
   mScrap2: ['Nicht verschrotten', 'Don`t Scrap Fleet', 'Ne pas recycler', 'Hurdaya çıkarma', 'No desguazar'], mBattle: ['Kampf ansehen', 'Review Battle on %1', 'Revoir le combat', 'Savaşı gözden geçir', 'Revisar el combate'], mNoBattle: ['Kein Kampf hier', 'No Battle here', 'Pas de combat ici', 'Burada savaş yok', 'Aquí no hay combate'],
   mCompare: ['Spielervergleich', 'Compare Players', 'Comparaison des joueurs', 'Oyuncu karşılaştırması', 'Comparar jugadores'], mStarList: ['Liste der Sterne', 'Star List', 'Liste des étoiles', 'Yıldız listesi', 'Lista de estrellas'],
   mMessage: ['Funkspruch', 'Send Message', 'Message radio', 'Telsiz mesajı', 'Mensaje de radio'], mZoomIn: ['Vergrößern', 'Zoom In', 'Agrandir', 'Yakınlaştır', 'Acercar'], mZoomOut: ['Verkleinern', 'Zoom Out', 'Réduire', 'Uzaklaştır', 'Alejar'],
@@ -196,16 +200,17 @@ const CLASS_EN = { scout: 'Scout', fighter: 'Fighter', colony: 'Colonyship', sat
 const className = (t) => (de() ? CLASS_DE[t] : lang() === 'en' ? CLASS_EN[t] : null) || (HO.TYPES[t] ? (window.HOUI ? HOUI.tr(HO.TYPES[t].name) : HO.TYPES[t].name) : t);
 // numbers the Amiga's way (ho!, FUN_0010eb24): 51.000, 1.234.567, and from
 // ten million on in thousands, 12.345K; the totals' changes in money
-// (FUN_0010ec04) in whole thousands or millions, 22K, 3M
+// (FUN_0010ec04) in whole thousands or millions, 22K, 3M; the English 2.1 the same, "$ 51.000", "750.000" (Jake's
+// captures, audit/amiga-2.1 in the sources, shots 059-148: the program's own format, not the locale's)
 const num = (n) => {
-  const a = Math.abs(Math.trunc(n)), sg = n < 0 ? '-' : '', sep = lang() === 'en' ? ',' : lang() === 'fr' ? ' ' : '.';
+  const a = Math.abs(Math.trunc(n)), sg = n < 0 ? '-' : '', sep = lang() === 'fr' ? ' ' : '.';
   const m = Math.trunc(a / 1e6), k = Math.trunc((a % 1e6) / 1000), u = a % 1000, p3 = (v) => String(v).padStart(3, '0');
   if (m >= 10) return sg + m + sep + p3(k) + 'K';
   if (m) return sg + m + sep + p3(k) + sep + p3(u);
   if (k) return sg + k + sep + p3(u);
   return sg + u;
 };
-const cash = (n) => (lang() !== 'en' ? '$ ' + num(n) : api().money(n));
+const cash = (n) => '$ ' + num(n);
 // "(+ $ 22K)", "(- 889)": strings 90-93
 const signed = (n, money) => {
   const a = Math.abs(Math.trunc(n)), s = n < 0 ? '-' : '+';
@@ -1057,7 +1062,7 @@ function openShipyard(sid) {
     const right = el('div', { class: 'am-yright' }, el('div', { class: 'am-ytitle' }, w('types')),
       el('div', { class: 'am-ylist' }, listBox, scroller(listBox, true)));
     const btns = el('div', { class: 'am-ybtns' },
-      btn(w('newType'), () => { a.closeModal(); a.classic('build', a.openBuild, sid); }, 'am-small'),
+      btn(w('newType'), () => { a.closeModal(); if (!openConstruction(() => openShipyard(sid))) a.classic('build', a.openBuild, sid); }, 'am-small'),
       btn(w('ok'), () => { a.closeModal(); }),
       btn(w('cancel'), () => { s.queue = JSON.parse(before); s.yard = yard0; s.yardDid = yardDid0; a.closeModal(); a.renderPanel(); a.draw(); }));
     const keepTop = listBox.scrollTop;
@@ -1090,7 +1095,7 @@ function openTypes() {
     const marks = !!HO.rules(G).flagScrapDesign;
     body.replaceChildren(
       el('div', { class: 'am-tleft' }, frame('am-tlistf', listBox, scroller(listBox, true)),
-        frame('am-tcount', el('div', null, w('built', d ? (d.built || 0) : 0)), el('div', null, w('exist', d ? (n[d.id] || 0) : 0)))),
+        frame('am-tcount', el('div', null, w('built'), el('span', null, String(d ? (d.built || 0) : 0))), el('div', null, w('exist'), el('span', null, String(d ? (n[d.id] || 0) : 0))))), // (the label, strings 663 and 664, and the number apart, in its column: capture 66)
       el('div', { class: 'am-tright' },
         el('div', { class: 'am-tbig' }, d ? shipCanvas(d) : ''),
         frame('am-tfigs', ...(d ? [...fig(w('name'), d.name), ...fig(w('weite'), d.type === 'satellite' ? '0' : String(d.R)),
@@ -1115,6 +1120,57 @@ function openTypes() {
   };
   render();
   amWin(w('typeMgr'), body, 'am-wtypes', { onClose: () => a.save() });
+  return true;
+}
+// Konstruktion / Construction (Jake's captures 068-069 of the English 2.1; the gadget table at 2022cc of the English program,
+// decompiled/amiga-2.1-en-1.05/windows.txt, 502 x 182): the name of the new type in a string field, Range, Speed, Weapons, Shield
+// and Mini on proportional sliders with arrows (the figure, "8/8" where it can change, left of each), the type's picture, its class
+// on a cycle button (Scout, Fighter, Colonyship, Satellite), its costs; Ok (dotted until it has a name), Name (one the game makes
+// up: the ruleset's designName) and Cancel. The costs are filled in here; the captures show them empty before a name is typed.
+function openConstruction(after) {
+  const a = api(), G = a.G, p = a.me(); if (!G || !p) return false;
+  const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker', 'dread', 'bio', 'decoy'].filter(t => HO.canBuildType(G, p, t));
+  if (!types.length) return false;
+  const st = { type: types[0], name: '' };
+  const KEYS = ['R', 'V', 'W', 'S', 'M'], LAB = { R: 'weite', V: 'tempo', W: 'waffen', S: 'shields2', M: 'miniC' };
+  const lim = () => { const L = HO.designLimits(G, p, st.type), o = {}; for (const k of KEYS) { const lo = HO.designMin(G, k, st.type); o[k] = [lo, Math.max(lo, L[k] || lo)]; } return o; };
+  const fit = (fresh) => { const o = lim(); for (const k of KEYS) { const [lo, hi] = o[k]; if (fresh || st[k] == null) st[k] = hi; st[k] = Math.max(lo, Math.min(hi, st[k])); } };
+  fit(true);
+  const spec = () => ({ type: st.type, R: st.type === 'satellite' ? 0 : st.R, V: st.V, W: st.W, S: st.S, M: st.M });
+  const body = el('div', { class: 'am-cons' });
+  const inp = el('input', { class: 'am-field am-kname', maxlength: 14, 'aria-label': w('consName'), oninput: () => { st.name = inp.value.trim(); okB.disabled = !st.name; } });
+  const okB = btn(w('ok'), () => {
+    if (!st.name) return;
+    const sp = spec(), exists = p.designs.find(d => !d.scrapped && d.type === sp.type && d.R === sp.R && d.V === sp.V && d.W === sp.W && d.S === sp.S && d.M === sp.M), lm = HO.rules(G).maxDesigns;
+    if (lm && !exists && HO.liveDesigns(p) >= lm) { a.toast(HO.say(G, HO.DATA.alerts[15] || 'Your assembly lines are full.')); return; }
+    sp.name = st.name; const d = HO.findOrCreateDesign(G, p, sp); if (exists && d === exists && st.name) d.name = st.name;
+    a.save(); a.closeModal(); a.renderPanel(); a.draw(); if (after) after(d);
+  });
+  okB.disabled = true;
+  const rows = el('div', { class: 'am-csliders' }), figs = el('div', { class: 'am-cfigs' }), pic = el('div', { class: 'am-kpic' });
+  const clsB = btn(className(st.type), () => { st.type = types[(types.indexOf(st.type) + 1) % types.length]; fit(true); render(); }, 'am-ccycle');
+  const render = () => {
+    const o = lim(), c = HO.designCost(G, spec());
+    clsB.textContent = className(st.type);
+    rows.replaceChildren(...KEYS.map((k, i) => {
+      const [lo, hi] = o[k], v = st[k], n = hi - lo + 1, off = k === 'R' && st.type === 'satellite';
+      const set = (x) => { if (off) return; st[k] = Math.max(lo, Math.min(hi, x)); render(); };
+      const track = el('div', { class: 'am-ctrack', onclick: (e) => { const r = track.getBoundingClientRect(); set(lo + Math.floor((e.clientX - r.left) / r.width * n)); } },
+        el('div', { class: 'am-cknob', style: `left:${(v - lo) / n * 100}%;width:${100 / n}%` }));
+      return el('div', { class: 'am-crow', style: `top:calc(${78 + 15 * i} * var(--v))` }, el('span', { class: 'am-clab' }, w(LAB[k])), el('span', { class: 'am-cval' }, off ? '0' : hi > lo ? `${v}/${hi}` : String(v)),
+        el('div', { class: 'am-cslide', role: 'slider', 'aria-label': w(LAB[k]), 'aria-valuemin': lo, 'aria-valuemax': hi, 'aria-valuenow': v },
+          el('button', { type: 'button', class: 'am-carrow l', 'aria-label': '-', onclick: () => set(v - 1) }), track, el('button', { type: 'button', class: 'am-carrow r', 'aria-label': '+', onclick: () => set(v + 1) })));
+    }));
+    figs.replaceChildren(...[['cls', clsB], ['devCost', cash(c.proto || 0)], ['prodCost', cash(c.money)], ['metal', num(c.metal)]].map(([k, v], i) =>
+      el('div', { class: 'am-cfig', style: `top:calc(${93 + 15 * i} * var(--v))` }, el('span', null, w(k)), k === 'cls' ? null : el('span', { class: 'am-cfv' }, v))));
+    body.append(clsB);
+    pic.replaceChildren(shipCanvas(spec()));
+  };
+  body.append(frame('am-cf1'), frame('am-cf2'), frame('am-cf3'), pic, el('span', { class: 'am-clabname' }, w('consName')), inp, rows, figs,
+    el('div', { class: 'am-kbtns' }, okB, btn(w('nameBtn'), () => { st.name = HO.designName(G, p, st.type); inp.value = st.name; okB.disabled = false; }), btn(w('cancel'), () => a.closeModal())));
+  render();
+  amWin(w('consTitle'), body, 'am-wcons');
+  setTimeout(() => inp.focus(), 50);
   return true;
 }
 // "Name" (FUN_00122474): the "Schiff umbenennen" window (table data+0x2fd4,
@@ -1157,8 +1213,9 @@ function openCompare() {
   };
   const icon = P + 'i' + (me.female ? 1500 : 1000);
   const over = G.over || !me.alive || me.surrendered;
-  const title = G.year <= 2000 ? w('noCompare') : over ? w(me.alive && !me.surrendered ? 'cWon' : 'cLost', G.year) : w('compare', alive.length, G.year);
-  const plot = G.year <= 2000 || over ? el('div', { class: 'am-cplot am-cnone' }) : el('div', { class: 'am-cplot' },
+  // (before 2010 the English 2.1 shows an empty title, its string 739 being empty: Jake's capture 073; the German its own sentence)
+  const title = G.year <= 2000 ? (lang() === 'en' ? '' : w('noCompare')) : over ? w(me.alive && !me.surrendered ? 'cWon' : 'cLost', G.year) : w('compare', alive.length, G.year);
+  const plot = G.year <= 2000 || over ? el('div', { class: 'am-cplot am-cnone' + (G.year <= 2000 ? ' am-c2000' : '') }) : el('div', { class: 'am-cplot' },
     ...[w('first'), w('middle'), w('last')].map((t, i) => el('span', { class: 'am-crank r' + i }, t)),
     ...cats.map(([k, fn], i) => el('div', { class: 'am-ccat', style: `--i:${i}` }, el('span', { class: 'am-cpic', style: `--y:${place(fn)}` }, img(icon)), el('span', { class: 'am-cname' }, w(k)))));
   const body = el('div', { class: 'am-compare' }, frame('am-cframe', plot),
@@ -1272,9 +1329,11 @@ function dblc(key, one, two) {
 function listWin({ title, size: [W, H], frame: [fx, fy, fw, fh], rows: [rx, ry, rw], scroll: [sx, sy, sh], items, buttons, pick }) {
   const a = api();
   let sel = -1;
-  const list = el('div', { class: 'am-lrows', style: at(rx - fx, ry - fy, rw, sh) });
+  const list = el('div', { class: 'am-lrws', style: at(rx - fx, ry - fy, rw, sh) });
+  // (each row a raised box, 20 pixels apart; the boxes the list has no line for show empty: Jake's captures 070 and 141)
+  const blanks = () => Array.from({ length: Math.max(0, Math.round(sh / 20) - items.length) }, () => el('div', { class: 'am-lrw am-lempty', 'aria-hidden': 'true' }));
   const paint = () => list.replaceChildren(...items.map((t, i) => el('div', { class: 'am-lrw' + (i === sel ? ' sel' : ''), role: 'option', tabindex: 0,
-    onclick: dblc(i, () => { sel = i; paint(); }, () => { sel = i; if (pick) pick(i); }) }, ...(Array.isArray(t) ? t.map(c => el('span', null, c)) : [t]))));
+    onclick: dblc(i, () => { sel = i; paint(); }, () => { sel = i; if (pick) pick(i); }) }, ...(Array.isArray(t) ? t.map(c => el('span', null, c)) : [t]))), ...blanks());
   paint();
   const bar = scroller(list, true); bar.setAttribute('style', at(sx - fx, sy - fy, 16, sh));
   const body = el('div', { class: 'am-listwin' }, el('div', { class: 'am-frame', style: at(fx, fy, fw, fh) }, list, bar),
@@ -1756,7 +1815,7 @@ const AKEYS = []; // { key, labels (German, English), fn, feat, match }: the ite
 // COMMSEQ and the letter for each '~' in the menu table and leaves 32 pixels for them)
 function markKeys(root) {
   for (const b of root.querySelectorAll('.dropdown button[role=menuitem]')) {
-    if (b.querySelector('.am-akey')) continue;
+    if (b.querySelector('.am-akey, .mkey')) continue; // (an item the classic page gave its key already: the glyph is .mkey's)
     const t = b.textContent.trim(), te = enOf(b), k = AKEYS.find(x => x.labels.includes(t) || x.labels.includes(te) || (x.match && (x.match(t) || x.match(te))));
     if (k) b.append(el('span', { class: 'am-akey', 'aria-hidden': 'true' }, k.key));
   }
@@ -1801,6 +1860,7 @@ function menus(M, ho) {
   const hasCmd = (re) => !!(planetBox && [...planetBox.querySelectorAll('button')].some(n => !n.disabled && re.test(enOf(n))));
   const clickCmd = (re) => { const n = planetBox && [...planetBox.querySelectorAll('button')].find(x => !x.disabled && re.test(enOf(x))); if (n) n.click(); };
   const ownStar = () => { const A2 = a(), G = A2.G; return G && A2.UI.sel != null && G.stars[A2.UI.sel].owner === A2.ME ? G.stars[A2.UI.sel] : null; };
+  const fleetHere = () => { const A2 = a(), G = A2.G; return !!G && (!!A2.curFleet() || (A2.UI.sel != null && G.fleets.some(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat))); };
   const zoomIdxNow = () => { const v = a().UI.view; return v ? zoomIdx(v.s) : 3; };
   const alive = () => { const G = G0(); return !!G && !G.over; };
   const fe = (en) => classicFn('Galaxy', en) || classicFn('Game', en) || classicFn('Ships', en);
@@ -1832,10 +1892,10 @@ function menus(M, ho) {
     ],
     mShips: [
       [() => w('mShipTypes'), () => a().G && openTypes(), null, null, () => !G0()],
-      [() => w('mNewType'), () => { const st = ownStar(); if (st) a().classic('build', a().openBuild, st.id); else a().toast(w('pickColony')); }, null, null, () => !alive(), 'N'],
+      [() => w('mNewType'), () => { if (!openConstruction()) { const st = ownStar(); if (st) a().classic('build', a().openBuild, st.id); else a().toast(w('pickColony')); } }, null, null, () => !alive(), 'N'],
       [() => w('mFleets'), () => G0() && openFleetListAm(), null, null, () => !G0(), 'L'],
-      [() => w('mSplitFleets'), () => splitNow(), null, null, () => !alive(), 'G'],
-      [() => { const st = ownStar(); return w('mBuildAt', st ? st.name : (G0() && a().UI.sel != null ? G0().stars[a().UI.sel].name : '')); }, () => { const st = ownStar(); if (st) { if (!openShipyard(st.id)) a().classic('build', a().openBuild, st.id); } else a().toast(w('pickColony')); }, null, null, () => !alive() || !ownStar(), 'B'],
+      [() => (fleetHere() ? w('mSplitFleets') : w('mNoOrganize')), () => splitNow(), null, null, () => !alive() || !fleetHere(), 'G'],
+      [() => { const st = ownStar(); return st && alive() ? w('mBuildAt', st.name) : w('mNoBuild'); }, () => { const st = ownStar(); if (st) { if (!openShipyard(st.id)) a().classic('build', a().openBuild, st.id); } else a().toast(w('pickColony')); }, null, null, () => !alive() || !ownStar(), 'B'],
       [() => { const A2 = a(), f = A2.G && A2.curFleet(); return f && f.scrap301 ? w('mScrap2') : w('mScrap'); }, () => { const A2 = a(), f = A2.G && A2.curFleet(); if (f && !A2.G.over) A2.toggleScrapFleet(f); }, () => !!(a().G && a().marksScrap()), null, () => !(a().G && a().curFleet()), 'V'],
       [() => { const A2 = a(), G = A2.G; return G && A2.UI.sel != null && A2.lastBattles(A2.UI.sel).length ? w('mBattle', G.stars[A2.UI.sel].name) : w('mNoBattle'); }, () => { const A2 = a(), G = A2.G, bs = G ? A2.lastBattles(A2.UI.sel) : []; if (bs.length) A2.openBattle(bs[0].id); }, null, null, () => { const A2 = a(); return !(A2.G && A2.UI.sel != null && A2.lastBattles(A2.UI.sel).length); }],
     ],
@@ -1901,6 +1961,10 @@ window.HOTHEME_OVER = {
   drawStar, markerAt, allyAt, ownRings: true, zoomTo, compareMenu: false, afterDraw: syncMapBars, fitView,
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,
+  // (the DOS skin's file loads after this one on the Amiga page, for its report looks, and its theme comes in under this one: its own menu bar,
+  // the DOS program's File / Options / Ships / Galaxy / Window and their "[Ctrl+S]" keys, would take the place of the Amiga's six menus)
+  menuLayout: undefined, menuLayoutNow: undefined, hoIntoLast: undefined, leftoversIntoHo: undefined,
+  keyName: (k) => k, // (the item's key: the Amiga-key glyph before it is the stylesheet's, .mkey)
   menuName: (k) => (WORDS[k] ? W(k) : k), // the menus' names (menus above), in the language
   // no You Lost window: the Amiga game's words (texte.pff) have none, only the
   // report "Sie werden aus dem Spiel gelöscht." (624) and Spielervergleich's
