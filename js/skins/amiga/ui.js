@@ -964,20 +964,10 @@ function afterMsg(box, ctx) {
     if (im && api().A.img[want]) im.src = api().A.img[want];
     clock.setAttribute('aria-label', w('endTurn'));
   }
-  // (2.1, Jake's captures 060-061 and 131-139: with the Reports window open the turn's reports are all in it at once and no card is
-  // shown; the cards are stepped through unseen, so each report still does what it does (its sound, its battle, its star), waiting
-  // while a window such as a battle review is open; with the window closed, the cards as before)
-  const auto = !!card && !card.classList.contains('end') && !card.classList.contains('waiting') && newsOpen() && !!game();
-  box.classList.toggle('am-newsmode', auto);
-  renderNews(clock || auto ? ctx.inbox : null);
-  if (auto) {
-    const step = () => {
-      if (!card.isConnected) return;
-      if (document.querySelector('.scrim')) { setTimeout(step, 250); return; }
-      const T = TH(), q = T.quietNext; T.quietNext = true; card.click(); T.quietNext = q;
-    };
-    setTimeout(step, 0);
-  }
+  // (2.1, Jake's captures: the Reports window, when open, lists the turn's reports from the start, in front of the card, which still
+  // steps through them with its "--more--" (ks204 shot 161: the card's corner under the window); closed, the card alone (shot 162))
+  const listing = !!card && !card.classList.contains('end') && !card.classList.contains('waiting');
+  renderNews(clock || listing ? ctx.inbox : null);
 }
 function newsIcon(m) {
   const a = api(), G = a.G;

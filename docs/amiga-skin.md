@@ -686,9 +686,10 @@ ones of the English program to be compared. Put side by side with the remake at 
 - **Compare Players in 2000:** in English an empty title (string 739 is empty) and nothing drawn in the frame (shot 073).
 - **Ship Building:** the remake's "New type…" button on one line in every language.
 
-- **Reports (second pass):** with the Reports window open (the default on a desktop) the turn's reports are all listed in it at once and no
-  card shows (captures 060-061, 131-139); the cards are still stepped through, unseen, so each report's sound, battle and star happen,
-  waiting while a window such as a battle review is open. With the window closed, the cards as before.
+- **Reports (second pass, corrected after the Kickstart 2.04 captures):** the report cards still step through the turn's reports with
+  their "--more--"; the Reports window, when open, lists them all from the start and sits in front of the card (ks204 shot 161: the
+  card's corner shows under the window; shot 162, the window closed: the card alone). A first try (the cards stepped through unseen)
+  was wrong and is gone.
 - **The fleet panel** has your first fleet at the selected star chosen when none is, with its Fuel / Speed / Scrap line (capture 060).
 - **List of Players** (Compare Players > Info): the game file's entries, the computers as "Comp 0", "Comp 1" … (string 720) with no
   level, then the humans with theirs, each a raised row, the level at x 290 (capture 074; FUN_00124d5c).

@@ -859,8 +859,8 @@ html.amiga .am-cons .am-ccycle::after { content: ''; position: absolute; left: c
 html.amiga .am-kbtns .am-btn { pointer-events: auto; top: calc(157 * var(--v)); width: calc(100 * var(--u)); height: calc(20 * var(--v)); }
 html.amiga .am-kbtns .am-btn:nth-child(1) { left: calc(71 * var(--u)); } html.amiga .am-kbtns .am-btn:nth-child(2) { left: calc(238 * var(--u)); } html.amiga .am-kbtns .am-btn:nth-child(3) { left: calc(385 * var(--u)); }
 
-/* the reports stepped through unseen while the Reports window lists them (afterMsg: 2.1's way, captures 060 and 131-139) */
-html.amiga #msg.am-newsmode .card { visibility: hidden; }
+/* the Reports window in front of the report card (ks204 shot 161) */
+html.amiga #am-news { z-index: 15; }
 
 /* Sreenmode Preferences (the English program's table at 2032e2, 552 x 160; capture 144) */
 html.amiga .win.am-wsmode { width: calc(560 * var(--u)); height: calc(178 * var(--v)); }
