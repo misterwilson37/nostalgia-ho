@@ -88,3 +88,13 @@ Taken from the Mac 1.2 program and **not measured on DOS**: a page click moves t
 **Sample.** 20 unflagged rows drawn at random (window geometry, list and string helpers, text measuring and word wrap of the alert box, computer-player helpers, data tables): all 20 are internal (judged by their call profile and strings; 3 of them, the list and text helpers, also read in the disassembly). The first run's sample had found two holes in the script, now closed: a routine's own literal strings were not a flag (FUN_a000_dab3, the ship type's list line "Panther (2/2) Fighter", passed as unflagged) and calls through the video driver's vector table at DS:324a were not seen (10 rows).
 **Limits.** Tier A / B rows were classified from the corrected call graph, the strings and, for about a dozen routines, the disassembly (so the reasons of the others say what their calls and strings show, not more); the rows of the 1,000 to 4,000 segments were not re-read (their far calls were right). Several rows of other status carry a first-table reason that is a Ghidra label of data, not what the routine does (FUN_b000_4d0a, 4b7e, 9fd0, 53a0, 44f0, 0110, 9000:dc1e are window procedures labelled "developer's trace" or "sound"; 2000:fd17, 26d3 and 3000:8395 above); only FUN_b000_562b was rewritten here.
 
+
+## New Game in the DOS look (22 Nov 2026)
+
+Jake: "DOS create game was the real mess". The program's Create New Galaxy window (536 x 280) now sits where the program puts it, at
+(48, 99) on the program's 640 x 476 screen, which is drawn behind it as before a game exists (teal title bar, menu bar with red initials,
+the left column white, the map black, the grey scroll bars; measured on v20dos-orig-n2.png). The remake's own choices (version, edition,
+language, skin, look and the rest) are behind a "Remake options…" link under the screen, with "Back to Create New Galaxy" to return,
+no longer spilled under the window. Why only the DOS look keeps one shape: DOS had no windows, so the program is one 640 x 480 screen,
+scaled whole (setUnit: in half steps to the largest that fits); the Mac skins give the room left over to the map window, as the Mac program
+could on a bigger monitor.

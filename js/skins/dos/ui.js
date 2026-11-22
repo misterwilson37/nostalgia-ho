@@ -1270,13 +1270,20 @@ function createGalaxyDos(f) {
     dSlider(48, 238, 176, 13, 0, 19, comp && /^\d+$/.test(comp.value) ? +comp.value : 4, (n) => { if (comp) { comp.value = String(n); fire(comp); } num.textContent = String(n); }, 'Number of Computer Players'),
     dButton('Cancel', 272, 224, 71, 26, () => a.closeModal(), { hot: 0 }), dButton('Create', 401, 225, 70, 26, () => f.requestSubmit(), { hot: 1, def: true }));
   let opened = false;
+  // (the remake's own choices, version, edition, language, skin, look: behind a link under the program's screen, not on its window)
   const more = el('button', { type: 'button', class: 'dd-more', onclick: () => { opened = !opened; dress(); } }, tx('Remake options…'));
-  dAt(more, 19, 264, 230, 14); kids.push(more);
   const box = el('div', { class: 'dd', role: 'group', 'aria-label': 'Create New Galaxy' }); box.style.width = du(536); box.style.height = du(280);
   box.append(dAt(el('div', { class: 'dd-title', translate: 'no' }, tx('Create New Galaxy')), 5, 5, 526, 17), ...kids);
-  const holder = el('div', { class: 'cg-dos' }, box); f.prepend(holder);
-  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
-  const rs = field('rules'), dress = () => { const on = !rs || rs.value === 'dos'; box.style.display = on ? '' : 'none'; win.classList.toggle('dosw', on && !opened); for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
+  // the program's screen behind it (v20dos-orig-n2.png, measured: the 640 x 476 screen, its teal title bar and grey menu bar, the left column
+  // white, the map black with its scroll bars; the window at (48, 99) on it): nothing in the panes yet, as before a game exists
+  const stage = el('div', { class: 'dd-stage', 'aria-hidden': 'false' });
+  const bar = (cls, l, t, w, h, txt) => { const e = dAt(el('div', { class: cls, 'aria-hidden': 'true' }), l, t, w, h); if (txt) e.append(txt); return e; };
+  const menus = el('span', null); ['File', 'Options', 'Ships', 'Galaxy', 'Window'].forEach((m) => { const w = tx(m); menus.append(el('b', null, w.charAt(0)), w.slice(1), '  '); });
+  stage.append(bar('dd-st-title', 0, 0, 640, 15, tx('Spaceward Ho!')), bar('dd-st-menu', 0, 15, 640, 13, menus), bar('dd-st-left', 0, 28, 240, 448), bar('dd-st-map', 240, 28, 400, 448),
+    bar('dd-st-vbar', 624, 28, 16, 432), bar('dd-st-hbar', 240, 460, 400, 16), dAt(box, 48, 99, 536, 280));
+  const holder = el('div', { class: 'cg-dos' }, stage, el('div', { class: 'dd-morerow' }, more)); f.prepend(holder);
+  const keep = (n) => n.classList && opened && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
+  const rs = field('rules'), dress = () => { const on = !rs || rs.value === 'dos'; stage.style.display = on && opened ? 'none' : ''; more.textContent = opened ? tx('Back to Create New Galaxy') : tx('Remake options…'); more.parentNode.style.position = opened ? 'static' : ''; more.style.fontSize = opened ? '13px' : ''; box.style.display = on ? '' : 'none'; win.classList.toggle('dosw', on && !opened); for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
   if (rs) rs.addEventListener('change', dress); dress();
 }
 
