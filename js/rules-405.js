@@ -2488,6 +2488,16 @@ E.registerRules('405', Object.assign({}, D, {
   // CONFIRMED (Windows FUN_00410d1c and the profile's fallbacks, shipShootDelay 10, pollTicks 60; Mac doPreferencesDialog @1045fe: SetCtlMin 4,
   // SetCtlMax 60 for Battle Speed): the battle speed 4 to 60 ticks a shot, 10 to start; the polling time 1 second to start (Jake's Mac shot of
   // Preferences: "1 Seconds"); Review Announced Battles on
+  // CONFIRMED (Mac 'Stup' 1000: +0x4a computers 3, +0x40 style 1 Circle, +0x42 density 1 Dense, +0x44 intelligence 1 Dumb, +0x3e size 2
+  // Medium, +0x4c 15 Alliances, Luck in Battles and Automatically end turn on, +0x8a 10 years, read by doCreateGalaxyDlg and
+  // InitCreateGalaxyLists; Windows the profile's fallbacks numCompPlayers 3, computerInt 1, galaxySize 2, galaxyDensity 1, galaxyAttrs 15;
+  // Jake's shots: Mac 002 (Base Difficulty 49 for these), Windows 002): a new 4.0.5 game starts there, Novice for the player
+  // CONFIRMED (Mac OrganizeFleets, 3.0.1's with Split All, Windows FUN_0042b278; Jake's shots, Windows 042 / 044, Mac System 7 capture 7):
+  // 4.0.5 has Organize Ships, piles of a type moved between a star's fleets, Group All and Split All. The Mac and Windows skins draw the
+  // program's own window; any other skin playing these rules gets the classic page's pile window (its 5.0.5 style, the same moves) under
+  // 4.0.5's name
+  organizeFleets: '505', organizeWord: 'Organize Ships…',
+  newGameDefaults: { computers: 3, w_iq: 'dumb', w_shape: 'circle', w_density: 'dense', w_size: 'medium', w_years: 10, w_skill: 'novice', alliances: true, luck: true, autoend: true, timelimit: 0 },
   options: Object.assign({}, D.options || {}, { reviewDefault: true,
     battleSpeed: Object.assign({}, (D.options || {}).battleSpeed, { min: 4, max: 60, def: 10 }), poll: Object.assign({}, (D.options || {}).poll, { def: 1 }) }),
   label: 'Windows 95 4.0.5 (1996)',

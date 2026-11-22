@@ -3022,7 +3022,7 @@ function openSplit(f) {
 // pile (Option-drag asks how many, Option-Shift moves one: here a count).
 function organizeStyle() { return !!G && !G.over && HO.rules(G).organizeFleets; }
 // the window's name: iOS and the Palm's "Organize Fleets", 5.0.5's "Group Fleets"
-const organizeName = () => organizeStyle() === 'ios' || organizeStyle() === 'palm' ? 'Organize fleets…' : 'Group fleets…';
+const organizeName = () => (G && HO.rules(G).organizeWord) || (organizeStyle() === 'ios' || organizeStyle() === 'palm' ? 'Organize fleets…' : 'Group fleets…'); // (rs.organizeWord: the version's own name, 4.0.5's "Organize Ships…")
 const pileStance = (f, did) => f.dstance && f.dstance[did] != null ? f.dstance[did] : (f.delayed ? 1 : 0) | (f.stance === 'defensive' ? 2 : f.stance === 'offensive' ? 4 : 0);
 function openOrganize(sid) {
   const style = organizeStyle();
@@ -3187,7 +3187,7 @@ function openOrganize(sid) {
   });
   body.addEventListener('pointerup', pinEnd); body.addEventListener('pointercancel', pinEnd);
   render();
-  modal(ios || palm ? 'Organize Fleets' : 'Group Fleets', body, { cls: 'wide orgwin', onClose: () => { W.empties = []; renderPanel(); draw(); save(); } });
+  modal(HO.rules(G).organizeWord ? HO.rules(G).organizeWord.replace(/…$/, '') : ios || palm ? 'Organize Fleets' : 'Group Fleets', body, { cls: 'wide orgwin', onClose: () => { W.empties = []; renderPanel(); draw(); save(); } });
 }
 
 // ----- battle replay -----
@@ -6587,6 +6587,11 @@ function newGameDialog() {
     if (humansLimit && +e.target.value > humansLimit.max) { e.target.value = String(humansLimit.max); alertOver(humansLimit.text, 'fr'); }
   });
   const refresh = () => {
+    // rs.newGameDefaults: the version's own New Game choices (its program's defaults), put in the form once each time that ruleset is
+    // chosen, before anything is read (4.0.5: the Mac's 'Stup' and the Windows profile's fallbacks)
+    { const r0 = (f.querySelector('select[name=rules]') || {}).value, ND = r0 && HO.RULESETS[r0] && HO.RULESETS[r0].newGameDefaults;
+      if (r0 && f.dataset.defRules !== r0) { f.dataset.defRules = r0;
+        if (ND) for (const [n, v] of Object.entries(ND)) { const e = f.querySelector(`[name="${n}"]`); if (!e) continue; if (e.type === 'checkbox') e.checked = !!v; else e.value = String(v); } } }
     const d = Object.fromEntries(new FormData(f).entries());
     const k = kindOf(d.rules);
     // a ruleset's own New Game window (each read where it is used):
@@ -6820,7 +6825,7 @@ function setupMenus(again) {
       ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', quitToTitle]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
-      [() => (G && organizeName()), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()],
+      [() => (G && !T.ownOrganize && organizeName()), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()], // (T.ownOrganize: a skin whose menus carry the program's own Organize)
       ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Compare players…', () => G && openCompare(), () => !!(G && HO.rules(G).compare) && T.compareMenu !== false],
       ['Players and alliances…', () => G && openPlayers(), null, null, () => menuDim('alliances')], ['List explored stars…', () => G && openStarList()],

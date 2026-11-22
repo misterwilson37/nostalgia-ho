@@ -191,3 +191,9 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
   skin on this code. (2) A game begun from the title at a phone's size was fitted while the map's box was still being laid out (a fifth of
   the zoom: the galaxy a speck, no star in reach to tap); `resize` now fits again while the view is the untouched fitted one. (3) real-play
   waits for a hidden New Game form (the iOS skin's own screen) and answers the Amiga's question and name prompt, so both games start.
+- **22 Nov, New Game defaults and Organize:** a new 4.0.5 game now starts where both programs do (rs.newGameDefaults, put in the form
+  each time the ruleset is chosen): 3 computers, Dumb, Circle, Dense, Medium, 10 years, no time limit, Alliances, Luck in Battles and
+  Automatically end turn on, Novice (Mac 'Stup' 1000 read by doCreateGalaxyDlg / InitCreateGalaxyLists; Windows the profile's fallbacks;
+  Mac shot 002's Base Difficulty 49 now the form's opening rating). Organize Ships: the 405 ruleset has it (organizeFleets, the classic
+  page's pile window under 4.0.5's name) for every other skin; the Mac and Windows skins keep the program's own window, and the classic
+  page's leftover item is no longer repeated in their Ho! menus (T.ownOrganize).

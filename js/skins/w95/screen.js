@@ -109,6 +109,7 @@ T.keyName = (k) => (/^Alt/.test(k) ? k : 'Ctrl+' + k);
 // (the remake's own commands: no longer at the end of Help; the Ho! menu is opened from the window's icon at the caption's left, where
 // Windows 95 keeps a window's own menu: Jake 18 Nov. style.css puts the Ho! button over the icon)
 T.hoIntoLast = () => false;
+T.ownOrganize = true; // (Ships > Organize Ships..., the skin's own window: the classic page's item not repeated)
 T.leftoversIntoHo = () => true; // (the remake's commands with no place in 4.0.5's menus: in the Ho! menu too, Help keeps shot 282's two items)
 // (the menu's name as one text, so that the page's languages can swap it; its first letter underlined by the CSS, as Windows marks its key)
 T.menuName = (name) => TL(name);

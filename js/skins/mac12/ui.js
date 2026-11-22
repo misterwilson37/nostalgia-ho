@@ -4992,6 +4992,7 @@ if (V3) {
     battleWindow: (b, k) => (own() ? battleWindow(b, k) : false),
     // (the program's own battle window with modern conveniences on too: Jake, 18 Nov, the remake's looked wrong in this skin)
     battleWindowAlways: true,
+    ownOrganize: true, // (Ships > Organize, the program's own window: the classic page's leftover item not repeated in the Ho! menu)
     // (4.0.5's DoMessageAction for the armageddon and supernova reports: the shake and the supernova graphic before the card)
     beforeCard: (m, again) => (V4 && own() && G() ? beforeCard405(m, again) : false),
     // (Compare Players' chart: its words in Geneva 9, as Jake's System 7 capture 8 of 4.0.5 shows them; the bitmap face, 12 CSS pixels to its 9)
