@@ -3737,12 +3737,14 @@ function scrollBar301(q, x, l, t, b, max, val, oy) { // an OS scroll bar, drawn 
 // #777777 dots on #dddddd aligned to the screen, a 12-row thumb (#555555, #ccccff, #aaaaaa, a #9999cc / #666699 grip, #333366); with nothing to
 // scroll, #eeeeee with the arrows outlined in #777777 and no thumb.
 const AR75S = [' ', '    E', '   EFE', '  EEFFE', ' EFFFFFE', 'EEEEFFEEE', '   EFFE', '   EFFE', '   EEEE'];
+// (the outlined arrow of a bar with nothing to scroll is its own shape, a pixel wider, its tip two pixels: shot 008's colony list, pixel by pixel)
+const AR75I = [' ', '    EE', '   E  E', '  EE  EE', ' E      E', 'EEEE  EEEE', '   E  E', '   E  E', '   EEEE'];
 function scrollBar75s(q, x, l, t, b, max, val, ox, oy) {
   const on = max > 0, R = (h, v, w, hh, c) => q.rect(h, v, h + w, v + hh, c);
   R(l, t, 12, b - t, '#000'); R(l + 1, t + 1, 10, b - t - 2, on ? '#dddddd' : '#eeeeee');
   const box = (t0, down) => {
     R(l + 1, t0, 10, 10, on ? '#dddddd' : '#eeeeee'); if (on) { R(l + 10, t0, 1, 10, '#777777'); R(l + 1, down ? t0 + 9 : t0 + 9, 10, 1, '#777777'); }
-    AR75S.forEach((row, i) => { for (let j = 0; j < row.length; j++) { const ch = row[j]; if (ch === ' ' || (!on && ch === 'F')) continue; R(l + 1 + j, down ? t0 + 9 - i : t0 + i, 1, 1, on ? (ch === 'E' ? '#333366' : '#9999cc') : '#777777'); } });
+    (on ? AR75S : AR75I).forEach((row, i) => { for (let j = 0; j < row.length; j++) { const ch = row[j]; if (ch === ' ' || (!on && ch === 'F')) continue; R(l + 1 + j, down ? t0 + 9 - i : t0 + i, 1, 1, on ? (ch === 'E' ? '#333366' : '#9999cc') : '#777777'); } });
   };
   box(t + 1, false); R(l + 1, t + 11, 10, 1, on ? '#000' : '#777777'); R(l + 1, b - 12, 10, 1, on ? '#000' : '#777777'); box(b - 11, true);
   if (!on) return;
@@ -3757,7 +3759,7 @@ function scrollBar75s(q, x, l, t, b, max, val, ox, oy) {
 //   after each, twice, the uncovered strip black, the End Turn clock and the bubble left out of it; then the map is drawn again;
 // - 1130 "The armageddon device has caused half of the stars to supernova!" (the stars gone this step) and 1081 "%s has just gone supernova."
 //   (that star): DoSupernovaGraphic @1168b8 centres the map on the first, then in colour at zoom 17 draws on each star the colour icons 728
-//   to 741 (32 x 32 about its centre, 6 ticks each), fades the screen out and back (DoFadeAndBack), and draws PICT 750 to 758 (64 x 64, 6 ticks
+//   to 741 (32 x 32 about its centre, 6 ticks each), flashes the screen white and back (DoFadeAndBack), and draws PICT 750 to 758 (64 x 64, 6 ticks
 //   each); otherwise (black and white, or another zoom) it frames ovals growing a pixel a tick to 3 x the zoom, red going to yellow
 //   (RGBForeColor 65535, r x zoom x 2000, 0). Then the map is drawn again. The remake draws them on a canvas laid over the map.
 function beforeCard405(m, again) {
@@ -3786,7 +3788,11 @@ function shake405(done) {
   return true;
 }
 function nova405(ids, done) {
-  const a = A(), g = G(); a.centerOn(ids[0]); a.draw();
+  const a = A(), g = G();
+  // (SelectNewStar, as DoSupernovaGraphic does when the selected star has gone (+0x72 set): your first colony still there, else the first star left)
+  const gone = (sid) => sid != null && g.stars[sid] && !!g.stars[sid].nova;
+  if (gone(a.UI.sel)) { const mine = g.stars.find(s => s.owner === a.ME && !s.nova), any = g.stars.find(s => !s.nova); const t = mine || any; if (t) { a.UI.sel = t.id; a.UI.selFleet = null; a.renderPanel(); } }
+  a.centerOn(ids[0]); a.draw();
   const M = mapBox405(); if (!M || !window.HOVIEW) { done(); return; }
   const v = HOVIEW(), kx = M.r.width / v.mapW, ky = M.r.height / v.mapH;
   const ov = a.el('canvas', { width: Math.round(M.r.width), height: Math.round(M.r.height), 'aria-hidden': 'true',
@@ -3812,10 +3818,13 @@ function nova405(ids, done) {
   const pic = () => {
     if (i >= frames.length) { end(); return; }
     const f = frames[i++];
-    if (f.fade) { // DoFadeAndBack: the screen to black and back
-      const fd = a.el('div', { 'aria-hidden': 'true', style: 'position:fixed;inset:0;background:#000;opacity:0;z-index:60;pointer-events:none;transition:opacity 250ms' });
-      document.body.append(fd); requestAnimationFrame(() => { fd.style.opacity = '1'; });
-      setTimeout(() => { fd.style.opacity = '0'; setTimeout(() => { fd.remove(); pic(); }, 260); }, 260);
+    if (f.fade) { // DoFadeAndBack @172240: the whole screen white at once through the gamma (FadeToWhite), 2 ticks, then FadeFromWhite lifts the
+      // ramp's foot by 61, then 60 a step, 2 ticks apart (255, 194, 134, 74, 14, then none): a white veil of that share over the screen
+      const fd = a.el('div', { 'aria-hidden': 'true', style: 'position:fixed;inset:0;background:#fff;opacity:1;z-index:60;pointer-events:none' });
+      document.body.append(fd);
+      const steps = [194, 134, 74, 14, 0]; let k = 0;
+      const next = () => { if (k >= steps.length) { fd.remove(); pic(); return; } fd.style.opacity = String(steps[k++] / 255); setTimeout(next, 2000 / 60); };
+      setTimeout(next, 2000 / 60);
       return;
     }
     x.clearRect(0, 0, ov.width, ov.height);
@@ -3955,7 +3964,7 @@ function lowBox301(B) {
   q.vline(L + 44, y, Y(FT));
   if (V4 && sepY == null) { q.vline(L + 44, y, y + 14); y += 7; q.hline(L + 44, 226, y); sepY = y; }
   q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = String(FT - 166);
-  if (V4) scrollBar301(q, x, 214, sepY + 1, Y(FT), Math.max(0, slots.length - 2 - (brow - 2)), LOW301.bTop);
+  if (V4) scrollBar301(q, x, 214, sepY, Y(FT), Math.max(0, slots.length - 2 - (brow - 2)), LOW301.bTop);
   else scrollBar301(q, x, 214, Y(181), Y(FT), Math.max(0, slots.length - brow), LOW301.bTop);
   // DoHBarClick: a drag on a bar, a click on the heading; the scroll bars; a click on a colony's name selects it (FollowStarNameClick)
   q.c.style.touchAction = 'none';
