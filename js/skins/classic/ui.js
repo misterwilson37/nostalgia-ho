@@ -535,6 +535,40 @@ function wheelZoom(e) {
   zoomAt(ox(e), oy(e), wheelSt.acc < 0 ? 1.15 : 1 / 1.15);
   wheelSt.acc = 0; wheelSt.stepT = now; wheelSt.locked = true;
 }
+// The wheel over a pane's or a window's own list (a modern convenience: Jake, 22 Nov 2026, "modern conveniences should activate scrolling on all
+// windows that have it and aren't using it for zoom"). The originals had no wheel: their lists scroll by their scroll bars' arrows, track and
+// thumb alone, and a list the skin draws itself (a canvas with a drawn bar, a box whose browser bar is hidden) keeps that with the setting off.
+// With it on, the wheel steps the list as its bar's arrow does. wheelRows(e): the whole rows a wheel event moves, one a mouse wheel's notch
+// (Chrome's 100 pixels, Firefox's 3 lines; a faster spin more), while a trackpad's many small deltas are added up, a row each WHEEL_ROW.PX
+// pixels of them, the sum forgotten after a pause or a turn the other way (as the zoom's, above). Kept for each list (its element).
+const WHEEL_ROW = { NOTCH: 50, PX: 40, GAP: 220 };
+const wheelAcc = new WeakMap();
+function wheelRows(e, key) {
+  const k = key || e.currentTarget || document, now = performance.now();
+  let st = wheelAcc.get(k); if (!st) wheelAcc.set(k, st = { acc: 0, t: 0 });
+  const gap = now - st.t, d = e.deltaY; st.t = now;
+  if (!d) return 0;
+  if (e.deltaMode === 1) { st.acc = 0; return Math.sign(d) * Math.max(1, Math.round(Math.abs(d) / 3)); } // (lines)
+  if (e.deltaMode === 2) { st.acc = 0; return Math.sign(d) * 4; } // (pages)
+  if (Math.abs(d) >= WHEEL_ROW.NOTCH) { st.acc = 0; return Math.sign(d) * Math.max(1, Math.round(Math.abs(d) / 100)); }
+  if (gap > WHEEL_ROW.GAP || Math.sign(d) !== Math.sign(st.acc)) st.acc = 0;
+  st.acc += d; const n = Math.trunc(st.acc / WHEEL_ROW.PX); st.acc -= n * WHEEL_ROW.PX; return n;
+}
+// wheelList(el, step, can): with modern conveniences on, the wheel over el calls step(rows, event) (rows: + down, - up) while can() (there is more
+// than fits); off, the event is left alone, as before.
+function wheelList(el, step, can) {
+  el.addEventListener('wheel', guard((e) => { if (!modern() || e.ctrlKey || (can && !can())) return; e.preventDefault(); const n = wheelRows(e, el); if (n) step(n, e); }), { passive: false });
+  return el;
+}
+// wheelBox(box): the same for a box of HTML rows the skin scrolls with a bar of its own and the browser can't (overflow hidden: the Amiga's
+// lists): it moves by the wheel's own pixels, as the browser moves a box it scrolls itself, and the box's 'scroll' event moves its bar.
+function wheelBox(box) {
+  box.addEventListener('wheel', guard((e) => {
+    if (!modern() || e.ctrlKey || box.scrollHeight <= box.clientHeight + 1) return;
+    e.preventDefault(); box.scrollTop += e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? box.clientHeight : 1);
+  }), { passive: false });
+  return box;
+}
 // (Firefox, 18 Nov: a press on a report card's or End Turn's picture that moved a pixel started dragging the picture, and the click was
 // lost; CSS can't stop that in Firefox, so the drag is cancelled here, over the map, its report card and the panes)
 document.addEventListener('dragstart', (e) => { if (e.target && e.target.closest && e.target.closest('#mapwrap, #panel, .p301x')) e.preventDefault(); });
@@ -6980,7 +7014,7 @@ window.addEventListener('DOMContentLoaded', () => {
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
     quitToTitle, evacuateClick, evacuateHere, evacuateLabel, evacuateShown, // (the iOS skin's evacuate button beside the selected colony's bar)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
-    verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
+    verOpts, modern, wheelRows, wheelList, wheelBox, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, profile, rankOf, // (profile, rankOf: the rank window a skin draws itself)
     arrivesText, markedLine, hallTables, playAgain, openTemperature, compareWords, tl, CMP_EN, CMP_ICONS, openSkillsList: () => openSkills(), hasCloud: () => !!CLOUD, cloudHall: (kind, order) => CLOUD.hallTop(G.rules, kind, order), cloudError: (e) => CLOUD.errorText(e), cloudUser: () => cloudUser(), // (what the iOS skin's own fleet list, Hall and Master Point List need)

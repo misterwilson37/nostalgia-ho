@@ -371,6 +371,9 @@ function scroller(box, vertical) {
   knob.addEventListener('pointerup', () => { drag = null; });
   track.addEventListener('pointerdown', (e) => { if (e.target === track) { const r = knob.getBoundingClientRect(); step((vertical ? e.clientY < r.top : e.clientX < r.left) ? -1 : 1); } });
   requestAnimationFrame(sync);
+  // the wheel over the box: the Amiga had none; with modern conveniences on it scrolls the box (HOAPI.wheelBox: the classic page's), and the
+  // box's scroll moves the knob (the map's wheel still zooms)
+  if (vertical && !box._wheel) { const a = window.HOAPI; if (a && a.wheelBox) { a.wheelBox(box); box._wheel = true; } }
   bar._sync = sync;
   return bar;
 }

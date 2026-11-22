@@ -412,7 +412,7 @@ function shipTypes(selId) {
     });
     drawBar(lq.x, LW - 16, 0, true, LH, 16, { on: true, value: L6000.top, max: maxTop });
     lq.c.addEventListener('click', (ev) => { const pt = lq.at(ev); if (pt.h < LW - 16 || !maxTop) return; L6000.top += pt.v < 16 ? -1 : pt.v >= LH - 16 ? 1 : pt.v < LH / 2 ? -rows : rows; show(); });
-    lq.c.addEventListener('wheel', (ev) => { if (!maxTop) return; ev.preventDefault(); L6000.top += ev.deltaY > 0 ? 1 : -1; show(); }, { passive: false });
+    wheel12(lq.c, (n) => { L6000.top += n; show(); }, () => !!maxTop);
     // the chosen type
     const bq = qdCanvas(243, 76, cur.name); bq.c.style.cssText = at20([3, 149, 79, 392]); putPic(bq, cur, 0, 0, 243, 76);
     const c = H().designCost(g, cur), R = R6000;
@@ -543,7 +543,7 @@ function list6030(title, rows, goWord, onGo, o) {
   };
   lq.c.style.cssText = at20([26, 13, 26 + LH, 13 + LW]);
   lq.c.addEventListener('click', (ev) => { const pt = lq.at(ev); if (pt.h < LW - 16 || rows.length <= n) return; top += pt.v < 16 ? -1 : pt.v >= LH - 16 ? 1 : pt.v < LH / 2 ? -(n - 1) : n - 1; draw(); });
-  lq.c.addEventListener('wheel', (ev) => { if (rows.length <= n) return; ev.preventDefault(); top += ev.deltaY > 0 ? 1 : -1; draw(); }, { passive: false });
+  wheel12(lq.c, (k) => { top += k; draw(); }, () => rows.length > n);
   draw();
   const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
   const head = txt20(title, o.head); head.style.overflow = 'visible'; head.style.whiteSpace = 'nowrap';
@@ -751,7 +751,7 @@ function build6020(sid, before) {
       lb.append(el('div', { class: 'li', role: 'option', tabindex: 0, 'aria-selected': d === pick ? 'true' : 'false', 'aria-label': desc0(d), style: `position:absolute;left:0;right:0;top:${53 * i}px;height:53px;cursor:default`,
         onclick: dbl12('b' + d.id, () => { pick = d; draw(); }, queueOne), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); queueOne(); } } }));
     });
-    lq.c.addEventListener('wheel', (ev) => { if (!maxTop) return; ev.preventDefault(); B6020.top += ev.deltaY > 0 ? 1 : -1; draw(); }, { passive: false });
+    wheel12(lq.c, (n) => { B6020.top += n; draw(); }, () => !!maxTop);
     box.append(lq.c, lb);
   };
   draw();
@@ -1498,6 +1498,10 @@ function fixStep() {
 }
 
 // ---------- Mac 2.0.1's own dialogs (the DLOGs it added; read in audit/mac-2.0.1 of the private repo) ----------
+// The wheel over a pane's or a dialog's list drawn by this skin (a modern convenience: Jake, 22 Nov 2026; the originals had no wheel, their
+// lists moved by the bars alone): the classic page's wheelList (whole rows, a trackpad's small deltas added up; nothing with the
+// conveniences off). step(rows, event); can(): there is more than fits.
+function wheel12(el, step, can) { const a = A(); if (a && a.wheelList) a.wheelList(el, step, can); return el; }
 // a dialog's item at its DITL rectangle (top, left, bottom, right), in the DLOG's pixels
 const at20 = (r) => `position:absolute;left:${r[1]}px;top:${r[0]}px;width:${r[3] - r[1]}px;height:${r[2] - r[0]}px`;
 const dlog20 = (w, h, ...items) => A().el('div', { class: 'dl20', style: `position:relative;width:${w}px;height:${h}px` }, ...items);
@@ -3004,7 +3008,7 @@ function fleetBox12() {
     if (pt.v < 21) return;
     const f = here[FLEET_TOP + Math.floor((pt.v - 21) / 10)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); }
   });
-  q.c.addEventListener('wheel', (ev) => { if (here.length <= 4) return; ev.preventDefault(); FLEET_TOP += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  wheel12(q.c, (n) => { FLEET_TOP += n; a.renderPanel(); }, () => here.length > 4);
   return a.el('section', { class: 'box fleets12' }, q.c);
 }
 function incomeBox12(old) {
@@ -3095,6 +3099,8 @@ function reportsBox12() {
   const up = () => { clearTimeout(timer); press = null; if (drag) { const o = vals(), T = L() - 46; list.scrollTop = Math.round(Math.max(0, Math.min(1, T > 0 ? (ghost - 15) / T : 0)) * o.max) * 32; drag = null; ghost = null; } paint(); };
   bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
   bar.addEventListener('keydown', (e) => { const d = { ArrowUp: -32, ArrowDown: 32, PageUp: -64, PageDown: 64 }[e.key]; if (d) { e.preventDefault(); go(d); } });
+  wheel12(list, (n) => go(32 * n), () => vals().max > 0); // (the wheel, a report a row: modern conveniences only)
+  list.addEventListener('wheel', (e) => { const a2 = A(); if (a2 && a2.modern && !a2.modern()) e.preventDefault(); }, { passive: false }); // (the browser would scroll this list itself: not without the conveniences, as the program)
   const body = el('div', { class: 'rep12body' }, list, bar, grow.c);
   const box = V3 ? el('section', { class: 'box rep12box' }, body) : el('section', { class: 'box rep12box' }, titleBar12(226), body); // (3.0.1, 4.0.5: the windoid's title bar is frame75's)
   // (kept where the player scrolled it while the reports are the same; a new turn opens it at the current year's first)
@@ -3202,7 +3208,7 @@ function lowBox12(B) {
     const up = (e2) => { window.removeEventListener('pointermove', later2); window.removeEventListener('pointerup', up); if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; set(e2); a.save(); a.renderPanel(); };
     window.addEventListener('pointermove', later2); window.addEventListener('pointerup', up); set(ev);
   });
-  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); scroll(pt.h < 79 ? 'pTop' : 'bTop', ev.deltaY > 0 ? 1 : -1); }, { passive: false });
+  wheel12(q.c, (n, ev) => { const pt = q.at(ev); scroll(pt.h < 79 ? 'pTop' : 'bTop', n); });
   let box = a.el('section', { class: 'box low12c' }, q.c);
   return box;
 }
@@ -3681,7 +3687,7 @@ function fleetBox301() {
     const r = rows[FLT301.top + Math.floor((v - 90) / 10)];
     if (r && !r.other && r.f.id !== a.UI.selFleet) { a.UI.selFleet = r.f.id; a.renderPanel(); a.draw(); }
   });
-  q.c.addEventListener('wheel', (ev) => { if (total <= 4) return; ev.preventDefault(); FLT301.top += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  wheel12(q.c, (n) => { FLT301.top += n; a.renderPanel(); }, () => total > 4);
   return a.el('section', { class: 'box fleets12 fleets301' }, q.c);
 }
 // 3.0.1's colour table (XWinProc @180bae), all eighteen, as RGB 0..65535: the bars mix and shade them
@@ -3989,7 +3995,7 @@ function lowBox301(B) {
     const up = (e2) => { window.removeEventListener('pointermove', later); window.removeEventListener('pointerup', up); if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; set(e2); a.save(); a.renderPanel(); };
     window.addEventListener('pointermove', later); window.addEventListener('pointerup', up); set(ev);
   });
-  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); if (pt.h < BL) LOW301.pTop += ev.deltaY > 0 ? 1 : -1; else LOW301.bTop += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  wheel12(q.c, (n, ev) => { const pt = q.at(ev); if (pt.h < BL) LOW301.pTop += n; else LOW301.bTop += n; a.renderPanel(); });
   const box = a.el('section', { class: 'box low301' }, q.c);
   return box;
 }

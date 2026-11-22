@@ -959,7 +959,7 @@ function fleetBoxDos() {
   q.c.addEventListener('click', (ev) => { const pt = q.at(ev); if (pt.v < G.top || pt.v > G.top + 4 * G.row) return;
     if (pt.h >= G.bar) { if (here.length > 4) { FLEET_TOP += pt.v < G.top + 2 * G.row ? -1 : 1; a.renderPanel(); } return; }
     const f = here[FLEET_TOP + Math.floor((pt.v - G.top) / G.row)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); } });
-  q.c.addEventListener('wheel', (ev) => { if (here.length <= 4) return; ev.preventDefault(); FLEET_TOP += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  if (a.wheelList) a.wheelList(q.c, (n) => { FLEET_TOP += n; a.renderPanel(); }, () => here.length > 4); // (the wheel: a modern convenience, the classic page's whole rows)
   return q.c;
 }
 // the totals: 240 x 43
@@ -1025,7 +1025,7 @@ function vScroll(target, l, t, h) {
     const mv = (ev) => { const max = Math.max(1, target.scrollHeight - target.clientHeight), span = Math.max(1, trk - th.offsetHeight / k); target.scrollTop = s0 + (ev.clientY - y0) / k / span * max; upd(); };
     const upf = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', upf); }; window.addEventListener('pointermove', mv); window.addEventListener('pointerup', upf);
   });
-  target.addEventListener('scroll', upd); target.addEventListener('wheel', (e) => { if (target.scrollHeight > target.clientHeight) { e.preventDefault(); step(e.deltaY > 0 ? 14 : -14); } }, { passive: false });
+  target.addEventListener('scroll', upd); if (window.HOAPI && HOAPI.wheelList) HOAPI.wheelList(target, (n) => step(14 * n), () => target.scrollHeight > target.clientHeight); // (the wheel: a modern convenience, a 14-pixel line a row)
   setTimeout(upd, 0); return bar;
 }
 function panelDos(panel, B) {
