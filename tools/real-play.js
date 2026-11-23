@@ -238,7 +238,10 @@ async function playRun(browser, job, outDir, idx) {
       // (some skins ask for a name before the game exists, the Amiga's "Enter game": answer it while waiting, as a person would)
       for (let k = 0; k < 30 && !await G(() => !!(window.HOAPI && HOAPI.G)); k++) {
         // (and the Amiga's question after Big Bang, "Ok, ok" / Cancel, before the game is made)
-        if (await aim('.am-enname', { soft: true, what: 'name field' }) || await ev(() => [...document.querySelectorAll('.scrim button, .win button')].some(b => b.offsetParent && /^ok, ok$/i.test(b.textContent.trim())))) await press('button', { re: /^(ok|ok, ok|enter|start)/i, soft: true, what: 'Enter game OK' });
+        // (the Amiga's Enter game: a person types a name, then Ok; the program asks it before Player Registration)
+        const nm = await aim('.am-enname', { soft: true, what: 'name field' });
+        if (nm && await ev(() => { const i = [...document.querySelectorAll('.am-enname')].find(window.__rp.vis); return !!i && !i.value; })) { await ptr.tap(nm.x, nm.y); await page.keyboard.type('Tester'); await sleep(150); }
+        if (nm || await ev(() => [...document.querySelectorAll('.scrim button, .win button')].some(b => b.offsetParent && /^ok, ok$/i.test(b.textContent.trim())))) await press('button', { re: /^(ok|ok, ok|enter|start)/i, soft: true, what: 'Enter game OK' });
         await sleep(500);
       }
       await page.waitForFunction(() => window.HOAPI && HOAPI.G, null, { timeout: 2000 }).catch(() => fail('the game did not start'));
@@ -294,10 +297,13 @@ async function playRun(browser, job, outDir, idx) {
       // (the iOS phone keeps the bars in the sidebar the $ and stars buttons open)
       for (const opener of [null, '.ios-col [data-ios=dollar]', '.ios-col [data-ios=planet]']) {
       if (opener) { if (await ev(() => document.querySelectorAll('#panel .track').length && [...document.querySelectorAll('#panel .track')].some(window.__rp.vis)) && !await ev(() => document.documentElement.classList.contains('skin-ios'))) break; if (!await press(opener, { soft: true, what: 'sidebar button', wait: 400 })) continue; }
-      const n = await G(() => [...document.querySelectorAll('#panel .track')].filter(window.__rp.vis).length);
+      // (the Amiga: the spending window and Tech Spending are two windows, one in front of the other: the bars of the one behind are
+      // out of reach until its depth gadget brings it forward, so only the front window's bars are a person's: window.__rp.front)
+      await G(() => { window.__rp.front = (tr) => { if (!document.documentElement.classList.contains('amiga')) return true; const r = tr.getBoundingClientRect(), h = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return !h || h === tr || tr.contains(h) || h.closest('.box') === tr.closest('.box'); }; });
+      const n = await G(() => [...document.querySelectorAll('#panel .track')].filter(window.__rp.vis).filter(window.__rp.front).length);
       if (!n) continue; total += n;
       for (let i = 0; i < n; i++) {
-        const t = await G((i) => { const tr = [...document.querySelectorAll('#panel .track')].filter(window.__rp.vis)[i]; if (!tr) return null; tr.setAttribute('data-rp-bar', '1'); const fl = tr.querySelector('.fill'); const r = tr.getBoundingClientRect(), f = fl ? fl.getBoundingClientRect() : null; const vert = r.height > r.width * 1.5; return { vert, frac: f ? (vert ? f.height / r.height : f.width / r.width) : 0.5, tech: !!tr.closest('.tbar, .tech12, [class*=tech]') || !!(tr.parentElement && tr.parentElement.classList.contains('tbar')), label: ((tr.parentElement.querySelector('.blabel') || {}).textContent || '').trim() }; }, i);
+        const t = await G((i) => { const tr = [...document.querySelectorAll('#panel .track')].filter(window.__rp.vis).filter(window.__rp.front)[i]; if (!tr) return null; tr.setAttribute('data-rp-bar', '1'); const fl = tr.querySelector('.fill'); const r = tr.getBoundingClientRect(), f = fl ? fl.getBoundingClientRect() : null; const vert = r.height > r.width * 1.5; return { vert, frac: f ? (vert ? f.height / r.height : f.width / r.width) : 0.5, tech: !!tr.closest('.tbar, .tech12, [class*=tech]') || !!(tr.parentElement && tr.parentElement.classList.contains('tbar')), label: ((tr.parentElement.querySelector('.blabel') || {}).textContent || '').trim() }; }, i);
         if (!t) continue;
         const a = await aim('[data-rp-bar]', { what: `bar "${t.label}"`, soft: false }); await G(() => document.querySelectorAll('[data-rp-bar]').forEach(e => e.removeAttribute('data-rp-bar')));
         if (!a) continue;
@@ -346,7 +352,7 @@ async function playRun(browser, job, outDir, idx) {
       const top = await checkTop('Build window'); await shot('build-open'); await checkText('Build window');
       // buy or queue: the first "+" / item, then a confirm if there is one
       let did = false;
-      for (const [sel, re] of [['.win button, .ios-gdlg button, .ios-remake button', /^\+$|^add$|^buy$/i], ['.ios-gdlg .ios-bitem, .ios-remake .ios-bitem', null], ['.win .li, .win li', 'dbl'], ['.win .drow, .win tr', null], ['.win .dd-type', null], ['.win .w31olist [role=option]', null]]) {
+      for (const [sel, re] of [['.win button, .ios-gdlg button, .ios-remake button', /^\+$|^add$|^buy$/i], ['.ios-gdlg .ios-bitem, .ios-remake .ios-bitem', null], ['.am-wyard .am-ytype', null], ['.win .li, .win li', 'dbl'], ['.win .drow, .win tr', null], ['.win .dd-type', null], ['.win .w31olist [role=option]', null]]) {
         if (re === 'dbl') { const a = await aim(sel, { soft: true, what: 'ship type in the list', nth: 99 }); if (!a) continue; await ptr.tap(a.x, a.y); await sleep(150); await ptr.dbl(a.x, a.y); await sleep(300); did = true; break; } // (a list: double-click a type to queue it)
         const a = await aim(sel, { re, soft: true, what: 'add a ship' }); if (!a) continue;
         await ptr.tap(a.x, a.y); await sleep(200); did = true;
@@ -356,7 +362,7 @@ async function playRun(browser, job, outDir, idx) {
       }
       if (!did) warn('nothing like a "+"/ship row found in the Build window');
       await sleep(250); await shot('build-ship-chosen');
-      if (!await press('.win button, .ios-gdlg button, .ios-remake button', { re: /^(ok|done|build|buy|queue|add|yes|apply|✓)$/i, soft: true, what: 'Build OK', wait: 350 })) await press('.ios-gdlg .ios-bcheck, .ios-remake .ios-bcheck, .ios-bcheck', { soft: true, what: 'Build check mark', nth: 99, wait: 350 });
+      if (!await press('.win button, .ios-gdlg button, .ios-remake button', { re: /^(ok|ok, ok|done|build|buy|queue|add|yes|apply|✓)$/i, soft: true, what: 'Build OK', wait: 350 })) await press('.ios-gdlg .ios-bcheck, .ios-remake .ios-bcheck, .ios-bcheck', { soft: true, what: 'Build check mark', nth: 99, wait: 350 });
       await closeAll('Build window');
       const s1 = await state(); if (s1 === s0) fail('Build: nothing changed (no ship queued or bought, no money spent) after choosing a ship and pressing OK');
       await shot('build-done');
@@ -376,6 +382,13 @@ async function playRun(browser, job, outDir, idx) {
     }
     async function menuBarOn() {
       if (await ev(() => [...document.querySelectorAll('#menubar .mbtn')].some(window.__rp.vis))) return true;
+      // the Amiga: the screen's title bar shows its menus while the pointer is on it (a person points at the bar; a finger taps it)
+      if (await ev(() => !!document.querySelector('html.amiga #menubar'))) {
+        const r = await ev(() => { const b = document.getElementById('menubar').getBoundingClientRect(); return [b.x + b.width / 2, b.y + b.height / 2]; });
+        if (job.touch) await ptr.tap(r[0], r[1]); else await page.mouse.move(r[0], r[1]);
+        await sleep(150);
+        if (await ev(() => [...document.querySelectorAll('#menubar .mbtn')].some(window.__rp.vis))) return true;
+      }
       // iOS and Android: the gear, then More menus
       if (await press('.ios-gear', { soft: true, what: 'gear', wait: 300 })) { if (await press('.ios-amx', { soft: true, what: 'More menus', wait: 300 })) { /* continues */ } }
       return await ev(() => [...document.querySelectorAll('#menubar .mbtn')].some(window.__rp.vis));

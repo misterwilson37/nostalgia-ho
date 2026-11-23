@@ -737,6 +737,18 @@ ones of the English program to be compared. Put side by side with the remake at 
   and ks204 024) is the Amiga's setup making the scouts first, where the DOS rules, CONFIRMED from the DOS program, make the colony
   ship first; the skin follows the ruleset's setup.
 
+- **Start-up** (ks204 shots 001-023): after Big Bang the program asks Enter game ("Please indentify:") and then, for a new name,
+  Player Registration; the skin now does the same inside New Galaxy (the name typed in Enter game is the registration's), and does
+  not ask Enter game again at the first turn. The Startup window says "Amiga Version 2.1" in English (2.0 in German, as captured).
+- **"Hm? Quo vadis?"** (string 557, ks204 shot 585): a fleet sent out of its reach gets the small alert with the cowboy and Ok, ok,
+  in place of the remake's toast (the classic page's new hook T.outOfRangeAlert).
+- **Rename Ship** (shot 181): the field starts empty, Ok dotted until a name is typed.
+- **Checked, already right:** the colony warning (shot 630), Group Ships (071), and the new windows in German.
+- **The real-play tool** now plays the Amiga as a person does: it points at the title bar for the menus, types a name in Enter
+  game, drags only the bars of the window in front, and queues a ship with a click on its type and Ok, ok. Left: its fleet drag
+  starts a few pixels off the Amiga's fleet marker (the game takes a drag from the marker; checked by hand), so send-fleet still
+  fails in the tool.
+
 **The tool:** `tools/amiga-captures.js` starts an Amiga game at 1280 x 1024 (2 x 4 CSS pixels to the Amiga pixel), opens each window as a
 person does (its menu and item), and writes the remake's screen above the capture named for it (pair-<view>.png): main, the six menus,
 types, newtype, roster, organize, build, compare, players, stars, screen, about, battle, battleEnd, won, nameStar, controlTime, battleSpeed, computerPlayer, sendMessage, sendMessage2 (`--only=`, `--lang=de`; a view's capture 'kNNN' is one of the Kickstart 2.04 shots). Every
