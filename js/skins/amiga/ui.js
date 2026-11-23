@@ -1222,6 +1222,7 @@ function battleAmiga(b, k) {
       if (im) x.drawImage(im, gx, gy, 120, 40);
       if (!gr.units.some(i => alive[i])) { x.fillStyle = 'rgba(0,0,0,0.55)'; x.fillRect(gx, gy, 120, 40); }
     }
+    if (gr.planet || gr.units.some(i => alive[i])) for (const [px, py] of bursts.get(gr) || []) burst(px, py); else bursts.delete(gr);
     const t = words(gr);
     text(t, gx + 60, gy + (gr.planet ? 34 : 36), capFont(t, 124), true);
   };
@@ -1241,7 +1242,19 @@ function battleAmiga(b, k) {
     }
     x.putImageData(save, 0, 0);
   }
-  const spark = (t, ev) => { const dm = ev.dm | 0, [h, v] = mid(t), px = h - 50 + (dm % 100), py = v - 14 + (dm % 28); x.fillStyle = '#ff3311'; x.fillRect(px - 2, py, 5, 1); x.fillRect(px, py - 2, 1, 5); x.fillStyle = '#ffee44'; x.fillRect(px, py, 1, 1); };
+  // a hit leaves a red burst where it struck, and the bursts stay on the ship or planet until it is destroyed (Jake's photos of a
+  // planet under attack, 22 Nov: the planet covered in them by turn 8; a hit fighter row too)
+  const bursts = new Map();
+  const burst = (px, py) => {
+    x.fillStyle = '#cc1100'; for (const [dx, dy] of [[-4, 0], [4, 0], [0, -2], [0, 2], [-3, -1], [3, 1], [-3, 1], [3, -1]]) x.fillRect(px + dx, py + dy, 1, 1);
+    x.fillStyle = '#ff3311'; x.fillRect(px - 2, py, 5, 1); x.fillRect(px, py - 1, 1, 3); x.fillRect(px - 1, py - 1, 3, 3);
+    x.fillStyle = '#ffee44'; x.fillRect(px, py, 1, 1);
+  };
+  const spark = (t, ev) => {
+    const dm = ev.dm | 0, [h, v] = mid(t), wide = t.planet ? 22 : 50, high = t.planet ? 16 : 14;
+    const at = [h - wide + (dm % (2 * wide)), v - high + ((dm >> 3) % (2 * high))];
+    if (!bursts.has(t)) bursts.set(t, []); bursts.get(t).push(at); burst(at[0], at[1]);
+  };
   async function rings(t) {
     const [h, v] = mid(t);
     for (let r = 1; r <= 6 && !stop && !skip; r++) {

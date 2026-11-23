@@ -47,6 +47,8 @@ const VIEWS = {
   battle: [104, [`(() => { const a = HOAPI, G = a.G, me = a.me(), h = G.stars[me.homeStar];
       const e = G.players.filter(q => q.id !== a.ME).map(q => G.stars[q.homeStar]).sort((x, y) => HO.starDist(G, h.id, x.id) - HO.starDist(G, h.id, y.id))[0];
       const d = me.designs.find(x => x.type === 'fighter'); HO.addShipsToStar(G, a.ME, e.id, d, 8); a.renderPanel(); a.draw(); a.doEndTurn(); })()`,
+    // (the reports come one card at a time: clicked through until the battle's opens its window)
+    `(async () => { for (let k = 0; k < 30 && !document.querySelector('.am-battle'); k++) { const c = document.querySelector('#msg .card'); if (c) c.click(); await new Promise(r => setTimeout(r, 300)); } })()`,
     'new Promise(r => setTimeout(r, 2500))']],
   // the game won (ks204 840-841): the winner's report put in front, as the end of the game does (it changes the game: run alone)
   won: ['k840', [`(() => { const a = HOAPI, G = a.G; G.over = true; G.winner = a.ME; a.me().alive = true; G.players.forEach(q => { if (q.id !== a.ME) q.alive = false; });
