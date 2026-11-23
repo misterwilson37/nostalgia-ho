@@ -932,3 +932,9 @@ html.amiga .am-wabout .am-abtns .am-btn { left: calc(235 * var(--u)); top: calc(
 /* New Galaxy's Enter game step (the program's order: ks204 shots 021-023), the Enter game window's size */
 html.amiga .win.am-wng.am-entrystep { width: calc(237 * var(--u)); height: calc(190 * var(--v)); }
 html.amiga .am-wng.am-entrystep .am-more { display: none !important; }
+
+/* "Hm? Quo vadis?" (ks204 shot 585): the small alert, 225 x 102 inside, the cowboy, the text panel, one button under it */
+html.amiga .win.am-walert.am-walertsmall { width: calc(226 * var(--u)); height: calc(112 * var(--v)); }
+html.amiga .am-walertsmall .am-apic { left: calc(10 * var(--u)); top: calc(9 * var(--v)); width: calc(74 * var(--u)); height: calc(74 * var(--v)); }
+html.amiga .am-walertsmall .am-atext { left: calc(100 * var(--u)); top: calc(9 * var(--v)); width: calc(114 * var(--u)); height: calc(46 * var(--v)); }
+html.amiga .am-walertsmall .am-abtn1 { left: calc(100 * var(--u)); top: calc(66 * var(--v)); width: calc(114 * var(--u)); }

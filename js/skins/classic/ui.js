@@ -1119,7 +1119,7 @@ function onUp(e) {
   else if (autoRoute(f, tgt)) Sound.play(4001);
   // (1.2: ALRT 3330 the first time in a session, FollowPathDrag's flag at A5-0x34a; no sound)
   else if (alertWords('fuel')) { if (!UI.fuelOnce) { UI.fuelOnce = true; alertOver(alertWords('fuel'), (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))); } }
-  else { Sound.play(7016); if (HO.rules(G).fuelAlert === '505') fuelAlert(HO.say(G, HO.DATA.alerts[29]), 'ho5.fuelAlert505'); else toast(outOfRange(f, tgt)); }
+  else { Sound.play(7016); if (HO.rules(G).fuelAlert === '505') fuelAlert(HO.say(G, HO.DATA.alerts[29]), 'ho5.fuelAlert505'); else if (!(T.outOfRangeAlert && T.outOfRangeAlert(f, tgt))) toast(outOfRange(f, tgt)); } // (T.outOfRangeAlert: a skin's own box, the Amiga's "Hm? Quo vadis?")
   UI.hover = null; draw(); renderPanel(); save();
 }
 // Plan route…: a clicked (or tapped) star is the next stop

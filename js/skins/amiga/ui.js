@@ -150,6 +150,7 @@ const WORDS = {
   wonGame: ['Glückwunsch! Sie haben das Spiel gewonnen.', 'Congratulations! You have just won the game.', 'Félicitations ! Vous venez de gagner la partie.', 'Tebrikler! Oyunu kazandın.', '¡Enhorabuena! Acabas de ganar la partida.'],
   lostGame: ['Sie wurden aus dem Spiel gelöscht.', 'You have just been eliminated from the game.', 'Vous venez d’être éliminé de la partie.', 'Oyundan elendin.', 'Acabas de ser eliminado de la partida.'],
   diedN: ['%1 Tote', '%1 died', '%1 morts', '%1 öldü', '%1 muertos'],
+  quoVadis: ['Hoppla? Wo geht es hin??', 'Hm? Quo vadis?', 'Hm ? Quo vadis ?', 'Hm? Quo vadis?', '¿Eh? ¿Quo vadis?'],
   nameStarTitle: ['Sterntaufe', 'Name a Star', 'Baptiser une étoile', 'Bir yıldıza ad ver', 'Bautiza una estrella'], nameStarAsk: ['Geben Sie einem neuen Stern einen Namen:', 'Please name a new star:', 'Nommez une nouvelle étoile :', 'Yeni bir yıldıza ad ver:', 'Pon nombre a una estrella nueva:'],
   // (strings 682-694 and 757-765: the Options windows and Send Message, English and German)
   fast: ['Schnell', 'Fast', 'Rapide', 'Hızlı', 'Rápido'], slow: ['Langsam', 'Slow', 'Lent', 'Yavaş', 'Lento'], animBattle: ['Animierte Kämpfe', 'Animated Battle', 'Combats animés', 'Canlandırılmış savaş', 'Combate animado'],
@@ -1373,13 +1374,16 @@ function openConstruction(after) {
 // keeps it, Abbruch doesn't.
 function renameType(d) {
   const a = api(), G = a.G, p = a.me();
-  const inp = el('input', { class: 'am-field am-rnfield', value: d.name, maxlength: 14, 'aria-label': w('name') });
+  // (empty, Ok dotted until a name is typed: Jake's ks204 shot 181)
+  const inp = el('input', { class: 'am-field am-rnfield', value: '', maxlength: 14, 'aria-label': w('name') });
   const back = () => { a.closeModal(); openTypes(); };
   const box = el('div', { class: 'am-rename' }, el('p', { class: 'am-rn1' }, w('rnHelp1')), el('p', { class: 'am-rn2' }, w('rnHelp2')), inp,
     el('div', { class: 'am-rnbtns' },
-      btn(w('ok'), () => { const v = inp.value.trim(); if (v) d.name = v; a.save(); back(); a.renderPanel(); }),
-      btn(w('autoName'), () => { inp.value = HO.designName(G, p, d.type); inp.focus(); }),
+      btn(w('ok'), () => { const v = inp.value.trim(); if (!v) return; d.name = v; a.save(); back(); a.renderPanel(); }),
+      btn(w('autoName'), () => { inp.value = HO.designName(G, p, d.type); sync(); inp.focus(); }),
       btn(w('cancel'), back)));
+  const okB = box.querySelector('.am-rnbtns .am-btn'), sync = () => { okB.disabled = !inp.value.trim(); };
+  inp.addEventListener('input', sync); sync();
   amWin(w('renameTitle'), box, 'am-wrename');
   inp.focus(); inp.select();
 }
@@ -2337,6 +2341,8 @@ window.HOTHEME_OVER = {
   // the game." (626), then "Name a Star" (the table at 202e3e), then the same words as the turn's report
   youWonLayout: (kind, Y, done) => (alertWindow(w(kind === 'won' ? 'wonGame' : 'lostGame'), [[w('ok'), () => api().closeModal(), true]], { pic: kind === 'won' ? 'd5040' : 'd5050', cls: 'am-walertbig', onClose: done }), true),
   nameStarLayout: (f, o) => nameStarAmiga(f, o),
+  // a fleet sent where it can't reach: "Hm? Quo vadis?" (string 557) in a small alert with the cowboy, Ok, ok (Jake's ks204 shot 585)
+  outOfRangeAlert: () => { alertWindow(w('quoVadis'), [[w('ok'), () => api().closeModal(), true]], { cls: 'am-walertsmall' }); return true; },
 };
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();
