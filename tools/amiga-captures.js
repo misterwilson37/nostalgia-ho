@@ -59,7 +59,8 @@ const VIEWS = {
   lost: ['k000', [`(() => { const a = HOAPI, G = a.G, p = a.me(); p.alive = false; const m = { text: 'You have just been eliminated from the game.', icon: 'p3040', big: 'p3040' };
       a.UI.inbox = [m]; a.UI.msgIdx = 0; a.renderMsg(); })()`, 'new Promise(r => setTimeout(r, 900))']],
   // (the last battle again, skipped to its end: run with battle, after it)
-  battleEnd: [126, [`(() => { const a = HOAPI, bs = a.G.battles || []; if (bs.length) a.openBattle(bs[bs.length - 1].id); })()`, 'new Promise(r => setTimeout(r, 600))', `(() => { const b = document.querySelector('.am-battle .am-btn'); if (b) b.click(); })()`, 'new Promise(r => setTimeout(r, 600))']],
+  battleEnd: [126, [`(() => { const a = HOAPI, bs = a.G.battles || []; if (bs.length) a.openBattle(bs[bs.length - 1].id); })()`, 'new Promise(r => setTimeout(r, 600))', // (Skip Battle is heard only between shots, as the program's: clicked until it takes)
+    `(async () => { for (let k = 0; k < 200; k++) { const b = document.querySelector('.am-battle .am-btn'); if (!b || /Ok/.test(b.textContent)) break; b.click(); await new Promise(r => setTimeout(r, 40)); } })()`, 'new Promise(r => setTimeout(r, 600))']],
 };
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });

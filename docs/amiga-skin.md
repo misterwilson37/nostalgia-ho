@@ -704,6 +704,9 @@ ones of the English program to be compared. Put side by side with the remake at 
   The DOS theme's battleWindow (added 22 Nov) had replaced the Amiga's battle with the DOS program's; the skin now gives its own.
   Hits stay: each leaves a red burst where it struck, kept on the ship or planet until it is destroyed (Jake's photos of a lost battle
   at his own planet, 22 Nov: by turn 8 the planet is covered in them, and a hit row of fighters carries its own).
+  What falls is covered by the yellow rings, which then stay on it in red. **Skip Battle is heard only between shots** (Jake: a click
+  while a bolt or the rings are drawn is lost, so you click again and again): the skin does the same; the patch's fix
+  `amigaSkipBattle` (rules-dos fixes) takes the click whenever it comes.
 
 - **The end of a won game** (Jake's ks204 shots 837-842, 22 Nov): the last battle ends "Congratulations! / You won!" with the cowboy
   giving the OK (d3500; a lost battle's is on crutches, d3510); then an alert in the colony warning's style, larger (about 465 x 185),

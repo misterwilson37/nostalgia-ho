@@ -4598,8 +4598,8 @@ function openWinWindows(done) {
 // align, pic (the skin's picture, p3040 unless said), okPic (a picture for
 // the button: iOS's check mark), looks: { <OS look>: words } (Windows 3.1's
 // alert for DOS 2.0's box), bw: words on a black-and-white screen (1.2F's
-// ALRT 5051) }. A skin whose original had none says T.youLost = false (the
-// Amiga).
+// ALRT 5051) }. A skin whose original had none would say T.youLost = false;
+// every version has one (Jake, 23 Nov 2026: the Amiga's too, T.youWonLayout 'lost').
 function youLostWords() {
   if (!G || T.youLost === false) return null;
   let Y = HO.rules(G).youLost;
@@ -4615,8 +4615,8 @@ const lostReport = (m) => !!(m && m.big === 'p3040' && m.text === LOST_REPORT &&
 // opens as the winner's report comes up: 5.0.5's PPob 150, 4.0.5's dialog 377
 // and DLOG 5040, 3.0.1's, 2.0.1's and 1.2's ALRT 5040, 2.0's alert and
 // DOSHO box, the Palm's Game Over form, iOS's EndGameLayer youWon), then the
-// rank window and Name a Star (openWinWindows). The Amiga says
-// T.youWon = false (texte.pff has only the report 626).
+// rank window and Name a Star (openWinWindows). The Amiga draws its own
+// (T.youWonLayout: the alert with the portrait, Jake's captures).
 function youWonWords() {
   if (!G || T.youWon === false) return null;
   let Y = HO.rules(G).youWon;

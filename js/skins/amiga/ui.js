@@ -1185,8 +1185,10 @@ function battleAmiga(b, k) {
   const W = 440, Hh = 235, FX = [25, 300], COLX = [23, 300], ROW0 = 34, PIT = 52;
   const c = el('canvas', { class: 'am-bcv', width: W, height: Hh, role: 'img', 'aria-label': w('battleRep') });
   const x = c.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = false; x.textBaseline = 'top';
-  let stop = false, skip = false, done = false;
-  const button = btn(w('skipBattle'), () => { if (done) a.closeModal(); else skip = true; });
+  // (the program hears Skip Battle only between shots: a click while a bolt or the rings are drawn is lost, Jake 22 Nov 2026;
+  // the patch's amigaSkipBattle takes it whenever it comes)
+  let stop = false, skip = false, done = false, busy = false;
+  const button = btn(w('skipBattle'), () => { if (done) a.closeModal(); else if (!busy || HO.fixed(G, 'amigaSkipBattle')) skip = true; });
   const body = el('div', { class: 'am-battle' }, c, button);
   amWin(w('battleRep'), body, 'am-wbattle', { onClose: () => { stop = true; } });
   const FONT = { f11: '16px HoFont11, sans-serif', f9: '16px HoFont9, sans-serif', fc9: '16px HoCond9, sans-serif' };
@@ -1225,6 +1227,7 @@ function battleAmiga(b, k) {
       if (!gr.units.some(i => alive[i])) { x.fillStyle = 'rgba(0,0,0,0.55)'; x.fillRect(gx, gy, 120, 40); }
     }
     if (gr.planet || gr.units.some(i => alive[i])) for (const [px, py] of bursts.get(gr) || []) burst(px, py); else bursts.delete(gr);
+    if (ringed.has(gr) && !done) redRings(gr);
     const t = words(gr);
     text(t, gx + 60, gy + (gr.planet ? 34 : 36), capFont(t, 124), true);
   };
@@ -1257,6 +1260,9 @@ function battleAmiga(b, k) {
     const at = [h - wide + (dm % (2 * wide)), v - high + ((dm >> 3) % (2 * high))];
     if (!bursts.has(t)) bursts.set(t, []); bursts.get(t).push(at); burst(at[0], at[1]);
   };
+  const ringed = new Set();
+  // (the rings, once drawn, stay on what fell, red: Jake's photos of the fallen planet)
+  const redRings = (t) => { const [h, v] = mid(t), ry = t.planet ? 4.6 : 3.3; x.strokeStyle = '#cc1100'; x.lineWidth = 1; for (let j = 1; j <= 6; j++) { x.beginPath(); x.ellipse(h, v, 10 * j, ry * j, 0, 0, Math.PI * 2); x.stroke(); } };
   async function rings(t) {
     const [h, v] = mid(t);
     for (let r = 1; r <= 6 && !stop && !skip; r++) {
@@ -1297,9 +1303,10 @@ function battleAmiga(b, k) {
         for (let j = 0; j < n - 1; j++) apply(R[e + j]);
         const ev = R[e + n - 1], s = cellOf(ev, true), t = cellOf(ev, false);
         if (s && t) {
-          await bolt(s, t); if (stop || skip) break;
+          busy = true; await bolt(s, t); if (stop || skip) { busy = false; break; }
           a.Sound.play(k.shotSnd(ev, 3000)); apply(ev); spark(t, ev);
-          if ((ev.k && !ev.p && !t.units.some(i => alive[i])) || (ev.p && t.planet && pop <= 0.0005)) await rings(t); // (a planet that falls gets the rings too: Jake's photos)
+          if ((ev.k && !ev.p && !t.units.some(i => alive[i])) || (ev.p && t.planet && pop <= 0.0005)) { await rings(t); ringed.add(t); } // (a planet that falls gets the rings too: Jake's photos)
+          busy = false;
           drawGroup(t); drawStars(); deadline += speed * TICK; await wait(deadline);
         } else apply(ev);
         e += n;
