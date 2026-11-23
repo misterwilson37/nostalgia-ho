@@ -36,7 +36,7 @@ const VIEWS = {
   players: [74, [pick(4, '^(Compare|Spielervergleich)'), `(() => { const b = [...document.querySelectorAll('.scrim button')].find(b => /^Info$/.test(b.textContent.trim())); b && b.click(); })()`]],
   stars: [141, [pick(4, '^(Star List|Liste der Sterne)')]],
   screen: [144, [pick(2, '^(ScreenMode|Bildschirm)')]],
-  about: [58, [pick(6, '^(About|Über)')]],
+  about: ['k642', [pick(6, '^(About|Über)')]],
   controlTime: ['k048', [pick(2, '^(Control Time|Kontrollzeit)')]],
   battleSpeed: ['k049', [pick(2, '^(Battle Speed|Kampftempo)')]],
   computerPlayer: ['k050', [pick(2, '^(Autoplay|Autospiel)')]],
