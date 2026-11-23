@@ -149,6 +149,7 @@ const WORDS = {
   noInfo: ['Sie haben keine Information erlangt.', 'You got no information...', 'Vous n’avez obtenu aucune information...', 'Hiç bilgi alamadın...', 'No has obtenido información...'], destroyedNow: ['Sie wurden sofort besiegt.', 'You were destroyed immediately', 'Vous avez été détruit immédiatement', 'Hemen yok edildin', 'Fuiste destruido de inmediato'],
   wonGame: ['Glückwunsch! Sie haben das Spiel gewonnen.', 'Congratulations! You have just won the game.', 'Félicitations ! Vous venez de gagner la partie.', 'Tebrikler! Oyunu kazandın.', '¡Enhorabuena! Acabas de ganar la partida.'],
   lostGame: ['Sie wurden aus dem Spiel gelöscht.', 'You have just been eliminated from the game.', 'Vous venez d’être éliminé de la partie.', 'Oyundan elendin.', 'Acabas de ser eliminado de la partida.'],
+  diedN: ['%1 Tote', '%1 died', '%1 morts', '%1 öldü', '%1 muertos'],
   nameStarTitle: ['Sterntaufe', 'Name a Star', 'Baptiser une étoile', 'Bir yıldıza ad ver', 'Bautiza una estrella'], nameStarAsk: ['Geben Sie einem neuen Stern einen Namen:', 'Please name a new star:', 'Nommez une nouvelle étoile :', 'Yeni bir yıldıza ad ver:', 'Pon nombre a una estrella nueva:'],
   // (strings 682-694 and 757-765: the Options windows and Send Message, English and German)
   fast: ['Schnell', 'Fast', 'Rapide', 'Hızlı', 'Rápido'], slow: ['Langsam', 'Slow', 'Lent', 'Yavaş', 'Lento'], animBattle: ['Animierte Kämpfe', 'Animated Battle', 'Combats animés', 'Canlandırılmış savaş', 'Combate animado'],
@@ -1207,7 +1208,7 @@ function battleAmiga(b, k) {
   };
   const designOf = (gr) => { const u = b.start[gr.units[0]]; return H.getDesign(G, u.o, u.did) || { type: u.t, name: '', R: 1, V: 1, W: 1, S: 1 }; };
   const words = (gr) => {
-    if (gr.planet) return num(Math.round(pop * 1000));
+    if (gr.planet) return pop > 0.0005 ? num(Math.round(pop * 1000)) : w('diedN', num(Math.round(b.pop0 * 1000))); // (string 640, "752.105 died")
     const d = designOf(gr), n = gr.units.filter(i => alive[i]).length, what = `${d.name} (${d.W}/${d.S}) ${className(d.type)}`;
     return n ? `${countWord(n)} ${what}` : w('destroyedN', gr.n0, what);
   };
@@ -1252,7 +1253,7 @@ function battleAmiga(b, k) {
     x.fillStyle = '#ffee44'; x.fillRect(px, py, 1, 1);
   };
   const spark = (t, ev) => {
-    const dm = ev.dm | 0, [h, v] = mid(t), wide = t.planet ? 22 : 50, high = t.planet ? 16 : 14;
+    const dm = ev.dm | 0, [h, v] = mid(t), wide = t.planet ? 58 : 50, high = t.planet ? 18 : 14; // (a planet's hits spread over the whole row: Jake's photos)
     const at = [h - wide + (dm % (2 * wide)), v - high + ((dm >> 3) % (2 * high))];
     if (!bursts.has(t)) bursts.set(t, []); bursts.get(t).push(at); burst(at[0], at[1]);
   };
@@ -1297,7 +1298,7 @@ function battleAmiga(b, k) {
         if (s && t) {
           await bolt(s, t); if (stop || skip) break;
           a.Sound.play(k.shotSnd(ev, 3000)); apply(ev); spark(t, ev);
-          if (ev.k && !ev.p && !t.units.some(i => alive[i])) await rings(t);
+          if ((ev.k && !ev.p && !t.units.some(i => alive[i])) || (ev.p && t.planet && pop <= 0.0005)) await rings(t); // (a planet that falls gets the rings too: Jake's photos)
           drawGroup(t); drawStars(); deadline += speed * TICK; await wait(deadline);
         } else apply(ev);
         e += n;

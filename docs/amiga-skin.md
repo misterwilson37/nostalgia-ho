@@ -712,7 +712,8 @@ ones of the English program to be compared. Put side by side with the remake at 
   turn's report. The skin had said the Amiga had no You Won window (T.youWon false): wrong, now T.youWonLayout and T.nameStarLayout.
   **The game lost** (Jake's photos, 22 Nov, after all): the same alert with the vulture over the planet (d5050) and "You have just
   been eliminated from the game.", Ok, ok; then the report with the same words. The skin had T.youLost false: wrong, now the same
-  T.youWonLayout. In the last battle the destroyed planet is covered in red rings and its population reads "752.105 died".
+  T.youWonLayout. In the last battle the planet's hits spread over its whole row, it gets the ships' yellow rings as it falls, and its caption
+  reads "752.105 died" (string 640, the population it had).
 - **Battles with more than three rows a side** (ks204 shots 643-837): the rows go on below the window's bottom, and their ships shoot
   from out of sight, as the skin's battle already does.
 
