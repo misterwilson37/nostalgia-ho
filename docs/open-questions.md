@@ -85,6 +85,11 @@ and what was searched. Every file of every version was gone through again in Oct
 Windows, commands and pictures of the originals that the remake hasn't built yet. Everything
 once queued here is built (the last piece, 4.0.5's Mac floating windows, in October 2026).
 
+- **The System 7 file boxes (Mac 2.0.1 to 4.0.5).** After New Game the programs ask "File name of new galaxy:" in the standard
+  Save box, and Open uses the standard Open box (Jake's 3.0.1 shots 004, 010, 164). The remake names the galaxy in New Game and
+  saves by itself, in every Mac skin. Building them (the folder pop-up, the list, Eject, Desktop, New folder, the name, Save / Open)
+  would add a step to starting a game, as the Amiga's file requester does: Jake's decision (asked 23 Nov 2026).
+
 (The remake's own work, such as the translations, is in `docs/roadmap.md`.)
 
 ---
