@@ -887,3 +887,20 @@ html.amiga .win.am-wbattle { width: calc(448 * var(--u)); height: calc(253 * var
 html.amiga .am-battle { position: absolute; inset: 0; background: #000; }
 html.amiga .am-battle .am-bcv { position: absolute; left: 0; top: 0; width: calc(440 * var(--u)); height: calc(235 * var(--v)); image-rendering: pixelated; }
 html.amiga .am-battle .am-btn { left: calc(190 * var(--u)); top: calc(211 * var(--v)); width: calc(60 * var(--u)); height: calc(20 * var(--v)); white-space: nowrap; font-family: var(--am11), sans-serif !important; font-size: calc(16 * var(--v)) !important; padding: 0 !important; overflow: hidden; }
+
+/* the game won (ks204 shot 840): the alert, larger, with the 149 x 151 portrait; one button under the text panel */
+html.amiga .win.am-walert.am-walertbig { width: calc(465 * var(--u)); height: calc(185 * var(--v)); }
+html.amiga .am-walertbig .am-apic { left: calc(11 * var(--u)); top: calc(10 * var(--v)); width: calc(149 * var(--u)); height: calc(151 * var(--v)); background: #000; }
+html.amiga .am-walertbig .am-atext { left: calc(175 * var(--u)); top: calc(11 * var(--v)); width: calc(272 * var(--u)); height: calc(120 * var(--v)); }
+html.amiga .am-abtn1 { position: absolute; left: calc(94 * var(--u)); top: calc(76 * var(--v)); width: calc(296 * var(--u)); height: calc(22 * var(--v)); }
+html.amiga .am-walertbig .am-abtn1 { left: calc(175 * var(--u)); top: calc(140 * var(--v)); width: calc(272 * var(--u)); }
+html.amiga .am-abtn1 .am-btn { top: 0; left: 50%; transform: translateX(-50%); width: calc(70 * var(--u)); }
+/* Name a Star (the table at 202e3e, 216 x 128; ks204 shot 841) */
+html.amiga .win.am-wnstar { width: calc(224 * var(--u)); height: calc(146 * var(--v)); }
+html.amiga form.am-nstar { position: absolute; inset: 0; margin: 0; padding: 0; }
+html.amiga form.am-nstar > * { position: absolute; margin: 0; }
+html.amiga .am-nsframe { left: calc(16 * var(--u)); top: calc(8 * var(--v)); width: calc(184 * var(--u)); height: calc(112 * var(--v)); }
+html.amiga .am-nslabel { left: calc(38 * var(--u)); top: calc(18 * var(--v)); white-space: nowrap; }
+html.amiga form.am-nstar .am-nsfield { left: calc(61 * var(--u)); top: calc(42 * var(--v)); width: calc(90 * var(--u)) !important; height: calc(16 * var(--v)); }
+html.amiga form.am-nstar .am-btn { top: calc(88 * var(--v)); width: calc(70 * var(--u)); height: calc(20 * var(--v)); }
+html.amiga form.am-nstar .am-nsok { left: calc(32 * var(--u)); } html.amiga form.am-nstar .am-nscancel { left: calc(114 * var(--u)); }

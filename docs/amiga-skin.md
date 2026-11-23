@@ -703,9 +703,18 @@ ones of the English program to be compared. Put side by side with the remake at 
   fourth runs into the button), and a battle that stops with both sides standing (the program's never does; no verdict is shown).
   The DOS theme's battleWindow (added 22 Nov) had replaced the Amiga's battle with the DOS program's; the skin now gives its own.
 
+- **The end of a won game** (Jake's ks204 shots 837-842, 22 Nov): the last battle ends "Congratulations! / You won!" with the cowboy
+  giving the OK (d3500; a lost battle's is on crutches, d3510); then an alert in the colony warning's style, larger (about 465 x 185),
+  with the conquering portrait (d5040) and "Congratulations! You have just won the game." (626), Ok, ok; then "Name a Star" (the table
+  at 202e3e, 216 x 128: "Please name a new star:", the field, Ok dotted until a name is typed, Cancel); then the same words as the
+  turn's report. The skin had said the Amiga had no You Won window (T.youWon false): wrong, now T.youWonLayout and T.nameStarLayout.
+  No lost game was captured (Jake, 22 Nov: not worth the patience); the skin keeps T.youLost false.
+- **Battles with more than three rows a side** (ks204 shots 643-837): the rows go on below the window's bottom, and their ships shoot
+  from out of sight, as the skin's battle already does.
+
 **The tool:** `tools/amiga-captures.js` starts an Amiga game at 1280 x 1024 (2 x 4 CSS pixels to the Amiga pixel), opens each window as a
 person does (its menu and item), and writes the remake's screen above the capture named for it (pair-<view>.png): main, the six menus,
-types, newtype, roster, organize, build, compare, players, stars, screen, about, battle, battleEnd (`--only=`, `--lang=de`). Every
+types, newtype, roster, organize, build, compare, players, stars, screen, about, battle, battleEnd, won, nameStar (`--only=`, `--lang=de`; a view's capture 'kNNN' is one of the Kickstart 2.04 shots). Every
 comparison above was made with it (or its scratch forerunner).
 
 - **The screen's layout (changed 22 Nov, after Jake's Kickstart 2.04 captures, `audit/amiga-2.1/captures-ks204`):** the English

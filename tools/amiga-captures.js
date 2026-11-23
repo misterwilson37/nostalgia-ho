@@ -6,7 +6,7 @@
 // Serve the repo first (python3 -m http.server 8790). The page is opened at 1280 x 1024, so the Amiga screen is exactly 2 x 4 CSS
 // pixels to its pixel (the tall-pixel look); a game is started (Big Bang, the name typed in), each view below is opened as a person
 // opens it (its menu and item), and the remake's screen is sampled back to 640 x 256 at each pixel's centre and put above the capture
-// named for it (captures/amiga21-jake-shotNNN.png in the sources repo: the English 2.1, Kickstart 3.1; docs/amiga-skin.md, "Against
+// named for it (captures/amiga21-jake-shotNNN.png in the sources repo: the English 2.1, Kickstart 3.1; 'kNNN': captures-ks204, Kickstart 2.04; docs/amiga-skin.md, "Against
 // the English 2.1 captures"). Out: <out>/<view>.png (the remake, full size) and <out>/pair-<view>.png (capture above, remake below,
 // both doubled). A view can also be a list of steps: see VIEWS.
 const { chromium } = require('playwright');
@@ -43,6 +43,11 @@ const VIEWS = {
       const e = G.players.filter(q => q.id !== a.ME).map(q => G.stars[q.homeStar]).sort((x, y) => HO.starDist(G, h.id, x.id) - HO.starDist(G, h.id, y.id))[0];
       const d = me.designs.find(x => x.type === 'fighter'); HO.addShipsToStar(G, a.ME, e.id, d, 8); a.renderPanel(); a.draw(); a.doEndTurn(); })()`,
     'new Promise(r => setTimeout(r, 2500))']],
+  // the game won (ks204 840-841): the winner's report put in front, as the end of the game does (it changes the game: run alone)
+  won: ['k840', [`(() => { const a = HOAPI, G = a.G; G.over = true; G.winner = a.ME; a.me().alive = true; G.players.forEach(q => { if (q.id !== a.ME) q.alive = false; });
+      a.UI.inbox = [{ text: 'Congratulations! You have just won the game.', big: 'p3030' }]; a.UI.msgIdx = 0; a.renderMsg(); })()`, 'new Promise(r => setTimeout(r, 900))']],
+  nameStar: ['k841', [`(() => { const a = HOAPI, G = a.G; G.over = true; G.winner = a.ME; a.me().alive = true; G.players.forEach(q => { if (q.id !== a.ME) q.alive = false; });
+      a.UI.inbox = [{ text: 'Congratulations! You have just won the game.', big: 'p3030' }]; a.UI.msgIdx = 0; a.renderMsg(); })()`, 'new Promise(r => setTimeout(r, 900))', `(() => { const b = [...document.querySelectorAll('.am-walertbig .am-btn')][0]; if (b) b.click(); })()`, 'new Promise(r => setTimeout(r, 600))']],
   // (the last battle again, skipped to its end: run with battle, after it)
   battleEnd: [126, [`(() => { const a = HOAPI, bs = a.G.battles || []; if (bs.length) a.openBattle(bs[bs.length - 1].id); })()`, 'new Promise(r => setTimeout(r, 600))', `(() => { const b = document.querySelector('.am-battle .am-btn'); if (b) b.click(); })()`, 'new Promise(r => setTimeout(r, 600))']],
 };
@@ -76,7 +81,9 @@ const VIEWS = {
     for (const js of steps) { await p.evaluate(js); await p.waitForTimeout(700); }
     const t = await p.title(); if (/^NO ITEM/.test(t)) console.log(name + ': ' + t);
     const file = path.join(OUT, name + '.png'); await p.screenshot({ path: file });
-    const cap = path.join(CAPS, `amiga21-jake-shot${String(shot).padStart(3, '0')}.png`);
+    // (a shot 'kNNN' is one of the Kickstart 2.04 captures, audit/amiga-2.1/captures-ks204)
+    const ks = /^k/.test(String(shot)), num = String(shot).replace(/^k/, '').padStart(3, '0');
+    const cap = ks ? path.join(CAPS, '..', 'captures-ks204', `amiga21-ks204-shot${num}.png`) : path.join(CAPS, `amiga21-jake-shot${num}.png`);
     const pair = await p.evaluate(async ([rem, capData]) => {
       const load = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
       const r = await load(rem), c = capData ? await load(capData) : null;

@@ -147,6 +147,8 @@ const WORDS = {
   bWon1: ['Glückwunsch!', 'Congratulations!', 'Félicitations !', 'Tebrikler!', '¡Enhorabuena!'], bWon2: ['Sie haben gewonnen!', 'You won!', 'Vous avez gagné !', 'Kazandın!', '¡Has ganado!'],
   bLost1: ['Leider haben', 'Unfortunately', 'Malheureusement', 'Ne yazık ki', 'Por desgracia'], bLost2: ['Sie den Kampf verloren...', 'You lost the battle.', 'vous avez perdu le combat.', 'savaşı kaybettin.', 'has perdido el combate.'],
   noInfo: ['Sie haben keine Information erlangt.', 'You got no information...', 'Vous n’avez obtenu aucune information...', 'Hiç bilgi alamadın...', 'No has obtenido información...'], destroyedNow: ['Sie wurden sofort besiegt.', 'You were destroyed immediately', 'Vous avez été détruit immédiatement', 'Hemen yok edildin', 'Fuiste destruido de inmediato'],
+  wonGame: ['Glückwunsch! Sie haben das Spiel gewonnen.', 'Congratulations! You have just won the game.', 'Félicitations ! Vous venez de gagner la partie.', 'Tebrikler! Oyunu kazandın.', '¡Enhorabuena! Acabas de ganar la partida.'],
+  nameStarTitle: ['Sterntaufe', 'Name a Star', 'Baptiser une étoile', 'Bir yıldıza ad ver', 'Bautiza una estrella'], nameStarAsk: ['Geben Sie einem neuen Stern einen Namen:', 'Please name a new star:', 'Nommez une nouvelle étoile :', 'Yeni bir yıldıza ad ver:', 'Pon nombre a una estrella nueva:'],
   mNoBuild: ['Kein Bau hier möglich', 'Can`t Build Ships Here', 'Pas de construction ici', 'Burada gemi yapılamaz', 'Aquí no se puede construir'],
   mNoOrganize: ['Keine Schiffe da', 'No Ships to Organize', 'Aucun vaisseau à répartir', 'Bölünecek gemi yok', 'No hay naves que dividir'],
   mScrap2: ['Nicht verschrotten', 'Don`t Scrap Fleet', 'Ne pas recycler', 'Hurdaya çıkarma', 'No desguazar'], mBattle: ['Kampf ansehen', 'Review Battle on %1', 'Revoir le combat', 'Savaşı gözden geçir', 'Revisar el combate'], mNoBattle: ['Kein Kampf hier', 'No Battle here', 'Pas de combat ici', 'Burada savaş yok', 'Aquí no hay combate'],
@@ -1246,11 +1248,12 @@ function battleAmiga(b, k) {
     [0, 1].forEach(ci => { const o = owners[ci]; if (o == null) return; crossed[ci] = !(b.start.some((u, i) => alive[i] && u.o === o) || (b.planetOwner === o && pop > 0.0005)); });
     // (the program's battle runs until one side has nothing left; a ruleset's can stop with both standing: then no verdict)
     const blind = hidden[0] || hidden[1], lost = crossed[0] && !crossed[1], verdict = won ? 'bWon' : lost ? 'bLost' : null;
-    paint(blind || lost ? 0 : Math.max(1, b.rounds.length));
+    paint(blind || verdict ? 0 : Math.max(1, b.rounds.length));
     if (blind) { text(w('noInfo'), 150, 51, 'f11'); text(w('destroyedNow'), 150, 64, 'f11'); }
     else if (verdict) {
       text(w(verdict + '1'), 218, 44, 'f11', true); text(w(verdict + '2'), 218, 56, 'f11', true);
-      if (lost) { const im = pic('d3510'); if (im) x.drawImage(im, 190, 128, 56, 62); } // (the big cowboy where Turn was: capture 128)
+      // (the cowboy where Turn was: on crutches for a lost battle, capture 128; giving the OK for a won one, ks204 shots 582, 837)
+      const im = pic(lost ? 'd3510' : 'd3500'); if (im) x.drawImage(im, 190, 128, 56, 62);
     }
     button.textContent = w('ok');
   };
@@ -1870,16 +1873,32 @@ function amigaAlert(kind, text, yes) {
   void text;
   return true;
 }
-function alertWindow(text, buttons) {
-  const a = api();
-  const body = el('div', { class: 'am-alert' }, el('div', { class: 'am-apic' }, img(P + 'd3520')), el('div', { class: 'am-atext' }, el('p', null, text)),
-    el('div', { class: 'am-abtn2' }, ...buttons.map(([label, fn, dflt]) => btn(label, fn, dflt ? 'am-default am-dotted' : ''))));
-  const win = amWin(w('about'), body, 'am-walert');
+function alertWindow(text, buttons, o) {
+  const a = api(); o = o || {};
+  const body = el('div', { class: 'am-alert' }, el('div', { class: 'am-apic' }, img(P + (o.pic || 'd3520'))), el('div', { class: 'am-atext' }, el('p', null, text)),
+    el('div', { class: buttons.length === 1 ? 'am-abtn1' : 'am-abtn2' }, ...buttons.map(([label, fn, dflt]) => btn(label, fn, dflt ? 'am-default am-dotted' : ''))));
+  const win = amWin(w('about'), body, 'am-walert' + (o.cls ? ' ' + o.cls : ''), o.onClose ? { onClose: o.onClose } : undefined);
   win.querySelector('.wtitle').append(gadget('depth', 'Depth', () => a.closeModal()));
   // (Return takes the default button: Abbruch, as the capture has it)
   win.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); const d = buttons.find(b => b[2]); if (d) d[1](); } });
   const d = win.querySelector('.am-default'); if (d) d.focus();
   return win;
+}
+// "Name a Star" (the English program's table at 202e3e, 216 x 128; German "Sterntaufe"; Jake's ks204 shot 841): "Please name a new
+// star:", the name's field, Ok (dotted until a name is typed) and Cancel. Laid out in the classic page's own form (T.nameStarLayout),
+// whose words about the remake's star names are kept out of sight.
+function nameStarAmiga(f, { inp }) {
+  const okB = f.querySelector('button[type=submit]'), cancel = f.querySelector('.btns button[type=button]');
+  for (const n of [...f.children]) n.hidden = true;
+  okB.textContent = w('ok'); cancel.textContent = w('cancel');
+  okB.className = 'am-btn am-nsok'; cancel.className = 'am-btn am-nscancel';
+  inp.classList.add('am-field', 'am-nsfield');
+  const sync = () => { okB.disabled = !inp.value.trim(); }; inp.addEventListener('input', sync); sync();
+  f.classList.add('am-nstar');
+  f.append(frame('am-nsframe'), el('span', { class: 'am-nslabel' }, w('nameStarAsk')), inp, okB, cancel);
+  // (the window's title: the classic page opens it without one when a skin lays it out)
+  requestAnimationFrame(() => { const t = f.closest('.win') && f.closest('.win').querySelector('.wtitle'); if (t && !t.textContent.trim()) t.prepend(document.createTextNode(w('nameStarTitle'))); setTimeout(() => inp.focus(), 30); });
+  return 'am-win am-wnstar';
 }
 // "Neuer Spielstand wird gespeichert" over the star panel, with "Speichern der Galaxis" and a red bar with its
 // percentage (capture 31): shown briefly when the game saves (End Turn's copy, Datei > Speichern)
@@ -2153,10 +2172,10 @@ window.HOTHEME_OVER = {
   youLost: false,
   // the skin's own alert, saving panel, busy pointer and dragged route (Jake's captures), and no other route lines
   alert: amigaAlert, beforeFirstTurn: spieleintrag, onSave: savingPanel, busy, dragRoute, routes: false, showMsgsPref: true,
-  // nor a You Won window: 626 "Glückwunsch! Sie haben das Spiel gewonnen." is the
-  // report; 633-634 ("Glückwunsch!", "Sie haben gewonnen!") are the battle's, and
-  // 740 the Spielervergleich's
-  youWon: false,
+  // the game won (Jake's ks204 shots 840-842): the alert with the conquering portrait (d5040) and "Congratulations! You have just won
+  // the game." (626), then "Name a Star" (the table at 202e3e), then the same words as the turn's report
+  youWonLayout: (kind, Y, done) => (kind === 'won' ? (alertWindow(w('wonGame'), [[w('ok'), () => api().closeModal(), true]], { pic: 'd5040', cls: 'am-walertbig', onClose: done }), true) : false),
+  nameStarLayout: (f, o) => nameStarAmiga(f, o),
 };
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();
