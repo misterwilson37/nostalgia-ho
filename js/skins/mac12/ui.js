@@ -2376,12 +2376,13 @@ function youWon405(kind, Y, done) {
 }
 // 4.0.5's Armageddon question (ALRT 3240-3244, one at random: 291 x 194; the line (12, 16, 273, 72: left, top, right, bottom), PICT 3020 (16, 112), Cancel (140, 160), OK
 // (212, 160, default); shot 167). The ruleset's line is the Windows program's ("?  It'll"): the Mac's has one space and its own apostrophe.
-function armAsk405(text, yes) {
+function armAsk405(text, yes, labels) {
   const a = A(), el = a.el, im = { src: 'assets/skins/mac4/sprites/p3020.png' }, t = String(text).replace(/\?\s+/, '? ').replace(/'/g, '’'), close = () => back.remove(); // (the alert's PICT 3020 is the black and white one, in colour too: shot 167)
   const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } } },
     el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': t },
-      dlog20(291, 194, el('button', { type: 'button', class: 'ok20 def20', style: at20([160, 212, 180, 270]) + ';min-width:0;padding:0', onclick: () => { close(); yes(); } }, raw('span', 'OK')),
-        ok20('Cancel', [160, 140, 180, 198], close), txt20(t, [16, 12, 72, 273]),
+      // (the second question's alerts, 3250-3255, have their own words: "That’s It!" and "Never mind", item 1 and item 2: rs.armageddonButtons)
+      dlog20(291, 194, el('button', { type: 'button', class: 'ok20 def20', style: at20([160, 212, 180, 270]) + ';min-width:0;padding:0', onclick: () => { close(); yes(); } }, raw('span', labels && labels[0] ? labels[0] : 'OK')),
+        ok20(labels && labels[1] ? labels[1] : 'Cancel', [160, 140, 180, 198], close), txt20(t, [16, 12, 72, 273]),
         im ? el('img', { src: im.src, alt: '', style: at20([112, 16, 186, 90]) + ';image-rendering:pixelated' }) : null)));
   document.body.append(back); back.querySelector('button').focus();
   const q = back.querySelector('.dt20'); if (q) q.style.font = "15px/16px 'Mac Chicago 12', Chicago, sans-serif";
@@ -2794,18 +2795,18 @@ function nameStarLayout(f, o) {
   f.setAttribute('style', 'position:relative;width:281px;height:217px');
   // (4.0.5's DITL 4050 words: its rules give none of their own)
   const T4 = V4 ? ['You won the game, so you get to name a star.', 'Star names must be 2 to 7 characters long. ', '(If you’d rather not name a star, click “OK” with the name blank.)', 'New Star Name:'] : null;
-  if (V4) f.classList.add('dl20');
+  if (V4 || V3) f.classList.add('dl20'); // (3.0.1's DLOG 4050 is 4.0.5's: Jake's 3.0.1 shot 151)
   f.append(raw('p', T4 ? T4[0] : NS.text, { style: at(9, 6, 265, 35) + ';margin:0' }), raw('p', T4 ? T4[1] : NS.rule || '', { style: at(9, 45, 263, 34) + ';margin:0' }),
     raw('p', T4 ? T4[2] : NS.hint || '', { style: at(9, 82, 263, 34) + ';margin:0' }),
-    V2 || V4 ? el('img', { src: V4 ? (a.IMG['dos:p3500'] || {}).src : window.HOMAC2_COLOUR ? 'assets/skins/mac2/sprites/p3500.png' : (a.IMG['dos:p3500'] || {}).src, // (4.0.5: PICT 3500 drawn by DRAWBWCOLORGOODGUY, shot 164) // (the colour game shows the black and white sketch too: the colour pictures' file has no 3500, shot105)
+    V2 || V3 || V4 ? el('img', { src: V4 || V3 ? (a.IMG['dos:p3500'] || {}).src : window.HOMAC2_COLOUR ? 'assets/skins/mac2/sprites/p3500.png' : (a.IMG['dos:p3500'] || {}).src, // (4.0.5: PICT 3500 drawn by DRAWBWCOLORGOODGUY, shot 164) // (the colour game shows the black and white sketch too: the colour pictures' file has no 3500, shot105)
        alt: '', style: at(10, 118, 74, 74) + ';image-rendering:pixelated' }) : null, // (2.0.1's DITL 4050 item 4: PICT 3500 at (118, 10, 192, 84))
     raw('span', T4 ? T4[3] : NS.label || '', { style: at(95, 119, 150, 16) }), o.inp, o.err,
-    el('button', { type: 'submit', class: V4 ? 'ok20 def20' : null, style: at(196, 179, 58, 20) + ';min-width:0;padding:0' }, raw('span', NS.ok || 'OK')));
-  if (V4) { // (Chicago 12 with its 16-pixel lines; the field a plain box 3 pixels round its DITL rect (97, 144, 187, 160): shot 164)
+    el('button', { type: 'submit', class: V4 || V3 ? 'ok20 def20' : null, style: at(196, 179, 58, 20) + ';min-width:0;padding:0' }, raw('span', NS.ok || 'OK')));
+  if (V4 || V3) { // (Chicago 12 with its 16-pixel lines; the field a plain box 3 pixels round its DITL rect (97, 144, 187, 160): shot 164)
     f.querySelectorAll('p, span').forEach(q => { q.style.font = "15px/16px 'Mac Chicago 12', Chicago, sans-serif"; });
     o.inp.setAttribute('style', at(94, 141, 96, 22) + ";box-sizing:border-box;padding:0 3px;border:1px solid #000;border-radius:0;background:#fff;color:#000;font:15px/16px 'Mac Chicago 12', Chicago, sans-serif;outline:none");
   }
-  return V4 ? 'mac12 dl20w' : true; // (4.0.5: the dialog frame and place of every 4.0.5 dialog)
+  return V4 || V3 ? 'mac12 dl20w' : true; // (4.0.5 and 3.0.1: the dialog frame and place of every 4.0.5 dialog)
 }
 
 // ---------- a route line (StarLine @c70c4, MakeArrowRegion @12da0) ----------
@@ -4984,7 +4985,11 @@ if (V3) {
   // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
   try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); if (V4) { document.fonts.load("12px 'Mac Geneva 9 Bold'"); document.fonts.load("12px 'Mac Geneva 9'").then(() => { const a = A(); if (a && a.G) a.renderPanel(); }); } } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {
-    ...(V4 ? { youWonLayout: (kind, Y, done) => (own() && G() ? youWon405(kind, Y, done) : false), nameStarLayout, confirm: (text, yes) => (own() && /armageddon device\?/.test(String(text)) ? armAsk405(text, yes) : false) } : {}),
+    ...(V4 ? { youWonLayout: (kind, Y, done) => (own() && G() ? youWon405(kind, Y, done) : false), nameStarLayout, confirm: (text, yes, labels) => (own() && /armageddon|losing big time|sissy way|ultimate feeling|laughing matter|really late|not launching/.test(String(text)) ? armAsk405(text, yes, labels) : false) } : {}),
+    // (3.0.1: the Armageddon alerts and Name a Star are 4.0.5's (ALRT 3240-3255, DLOG 4050: the same items and sizes, audit dialogs-301.tsv);
+    // You Won and You Lost 2.0.1's ALRT 5040 / 5050 and their colour twins (Jake's shots 149-195))
+    ...(V3 ? { nameStarLayout, youWonLayout: (kind, Y, done) => { if (!own() || !G()) return false; alertById20(String((kind === 'won' ? 5040 : 5050) + (COLOUR3 ? 1 : 0)), [Y.text], Y.ok, done); return true; },
+      confirm: (text, yes, labels) => (own() && /armageddon|losing big time|sissy way|ultimate feeling|laughing matter|really late|not launching/.test(String(text)) ? armAsk405(text, yes, labels) : false) } : {}),
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
     newGame(f) { if (V4) createGalaxy405(f); else createGalaxy301(f); },
@@ -4994,7 +4999,7 @@ if (V3) {
     battleWindowAlways: true,
     ownOrganize: true, // (Ships > Organize, the program's own window: the classic page's leftover item not repeated in the Ho! menu)
     // (4.0.5's DoMessageAction for the armageddon and supernova reports: the shake and the supernova graphic before the card)
-    beforeCard: (m, again) => (V4 && own() && G() ? beforeCard405(m, again) : false),
+    beforeCard: (m, again) => ((V4 || V3) && own() && G() ? beforeCard405(m, again) : false), // (3.0.1: DoArmageddonGraphic and DoSupernovaGraphic are 4.0.5's steps; Jake's 3.0.1 shots 154-163)
     // (Compare Players' chart: its words in Geneva 9, as Jake's System 7 capture 8 of 4.0.5 shows them; the bitmap face, 12 CSS pixels to its 9)
     chartFont: G9,
     // (3.0.1 works the battles out during the update without showing them: DoBattleStage passes 0 to DoOneBattle; each is shown as its

@@ -103,8 +103,8 @@ another version.
 |---|---|---|---|---|
 | Personalize your copy | 002 | DLOG 4030 | differs | not built, as in the 2.0.1 skins: the remake takes the name from New Game and the account (a licence name is never a stranger's) |
 | Startup window, B&W and colour | 003, 009 | DLOG 1200, 1201 | same | close: PICT 1003 (colour 1002, the colour skin's p1003) over Open Game and New Game, framed as the 2.0.1 skins' (the same DLOG); the licensee's plate (PICT 4010, drawn by `GetLicensePict`) is not drawn |
-| Name the new galaxy (System 7's file box) | 004, 164 | system | n/a | ? |
-| Open a game (System 7's file box) | 010 | system | n/a | ? |
+| Name the new galaxy (System 7's file box) | 004, 164 | system | n/a | **not built** (23 Nov): the remake names the galaxy in New Game and saves by itself; a System 7 Standard File box (the folder pop-up, the list, Eject, Desktop, New folder, the name field, Save) would go in every Mac 2.0.1-4.0.5 skin |
+| Open a game (System 7's file box) | 010 | system | n/a | **not built**: as above (Open lists the remake's saves in its own window) |
 | Create New Galaxy | 005, 006, 165 | DLOG 6080 | differs | **done** (`createGalaxy301`): DITL 6080's rectangles; the four lists with Cluster and Diabolical, the computers' number and slider, Years Per Turn… and its years, Alliances, Cancel, Create; the remake's own choices under "More…" |
 | Please Identify Yourself | 007, 011 | DLOG 4000 | same | not built, as in the 2.0.1 skins (a game file shared between machines; the remake's players are set at New Game) |
 | New player: name, skill, sex | 008 | DLOG 4010 | differs | not built (as 4000): the skill is New Game's, the sex the Preferences' |
@@ -168,12 +168,12 @@ another version.
 
 | Screen | Captures | Resource | Against 2.0.1 | Remake |
 |---|---|---|---|---|
-| A player eliminated (report bubble) | 149, 194 | code | ? | ? |
-| You won | 150 | ALRT 5040, 5041 | window differs, items same | ? |
-| Name a Star | 151 | DLOG 4050 | window same, items differ | ? |
-| Armageddon questions | 152, 153 | ALRT 3240-3255 | mostly new | ? |
-| Armageddon on the map | 154-163 | code | new | ? |
-| You lost | 195 | ALRT 5050, 5051 | same | ? |
+| A player eliminated (report bubble) | 149, 194 | code | same | **done**: the report bubble with the player's crossed-out face (checked 23 Nov) |
+| You won | 150 | ALRT 5040, 5041 | window differs, items same | **done** (23 Nov): 2.0.1's `alertById20` 5041 (colour) / 5040: the plain alert, the two lines at the top left, PICT 3530 / 3030, OK; it had been the classic window with a close box |
+| Name a Star | 151 | DLOG 4050 | window same, items differ | **done** (23 Nov): 4.0.5's `nameStarLayout` (the same DLOG 4050 in both, audit dialogs-301.tsv): no title bar, Chicago, PICT 3500, OK only |
+| Armageddon questions | 152, 153 | ALRT 3240-3255 | mostly new | **done** (23 Nov): 4.0.5's `armAsk405` (the same ALRTs), now with each second question's own buttons ("That’s It!" / "Never mind", rs.armageddonButtons), in 4.0.5 too, whose second question had fallen to the classic box |
+| Armageddon on the map | 154-163 | code | new | **close** (23 Nov): 4.0.5's `beforeCard405` (the shake, the stars red, the supernova icons and flash: 3.0.1's DoArmageddonGraphic and DoSupernovaGraphic take the same steps, a few bytes apart) |
+| You lost | 195 | ALRT 5050, 5051 | same | **done** (23 Nov): as You won, 5051 / 5050 with "Oh, well…" |
 
 ## Not in Jake's games (the resource decides; marked so in the remake)
 
