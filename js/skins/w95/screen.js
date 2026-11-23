@@ -49,7 +49,7 @@ T.menuLayout = {
     [lab('Save Game'), 'Game/Export this game…'], '-',
     [lab('End Turn'), clickEndTurn, null, null, () => !(window.HOAPI && HOAPI.G), 'T'], '-',
     [lab('Recent File'), () => {}, null, null, dim], '-',
-    [lab('Exit'), () => askFirst('Are you sure you want to leave Spaceward Ho?', () => HOAPI.quitToTitle()), null, null, null, 'Q']],
+    [lab('Exit'), () => askFirst('Are you sure you want to leave Spaceward Ho?', () => HOAPI.quitToTitle()), null, null, null, 'Ctrl-Q']], // ("Ctrl-Q" with a hyphen: menu 2's own, shot 032)
   // (4.0.5's Edit menu has nothing the remake does: shown dimmed, as in shot 035)
   Edit: [[lab('Undo'), () => {}, null, null, dim, 'Z'], '-', [lab('Cut'), () => {}, null, null, dim, 'X'], [lab('Copy'), () => {}, null, null, dim, 'C'], [lab('Paste'), () => {}, null, null, dim, 'V']],
   Options: [[lab('Auto Play...'), () => (W95ON() ? autoPlayDialog() : HOAPI.openAutoPlay()), null, null, () => noGame() || !!(HOAPI.G && HOAPI.G.over)], '-', [null, 'View/#4'], '-',
@@ -105,7 +105,37 @@ T.menus = (menus) => {
   // Options' "Sound", ticked while on (shot 036), in place of the remake's "Turn sound off / on"
   for (const it of menus.View || []) if (typeof it[0] === 'function') { let t = ''; try { t = it[0](); } catch (e) {} if (/sound/i.test(t)) { it[0] = lab('Sound'); it[3] = () => !!(window.HOAPI && HOAPI.Sound.on); } }
 };
-T.keyName = (k) => (/^Alt/.test(k) ? k : 'Ctrl+' + k);
+T.keyName = (k) => (/^(Alt|Ctrl)/.test(k) ? k : 'Ctrl+' + k);
+// The items' access letters (menu 2's "&", docs/405-windows.md), underlined as Windows 95 draws them, dimmed items too (shot 050's Chat Window,
+// Zoom In). The items the program renames at run time carry none (shot 042: Build/Design Ships..., Organize Ships..., Scrap current fleet;
+// shot 046: Don't Scrap Current Fleet; No Battles here...), nor does the Galaxy menu, whose resource has none (shot 047). Checked on shots
+// 032, 036, 042, 046, 047, 050, 282. Only the English words are marked: no 4.0.5 was published in the remake's other languages.
+// Alt+letter opens the menu of that underlined first letter; a letter in an open menu chooses its item, as Windows does.
+const MENU_ACC = { 'New Game': 0, 'Open Game...': 0, 'Save Game': 0, 'End Turn': 0, 'Exit': 1, 'Undo': 0, 'Cut': 2, 'Copy': 0, 'Paste': 0,
+  'Auto Play...': 0, 'Sound': 0, 'Master Point List...': 0, 'Hall of Fame...': 0, 'Hall of Shame...': 2, 'Preferences...': 0, 'List All Fleets': 0,
+  'Tech Spending Window': 0, 'Report Window': 0, 'Chat Window': 0, 'Zoom In': 5, 'Zoom Out': 5, 'Hide Information': 0, 'Clean Up Windows': 1,
+  'About Spaceho...': 0, 'Help Topics': 0 };
+function accMenus() {
+  const mark = (dd) => {
+    if (!de.classList.contains('w95win')) return;
+    dd.querySelectorAll('button[role=menuitem]').forEach(b => {
+      if (b.dataset.acc) return; const n = b.firstChild; if (!n || n.nodeType !== 3) return;
+      const t = n.nodeValue, i = MENU_ACC[t]; if (i == null || i >= t.length) return;
+      b.dataset.acc = t[i].toLowerCase(); const u = document.createElement('u'); u.className = 'macc'; u.textContent = t[i];
+      const w = document.createElement('span'); w.setAttribute('translate', 'no'); w.append(t.slice(0, i), u, t.slice(i + 1)); n.replaceWith(w);
+    });
+  };
+  new MutationObserver(() => document.querySelectorAll('#menubar .dropdown.open').forEach(mark)).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+  document.addEventListener('keydown', (e) => {
+    if (!de.classList.contains('w95win') || e.ctrlKey || e.metaKey || e.shiftKey || e.key.length !== 1 || !/[a-z]/i.test(e.key)) return;
+    const k = e.key.toLowerCase(), open = document.querySelector('#menubar .dropdown.open');
+    if (open && !e.altKey) { const b = [...open.querySelectorAll('button[role=menuitem]:not(:disabled)')].find(x => x.dataset.acc === k); if (b) { e.preventDefault(); b.click(); } return; }
+    if (!e.altKey || document.querySelector('.scrim')) return;
+    const m = [...document.querySelectorAll('#menubar .mbtn')].find(x => x.offsetParent && !x.classList.contains('logo') && x.textContent.trim().charAt(0).toLowerCase() === k);
+    if (m) { e.preventDefault(); if (open && open.previousElementSibling !== m) open.previousElementSibling.click(); m.click(); }
+  });
+}
+accMenus();
 // (the remake's own commands: no longer at the end of Help; the Ho! menu is opened from the window's icon at the caption's left, where
 // Windows 95 keeps a window's own menu: Jake 18 Nov. style.css puts the Ho! button over the icon)
 T.hoIntoLast = () => false;
@@ -1320,13 +1350,13 @@ function helpTopics() {
       if (tab === 'find' && q) { const ws = q.split(/\s+/); ts = ts.filter(t => { const tx = (HELPT.text[t.u] || '') + ' ' + t.t.toLowerCase(); return ws.every(w => tx.includes(w)); }); }
       ts.forEach((t, k) => row('pg', t.t, { key: 'i' + k + t.u, u: t.u }, 0));
     }
-    const ob = box.querySelector('.hbtns .op'); if (ob) ob.textContent = TL(sel && sel.book != null && open[sel.book] ? 'Close' : sel && sel.book == null ? 'Display' : 'Open');
+    const ob = box.querySelector('.hbtns .op'); if (ob) accText(ob, sel && sel.book != null && open[sel.book] ? 'Close' : sel && sel.book == null ? 'Display' : 'Open');
   };
   ['Contents', 'Index', 'Find'].forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.className = 'htab'; b.dataset.t = t.toLowerCase(); b.textContent = TL(t); b.setAttribute('role', 'tab');
     b.addEventListener('click', async () => { tab = t.toLowerCase(); sel = null; if (tab === 'find') await helpText(); draw(); inp.querySelector('input').focus(); }); tabs.append(b); });
   const fi = document.createElement('input'); fi.type = 'text'; inp.append(fi); fi.addEventListener('input', () => { sel = null; draw(); });
   const helpText = async () => { await Promise.all(all().filter(t => HELPT.text[t.u] == null).map(async t => { try { const h = await (await fetch(t.u)).text(); HELPT.text[t.u] = new DOMParser().parseFromString(h, 'text/html').body.textContent.toLowerCase(); } catch (e) { HELPT.text[t.u] = ''; } })); };
-  const pr = mk('Print...'); pr.disabled = true;
+  const pr = mk('Print...'); pr.disabled = true; accText(pr, 'Print...'); // (shot 284: Open's O and Print's P underlined, Cancel and the tabs not; Close and Display, not captured, as Open)
   box.querySelector('.hbtns').append(mk('Open', openSel, 'op def'), pr, mk('Cancel', () => a.closeModal()));
   box.querySelector('.x').addEventListener('click', () => a.closeModal());
   list.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); openSel(); } });
@@ -1607,6 +1637,44 @@ T.confirm = (text, yes, labels) => {
   ok.focus(); return true;
 };
 
+
+// a button's words with its first letter underlined, as Windows draws an access letter (English only: the words of other languages are the remake's)
+function accText(b, en) {
+  const t = TL(en); b.textContent = '';
+  if (t !== en) { b.textContent = t; return; }
+  const u = document.createElement('u'); u.textContent = t[0]; b.append(u, t.slice(1)); b.dataset.acc = t[0].toLowerCase();
+}
+// ---------- Processing Year (shots 286, 314): dialog 392 while the turn is worked out (T.turnProgress) ----------
+// FUN_00431ce4 (ENDTURN.CPP) opens dialog 392 (thunk_FUN_0044c5ba: modeless, CenterWindow over the frame, no caption) when the frame is
+// shown, then calls FUN_004320f8 once for each ten years of the turn (years per turn in tens). Each call adds 10 to the year, puts
+// "Processing Year %d..." with the new year in the STATIC 1201 (the template's "Doing Pass 1 for Player 1..." is never shown) and sets
+// the bar (control 1202) to (1000 / Y) * k + (1000 / Y) / 10 percent for the k-th call of Y years (integer arithmetic: 10 for a 10-year
+// turn, as in both shots: 21 of 213 pixels). The bar (FUN_0044c42b) is a white rectangle and a red one (RGB 255, 0, 0) from its left to
+// left + value * width / 100, both with the black pen. The window closes when the last ten years are done. The remake works the turn
+// out at once, so each ten years stays 80 ms (as the Mac 4.0.5 skin's status window, js/skins/mac12/ui.js turnProgress), then the turn
+// goes on.
+const prevTurnProgress = T.turnProgress;
+T.turnProgress = (g, go) => {
+  if (!W95ON()) return prevTurnProgress ? prevTurnProgress(g, go) : go();
+  const a = A(), dl = W95DLG(392); if (!dl) return go();
+  const Y = Math.max(10, Math.round(((g.opts && +g.opts.yearsPerTurn) || 10) / 10) * 10), per = Math.trunc(1000 / Y), steps = Y / 10;
+  const t = dl.by[1201], bar = dl.by[1202]; bar.className = 'w95prog'; bar.setAttribute('role', 'progressbar'); bar.setAttribute('aria-valuemin', '0'); bar.setAttribute('aria-valuemax', '100');
+  const fill = document.createElement('i'); bar.append(fill);
+  let k = 0;
+  const show = () => {
+    const v = per * k + Math.trunc(per * 10 / 100), w = bar.offsetWidth || 213;
+    t.textContent = cfmt(TL('Processing Year %d...'), g.year + 10 * (k + 1));
+    const fx = Math.min(w, Math.trunc(v * w / 100)); fill.style.width = fx + 'px'; fill.style.display = fx > 0 ? '' : 'none'; bar.setAttribute('aria-valuenow', String(v));
+  };
+  a.modal('', dl.el, { cls: 'w95dlgwin w95busy', sticky: true, label: TL('Processing Year %d...').replace('%d', String(g.year + 10)) });
+  dl.el.setAttribute('aria-busy', 'true'); show();
+  const step = () => {
+    if (!dl.el.isConnected) return go();
+    if (++k >= steps) { a.closeModal(); go(); return; }
+    show(); setTimeout(step, 80);
+  };
+  setTimeout(step, 80);
+};
 
 // ---------- Create New Galaxy (unit 9): the remake's New Game form dressed as dialog 111 (shot 002) while the 405 ruleset is chosen ----------
 // The program draws the four choices itself (not in the template): boxes of 48-pixel cells, each its picture over its name, the chosen one

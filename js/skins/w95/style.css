@@ -443,3 +443,21 @@ html.w95win #panel ::-webkit-scrollbar-button:vertical:increment:disabled, html.
 /* a static control paints its own background in the dialog's colour (WM_CTLCOLORSTATIC): over the program's frame lines, as shot 044's
    "To Organize Fleets:" (a picture or the program's own drawing set inline keeps its own) */
 html.w95win .w95dlg > .st { background-color: #c0c0c0; }
+/* Processing Year (dialog 392, shots 286 / 314; FUN_0044c42b): a white rectangle with the black pen, the done share a red one over it */
+html.w95win .w95dlg .w95prog { background: #fff; border: 1px solid #000; }
+html.w95win .w95dlg .w95prog > i { position: absolute; left: -1px; top: -1px; bottom: -1px; box-sizing: border-box; background: #f00; border: 1px solid #000; }
+/* its frame is Windows 95's own raised dialog edge, not the program's black-edged one: light grey and white at the top left, black and
+   dark grey at the bottom right (shot 314: the window 258 x 60, its client 254 x 56) */
+html.w95win .scrim > .win.w95dlgwin.w95busy { border: 0; }
+html.w95win .scrim > .win.w95dlgwin.w95busy .wbody { padding: 2px; background: #c0c0c0; box-shadow: inset 1px 1px 0 #c0c0c0, inset -1px -1px 0 #000, inset 2px 2px 0 #fff, inset -2px -2px 0 #808080; }
+html.w95win .w95busy .w95dlg { width: 254px !important; height: 56px !important; }
+/* the menu items' access letters (menu 2's "&"; shots 032-050, 282) */
+html.w95win #menubar .dropdown u.macc { text-decoration: underline; }
+/* the items 17 pixels apart and a separator 9 (shots 032, 050: Windows 95's menu metrics for MS Sans Serif 8) */
+html.w95win #menubar .dropdown button { line-height: 13px; height: 17px; padding-top: 2px; padding-bottom: 2px; box-sizing: border-box; }
+html.w95win #menubar .dropdown hr { margin: 4px 0 3px; }
+/* the drop-down right under the bar (shot 032: its top row is the bar's next, 40 at 640 x 480) in Windows 95's raised frame: light grey and
+   white at the top left, black and dark grey at the bottom right, no shadow; the key column 8 pixels after the longest item (shots 032, 050) */
+html.w95win #menubar .menu:not(:has(> .logo)) > .dropdown { margin-top: -6px; }
+html.w95win #menubar .dropdown { border: 1px solid; border-color: #c0c0c0 #000 #000 #c0c0c0; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #808080; padding: 2px; }
+html.w95win #menubar .dropdown .mkey { padding-left: 8px; min-width: 0; }

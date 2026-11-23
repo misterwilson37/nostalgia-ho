@@ -30,6 +30,7 @@ window.HOUI.add([
 ['%s stationed at %s.', '%s stationné à %s.', '%s stationiert bei %s.', '%s, %s yıldızında konuşlu.', '%s estacionado en %s.'],
 ['%s to arrive at %s in %d.', '%s arrivera à %s en %d.', '%s erreicht %s im Jahr %d.', '%s, %s yıldızına varacak; yıl %d.', '%s llegará a %s en %d.'],
 ['Abandoning', 'Abandon', 'Wird aufgegeben', 'Terk ediliyor', 'Abandonando'],
+['Processing Year %d...', 'Traitement de l’année %d...', 'Berechnung des Jahres %d...', '%d yılı işleniyor...', 'Procesando el año %d...'],
 ['Statistics...', 'Statistiques...', 'Statistik...', 'İstatistikler...', 'Estadísticas...'],
 ['Scrap current fleet', 'Mettre la flotte actuelle à la casse', 'Aktuelle Flotte verschrotten', 'Şimdiki filoyu hurdaya çıkar', 'Desguazar la flota actual'],
 ["Don't Abandon Planet", 'Ne pas abandonner la planète', 'Planet nicht aufgeben', 'Gezegeni terk etme', 'No abandonar el planeta'],
