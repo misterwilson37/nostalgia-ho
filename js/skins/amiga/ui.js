@@ -1261,7 +1261,8 @@ function battleAmiga(b, k) {
     const [h, v] = mid(t);
     for (let r = 1; r <= 6 && !stop && !skip; r++) {
       const t0 = performance.now(); x.strokeStyle = '#ffee00'; x.lineWidth = 1;
-      for (let j = 1; j <= r; j++) { x.beginPath(); x.ellipse(h, v, 10 * j, 3.3 * j, 0, 0, Math.PI * 2); x.stroke(); }
+      const ry = t.planet ? 4.6 : 3.3; // (a planet's rings cover it, taller than a ship's: Jake's photos)
+      for (let j = 1; j <= r; j++) { x.beginPath(); x.ellipse(h, v, 10 * j, ry * j, 0, 0, Math.PI * 2); x.stroke(); }
       await wait(t0 + TICK * 4);
     }
   }
