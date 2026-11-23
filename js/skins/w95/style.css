@@ -461,3 +461,23 @@ html.w95win #menubar .dropdown hr { margin: 4px 0 3px; }
 html.w95win #menubar .menu:not(:has(> .logo)) > .dropdown { margin-top: -6px; }
 html.w95win #menubar .dropdown { border: 1px solid; border-color: #c0c0c0 #000 #000 #c0c0c0; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #808080; padding: 2px; }
 html.w95win #menubar .dropdown .mkey { padding-left: 8px; min-width: 0; }
+/* One frame for every window of the program (Jake, 23 Nov: the Build window's is the right one): a 1-pixel black edge, then the five lines of
+   FUN_00411866, black, grey, white, grey, black (shots 038, 041, 078), drawn over the window's edge so no content can cover or break it.
+   Windows' own windows keep Windows' frame: its message box (w95msgwin), Help Topics (w95helpwin), Processing Year (w95busy). */
+html.w95win .scrim > .win:not(.w95msgwin):not(.w95helpwin):not(.w95busy) { position: relative; border: 1px solid #000; border-radius: 0; box-shadow: none; }
+html.w95win .scrim > .win:not(.w95msgwin):not(.w95helpwin):not(.w95busy):not(.w95dlgwin):not(.hallwin) { padding: 6px; }
+html.w95win .scrim > .win:not(.w95msgwin):not(.w95helpwin):not(.w95busy)::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px #828282, inset 0 0 0 3px #fff, inset 0 0 0 4px #828282, inset 0 0 0 5px #000; }
+html.w95win .scrim > .win.w95dlgwin .wbody, html.w95win .scrim > .win.hallwin .wbody { box-shadow: none; }
+/* buttons: no browser focus ring (Windows 95 has none); a focused button, like the default one, takes the black border of the Hall of Fame's
+   OK (Jake, 23 Nov: "fine for now"; the 3-D edges of every button are a later job) */
+html.w95win button:focus, html.w95win button:focus-visible { outline: none; }
+html.w95win .scrim button:not([role=menuitem]):not(.mbtn):not(.close):not(.htab):focus-visible, html.w95win .w95dlg button.pb.def { outline: 1px solid #000; outline-offset: 0; }
+/* Help Topics' tabs as Windows 95 draws a tab control (shot 284): raised tabs with white top and left, black and dark grey right, cut
+   corners, no bottom edge; the chosen one 2 pixels taller and wider, standing on the page and hiding the page's edge under it */
+html.w95win .w95help .htabs { display: flex; align-items: flex-end; padding: 6px 8px 0 10px; position: relative; z-index: 1; margin-bottom: -1px; border: 0; }
+html.w95win .scrim > .win .w95help .htab { position: relative; background: #c0c0c0; border: 0 !important; border-radius: 0; outline: none !important;
+  box-shadow: inset 1px 0 0 #fff, inset 0 1px 0 #fff, inset -1px 0 0 #000, inset -2px 0 0 #808080 !important; clip-path: polygon(0 2px, 2px 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 0 100%);
+  margin: 2px 0 0 !important; padding: 2px 7px 3px !important; }
+html.w95win .scrim > .win .w95help .htab.on { margin: 0 -2px !important; padding: 3px 9px 5px !important; z-index: 2; }
+html.w95win .w95help .hpane { border: 0; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #000, inset -2px -2px 0 #808080; }

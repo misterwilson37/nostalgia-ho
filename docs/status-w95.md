@@ -133,6 +133,23 @@ Topics underlines Open's O and Print's P (shot 284). The menus' metrics put on t
 drop-down's top on the bar's next row, Windows 95's raised frame, the key column 8 pixels after the longest item (File and Window menus
 within a pixel of shots 032 and 050). The game's own dialogs have no access letters (their templates carry none).
 
+## Jake's look (23 Nov)
+- **One frame for every window** of the program (Jake: the Build window's is right): the 1-pixel black edge and FUN_00411866's five lines,
+  drawn over the window's edge (style.css, `.win::after`), on Compare Players, the Halls, Dip, Statistics, Alliances and the rest alike;
+  the program's dialogs sized to even whole pixels (W95DLG) so the lines don't fall between pixels. Windows' own windows keep Windows'
+  frame (message box, Help Topics, Processing Year).
+- **Buttons:** no browser focus ring (the navy double line); a focused button, like a default one, has the black border of the Hall of
+  Fame's OK. The Armageddon question rings neither button (template 376's OK is a plain push button; shots 086, 298). The 3-D edges of
+  every button are left for later (Jake).
+- **The NWC logo** (splash and About): every white pixel is the window's grey in both shots (001, 283; bitmap 383 has one white palette
+  entry, index 0). Near-white now counts too (a colour-managed browser returns the white as 254), and the logo is redone once its
+  picture has loaded: Jake's white fills.
+- **Help Topics:** the books are HOHELP.CNT's 13 (the help copy's "Other topics" pop-ups are reached by Index and Find only); the tabs
+  drawn as a Windows 95 tab control; the first book chosen as it opens (shot 284).
+- **The Armageddon questions differ on purpose:** both programs draw each from a list at random (strings 299-303, then 304-309).
+- **Galaxy menu:** Statistics and "Armageddon" show in every 4.0.5 game tried here (405, mac405, 301 rules; title screen; modern on);
+  where Jake saw "Armageddon device" and no Statistics is to find out (another ruleset in this skin, the DOS one, has neither).
+
 ## Next
 
 All twelve units have had a pass. What is left, in order of value:

@@ -227,7 +227,7 @@ const whiteURL = (im) => { const c = whiteClear(im); try { return c && c.toDataU
 function whiteClear(im) {
   if (!im || !im.width) return null; if (WCLR.has(im)) return WCLR.get(im);
   const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
-  try { const d = x.getImageData(0, 0, c.width, c.height), p = d.data; for (let i = 0; i < p.length; i += 4) if (p[i] === 255 && p[i + 1] === 255 && p[i + 2] === 255) p[i + 3] = 0; x.putImageData(d, 0, 0); } catch (e) { return im; }
+  try { const d = x.getImageData(0, 0, c.width, c.height), p = d.data; for (let i = 0; i < p.length; i += 4) if (p[i] >= 245 && p[i + 1] >= 245 && p[i + 2] >= 245) p[i + 3] = 0; /* (near white too: a colour-managed browser, Firefox on a Mac, hands the bitmap's white back as 254: Jake saw it left white, 23 Nov) */ x.putImageData(d, 0, 0); } catch (e) { return im; }
   WCLR.set(im, c); return c;
 }
 function drawPlanet(cv, step) {
@@ -628,7 +628,7 @@ const DU = (x, y) => [x * 1.5, y * 1.625];
 function W95DLG(id) {
   const D = (window.W95DLGS || {})[id]; if (!D) return null;
   const root = document.createElement('div'); root.className = 'w95dlg'; const [W, Hh] = DU(D.w, D.h);
-  root.style.width = W + 'px'; root.style.height = Hh + 'px';
+  root.style.width = 2 * Math.round(W / 2) + 'px'; root.style.height = 2 * Math.round(Hh / 2) + 'px'; // (even whole pixels: centred on the page, a half-pixel size put the frame's 1-pixel lines between pixels, blurred)
   const by = {};
   for (const [cid, kind, text, x, y, w, h, flags] of D.c) {
     if (/hidden/.test(flags)) continue;
@@ -1141,7 +1141,7 @@ function aboutDialog() {
   const a = A(), dl = W95DLG(108); if (!dl) { a.openAbout(); return; }
   const gb = dl.by[1007], im = a.IMG['w95:b316'];
   if (gb && im && im.src) { gb.style.background = `#fff url("${im.src}") center / 100% 100% no-repeat`; gb.style.border = '0'; gb.style.imageRendering = 'pixelated'; }
-  const lg = dl.by[1174], li = a.IMG['w95:b383']; if (lg && li && li.src) { lg.style.background = `url("${whiteURL(li)}") left top / 80px 121px no-repeat`; lg.style.overflow = 'visible'; lg.style.width = '80px'; lg.style.height = '121px'; }
+  const lg = dl.by[1174], li = a.IMG['w95:b383']; if (lg && li && li.src && !(li.complete && li.naturalWidth)) li.addEventListener('load', () => { if (lg.isConnected) lg.style.backgroundImage = `url("${whiteURL(li)}")`; }, { once: true }); if (lg && li && li.src) { lg.style.background = `url("${whiteURL(li)}") left top / 80px 121px no-repeat`; lg.style.overflow = 'visible'; lg.style.width = '80px'; lg.style.height = '121px'; }
   const L = licensee95(), lic = dl.by[1173];
   if (lic) { lic.innerHTML = ''; lic.classList.add('lic');
     lic.append(span('ll', TL('Licensed to:')), span('lv', [L.name || 'Unknown', L.org || 'Unknown', 'Spaceward Ho! V4.0.5'].join('\n'))); }
@@ -1319,7 +1319,11 @@ function helpBase() { const M = window.HOMANUALS || {}, e = M['405'] || {}, lang
 async function helpBooks(base) {
   if (HELPT.cache[base]) return HELPT.cache[base];
   const html = await (await fetch(base + 'index.html')).text(), d = new DOMParser().parseFromString(html, 'text/html');
-  const books = [...d.querySelectorAll('ul.contents > li')].map(li => ({ t: (li.querySelector(':scope > b') || li).textContent.trim(), topics: [...li.querySelectorAll('a')].map(x => ({ t: x.textContent.trim(), u: base + x.getAttribute('href') })) }));
+  // the books are the first list's (HOHELP.CNT's 13, shot 284); the help copy's "Other topics" (pop-ups the .CNT doesn't list) are found
+  // through Index and Find only (they had shown as five more books: Jake, 23 Nov)
+  const lists = [...d.querySelectorAll('ul.contents')], link = (x) => ({ t: x.textContent.trim(), u: base + x.getAttribute('href') });
+  const books = lists.length ? [...lists[0].querySelectorAll(':scope > li')].map(li => ({ t: (li.querySelector(':scope > b') || li).textContent.trim(), topics: [...li.querySelectorAll('a')].map(link) })) : [];
+  books.extra = lists.slice(1).flatMap(l => [...l.querySelectorAll('a')].map(link));
   return (HELPT.cache[base] = books);
 }
 function helpTopics() {
@@ -1335,7 +1339,7 @@ function helpTopics() {
   const row = (cls, text, data, depth) => { const r = document.createElement('div'); r.className = 'hrow ' + cls + (sel && sel.key === data.key ? ' sel' : ''); r.style.paddingLeft = (2 + 18 * depth) + 'px'; r.setAttribute('role', 'treeitem');
     const i = document.createElement('i'); i.className = 'hic'; r.append(i, span('ht', text));
     r.addEventListener('click', () => { sel = data; draw(); }); r.addEventListener('dblclick', () => { sel = data; openSel(); }); list.append(r); };
-  const all = () => books.flatMap(b => b.topics);
+  const all = () => books.flatMap(b => b.topics).concat(books.extra || []);
   const draw = () => {
     [...tabs.children].forEach(c => c.classList.toggle('on', c.dataset.t === tab));
     list.innerHTML = '';
@@ -1361,7 +1365,7 @@ function helpTopics() {
   box.querySelector('.x').addEventListener('click', () => a.closeModal());
   list.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); openSel(); } });
   a.modal('', box, { cls: 'w95msgwin w95helpwin', label: 'Help Topics' });
-  helpBooks(base).then(b => { books = b; draw(); }).catch(() => { lead.textContent = TL('The help could not be read.'); });
+  helpBooks(base).then(b => { books = b; if (!sel && books.length) sel = { key: 'b0', book: 0 }; draw(); }) /* (the first book chosen as it opens: shot 284) */.catch(() => { lead.textContent = TL('The help could not be read.'); });
   draw();
   return true;
 }
@@ -1392,7 +1396,8 @@ const prevTitle = T.title;
 T.title = (frame, IMG, Sound) => {
   const r = prevTitle ? prevTitle(frame, IMG, Sound) : false;
   const lg = document.querySelector('#titlescreen .w95logo'), im = IMG && IMG['w95:b383'];
-  if (lg && im && im.src) lg.style.backgroundImage = `url("${whiteURL(im)}")`; // (all its white see-through: shot 001's globe shows the grey)
+  const setLogo = () => { if (lg && im && im.src) lg.style.backgroundImage = `url("${whiteURL(im)}")`; }; setLogo();
+  if (im && !(im.complete && im.naturalWidth)) im.addEventListener('load', setLogo, { once: true }); // (made before the picture had loaded, its white stayed) // (all its white see-through: shot 001's globe shows the grey)
   return r;
 };
 
@@ -1625,7 +1630,7 @@ T.confirm = (text, yes, labels) => {
     const im = a.IMG['w95:b3520']; if (im && im.src) dl.by[1138].style.background = `url("${edgeURL(im)}") left top / 80px 74px no-repeat`;
     dl.by[1].textContent = L2 ? L2[0] : 'OK'; dl.by[2].textContent = L2 ? L2[1] : 'Cancel';
     dl.by[1].addEventListener('click', () => { a.closeModal(); yes(); }); dl.by[2].addEventListener('click', () => a.closeModal());
-    showDlg(dl, 'Armageddon'); return true;
+    showDlg(dl, 'Armageddon'); setTimeout(() => { const f = document.activeElement; if (f && dl.el.contains(f)) f.blur(); }, 0); return true; // (no button ringed: OK is a plain push button in template 376, shots 086, 298)
   }
   const box = document.createElement('div'); box.className = 'w95msg';
   box.innerHTML = '<div class="mcap"><span>V4.0.5</span><i class="x"></i></div><div class="mbody"><i class="warn"></i><p></p></div><div class="mbtns"></div>';
