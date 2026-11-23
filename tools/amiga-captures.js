@@ -55,6 +55,9 @@ const VIEWS = {
       a.UI.inbox = [{ text: 'Congratulations! You have just won the game.', big: 'p3030' }]; a.UI.msgIdx = 0; a.renderMsg(); })()`, 'new Promise(r => setTimeout(r, 900))']],
   nameStar: ['k841', [`(() => { const a = HOAPI, G = a.G; G.over = true; G.winner = a.ME; a.me().alive = true; G.players.forEach(q => { if (q.id !== a.ME) q.alive = false; });
       a.UI.inbox = [{ text: 'Congratulations! You have just won the game.', big: 'p3030' }]; a.UI.msgIdx = 0; a.renderMsg(); })()`, 'new Promise(r => setTimeout(r, 900))', `(() => { const b = [...document.querySelectorAll('.am-walertbig .am-btn')][0]; if (b) b.click(); })()`, 'new Promise(r => setTimeout(r, 600))']],
+  // the game lost (Jake's photos of 22 Nov; no cropped shot: the pair shows the capture slot empty)
+  lost: ['k000', [`(() => { const a = HOAPI, G = a.G, p = a.me(); p.alive = false; const m = { text: 'You have just been eliminated from the game.', icon: 'p3040', big: 'p3040' };
+      a.UI.inbox = [m]; a.UI.msgIdx = 0; a.renderMsg(); })()`, 'new Promise(r => setTimeout(r, 900))']],
   // (the last battle again, skipped to its end: run with battle, after it)
   battleEnd: [126, [`(() => { const a = HOAPI, bs = a.G.battles || []; if (bs.length) a.openBattle(bs[bs.length - 1].id); })()`, 'new Promise(r => setTimeout(r, 600))', `(() => { const b = document.querySelector('.am-battle .am-btn'); if (b) b.click(); })()`, 'new Promise(r => setTimeout(r, 600))']],
 };

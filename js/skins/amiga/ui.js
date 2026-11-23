@@ -148,6 +148,7 @@ const WORDS = {
   bLost1: ['Leider haben', 'Unfortunately', 'Malheureusement', 'Ne yazık ki', 'Por desgracia'], bLost2: ['Sie den Kampf verloren...', 'You lost the battle.', 'vous avez perdu le combat.', 'savaşı kaybettin.', 'has perdido el combate.'],
   noInfo: ['Sie haben keine Information erlangt.', 'You got no information...', 'Vous n’avez obtenu aucune information...', 'Hiç bilgi alamadın...', 'No has obtenido información...'], destroyedNow: ['Sie wurden sofort besiegt.', 'You were destroyed immediately', 'Vous avez été détruit immédiatement', 'Hemen yok edildin', 'Fuiste destruido de inmediato'],
   wonGame: ['Glückwunsch! Sie haben das Spiel gewonnen.', 'Congratulations! You have just won the game.', 'Félicitations ! Vous venez de gagner la partie.', 'Tebrikler! Oyunu kazandın.', '¡Enhorabuena! Acabas de ganar la partida.'],
+  lostGame: ['Sie wurden aus dem Spiel gelöscht.', 'You have just been eliminated from the game.', 'Vous venez d’être éliminé de la partie.', 'Oyundan elendin.', 'Acabas de ser eliminado de la partida.'],
   nameStarTitle: ['Sterntaufe', 'Name a Star', 'Baptiser une étoile', 'Bir yıldıza ad ver', 'Bautiza una estrella'], nameStarAsk: ['Geben Sie einem neuen Stern einen Namen:', 'Please name a new star:', 'Nommez une nouvelle étoile :', 'Yeni bir yıldıza ad ver:', 'Pon nombre a una estrella nueva:'],
   // (strings 682-694 and 757-765: the Options windows and Send Message, English and German)
   fast: ['Schnell', 'Fast', 'Rapide', 'Hızlı', 'Rápido'], slow: ['Langsam', 'Slow', 'Lent', 'Yavaş', 'Lento'], animBattle: ['Animierte Kämpfe', 'Animated Battle', 'Combats animés', 'Canlandırılmış savaş', 'Combate animado'],
@@ -2303,15 +2304,13 @@ window.HOTHEME_OVER = {
   battleWindow: (b, k) => battleAmiga(b, k), // (the Amiga's Battle Report, in place of the DOS program's window the DOS theme would bring)
   keyName: (k) => k, // (the item's key: the Amiga-key glyph before it is the stylesheet's, .mkey)
   menuName: (k) => (WORDS[k] ? W(k) : k), // the menus' names (menus above), in the language
-  // no You Lost window: the Amiga game's words (texte.pff) have none, only the
-  // report "Sie werden aus dem Spiel gelöscht." (624) and Spielervergleich's
-  // "Sie haben das Spiel im Jahre %ld verloren!" (741), which the skin has
-  youLost: false,
+  // the game lost (Jake's photos, 22 Nov): the alert with the vulture over the planet (d5050) and "You have just been eliminated from
+  // the game.", Ok, ok, then the same words as the turn's report (T.youWonLayout 'lost', below)
   // the skin's own alert, saving panel, busy pointer and dragged route (Jake's captures), and no other route lines
   alert: amigaAlert, beforeFirstTurn: spieleintrag, onSave: savingPanel, busy, dragRoute, routes: false, showMsgsPref: true,
   // the game won (Jake's ks204 shots 840-842): the alert with the conquering portrait (d5040) and "Congratulations! You have just won
   // the game." (626), then "Name a Star" (the table at 202e3e), then the same words as the turn's report
-  youWonLayout: (kind, Y, done) => (kind === 'won' ? (alertWindow(w('wonGame'), [[w('ok'), () => api().closeModal(), true]], { pic: 'd5040', cls: 'am-walertbig', onClose: done }), true) : false),
+  youWonLayout: (kind, Y, done) => (alertWindow(w(kind === 'won' ? 'wonGame' : 'lostGame'), [[w('ok'), () => api().closeModal(), true]], { pic: kind === 'won' ? 'd5040' : 'd5050', cls: 'am-walertbig', onClose: done }), true),
   nameStarLayout: (f, o) => nameStarAmiga(f, o),
 };
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js' + (window.HO_BUILD || '') + '"><\/script>');

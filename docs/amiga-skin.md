@@ -710,7 +710,9 @@ ones of the English program to be compared. Put side by side with the remake at 
   with the conquering portrait (d5040) and "Congratulations! You have just won the game." (626), Ok, ok; then "Name a Star" (the table
   at 202e3e, 216 x 128: "Please name a new star:", the field, Ok dotted until a name is typed, Cancel); then the same words as the
   turn's report. The skin had said the Amiga had no You Won window (T.youWon false): wrong, now T.youWonLayout and T.nameStarLayout.
-  No lost game was captured (Jake, 22 Nov: not worth the patience); the skin keeps T.youLost false.
+  **The game lost** (Jake's photos, 22 Nov, after all): the same alert with the vulture over the planet (d5050) and "You have just
+  been eliminated from the game.", Ok, ok; then the report with the same words. The skin had T.youLost false: wrong, now the same
+  T.youWonLayout. In the last battle the destroyed planet is covered in red rings and its population reads "752.105 died".
 - **Battles with more than three rows a side** (ks204 shots 643-837): the rows go on below the window's bottom, and their ships shoot
   from out of sight, as the skin's battle already does.
 
