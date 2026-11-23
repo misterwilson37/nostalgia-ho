@@ -1,6 +1,7 @@
 # Missing screenshots: DOS 2.0, Windows 3.1 2.0, Windows 95 4.0.5 (23 Nov 2026)
 
-What the remake still builds from code or from another version because no picture of the original shows it. Each line says
+What the remake still builds from code or from another version because no picture of the original shows it. **Jake takes them (23 Nov):** the shooting list, with how to reach each screen, is in the private repo's
+`emulators/ON-YOUR-MAC.md`, under each version's **Wanted** heading (DOS has its own section there now). Each line says
 who can get it: **Claude** (in the emulators in the private repo, `emulators/`, no human needed) or **Jake** (needs real play:
 a long game, a win, a network game). Captures go to the private repo, `audit/<version>/captures/`.
 
