@@ -723,9 +723,11 @@ ones of the English program to be compared. Put side by side with the remake at 
 - **About** (Info > About Spaceward Ho!; ks204 shot 642): 460 x 185, the 74 x 74 picture, the text panel 348 x 121 with its lines
   13 apart, Ok, ok 68 x 20. The alert's rules (the colony warning's) share its classes and had squeezed its text panel; its own rules
   now come after them.
-- **The fleets' order (open):** the Amiga lists the two starting scouts above the colony ship (captures 060, ks204 024), where the
-  DOS rules make the colony ship first (CONFIRMED for DOS); but ks204 shot 111 lists a scout above a colony ship built later, so it is
-  not simply the newest first. The Amiga's own list (FUN_00105e9a in 2.0) would say; not read yet, the order not changed.
+- **The fleets' order (settled, not changed):** the Amiga's fleet panel (English 2.1 `FUN_0010635c`) walks the game's fleets in
+  their order and lists those at the star, so it lists them as they were made (ks204 shot 111: a scout above a colony ship built
+  later); the remake's panel does the same. The difference at the start (the two free scouts above the free colony ship, captures 060
+  and ks204 024) is the Amiga's setup making the scouts first, where the DOS rules, CONFIRMED from the DOS program, make the colony
+  ship first; the skin follows the ruleset's setup.
 
 **The tool:** `tools/amiga-captures.js` starts an Amiga game at 1280 x 1024 (2 x 4 CSS pixels to the Amiga pixel), opens each window as a
 person does (its menu and item), and writes the remake's screen above the capture named for it (pair-<view>.png): main, the six menus,
