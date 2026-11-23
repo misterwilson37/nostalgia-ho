@@ -482,12 +482,21 @@ function condenseCaps() {
   const all = (n) => (n.matches && n.matches(sel) ? [n] : []).concat([...(n.querySelectorAll ? n.querySelectorAll(sel) : [])]);
   new MutationObserver((ms) => { if (!frameOn()) return; for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) all(n).forEach(fit); }).observe(document.body, { subtree: true, childList: true });
 }
+// The bolt's three colours in the DOS program, by the shooting group's Weapons (Mac 2.0.1 DrawLaserBlast @d3e20: the middle line at hue (W - 1) x 4000,
+// full value; the lines 1 and 2 to each side 7500 and 15000 further round at values 45000 and 25000; the DOS program's palette puts them on these,
+// measured on its battles, W 1 to 5: battles/v20dos-orig-battle01..06). Past 5 (not captured) the hue rule itself, at the DOS step of 2000 a level.
+const BOLT = { 1: ['#ff0000', '#9a3000', '#653000'], 2: ['#ff3000', '#9a6500', '#653000'], 3: ['#ff6500', '#9a6500', '#653000'], 4: ['#ff9a00', '#9a9a00', '#656500'], 5: ['#ffcf00', '#00aa00', '#006500'] };
+function boltColours(W) {
+  if (BOLT[W]) return BOLT[W];
+  const hsv = (h, v) => { h = ((h % 65536) / 65536) * 6; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, g2, b2] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return `rgb(${Math.round(r * 255)},${Math.round(g2 * 255)},${Math.round(b2 * 255)})`; };
+  const h0 = (W - 1) * 2000; return [hsv(h0, 1), hsv(h0 + 7500, 45000 / 65535), hsv(h0 + 15000, 25000 / 65535)];
+}
 // ======== Review Battle: the program's battle window (Windows template 7, "Skip"; measured on the summary of a battle reviewed in DOSBox) ========
 // 456 x 364 with the program's frame (the interior black with 35 white stars): the two sides' faces (a red-brown cross over a side with nothing left), the viewer's group
 // pictures with a line of words under each (the Geneva 9, a lost group dimmed in a stipple), the title and the result in Geneva 9 Bold, the picture of the winner
-// (d3500) or the loser (d3510), "Round n" and the button, which says Skip while the shots are fired and OK after. What was measured is one group a side; the pitch
-// of further rows (53), the shots (as the Mac 1.2 program's DrawLaserBlast, 17 x 17 hits) and the other side's name being left out for the viewer are taken from the
-// Mac 1.2 window (js/skins/mac12) and are not measured on DOS.
+// (d3500) or the loser (d3510), "Round n" and the button, which says Skip while the shots are fired and OK after. Measured on seven battles fought in DOSBox (23 Nov 2026,
+// the private repo's audit/dos-2.0.1/captures/battles): rows 53 apart, the bolts' colours by Weapons (BOLT), a kill's ovals (explosion), your name in an announced
+// battle (k.live) but not in Review Battle's summary. The hits (17 x 17 pictures) and the Windows look's shots are still the Mac 1.2 window's (js/skins/mac12).
 function battleDos(b, k) {
   const a = window.HOAPI, g = a.G, H = window.HO, rs = H.rules(g), el = a.el, ME = a.ME, IMG = a.IMG;
   const pic = (n) => { const im = IMG['dos:' + n]; return im && im.complete && im.naturalWidth ? im : null; };
@@ -541,7 +550,7 @@ function battleDos(b, k) {
     const p = g.players[o]; if (!p) return;
     const id = o === ME ? (p.female ? 1500 : 1000) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20), im = pic('i' + id);
     if (im) x.drawImage(im, FACE[ci][0], FACE[ci][1], 32, 32);
-    if (o !== ME) text(p.name || '', FACE[ci][0] + 38 + (ci ? 0 : 0), FACE[ci][1] + 29, true);
+    if (o !== ME || (k.live && !win)) text(p.name || '', FACE[ci][0] + 38 + (ci ? 0 : 0), FACE[ci][1] + 29, true); // (a battle announced in the turn's reports names your side too: captured, battles/v20dos-orig-battle01..06; Review Battle's summary does not, v20dos-orig-battle-summary)
   };
   const groupWords = (gr) => { if (gr.planet) return P0.planetWords(pop); const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, name: '', W: 1, S: 1 }; return P0.shipWords(dd, gr.units.filter(i => alive[i]).length, gr.units.length, u.o === ME); };
   const drawGroup = (gr) => {
@@ -564,19 +573,42 @@ function battleDos(b, k) {
   [0, 1].forEach(ci => { if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || '', 150, 100, true); text(L.destroyed || '', 150, 116, true); skip = true; } else cols[ci].forEach(drawGroup); });
   const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
   const cellOf = (ev, shooter) => shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti));
+  const pxLine = (h0, v0, h1, v1, col) => { x.fillStyle = col; let dx = Math.abs(h1 - h0), dy = -Math.abs(v1 - v0), sx = h0 < h1 ? 1 : -1, sy = v0 < v1 ? 1 : -1, e = dx + dy;
+    for (;;) { x.fillRect(h0, v0, 1, 1); if (h0 === h1 && v0 === v1) break; const e2 = 2 * e; if (e2 >= dy) { e += dy; h0 += sx; } if (e2 <= dx) { e += dx; v0 += sy; } } };
   async function laser(s, t) {
     let x1 = SHIP[s.ci][0], y1 = SHIP[s.ci][1] + PIT * s.row + 18, x2 = SHIP[t.ci][0], y2 = SHIP[t.ci][1] + PIT * t.row + 18;
     if (x2 > x1) { x1 += 121; x2 -= 1; } else { x2 += 121; x1 -= 1; }
     const dx = Math.trunc((x2 - x1) / 5), dy = Math.trunc((y2 - y1) / 5);
-    const seg = (h0, v0, h1, v1, col) => { x.strokeStyle = col; x.lineWidth = 1; x.beginPath(); for (const o of [0, 1, -1, 2, -2]) { x.moveTo(h0 + 0.5, v0 + o + 0.5); x.lineTo(h1 + 0.5, v1 + o + 0.5); } x.stroke(); };
+    const cols = win ? ['#fff', '#fff', '#fff'] : boltColours(shooterW(s));
+    const seg = (h0, v0, h1, v1, col) => { for (const o of [0, 1, -1, 2, -2]) pxLine(h0, v0 + o, h1, v1 + o, col || cols[Math.abs(o)]); }; // (whole pixels, as QuickDraw's LineTo: an anti-aliased line left a trail when drawn over in black)
     let h = x1, v = y1, ph = -1, pv = -1;
-    for (let i = 0; i < 5 && !stop && !skip; i++) { const t0 = performance.now(); seg(h, v, h + dx, v + dy, '#fff'); if (ph !== -1) seg(ph, pv, h, v, '#000'); ph = h; pv = v; h += dx; v += dy; await wait(t0 + TICK); }
+    for (let i = 0; i < 5 && !stop && !skip; i++) { const t0 = performance.now(); seg(h, v, h + dx, v + dy); if (ph !== -1) seg(ph, pv, h, v, '#000'); ph = h; pv = v; h += dx; v += dy; await wait(t0 + TICK); }
     seg(ph, pv, h, v, '#000');
   }
   async function explosion(t, ev) {
     const dm = ev.dm | 0, im = pic('s' + (12000 + (dm % 3)));
-    if (ev.snd !== 3003) { if (im) x.drawImage(im, SHIP[t.ci][0] + (dm % 103), SHIP[t.ci][1] + PIT * t.row + (dm % 23), 17, 17); }
+    if (ev.snd !== 3003) { if (im) x.drawImage(im, SHIP[t.ci][0] + (dm % 103), SHIP[t.ci][1] + PIT * t.row + (dm % 23), 17, 17); return; }
+    if (win) return;
+    // a kill (sound 3003): Mac 2.0.1's colour DrawExplosion @d412e, which the DOS program draws too (captured: battles/v20dos-orig-battle01-00203,
+    // -battle02-00566, -battle05-01374): over the group's picture rectangle, 59 framed ovals from the middle out, the s-th inset s across and s / 3
+    // down (40 s / 120), its hue (59 - s) x 175 from red; the DOS palette gives three bands, measured: s 45 and up red, 20 to 44 (255, 48, 0), 1 to
+    // 19 (255, 101, 0). Then the same ovals in black from the outside in, and the group is drawn again. Two ovals a tick, as the program's BattleWait.
+    const [sx0, sy0] = SHIP[t.ci], gy = sy0 + PIT * t.row, w = groupW(t), L = sx0, T0 = gy, R = sx0 + w, B = gy + 35;
+    // an oval's row spans (its rectangle l..r x tp..bt, ends excluded, as QuickDraw's); a ring is the s-th oval less the (s + 1)-th, so whole pixels
+    // and nothing left over when the same rings are drawn in black
+    const spans = (s) => { const l = L + s, r = R - s, tp = T0 + Math.trunc(s / 3), bt = B - Math.trunc(s / 3), m = new Map(); if (r - l < 1 || bt - tp < 1) return m;
+      const cx = (l + r) / 2, cy = (tp + bt) / 2, rx = (r - l) / 2, ry = (bt - tp) / 2;
+      for (let v = tp; v < bt; v++) { const dy = (v + 0.5 - cy) / ry, k = 1 - dy * dy; if (k <= 0) continue; const hw = rx * Math.sqrt(k); m.set(v, [Math.round(cx - hw), Math.round(cx + hw)]); } return m; };
+    const oval = (s, col) => { const A0 = spans(s), A1 = spans(s + 1); x.fillStyle = col;
+      for (const [v, [h0, h1]] of A0) { const inner = A1.get(v); if (!inner) { x.fillRect(h0, v, h1 - h0, 1); continue; } if (inner[0] > h0) x.fillRect(h0, v, inner[0] - h0, 1); if (h1 > inner[1]) x.fillRect(inner[1], v, h1 - inner[1], 1); } };
+    let t1 = performance.now();
+    for (let s = 59; s >= 1 && !stop && !skip; s--) { oval(s, s >= 45 ? '#ff0000' : s >= 20 ? '#ff3000' : '#ff6500'); if (s % 2 === 0) { t1 += TICK; await wait(t1); } }
+    for (let s = 1; s <= 59 && !stop && !skip; s++) { oval(s, '#000'); if (s % 2 === 0) { t1 += TICK; await wait(t1); } }
+    drawGroup(t);
   }
+  // the shooting group's Weapons: its design's, or for a planet its owner's (as the shot's colour, DrawLaserBlast @d3e20's hue (W - 1) x 4000)
+  function shooterW(s) { if (s.planet) { const p = g.players[s.o]; return Math.max(1, Math.trunc(p && p.tech ? p.tech.weapons || 1 : 1)); } const u = b.start[s.units[0]], dd = u && H.getDesign(g, u.o, u.did); return Math.max(1, Math.trunc(dd && dd.W || 1)); }
+  function groupW(gr) { if (gr.planet) return 97; const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }, im = a.shipPic(dd, u.o); return im ? Math.round(im.width * 35 / im.height) : 97; }
   const apply = (ev) => { if (ev.p) { if (ev.php != null) pop = ev.php / 1000; } else { if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) alive[ev.ti] = false; } };
   const finish = () => {
     if (stop) return;
@@ -1280,7 +1312,7 @@ function createGalaxyDos(f) {
   const num = dText(comp ? comp.value : '', 24, 238);
   kids.push(dAt(el('div', { class: 'dd-gbox' }), 19, 230, 200, 30), dAt(el('span', { class: 'dd-gtitle', translate: 'no' }, tx('Number of Computer Players')), 24, 223, null, 14), num,
     dSlider(48, 238, 176, 13, 0, 19, comp && /^\d+$/.test(comp.value) ? +comp.value : 4, (n) => { if (comp) { comp.value = String(n); fire(comp); } num.textContent = String(n); }, 'Number of Computer Players'),
-    dButton('Cancel', 272, 224, 71, 26, () => a.closeModal(), { hot: 0 }), dButton('Create', 401, 225, 70, 26, () => f.requestSubmit(), { hot: 1, def: true }));
+    dButton('Cancel', 272, 224, 71, 26, () => a.closeModal(), { hot: 0 }), dButton('Create', 401, 225, 70, 26, () => playerEntryDos(), { hot: 1, def: true }));
   let opened = false;
   // (the remake's own choices, version, edition, language, skin, look: behind a link under the program's screen, not on its window)
   const more = el('button', { type: 'button', class: 'dd-more', onclick: () => { opened = !opened; dress(); } }, tx('Remake options…'));
@@ -1297,6 +1329,46 @@ function createGalaxyDos(f) {
   const keep = (n) => n.classList && opened && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
   const rs = field('rules'), dress = () => { const on = !rs || rs.value === 'dos'; stage.style.display = on && opened ? 'none' : ''; more.textContent = opened ? tx('Back to Create New Galaxy') : tx('Remake options…'); more.parentNode.style.position = opened ? 'static' : ''; more.style.fontSize = opened ? '13px' : ''; box.style.display = on ? '' : 'none'; win.classList.toggle('dosw', on && !opened); for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
   if (rs) rs.addEventListener('change', dress); dress();
+  // Create goes on to the program's Player Entry, then New Player Registration (FUN_a000_b60f / FUN_b000_53a0 and FUN_a000_ba93 / FUN_b000_44f0; captured,
+  // v20dos-orig-playerentry, -playerentry-name, -registration): each a window of the program on the same screen, placed by its rule (placeDos's cells).
+  // Player Entry, 38 x 13 cells (304 x 182) at 168, 140: "Please Identify Yourself:", Player Name and Player Password with their fields (216 x 14), Cancel,
+  // OK (dimmed until a name is typed), Info... (dimmed in a new game). New Player Registration, 48 x 15 (384 x 210) at 128, 126: "Your Name:" and the name,
+  // "Password:" and the password, the picture d3520, Skill Level (Novice ... Expert, opening on Novice) and Sex (Male, Female) in their boxes, Cancel, Join.
+  // Join starts the game with those choices (the form's name, d_skill and female). THE REMAKE'S: the password is not kept (the remake has none). The words sit
+  // a row lower than dText's other windows put them (measured: every line 1 pixel high at 28 / 56 / 70 ...).
+  const swap = (w, h, l, t, title, kids, label) => {
+    const nb = el('div', { class: 'dd', role: 'group', 'aria-label': label }); nb.style.width = du(w); nb.style.height = du(h);
+    nb.append(dAt(el('div', { class: 'dd-title', translate: 'no' }, title), 5, 5, w - 10, 17), ...kids);
+    const cur = stage.querySelector(':scope > .dd'); if (cur) cur.replaceWith(dAt(nb, l, t, w, h)); else stage.append(dAt(nb, l, t, w, h)); return nb;
+  };
+  function playerEntryDos() {
+    const nm = field('name'); let name = '', pw = '';
+    const ok = dButton('OK', 112, 140, 72, 28, () => { if (name.trim()) registrationDos(name.trim(), pw); }, { hot: 0, def: true }), info = dButton('Info...', 200, 140, 72, 28, () => {}, { hot: 0 });
+    ok.disabled = true; info.disabled = true;
+    const nf = dField(40, 70, 216, 14, '', 31, (v) => { name = v; ok.disabled = !v.trim(); }, 'Player Name'), pf = dField(40, 112, 216, 14, '', 31, (v) => { pw = v; }, 'Player Password');
+    [nf, pf].forEach(i => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (!ok.disabled) ok.click(); } }));
+    swap(304, 182, 168, 140, 'Spaceward Ho! Player Entry', [dText(tx('Please Identify Yourself:'), 40, 29), dText('Player Name:', 40, 57, { hot: 7 }), nf, dText('Player Password:', 40, 99, { hot: 7 }), pf,
+      dButton('Cancel', 24, 140, 72, 28, () => a.closeModal(), { hot: 0 }), ok, info], 'Spaceward Ho! Player Entry');
+    setTimeout(() => nf.focus(), 0);
+  }
+  function registrationDos(name, pw) {
+    const sk = field('d_skill'), fem = field('female'), skills = ['novice', 'beginner', 'normal', 'advanced', 'expert'], SK = ['Novice', 'Beginner', 'Normal', 'Advanced', 'Expert'], SKH = [0, 0, 2, 0, 0];
+    let skill = sk && skills.includes(sk.value) ? sk.value : 'novice', female = !!fem && fem.value === '1';
+    const radio = (label, hot, l, t, on, pick) => { const r = dText('', l, t); r.setAttribute('role', 'radio'); r.tabIndex = 0; r.style.cursor = 'pointer';
+      const draw = () => { r.textContent = ''; const w = (on() ? '(\u2022) ' : '( ) ') + label; r.append(w.slice(0, 4 + hot), a.el('span', { class: 'hot' }, w[4 + hot]), w.slice(5 + hot)); r.setAttribute('aria-checked', String(on())); };
+      r.addEventListener('click', () => { pick(); all.forEach(f2 => f2()); }); r.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); pick(); all.forEach(f2 => f2()); } });
+      all.push(draw); return r; };
+    const all = [];
+    const rows = skills.map((k, i) => radio(SK[i], SKH[i], 128, 71 + 14 * i, () => skill === k, () => { skill = k; }));
+    const sexes = [radio('Male', 0, 264, 71, () => !female, () => { female = false; }), radio('Female', 0, 264, 85, () => female, () => { female = true; })];
+    all.forEach(f2 => f2());
+    const img = a.IMG['dos:d3520'], pic = img ? dAt(el('img', { src: img.src, alt: '', style: 'image-rendering:pixelated' }), 19, 68, 74, 74) : null;
+    const join = () => { if (sk) { sk.value = skill; fire(sk); } if (fem) { fem.value = female ? '1' : '0'; fire(fem); } const nm = field('name'); if (nm) { nm.value = name; fire(nm); } f.requestSubmit(); };
+    swap(384, 210, 128, 126, 'Spaceward Ho! New Player Registration', [dText(tx('Your Name:') + name, 16, 29), dText(tx('Password:') + pw, 224, 29), pic,
+      dAt(el('div', { class: 'dd-gbox' }), 123, 63, 106, 85), dAt(el('span', { class: 'dd-gtitle', translate: 'no' }, tx('Skill Level')), 128, 57, null, 14), ...rows,
+      dAt(el('div', { class: 'dd-gbox' }), 259, 63, 90, 43), dAt(el('span', { class: 'dd-gtitle', translate: 'no' }, tx('Sex')), 264, 57, null, 14), ...sexes,
+      dButton('Cancel', 80, 168, 72, 28, () => a.closeModal(), { hot: 0 }), dButton('Join', 232, 168, 72, 28, join, { hot: 0, def: true })], 'Spaceward Ho! New Player Registration');
+  }
 }
 
 // ---- Ships: List Ship Types (496 x 350), Create New Ship Type (512 x 280), Build Ships / the shipbuilding queue (496 x 336) ----

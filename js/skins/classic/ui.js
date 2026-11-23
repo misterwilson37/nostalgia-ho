@@ -2050,7 +2050,7 @@ function renderMsg0() {
   // the bubble, and for a battle report, with Review Event Battles on, that is ReviewBattle): the battle first, then its card
   const m0 = UI.msgIdx < UI.inbox.length ? UI.inbox[UI.msgIdx] : null;
   if (m0 && T.battleBeforeCard && T.battleBeforeCard() && prefReview() && m0.battle && !m0._reviewed) {
-    m0._reviewed = true; openBattle(m0.battle); // (the bubble before stays under it, as the program leaves it)
+    m0._reviewed = true; openBattle(m0.battle, true); // (the bubble before stays under it, as the program leaves it)
     const wait = setInterval(() => { if (!document.querySelector('.scrim')) { clearInterval(wait); if (G && UI.inbox[UI.msgIdx] === m0) renderMsg(); } }, 200);
     return;
   }
@@ -2080,7 +2080,7 @@ function renderMsg0() {
     if (credit || (sysBeep && (m.battle || m.won != null))) { /* silent */ }
     else if (sysBeep && !(sound && A.snd[sound])) beep();
     else if (sound) Sound.play(sound);
-    if (prefReview() && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
+    if (prefReview() && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle, true), 50); }
     // (rs.radicalHand.announce, 4.0.5: the radical card window opens as its report is announced, FUN_00470dec case 0x461)
     { const RH = HO.rules(G).radicalHand; if (RH && RH.announce && radicalReport(m) && !m._radical && !G.over && RH.cards(G, me()).length >= (RH.full || 1)) { m._radical = true; setTimeout(openRadicalHand, 50); } }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
@@ -3239,10 +3239,10 @@ function pileShots(round, e, VB) {
 // 10 x damage / the ship's hit points, 3002 for a hit on a colony and 3003 when it is wiped out; the rules put it in the event as snd)
 // plays that; the others keep the remake's own scheme
 function shotSnd(ev, dflt) { return HO.rules(G).battleSounds && ev.snd ? ev.snd : dflt; }
-function openBattle(bid) {
+function openBattle(bid, live) { // (live: announced in the turn's reports, not reviewed from a menu; a skin's own window may draw the two apart)
   const b = G.battles.find(x => x.id === bid);
   if (!b) { const aw = alertWords('battleGone'); if (aw) alertOver(aw, (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))); else toast('The record of that battle is no longer available.'); return; }
-  if (HO.rules(G).battlePanel) { openBattlePanel(b); return; }
+  if (HO.rules(G).battlePanel) { openBattlePanel(b, live); return; }
   const c = el('canvas', { class: 'bcv', width: 760, height: 380 });
   const status = el('p', { class: 'sub' }, '');
   const body = el('div', null, c, status);
@@ -3349,10 +3349,10 @@ function openBattle(bid) {
 // ships die; the version's own heading and closing lines. The skin styles it
 // (T.battleBg: its own background, black words; T.battleFont). The modern
 // conveniences' written account is kept.
-function openBattlePanel(b) {
+function openBattlePanel(b, live) {
   // a skin's own battle window, drawn as its version draws it (T.battleWindow: the Mac 1.2 skin's, DoOneBattle @d07d0)
   // (T.battleWindowAlways: a skin whose program's own window stays with modern conveniences on: the Mac 1.2, 2.0.1 and 3.0.1 skins)
-  if (T.battleWindow && (!modern() || T.battleWindowAlways)) { T.battleWindow(b, { verBattle, shotSnd, tl }); return; }
+  if (T.battleWindow && (!modern() || T.battleWindowAlways)) { T.battleWindow(b, { verBattle, shotSnd, tl, live: !!live }); return; }
   const rs = HO.rules(G), viewer = b.sides.includes(ME) ? ME : b.sides[0];
   const alive = b.start.map(() => true), hurt = [];
   let seq = 0;

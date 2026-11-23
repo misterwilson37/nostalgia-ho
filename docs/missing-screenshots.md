@@ -12,13 +12,14 @@ version (`emulators/ON-YOUR-MAC.md` has no DOS section). Windows 3.1 and Windows
 
 Taken 23 Nov by Claude in DOSBox (no longer missing): the licence window (`v20dos-orig-license`), Create New Galaxy with
 choices set (`-newgalaxy-set`), **Player Entry** (`-playerentry`, `-playerentry-name`) and **New Player Registration**
-(`-registration`), two of the four open audit gaps, and the first End Turn's "play alone or wait" question (`-alert-playalone`).
+(`-registration`), two of the four open audit gaps, the first End Turn's "play alone or wait" question (`-alert-playalone`), and
+**seven battles while fought** (`battles/`, 140 frames: won and lost, one to four groups a side, the loser's picture).
 
 | Screen | Why it matters | Who |
 |---|---|---|
-| **A battle while it is fought**: shots, hits, kills, Round 2, 3 ... | The remake's DOS battle takes its shots and timing from Mac 1.2 | Claude (Auto Play game running) |
-| A battle with **several groups a side**, and one **at a planet** | The rows' spacing below the first and the planet's group come from Mac 1.2 | Claude |
-| A **lost** battle; "You were destroyed immediately"; "You have no information" | The loser's picture (d3510) is the Mac's rule | Claude |
+| A battle **at a planet** (the planet's group) | Still from Mac 1.2 (battles while fought, several groups, won and lost: captured 23 Nov, `captures/battles/`) | Claude |
+| "You were destroyed immediately"; "You have no information" | Words placed from the Mac | Claude |
+| Bolts of Weapons 6 and over | Colours past 5 follow the hue rule, not a capture | Claude (a longer game) |
 | **Skip** pressed in the middle of a battle | What Skip does on DOS is not known | Claude |
 | **Won game** box, **Name a Star**, **lost game** box | Built from the Windows boxes and the Mac's | Jake (a win), Claude (a loss) |
 | Alerts other than the fuel one: "abandon them?" (Let 'em Die), Revert to Saved, Force Turn Update | The box's height, picture and buttons follow the fuel alert | Claude |
