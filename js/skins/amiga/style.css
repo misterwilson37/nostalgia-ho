@@ -928,3 +928,7 @@ html.amiga .am-wabout .am-apic img { width: 100%; height: 100%; }
 html.amiga .am-wabout .am-atext { left: calc(96 * var(--u)); top: calc(11 * var(--v)); width: calc(348 * var(--u)); height: calc(121 * var(--v)); padding: calc(9 * var(--v)) 0 0 calc(9 * var(--u)); box-sizing: border-box; }
 html.amiga .am-wabout .am-atext p { white-space: nowrap !important; height: calc(13 * var(--v)); line-height: calc(13 * var(--v)); overflow: visible; }
 html.amiga .am-wabout .am-abtns .am-btn { left: calc(235 * var(--u)); top: calc(141 * var(--v)); width: calc(68 * var(--u)); height: calc(20 * var(--v)); white-space: nowrap; }
+
+/* New Galaxy's Enter game step (the program's order: ks204 shots 021-023), the Enter game window's size */
+html.amiga .win.am-wng.am-entrystep { width: calc(237 * var(--u)); height: calc(190 * var(--v)); }
+html.amiga .am-wng.am-entrystep .am-more { display: none !important; }

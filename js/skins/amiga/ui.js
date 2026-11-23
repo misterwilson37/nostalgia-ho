@@ -1652,12 +1652,26 @@ function newGame(f, ctx) {
       el('button', { type: 'button', class: 'am-arrow am-sr', 'aria-label': '+', tabindex: -1, onclick: () => { slider.value = String(Math.min(+slider.max, +slider.value + 1)); slider.dispatchEvent(new Event('input')); } }))),
     el('div', { class: 'am-ngbtns' },
       btn(w('moreSettings'), () => { win.classList.toggle('am-showmore'); }, 'am-small am-morebtn'),
-      btn(w('bang'), () => { if (dosOn()) showReg(); else f.requestSubmit(); }),
+      btn(w('bang'), () => { if (dosOn()) showEntry(); else f.requestSubmit(); }),
       btn(w('cancel'), () => a.closeModal(), 'am-default')));
   // the player
   const skillSel = field('d_skill'), nameIn = field('name'), femSel = field('female');
   const radio = (name, v, label, on, set) => el('label', { class: 'am-radio' }, el('input', { type: 'radio', name: 'am-' + name, value: v, checked: on ? 'checked' : false, onchange: () => set(v) }), el('span', null, label));
   const reg = el('div', { class: 'am-ngpane am-reg', hidden: true });
+  // (the program, after Big Bang: "Enter game" asks who is playing, and a name it doesn't know goes on to "Player Registration",
+  // Jake's ks204 shots 021-023; the name typed here is the registration's)
+  const entry = el('div', { class: 'am-ngpane am-entry', hidden: true });
+  const showEntry = () => {
+    const name = el('input', { class: 'am-field am-enname', maxlength: 20, value: '', 'aria-label': w('name'), spellcheck: 'false', autocomplete: 'off' });
+    const pass = el('input', { class: 'am-field am-enpass', type: 'password', maxlength: 8, 'aria-label': w('password'), autocomplete: 'off' });
+    const go = () => { if (!name.value.trim()) return; if (nameIn) nameIn.value = name.value.trim(); entry.hidden = true; win.classList.remove('am-entrystep'); showReg(); };
+    const ok = btn(w('ok'), go), info = btn(w('infoDots'), () => {});
+    const sync = () => { ok.disabled = info.disabled = !name.value.trim(); };
+    name.addEventListener('input', sync); name.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+    entry.replaceChildren(frame('am-enframe', el('p', { class: 'am-en1' }, w('identify')), el('p', { class: 'am-en2' }, w('name')), name, el('p', { class: 'am-en3' }, w('password')), pass),
+      el('div', { class: 'am-enbtns' }, ok, info, btn(w('cancel'), () => { entry.hidden = true; galaxy.hidden = false; win.classList.remove('am-entrystep'); titleSpan.textContent = w('ngTitle'); })));
+    sync(); galaxy.hidden = true; entry.hidden = false; win.classList.add('am-entrystep'); titleSpan.textContent = w('entryTitle'); name.focus();
+  };
   const showReg = () => {
     const fem = femSel && femSel.value === '1';
     const nameBox = el('input', { class: 'am-field', value: nameIn ? nameIn.value : '', maxlength: 20, 'aria-label': w('yourName'), oninput: (e) => { if (nameIn) nameIn.value = e.target.value; } });
@@ -1666,7 +1680,7 @@ function newGame(f, ctx) {
       frame('am-rname', el('div', null, w('yourName')), nameBox, el('div', null, w('password')), el('input', { class: 'am-field', type: 'password', disabled: 'disabled', 'aria-label': w('password'), title: w('noPassword') })),
       frame('am-rsex', el('div', null, w('sex')), el('div', { class: 'am-rsexrow' }, radio('sex', '0', w('man'), !fem, (x) => { if (femSel) { femSel.value = x; fire(femSel); } }), radio('sex', '1', w('woman'), fem, (x) => { if (femSel) { femSel.value = x; fire(femSel); } }))),
       el('div', { class: 'am-rpic' }, img(P + 'd3520')),
-      el('div', { class: 'am-rbtns' }, btn(w('ok'), () => f.requestSubmit()), btn(w('cancel'), () => { reg.hidden = true; galaxy.hidden = false; win.classList.remove('am-regstep'); titleSpan.textContent = w('ngTitle'); })));
+      el('div', { class: 'am-rbtns' }, btn(w('ok'), () => { identified = true; f.requestSubmit(); }), btn(w('cancel'), () => { reg.hidden = true; galaxy.hidden = false; win.classList.remove('am-regstep'); titleSpan.textContent = w('ngTitle'); })));
     galaxy.hidden = true; reg.hidden = false; win.classList.add('am-regstep'); titleSpan.textContent = w('reg');
     nameBox.focus();
   };
@@ -1682,7 +1696,7 @@ function newGame(f, ctx) {
     const cv = /^\d+$/.test(comp.value) ? +comp.value : 4;
     slider.value = String(cv); cnum.textContent = String(cv);
   };
-  f.prepend(galaxy, reg);
+  f.prepend(galaxy, entry, reg);
   titleSpan.textContent = w('ngTitle');
   f.addEventListener('change', paint);
   paint();
@@ -1713,7 +1727,7 @@ function page(doc) {
   // the title screen
   const ts = doc.getElementById('titlescreen'), card = ts.querySelector('.tcard');
   const frameC = doc.getElementById('tframe');
-  const info = frame('am-sinfo', el('p', { class: 'am-s1' }, 'Spaceward Ho! Amiga Version 2.0'), el('p', null, 'Copyright 1992-94 New World Computing Inc.'),
+  const info = frame('am-sinfo', el('p', { class: 'am-s1' }, lang() === 'en' ? 'Spaceward Ho! Amiga Version 2.1' : 'Spaceward Ho! Amiga Version 2.0') /* (the English 2.1 says 2.1: ks204 shot 008) */, el('p', null, 'Copyright 1992-94 New World Computing Inc.'),
     el('p', { class: 'am-slic' }, W('licence'), el('span', null, 'Marc & Christoph')), el('p', { class: 'am-slic2' }, 'Airospace'));
   const startup = el('div', { class: 'win am-win am-wstartup', role: 'dialog', 'aria-label': w('startup') },
     el('div', { class: 'wtitle' }, W('startup')),
@@ -1870,9 +1884,11 @@ const openAslLoad = () => openAsl('open');
 // a game: "Identifizieren Sie sich:", Name, Paßwort, and Ok and Info... (ghosted until a name is typed) and Abbruch.
 // The remake keeps no passwords, so the field is there and used for nothing; Ok goes on to the first turn, Info...
 // shows the players, and Abbruch goes on too (there is no program to leave).
+let identified = false; // (a new galaxy's player has identified already, in New Galaxy's Enter game: not asked again)
 function spieleintrag(done) {
   const a = api();
   if (!game()) return false;
+  if (identified) { identified = false; return false; }
   const name = el('input', { class: 'am-field am-enname', maxlength: 20, 'aria-label': w('name'), spellcheck: 'false', autocomplete: 'off' });
   const pass = el('input', { class: 'am-field am-enpass', type: 'password', maxlength: 8, 'aria-label': w('password'), autocomplete: 'off' });
   let ok = null, info = null;
