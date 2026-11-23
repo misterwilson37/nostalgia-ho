@@ -712,9 +712,17 @@ ones of the English program to be compared. Put side by side with the remake at 
 - **Battles with more than three rows a side** (ks204 shots 643-837): the rows go on below the window's bottom, and their ships shoot
   from out of sight, as the skin's battle already does.
 
+- **The Options windows and Send Message** (ks204 shots 044-050, the English program's tables): Options > Battle Speed (202ffc: Fast
+  to Slow, 0 to 50 = the DOS rules' 10 to 60 less 10, Animated Battle = the remake's fully animated battles), Control Time (2030b0:
+  "Pause" 0 to 30, kept: nothing in the remake polls), Autoplay's "Computer Player" (202edc: Computer plays for me / Mark my turns
+  done. / Thanks, i can play by myself, and the seconds a report stays in autoplay, 0 to 15; played by the classic page's runAutoPlay
+  until "Thanks" is chosen) and Galaxy > Send Message (202bb6: the To / What column of four cells and the 5 x 4 grid of choices: whom,
+  i like / i don`t like / i own, Star or Player, which; the ruleset's canned messages, as the DOS skin's chatDos). They were the
+  remake's Preferences and its own chat window. Sliders are proportional gadgets with arrows (propSlider), as Construction's.
+
 **The tool:** `tools/amiga-captures.js` starts an Amiga game at 1280 x 1024 (2 x 4 CSS pixels to the Amiga pixel), opens each window as a
 person does (its menu and item), and writes the remake's screen above the capture named for it (pair-<view>.png): main, the six menus,
-types, newtype, roster, organize, build, compare, players, stars, screen, about, battle, battleEnd, won, nameStar (`--only=`, `--lang=de`; a view's capture 'kNNN' is one of the Kickstart 2.04 shots). Every
+types, newtype, roster, organize, build, compare, players, stars, screen, about, battle, battleEnd, won, nameStar, controlTime, battleSpeed, computerPlayer, sendMessage, sendMessage2 (`--only=`, `--lang=de`; a view's capture 'kNNN' is one of the Kickstart 2.04 shots). Every
 comparison above was made with it (or its scratch forerunner).
 
 - **The screen's layout (changed 22 Nov, after Jake's Kickstart 2.04 captures, `audit/amiga-2.1/captures-ks204`):** the English

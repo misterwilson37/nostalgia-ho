@@ -149,6 +149,16 @@ const WORDS = {
   noInfo: ['Sie haben keine Information erlangt.', 'You got no information...', 'Vous n’avez obtenu aucune information...', 'Hiç bilgi alamadın...', 'No has obtenido información...'], destroyedNow: ['Sie wurden sofort besiegt.', 'You were destroyed immediately', 'Vous avez été détruit immédiatement', 'Hemen yok edildin', 'Fuiste destruido de inmediato'],
   wonGame: ['Glückwunsch! Sie haben das Spiel gewonnen.', 'Congratulations! You have just won the game.', 'Félicitations ! Vous venez de gagner la partie.', 'Tebrikler! Oyunu kazandın.', '¡Enhorabuena! Acabas de ganar la partida.'],
   nameStarTitle: ['Sterntaufe', 'Name a Star', 'Baptiser une étoile', 'Bir yıldıza ad ver', 'Bautiza una estrella'], nameStarAsk: ['Geben Sie einem neuen Stern einen Namen:', 'Please name a new star:', 'Nommez une nouvelle étoile :', 'Yeni bir yıldıza ad ver:', 'Pon nombre a una estrella nueva:'],
+  // (strings 682-694 and 757-765: the Options windows and Send Message, English and German)
+  fast: ['Schnell', 'Fast', 'Rapide', 'Hızlı', 'Rápido'], slow: ['Langsam', 'Slow', 'Lent', 'Yavaş', 'Lento'], animBattle: ['Animierte Kämpfe', 'Animated Battle', 'Combats animés', 'Canlandırılmış savaş', 'Combate animado'],
+  ctl1: ['Eine kürzere Kontrollzeit führt zu', 'A shorter control time causes', 'Un temps de contrôle plus court', 'Daha kısa bir kontrol süresi', 'Un tiempo de control más corto'],
+  ctl2: ['schnellerer Zugbearbeitung', 'faster turn processing', 'accélère les tours', 'turları hızlandırır', 'acelera los turnos'],
+  ctl3: ['bremst aber den Computer', 'but slows down the computer', 'mais ralentit l’ordinateur', 'ama bilgisayarı yavaşlatır', 'pero ralentiza el ordenador'], pause: ['Pause', 'Pause', 'Pause', 'Bekleme', 'Pausa'],
+  cpTitle: ['Computerspieler', 'Computer Player', 'Joueur ordinateur', 'Bilgisayar oyuncu', 'Jugador ordenador'], cp1: ['Computer spielt für mich', 'Computer plays for me', 'L’ordinateur joue pour moi', 'Bilgisayar benim yerime oynasın', 'El ordenador juega por mí'],
+  cp2: ['Meine Züge als erledigt markieren.', 'Mark my turns done.', 'Marquer mes tours comme joués.', 'Turlarımı bitmiş say.', 'Marcar mis turnos como hechos.'], cp3: ['Danke, ich spiele selbst', 'Thanks, i can play by myself', 'Merci, je joue moi-même', 'Sağ ol, kendim oynarım', 'Gracias, juego yo'],
+  cpSecs: ['Im Autospiel verschwinden Nachrichten nach', 'In autoplay messages will disappear after', 'En jeu auto, les messages disparaissent après', 'Otomatik oyunda mesajlar şu süre sonra kaybolur', 'En juego automático los mensajes desaparecen tras'], seconds: ['Sekunden', 'seconds', 'secondes', 'saniye', 'segundos'],
+  sendTitle: ['Nachricht senden', 'Send Message', 'Envoyer un message', 'Mesaj gönder', 'Enviar mensaje'], toW: ['An:', 'To:', 'À :', 'Kime:', 'A:'], whatW: ['Inhalt:', 'What:', 'Quoi :', 'Ne:', 'Qué:'], send: ['Senden', 'Send', 'Envoyer', 'Gönder', 'Enviar'],
+  iLike: ['ich mag', 'i like', 'j’aime', 'severim', 'me gusta'], iDislike: ['ich hasse', 'i don`t like', 'je n’aime pas', 'sevmem', 'no me gusta'], iOwn: ['ich habe', 'i own', 'je possède', 'bende', 'tengo'], starW: ['Planet', 'Star', 'Étoile', 'Yıldız', 'Estrella'], player: ['Spieler', 'Player', 'Joueur', 'Oyuncu', 'Jugador'],
   mNoBuild: ['Kein Bau hier möglich', 'Can`t Build Ships Here', 'Pas de construction ici', 'Burada gemi yapılamaz', 'Aquí no se puede construir'],
   mNoOrganize: ['Keine Schiffe da', 'No Ships to Organize', 'Aucun vaisseau à répartir', 'Bölünecek gemi yok', 'No hay naves que dividir'],
   mScrap2: ['Nicht verschrotten', 'Don`t Scrap Fleet', 'Ne pas recycler', 'Hurdaya çıkarma', 'No desguazar'], mBattle: ['Kampf ansehen', 'Review Battle on %1', 'Revoir le combat', 'Savaşı gözden geçir', 'Revisar el combate'], mNoBattle: ['Kein Kampf hier', 'No Battle here', 'Pas de combat ici', 'Burada savaş yok', 'Aquí no hay combate'],
@@ -1930,6 +1940,120 @@ function revertGame() {
 // Optionen > Bildschirm: the pixels (the screen mode the Amiga asked for here)
 let lastPointer = { x: 200, y: 40 };
 document.addEventListener('pointermove', (e) => { lastPointer = { x: e.clientX, y: e.clientY }; }, true);
+// ---------- the Options and Galaxy windows of the program (Jake's ks204 shots 044-050; the English program's tables) ----------
+// a proportional slider with its arrows (the Construction window's, .am-cslide), its figure kept by the caller
+function propSlider(lo, hi, get, set, label) {
+  const n = hi - lo + 1, knob = el('div', { class: 'am-cknob' });
+  const track = el('div', { class: 'am-ctrack', onclick: (e) => { const r = track.getBoundingClientRect(); set(lo + Math.floor((e.clientX - r.left) / r.width * n)); paint(); } }, knob);
+  const paint = () => { const v = get(); knob.style.left = (v - lo) / n * 100 + '%'; knob.style.width = Math.max(100 / n, 4) + '%'; box.setAttribute('aria-valuenow', v); };
+  const step = (d) => { set(Math.max(lo, Math.min(hi, get() + d))); paint(); };
+  const box = el('div', { class: 'am-cslide', role: 'slider', tabindex: 0, 'aria-label': label, 'aria-valuemin': lo, 'aria-valuemax': hi,
+    onkeydown: (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); step(-1); } if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); step(1); } } },
+  el('button', { type: 'button', class: 'am-carrow l', 'aria-label': '-', onclick: () => step(-1) }), track, el('button', { type: 'button', class: 'am-carrow r', 'aria-label': '+', onclick: () => step(1) }));
+  paint(); return box;
+}
+const at2 = (x, y, w2, h) => `left:calc(${x} * var(--u));top:calc(${y} * var(--v));` + (w2 ? `width:calc(${w2} * var(--u));` : '') + (h ? `height:calc(${h} * var(--v));` : '');
+const place = (node, x, y, w2, h) => { node.setAttribute('style', at2(x, y, w2, h)); return node; };
+// a window from the program's table: its inner size, and the body's parts placed at the table's coordinates
+function tableWin(title, W, H, parts, cls) {
+  const body = el('div', { class: 'am-twin' }, ...parts);
+  const win = amWin(title, body, 'am-wtable ' + (cls || ''));
+  win.style.width = `calc(${W + 8} * var(--u))`; win.style.height = `calc(${H + 18} * var(--v))`;
+  return win;
+}
+// Options > Battle Speed (table 202ffc, 280 x 152; ks204 shot 049): Fast to Slow on a slider of 0 to 50 with its figure, "Animated
+// Battle"; Ok. The figure is the ruleset's battle speed (DOS 2.0: 10 to 60 ticks) less 10; Animated Battle the remake's fully animated
+// battles.
+function openBattleSpeedAm() {
+  const a = api(), G = a.G, BS = HO.rules(G).options && HO.rules(G).options.battleSpeed, P = a.Prefs;
+  const lo = BS ? BS.min : 10, hi = BS ? BS.max : 60;
+  let v = P.battleSpeed != null ? P.battleSpeed : (BS ? BS.def : 30);
+  const fig = el('span', { class: 'am-tfig' }, String(v - lo));
+  const sl = propSlider(lo, hi, () => v, (x) => { v = x; fig.textContent = String(v - lo); }, w('mBattleSpeed'));
+  const anim = el('input', { type: 'checkbox', checked: P.fullAnim !== false ? 'checked' : false });
+  tableWin(w('mBattleSpeed'), 280, 152, [
+    place(frame(''), 16, 8, 248, 104), place(el('span', null, w('fast')), 48, 10), place(el('span', { class: 'am-right' }, w('slow')), 200, 10, 40),
+    place(fig, 22, 30, 22), place(sl, 48, 30, 200, 13),
+    place(el('label', { class: 'am-radio' }, anim, el('span', null, w('animBattle'))), 40, 80, 200, 20),
+    place(btn(w('ok'), () => { P.battleSpeed = BS && v === BS.def ? null : v; P.fullAnim = anim.checked; a.savePrefs(); a.closeModal(); }, 'am-default'), 90, 128, 100, 20)]);
+}
+// Options > Control Time (table 2030b0, 264 x 142; ks204 shot 048): the three lines about it, "Pause" with its figure on a slider of
+// 0 to 30; Ok. The program's polling of a shared game file; nothing in the remake polls, so the figure is kept and does nothing.
+function openControlTimeAm() {
+  const a = api(); let v = optGet('poll', 4);
+  const fig = el('span', { class: 'am-tfig' }, String(v));
+  tableWin(w('mPoll'), 264, 142, [
+    place(frame(''), 16, 8, 232, 56), place(frame(''), 16, 72, 232, 32),
+    place(el('span', null, w('ctl1')), 32, 16), place(el('span', null, w('ctl2')), 32, 31), place(el('span', null, w('ctl3')), 32, 46),
+    place(el('span', null, w('pause')), 32, 83), place(fig, 70, 83, 20),
+    place(propSlider(0, 30, () => v, (x) => { v = x; fig.textContent = String(v); }, w('pause')), 96, 82, 140, 13),
+    place(btn(w('ok'), () => { optSet('poll', v); a.closeModal(); }, 'am-default'), 84, 114, 100, 20)]);
+}
+// Options > Autoplay: "Computer Player" (table 202edc, 304 x 182; ks204 shot 050): Computer plays for me / Mark my turns done. /
+// Thanks, i can play by myself; "In autoplay messages will disappear after" so many seconds (0 to 15); Ok. Played by the classic
+// page's auto play, until "Thanks, i can play by myself" is chosen (or the game is over).
+let AUTO = null;
+function openComputerPlayerAm() {
+  const a = api(); let mode = AUTO && !AUTO.o.stopped ? AUTO.mode : 'self', secs = optGet('autoSecs', 2);
+  const fig = el('span', { class: 'am-tfig' }, String(secs));
+  const radio = (m, label, y) => place(el('label', { class: 'am-radio' }, el('input', { type: 'radio', name: 'am-cp', checked: mode === m ? 'checked' : false, onchange: () => { mode = m; } }), el('span', null, label)), 33, y, 240, 20);
+  tableWin(w('cpTitle'), 304, 182, [
+    place(frame(''), 16, 8, 272, 72), place(frame(''), 16, 88, 272, 56),
+    radio('computer', w('cp1'), 12), radio('end', w('cp2'), 34), radio('self', w('cp3'), 56),
+    place(el('span', null, w('cpSecs')), 31, 90), place(fig, 31, 109, 16),
+    place(propSlider(0, 15, () => secs, (x) => { secs = x; fig.textContent = String(secs); }, w('cpSecs')), 50, 109, 220, 13),
+    place(el('span', null, w('seconds')), 31, 130),
+    place(btn(w('ok'), () => {
+      optSet('autoSecs', secs); a.closeModal();
+      if (AUTO) { AUTO.o.stopped = true; AUTO = null; }
+      if (mode !== 'self' && a.G && !a.G.over) { const o = { turns: 100000, computer: mode === 'computer', won: false, lost: false, news: false, every: secs }; AUTO = { o, mode }; a.runAutoPlay(o); }
+    }, 'am-default'), 103, 154, 100, 20)]);
+}
+// Galaxy > Send Message (table 202bb6, 522 x 182; ks204 shots 044-047): "To:" and "What:" by a column of four cells (48 x 42) that
+// fill as the message is made, a grid of 5 x 4 cells of choices beside it: whom, then i like / i don`t like / i own, then Star or
+// Player, then which; a click on a cell in the column takes the message back to it; Send once all four are chosen, Cancel. The
+// ruleset's canned messages (rs.cannedChat), as the DOS skin's chatDos sends them.
+function openSendMessageAm() {
+  const a = api(), G = a.G, ME = a.ME, C = HO.rules(G).cannedChat; if (!C) return false;
+  const tos = C.to(G, ME), ok = tos.filter(o => !o[2]);
+  if (!ok.length) { a.toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to send something to.')); return true; }
+  const hat = (q) => 'i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const pl = (id) => G.players[+id];
+  const VERB = ['iLike', 'iDislike', 'iOwn'];
+  let step = 0; const ch = [null, null, null, null];
+  const cell = (c, x, y, onclick) => {
+    const pic = c.star != null ? (() => { const look = a.starLook(c.star); return look && a.A.img[look.base] ? el('img', { src: a.A.img[look.base], alt: '' }) : el('span'); })() : c.icon ? img(P + c.icon) : el('span');
+    return place(el('div', { class: 'am-mcell' + (c.off ? ' off' : '') + (onclick ? '' : ' am-lempty'), role: onclick ? 'button' : null, tabindex: onclick ? 0 : null, onclick }, pic, el('span', { class: 'am-mcap' }, c.name || '')), x, y, 48, 42);
+  };
+  const choices = () => {
+    if (step === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+    if (step === 1) return C.actions.map((x, i) => ({ id: i, i, name: w(VERB[i]), icon: 'i' + (3000 + i) }));
+    if (step === 2) return C.actions[ch[1].i].parts[0][2].map((o, i) => ({ id: i, i, name: w(o[1] === 'players' ? 'player' : 'starW'), icon: o[1] === 'players' ? hat(G.players[ME]) : 'i3010', kind: o[1] }));
+    const kind = ch[2].kind;
+    return C.list(G, ME, kind, a.UI.sel).map(o => ({ id: String(o[0]), name: o[1], icon: kind === 'players' && pl(o[0]) ? hat(pl(o[0])) : null, star: kind !== 'players' ? +o[0] : null, off: !!o[2] }));
+  };
+  const leftBox = el('div', { class: 'am-mleft' }), gridBox = el('div', { class: 'am-mgrid' });
+  const sendB = btn(w('send'), () => {
+    const r = HO.sendCanned(G, ME, C.make(G, ME, isNaN(+ch[0].id) ? ch[0].id : +ch[0].id, ch[1].i, [ch[2].i, isNaN(+ch[3].id) ? ch[3].id : +ch[3].id]));
+    if (r === 'limit') { a.chatLimitToast(); return; } if (r !== 'ok') return; a.Sound.play(5000); a.closeModal(); a.save();
+  });
+  const refresh = () => {
+    leftBox.replaceChildren(...ch.map((c, i) => (c ? cell(c, 50, 7 + 43 * i, () => { for (let k = i; k < 4; k++) ch[k] = null; step = i; refresh(); }) : cell({}, 50, 7 + 43 * i, null))));
+    const list = step > 3 ? [] : choices();
+    gridBox.replaceChildren(...list.map((c, k) => cell(c, 120 + 50 * (k % 5), 7 + 43 * Math.floor(k / 5), c.off ? null : () => {
+      ch[step] = { id: c.id, i: c.i, name: c.name, icon: c.icon, star: c.star, kind: c.kind };
+      step = ch[1] && ch[1].i === 2 && step === 1 && C.actions[2].parts[0][2].length === 1 ? (ch[2] = { id: 0, i: 0, name: w('starW'), icon: 'i3010', kind: C.actions[2].parts[0][2][0][1] }, 3) : step + 1;
+      refresh();
+    })));
+    sendB.disabled = !(step > 3);
+  };
+  tableWin(w('sendTitle'), 522, 182, [
+    place(el('span', { class: 'am-right' }, w('toW')), 0, 12, 40), place(el('span', { class: 'am-right' }, w('whatW')), 0, 55, 40),
+    place(frame('am-recess'), 48, 6, 52, 173), place(frame('am-recess'), 118, 6, 252, 173), leftBox, gridBox, place(scroller(gridBox, true), 370, 6, 16, 174),
+    place(sendB, 406, 110, 100, 20), place(btn(w('cancel'), () => a.closeModal(), 'am-default'), 406, 140, 100, 20)], 'am-wsend');
+  refresh();
+  return true;
+}
 // Options > ScreenMode: "Sreenmode Preferences" (sic; the English program's table at 2032e2, 552 x 160; German "Bildschirmeinstellung";
 // Jake's capture 144): seven mode rows (the screen modes asl offers, empty in the capture), "Select screen resolution / and number
 // of colors" with the colours on a cycle button, Ok and Cancel. Here the rows are the remake's two pixel shapes (the Amiga monitor's
@@ -2079,10 +2203,10 @@ function menus(M, ho) {
     ],
     mOptions: [
       [() => w('mForce'), () => fe('Force end turn…')(), null, null, () => !(G0() && HO.rules(G0()).forceEndTurn && a().hotSeat())],
-      [() => w('mAuto'), () => classicFn('Game', 'Auto play…')(), null, null, () => !G0()],
+      [() => w('mAuto'), () => openComputerPlayerAm(), null, null, () => !G0()],
       [() => w('mHandle'), () => { const A2 = a(); A2.toast(w('mHandleNote')); }, null, () => true],
-      [() => w('mPoll'), () => a().openPrefs(), null, null, () => !G0()],
-      [() => w('mBattleSpeed'), () => a().openPrefs(), null, null, () => !G0()],
+      [() => w('mPoll'), () => openControlTimeAm(), null, null, () => !G0()],
+      [() => w('mBattleSpeed'), () => openBattleSpeedAm(), null, null, () => !G0()],
       [() => w('mShowMsgs'), () => { const P = a().Prefs; P.showMsgs = P.showMsgs === false; a().savePrefs(); }, null, () => a().Prefs.showMsgs !== false],
       [() => w('mShowBattles'), () => { const P = a().Prefs; P.review = !P.review; optSet('battles', P.review); a().savePrefs(); }, null, () => !!a().Prefs.review],
       [() => w('mWarnings'), () => optSet('warn', !warningsOn()), null, () => warningsOn()],
@@ -2101,7 +2225,7 @@ function menus(M, ho) {
     mGalaxy: [
       [() => w('mCompare'), () => G0() && openCompare(), null, null, () => !G0(), 'C'],
       [() => w('mStarList'), () => G0() && openStarListAm(), null, null, () => !G0(), 'T'],
-      [() => w('mMessage'), () => classicFn('Galaxy', 'Send a message…')(), () => !!(G0() && (HO.feature(G0(), 'chat') || HO.rules(G0()).chatCommand !== false) && classicItem('Galaxy', 'Send a message…')), null, () => !alive(), 'F'],
+      [() => w('mMessage'), () => { if (!openSendMessageAm()) classicFn('Galaxy', 'Send a message…')(); }, () => !!(G0() && (HO.feature(G0(), 'chat') || HO.rules(G0()).chatCommand !== false) && classicItem('Galaxy', 'Send a message…')), null, () => !alive(), 'F'],
       [() => w('mZoomIn'), () => classicFn('View', 'Zoom in') ? classicZoom(1) : null, null, null, () => zoomIdxNow() >= zooms().length - 1, '+'],
       [() => w('mZoomOut'), () => classicZoom(-1), null, null, () => zoomIdxNow() <= 0, '-'],
       [() => w('mFix'), () => classicFn('Galaxy', 'Fix spending')(), () => !!(G0() && HO.rules(G0()).fixSpending && classicItem('Galaxy', 'Fix spending')), null, () => !alive()],

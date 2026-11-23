@@ -37,6 +37,11 @@ const VIEWS = {
   stars: [141, [pick(4, '^(Star List|Liste der Sterne)')]],
   screen: [144, [pick(2, '^(ScreenMode|Bildschirm)')]],
   about: [58, [pick(6, '^(About|Über)')]],
+  controlTime: ['k048', [pick(2, '^(Control Time|Kontrollzeit)')]],
+  battleSpeed: ['k049', [pick(2, '^(Battle Speed|Kampftempo)')]],
+  computerPlayer: ['k050', [pick(2, '^(Autoplay|Autospiel)')]],
+  sendMessage: ['k044', [pick(4, '^(Send Message|Funkspruch)')]],
+  sendMessage2: ['k045', [pick(4, '^(Send Message|Funkspruch)'), `(() => { const c = document.querySelector('.am-mgrid .am-mcell'); if (c) c.click(); })()`]],
   // a battle (shots 097-129): eight of your fighters put at the nearest computer's home, End Turn, the report caught as it plays
   // (it changes the game: keep it last, or alone with --only=battle)
   battle: [104, [`(() => { const a = HOAPI, G = a.G, me = a.me(), h = G.stars[me.homeStar];

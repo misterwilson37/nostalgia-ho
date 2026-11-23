@@ -843,7 +843,7 @@ html.amiga .am-crow, html.amiga .am-cfig { position: absolute; left: 0; right: 0
 html.amiga .am-crow > *, html.amiga .am-cfig > * { position: absolute; top: 0; white-space: nowrap; line-height: calc(13 * var(--v)); }
 html.amiga .am-clab { left: calc(26 * var(--u)); }
 html.amiga .am-cval { right: calc(377 * var(--u)); } /* (the figure ends at 125) */
-html.amiga .am-cslide { left: calc(140 * var(--u)); top: calc(-2 * var(--v)) !important; width: calc(80 * var(--u)); height: calc(13 * var(--v)); pointer-events: auto; display: flex; }
+html.amiga .am-crow .am-cslide { left: calc(140 * var(--u)); top: calc(-2 * var(--v)) !important; width: calc(80 * var(--u)); height: calc(13 * var(--v)); pointer-events: auto; display: flex; }
 html.amiga .am-carrow { flex: none; width: calc(12 * var(--u)); height: 100%; padding: 0; border: 0; background: #bbb; box-shadow: inset calc(1 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-1 * var(--u)) calc(-1 * var(--v)) 0 #000; cursor: pointer; position: relative; }
 html.amiga .am-carrow::after { content: ''; position: absolute; left: calc(3 * var(--u)); top: calc(2 * var(--v)); border-style: solid; border-color: transparent; border-width: calc(4 * var(--v)) calc(5 * var(--u)); }
 html.amiga .am-carrow.l::after { border-right-color: #000; border-left-width: 0; } html.amiga .am-carrow.r::after { border-left-color: #000; border-right-width: 0; left: calc(4 * var(--u)); }
@@ -904,3 +904,19 @@ html.amiga .am-nslabel { left: calc(38 * var(--u)); top: calc(18 * var(--v)); wh
 html.amiga form.am-nstar .am-nsfield { left: calc(61 * var(--u)); top: calc(42 * var(--v)); width: calc(90 * var(--u)) !important; height: calc(16 * var(--v)); }
 html.amiga form.am-nstar .am-btn { top: calc(88 * var(--v)); width: calc(70 * var(--u)); height: calc(20 * var(--v)); }
 html.amiga form.am-nstar .am-nsok { left: calc(32 * var(--u)); } html.amiga form.am-nstar .am-nscancel { left: calc(114 * var(--u)); }
+
+/* the program's table windows (tableWin: the Options windows and Send Message, ks204 shots 044-050): parts at the table's coordinates */
+html.amiga .am-twin { position: absolute; inset: 0; }
+html.amiga .am-twin > * { position: absolute; white-space: nowrap; }
+html.amiga .am-twin .am-right { text-align: right; }
+html.amiga .am-twin .am-tfig { text-align: right; }
+html.amiga .am-twin .am-cslide { display: flex; }
+html.amiga .am-twin .am-radio { display: flex; align-items: center; gap: calc(8 * var(--u)); }
+html.amiga .am-mleft, html.amiga .am-mgrid { inset: 0; pointer-events: none; }
+html.amiga .am-mcell { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: hidden; pointer-events: auto; cursor: pointer; font-family: var(--amc), sans-serif; }
+html.amiga .am-mcell.am-lempty { cursor: default; }
+html.amiga .am-mcell.off { opacity: 0.45; cursor: default; }
+html.amiga .am-mcell img { width: calc(32 * var(--u)); height: calc(32 * var(--v)); image-rendering: pixelated; }
+html.amiga .am-mcell .am-mcap { line-height: calc(10 * var(--v)); max-width: 100%; overflow: hidden; text-overflow: clip; }
+html.amiga .am-mcell:not(.am-lempty):hover { outline: calc(1 * var(--v)) solid var(--am-red); outline-offset: calc(-1 * var(--v)); }
+html.amiga .am-recess { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #fff; }
