@@ -11,6 +11,9 @@ version (`emulators/ON-YOUR-MAC.md` has no DOS section). Windows 3.1 and Windows
 
 ## DOS 2.0 (DOSHO.EXE)
 
+**Done (24 Nov): Jake captured the whole DOS list** (`captures/image0001-0190`): everything below is in hand except the report sounds
+(no recording yet: DOSBox-staging can record them, see ON-YOUR-MAC.md).
+
 Taken 23 Nov by Claude in DOSBox (no longer missing): the licence window (`v20dos-orig-license`), Create New Galaxy with
 choices set (`-newgalaxy-set`), **Player Entry** (`-playerentry`, `-playerentry-name`) and **New Player Registration**
 (`-registration`), two of the four open audit gaps, the first End Turn's "play alone or wait" question (`-alert-playalone`), and
