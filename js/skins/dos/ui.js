@@ -503,6 +503,16 @@ function condenseCaps() {
   const all = (n) => (n.matches && n.matches(sel) ? [n] : []).concat([...(n.querySelectorAll ? n.querySelectorAll(sel) : [])]);
   new MutationObserver((ms) => { if (!frameOn()) return; for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) all(n).forEach(fit); }).observe(document.body, { subtree: true, childList: true });
 }
+// The Windows look in 16 colours (its VGA driver: Jake's Windows 3.1 battles, audit/win-2.0/captures/image0028-0060): each colour the nearest of the 16 as
+// they show there; a bolt's outer lines take its inner side lines' colour (Weapons 2: red, olive, olive; Weapons 6: yellow, green, green). In 256 colours,
+// and in the DOS look, the colours as they are.
+const WIN16 = [[0, 0, 0], [0, 0, 170], [0, 0, 255], [0, 170, 85], [0, 255, 0], [0, 255, 255], [85, 170, 170], [134, 138, 142], [170, 0, 85], [170, 85, 170], [170, 170, 85], [194, 198, 202], [255, 0, 0], [255, 0, 255], [255, 255, 0], [255, 255, 255]];
+function win16(cols, bolt) {
+  if (!winOn() || document.documentElement.classList.contains('w31-256')) return cols;
+  const rgb = (c) => { const m = /^#(..)(..)(..)$/.exec(c); if (m) return [1, 2, 3].map(i => parseInt(m[i], 16)); const n = String(c).match(/\d+/g).map(Number); return n.slice(0, 3); };
+  const near = (c) => { const v = rgb(c); let b = WIN16[0], d = 1e9; for (const p of WIN16) { const e = (p[0] - v[0]) ** 2 + (p[1] - v[1]) ** 2 + (p[2] - v[2]) ** 2; if (e < d) { d = e; b = p; } } return `rgb(${b.join(',')})`; };
+  const out = cols.map(near); if (bolt) out[2] = out[1]; return out;
+}
 // The bolt's three colours in the DOS program, by the shooting group's Weapons (Mac 2.0.1 DrawLaserBlast @d3e20: the middle line at hue (W - 1) x 4000,
 // full value; the lines 1 and 2 to each side 7500 and 15000 further round at values 45000 and 25000; the DOS program's palette puts them on these,
 // measured on its battles, W 1 to 5: battles/v20dos-orig-battle01..06, and 9: Jake's image0134). Between and past those, not captured, the hue is interpolated.
@@ -569,7 +579,7 @@ function battleDos(b, k) {
   const mo = new MutationObserver(() => { if (!d.isConnected) { stop = true; mo.disconnect(); } }); mo.observe(document.body, { childList: true });
   const pat = (col) => { const p = document.createElement('canvas'); p.width = p.height = 2; const q = p.getContext('2d'); q.fillStyle = col; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); };
   const grayPat = pat('#000'), whiteGray = pat('#fff');
-  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "13px 'Win31 System', 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif") : bold ? C12 : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); }; // (the title, the names, the result and "Round n" in Chicago 12, the groups' words in Geneva 9: Jake's battle captures, image0033-0174)
+  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "13px 'Win31 System', 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : F9) : bold ? C12 : F9; /* (the Windows look's group words too in the small pixel face: Jake's Windows battles, audit/win-2.0/captures/image0030-0060) */ x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); }; // (the title, the names, the result and "Round n" in Chicago 12, the groups' words in Geneva 9: Jake's battle captures, image0033-0174)
   let seed = (b.id | 0) * 7919 + 13; const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
   const stars = Array.from({ length: 35 }, () => [rnd(5, 440), rnd(5, 348)]);
   const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) x.fillRect(h, v, 1, 1); };
@@ -577,7 +587,7 @@ function battleDos(b, k) {
     const p = g.players[o]; if (!p) return;
     const id = o === ME ? (p.female ? 1500 : 1000) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20), im = pic('i' + id);
     if (im) x.drawImage(im, FACE[ci][0], FACE[ci][1], 32, 32);
-    if (o !== ME || (k.live && !win)) text(p.name || '', FACE[ci][0] + (win ? 38 : 36), FACE[ci][1] + (win ? 29 : 28), true); // (DOS: 2 left and 1 up of the Windows look's place, in Chicago 12: image0033) // (a battle announced in the turn's reports names your side too: captured, battles/v20dos-orig-battle01..06; Review Battle's summary does not, v20dos-orig-battle-summary)
+    if (o !== ME || k.live) text(p.name || '', FACE[ci][0] + (win ? 38 : 36), FACE[ci][1] + (win ? 29 : 28), true); // (DOS: 2 left and 1 up of the Windows look's place, in Chicago 12: image0033) // (a battle announced in the turn's reports names your side too: captured, battles/v20dos-orig-battle01..06; Review Battle's summary does not, v20dos-orig-battle-summary)
   };
   const groupWords = (gr) => { if (gr.planet) return P0.planetWords(pop); const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, name: '', W: 1, S: 1 }; return P0.shipWords(dd, gr.units.filter(i => alive[i]).length, gr.units.length, u.o === ME); };
   const drawGroup = (gr) => {
@@ -611,7 +621,7 @@ function battleDos(b, k) {
     let x1 = SHIP[s.ci][0], y1 = SHIP[s.ci][1] + PIT * s.row + 18, x2 = SHIP[t.ci][0], y2 = SHIP[t.ci][1] + PIT * t.row + 18;
     if (x2 > x1) { x1 += 121; x2 -= 1; } else { x2 += 121; x1 -= 1; }
     const dx = Math.trunc((x2 - x1) / 5), dy = Math.trunc((y2 - y1) / 5);
-    const cols = win ? ['#fff', '#fff', '#fff'] : boltColours(shooterW(s));
+    const cols = win16(boltColours(shooterW(s)), true);
     const seg = (h0, v0, h1, v1, col) => { for (const o of [0, 1, -1, 2, -2]) pxLine(h0, v0 + o, h1, v1 + o, col || cols[Math.abs(o)]); }; // (whole pixels, as QuickDraw's LineTo: an anti-aliased line left a trail when drawn over in black)
     let h = x1, v = y1, ph = -1, pv = -1;
     for (let i = 0; i < 5 && !stop && !skip; i++) { const t0 = performance.now(); seg(h, v, h + dx, v + dy); if (ph !== -1) seg(ph, pv, h, v, '#000'); ph = h; pv = v; h += dx; v += dy; await wait(t0 + TICK); }
@@ -620,7 +630,6 @@ function battleDos(b, k) {
   async function explosion(t, ev) {
     const dm = ev.dm | 0, im = pic('s' + (12000 + (dm % 3)));
     if (ev.snd !== 3003) { if (im) x.drawImage(im, SHIP[t.ci][0] + (dm % 103), SHIP[t.ci][1] + PIT * t.row + (dm % 23), 17, 17); return; }
-    if (win) return;
     // a kill (sound 3003): Mac 2.0.1's colour DrawExplosion @d412e, which the DOS program draws too (captured: battles/v20dos-orig-battle01-00203,
     // -battle02-00566, -battle05-01374): over the group's picture rectangle, 59 framed ovals from the middle out, the s-th inset s across and s / 3
     // down (40 s / 120), its hue (59 - s) x 175 from red; the DOS palette gives three bands, measured: s 45 and up red, 20 to 44 (255, 48, 0), 1 to
@@ -634,13 +643,13 @@ function battleDos(b, k) {
     const oval = (s, col) => { const A0 = spans(s), A1 = spans(s + 1); x.fillStyle = col;
       for (const [v, [h0, h1]] of A0) { const inner = A1.get(v); if (!inner) { x.fillRect(h0, v, h1 - h0, 1); continue; } if (inner[0] > h0) x.fillRect(h0, v, inner[0] - h0, 1); if (h1 > inner[1]) x.fillRect(inner[1], v, h1 - inner[1], 1); } };
     let t1 = performance.now();
-    for (let s = 59; s >= 1 && !stop && !skip; s--) { oval(s, s >= 45 ? '#ff0000' : s >= 20 ? '#ff3000' : '#ff6500'); if (s % 2 === 0) { t1 += TICK; await wait(t1); } }
+    const OV = win16(['#ff0000', '#ff3000', '#ff6500']); for (let s = 59; s >= 1 && !stop && !skip; s--) { oval(s, s >= 45 ? OV[0] : s >= 20 ? OV[1] : OV[2]); if (s % 2 === 0) { t1 += TICK; await wait(t1); } }
     for (let s = 1; s <= 59 && !stop && !skip; s++) { oval(s, '#000'); if (s % 2 === 0) { t1 += TICK; await wait(t1); } }
     drawGroup(t);
   }
   // the shooting group's Weapons: its design's, or for a planet its owner's (as the shot's colour, DrawLaserBlast @d3e20's hue (W - 1) x 4000)
   function shooterW(s) { if (s.planet) { const p = g.players[s.o]; return Math.max(1, Math.trunc(p && p.tech ? p.tech.weapons || 1 : 1)); } const u = b.start[s.units[0]], dd = u && H.getDesign(g, u.o, u.did); return Math.max(1, Math.trunc(dd && dd.W || 1)); }
-  function groupOne(gr) { if (win) return null; if (gr.planet) return pic('d12757'); const u = b.start[gr.units[0]], dd = u && H.getDesign(g, u.o, u.did); return dd && dd.type === 'satellite' ? pic('d' + (12900 + Math.max(1, Math.min(26, dd.W | 0)))) : null; }
+  function groupOne(gr) { if (gr.planet) return pic('d12757'); const u = b.start[gr.units[0]], dd = u && H.getDesign(g, u.o, u.did); return dd && dd.type === 'satellite' ? pic('d' + (12900 + Math.max(1, Math.min(26, dd.W | 0)))) : null; }
   function oneAt(gr) { return [Math.ceil(CAPC[gr.ci] - 20), SHIP[gr.ci][1] + PIT * gr.row - 3]; }
   function groupW(gr) { if (groupOne(gr)) return 40; if (gr.planet) return 97; const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }, im = a.shipPic(dd, u.o); return im ? Math.round(im.width * 35 / im.height) : 97; }
   const apply = (ev) => { if (ev.p) { if (ev.php != null) pop = ev.php / 1000; } else { if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) alive[ev.ti] = false; } };
