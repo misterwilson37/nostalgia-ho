@@ -5057,7 +5057,7 @@ const titleLang = () => UIL.pref.get() || 'en';
 const TITLE_RULES = { mac3: '301', mac3c: '301', mac4: 'mac405', mac4c: 'mac405', w95: '405', mac2: 'mac20', mac2c: 'mac20', dos: 'dos', mac12: '12' };
 // each skin's own rules: New Game opens on them for the skin the title shows (Jake, 20 Nov 2026: "if I chose the 1.2 skin, it should choose the
 // 1.2 ruleset and its defaults initially"); the player can still pick others there (the Amiga 2.x plays DOS 2.0's rules: docs/amiga-skin.md)
-const SKIN_RULES = Object.assign({}, TITLE_RULES, { classic: 'original', palm: 'palm', ios: 'ios', android: 'android', amiga: 'dos', cozy: 'claude', gemini: 'gemini' });
+const SKIN_RULES = Object.assign({}, TITLE_RULES, { classic: 'original', palm: 'palm', ios: 'ios', android: 'android', amiga: 'dos', cozy: 'claude', gemini: 'gemini', mac10: '12' }); // (the Mac 1.0 skin: 1.2's rules, the nearest known)
 const skinRules = () => { const id = window.HOSKINS && SKIN_RULES[HOSKINS.current]; return id && HO.RULESETS[id] ? id : null; };
 function titleWindows(lang) {
   const id = window.HOSKINS && TITLE_RULES[HOSKINS.current], rs = id && HO.RULESETS[id];
@@ -5288,7 +5288,9 @@ function skinOSPickers(rulesId) {
   // the edition changed: its own skins first, its first one chosen unless one was picked by hand
   const forEdition = (id) => {
     const own = editionSkins(id);
-    fillSkins(skinSel, id, !picked.get('skin') && own.length ? own[0] : skinSel.value);
+    // (a skin made for another edition's rules, js/skins.js keepRules: the Mac 1.0 skin, which has no rules of its own, stays for 1.2's)
+    const cur = window.HOSKINS && HOSKINS.list.find(k => k.id === HOSKINS.current), keep = !!(cur && cur.keepRules === id);
+    fillSkins(skinSel, id, keep && !picked.get('skin') ? cur.id : !picked.get('skin') && own.length ? own[0] : skinSel.value);
     fillOS(osSel, skinSel.value, HOSKINS.osDefault(skinSel.value)); // a new skin starts in its own look
   };
   return { skinSel, osSel, forEdition };

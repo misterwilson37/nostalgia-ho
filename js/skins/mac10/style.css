@@ -1,0 +1,39 @@
+/* Spaceward Ho! — Mac 1.0 skin: the Mac 1.2 look (js/skins/mac12/style.css) with 1.0's windows (js/skins/mac10/ten.js). */
+@import url("../mac12/style.css");
+
+/* 1.0's floating windows (the manual, pp. 7-18): each its own width, as the figures measure them (Budget 283, Planet 247, Tech Spending
+   245, Report 352, Help 174), with the 11-pixel dotted title bar and close box of 1.2's windoids, a 1-pixel frame and a 1-pixel shadow */
+html.mac10lay #main { grid-template-rows: minmax(0, 1fr) auto; }
+html.mac10lay #panel { grid-row: 1 / span 2; grid-column: 1; }
+html.mac10lay #mapwrap { grid-row: 1; grid-column: 2; }
+html.mac10lay #low10 { grid-row: 2; grid-column: 2; display: flex; align-items: flex-start; gap: 8px; padding: 6px 0 0 0; min-width: 0; background: #fff; }
+html.macscale.mac10lay #main { grid-template-columns: calc((283px + 16px + 2px) * var(--mac)) 1fr; }
+html.macscale #low10 { zoom: var(--mac); }
+.win10 { box-sizing: content-box; border: 1px solid #000; box-shadow: 1px 1px 0 #000; background: #fff; margin: 0 0 6px 0; padding: 0; flex: none; }
+.win10[hidden] { display: none; }
+.win10 canvas.qd12, .win10 canvas.tbar12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+:is(#panel, #low10) .win10.box { padding: 0; border-radius: 0; }
+.win10 .tbar12 { cursor: default; }
+/* the Report Window's text (1.0's has no pictures: p. 12), Geneva 9, a line of 12 */
+.win10 .rep10 { position: relative; overflow: hidden; }
+.win10 .rep10 ul { list-style: none; margin: 0; padding: 0 0 0 4px; height: 100%; overflow-y: auto; scrollbar-width: none; font: 12px/12px 'Mac Geneva 9', Geneva, Verdana, sans-serif; color: #000; }
+.win10 .rep10 ul::-webkit-scrollbar { display: none; }
+.win10 .rep10 li { margin: 0; padding: 0; min-height: 12px; white-space: normal; }
+.win10 .rep10 li.click { cursor: pointer; }
+.win10 .rep10 li.click:hover { text-decoration: underline; }
+.win10 .rep10 .rbar10 { position: absolute; right: 0; top: 0; width: 16px; bottom: 15px; }
+.win10 .rep10 .grow10 { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; }
+.win10 .rep10 canvas { display: block; image-rendering: pixelated; }
+/* the Help Window (p. 7): what the pointer is over, Geneva 9 */
+.win10 .help10 { font: 12px/12px 'Mac Geneva 9', Geneva, Verdana, sans-serif; color: #000; padding: 1px 4px 2px 4px; overflow: hidden; }
+/* the Help Window takes the place of the remake's tooltip while it is open */
+html.mac10help #hotip { display: none !important; }
+/* the map is plain black (p. 9): no star field */
+html.mac10lay #map { background: #000; }
+/* 1.0's dialogs (pp. 21, 23, 34, 37): a modal dialog's double border, measured on the figures: a 1-pixel black line, 2 white, 2 black;
+   no title bar; the items' origin inside it */
+.win.mac10dlg { border: 1px solid #000; border-radius: 0; box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px #000; background: #fff; padding: 0; }
+.win.mac10dlg .wtitle { display: none; }
+.win.mac10dlg .wbody { padding: 0; background: transparent; }
+.win.mac10dlg .dl20 { margin: 5px; }
+.win.mac10dlg .dl20 select { font: 15px 'Mac Chicago 12', Chicago, sans-serif; border: 1px solid #000; box-shadow: 1px 1px 0 #000; background: #fff; color: #000; border-radius: 0; padding: 0 4px; appearance: none; }

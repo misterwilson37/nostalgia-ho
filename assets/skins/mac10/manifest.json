@@ -1,0 +1,14 @@
+{
+ "sprites": [
+  "cover",
+  "m10colony",
+  "m10colony-sel",
+  "m10enemy",
+  "m10enemy-sel",
+  "m10explored",
+  "m10explored-sel",
+  "m10fleet",
+  "m10unexplored",
+  "m10unexplored-sel"
+ ]
+}

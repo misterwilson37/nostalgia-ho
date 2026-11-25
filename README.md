@@ -3,7 +3,8 @@
 A personal remake of Delta Tao's *Spaceward Ho!* 5.0.5 that runs in a browser, with the
 1993 DOS version (2.0) and the 1996 Windows 95 version (4.0.5) as extra rulesets and skins,
 the Mac editions of 2.0.1 (1992) and 4.0.5 (1997) as rulesets of their own,
-an Amiga skin from the 1994 German Amiga version of 2.0, and skins from the Mac versions 1.2
+an Amiga skin from the 1994 German Amiga version of 2.0, a skin of the first Mac version, 1.0 (1990), drawn from its manual
+(the only part of it known to survive: `docs/mac10-skin.md`; it plays the 1.2 rules), and skins from the Mac versions 1.2
 (1992, black and white), 2.0.1 (1992), 3.0.1 (1993) and 4.0.5 (1997), the last three both in
 black and white and in colour, and an iOS skin from the 2017 iPhone and iPad version (1.2.9).
 

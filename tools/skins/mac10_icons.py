@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""The Mac 1.0 skin's map pictures (assets/skins/mac10/sprites), redrawn from the 1990 manual.
+
+No copy of Spaceward Ho! 1.0 (1990) is known, so its icons can't be extracted. Its manual (Delta Tao, 1990; scans in the
+private repo, originals/mac-1.0-manual) prints the four kinds of star on pages 8-11 and a Star Map on page 9. Every figure
+there is printed at about 1.67 times the Mac's pixels (the star names under the icons are Geneva 9: 58, 50, 45 and 42
+printed pixels for Canopus, Adhara, Merak and Mizar against Geneva 9's 35, 30, 27 and 25; a menu item, 16 pixels, is 27.5
+printed), so each icon is a 32 x 32 icon whose picture is 22 to 31 pixels across.
+
+- unexplored (Mizar, p. 11) and explored (Adhara, p. 10): round, drawn here by rule from what the scans show: a white rim,
+  a black ring, then a dotted band round a black middle with a white "?" (unexplored), or a planet shaded lighter at its
+  top left (explored);
+- colony (Canopus, p. 8: the cowboy hat on the planet) and enemy (Merak, p. 11: the bandit in the black hat): the printed
+  figure reduced to 32 x 32 by area and thresholded (tools: box filter at 1/1.67, white above 118 of 255), then kept as
+  it came out; the grids below are that output.
+- selected (Nasl, p. 9, "looks funny because it is selected"): the same icon with what is inside its outline inverted
+  (Nasl's middle is light where Mizar's is dark); the outline stays white.
+- the fleet dot (Adhara, p. 10: "Any planet with a dot next to it has at least one fleet there"): a 5 x 5 dotted square
+  above the icon's top right.
+
+Outside each icon's outline is transparent; inside it is black, as on the black map.
+The title picture (cover.png) is the manual's cover, 384 wide in 1 bit, from the scan of its first page (pdfimages -png on the
+private repo's PDF gives it as the first image); without that argument the cover already in the folder is kept.
+Run: python3 -I tools/skins/mac10_icons.py [cover page scan]  (writes assets/skins/mac10/sprites/*.png and the manifest)
+"""
+import json, os, sys
+from PIL import Image
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, '..', '..', 'assets', 'skins', 'mac10')
+
+COLONY = """
+................................
+.............#####..............
+..........####..###.............
+........###....#.###............
+.......##...#####..##...........
+.......##.########..######......
+.......#.###..#####.#######.....
+.....###.#####.#####.###..##....
+...###...#..########..###..##...
+...##..####...#######.####..#...
+..###.#######...####..####..#...
+..#..##########......#.####.#...
+..#.#############.####.####.#...
+..#.#############..########.#...
+..#.###############....####.#...
+..#..#######.....####..###.##...
+..##.####.........####.###.##...
+...##..#......#.....#####..#....
+....##....#.#....#........##....
+.....##..##....#........#.##....
+......##.###.#......#####.#.....
+.......#.####.#.#..######.#.....
+.......#.###...##.#######.#.....
+.......##.#####.########.##.....
+........#..#.###.#.####..#......
+........##..#####.#.#..###......
+.........##..###.#.....###......
+..........##..........##........
+...........###......###.........
+...........############.........
+................................
+................................
+"""
+
+ENEMY = """
+................................
+................................
+................................
+........###############.........
+........#.............##........
+.......##..............##.......
+.......##..............##.......
+......##................##......
+......##................##......
+......#.################.#......
+#######.################.######.
+#.............................#.
+#.............................#.
+#######..#.#.............######.
+......#.##....#.......##.#......
+......#.#.#.#.......####.#......
+......#.####.#.#..######.#......
+......#..####.#.##.##.#..#......
+......##.##........####.##......
+.......#......##........#.......
+.......##..###.###.#..###.......
+........##..#.#...#...##........
+......####............###.......
+.....##.................###.....
+.....#......##..###.......#.....
+.....#......##..###.......#.....
+.....#......###.###......##.....
+.....#####...##.##...######.....
+.........#############..........
+................................
+................................
+................................
+"""
+
+QMARK = """
+.#####.
+##...##
+##...##
+....##.
+...##..
+...##..
+...##..
+.......
+...##..
+...##..
+"""
+
+BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+
+
+def grid(s):
+    rows = [r for r in s.strip('\n').split('\n')]
+    return [[c == '#' for c in r] for r in rows]
+
+
+def round_icon(kind):
+    g = [[False] * 32 for _ in range(32)]
+    inside = [[False] * 32 for _ in range(32)]
+    cx = cy = 15.5
+    for y in range(32):
+        for x in range(32):
+            d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+            if d > 11.6:
+                continue
+            inside[y][x] = True
+            if d > 10.6:
+                g[y][x] = True  # the white rim
+            elif d > 9.6:
+                g[y][x] = False  # a black ring
+            elif kind == 'unexplored':
+                g[y][x] = d > 7.0 and (x + y) % 2 == 0 and y % 2 == 0  # the dotted band; the middle black
+            else:  # explored: a planet lit from its top left, lighter again at the foot's rim
+                lx, ly = (x - cx) / 9.6, (y - cy) / 9.6
+                v = 0.55 - 0.45 * lx - 0.40 * ly + (0.35 if d > 8.2 and ly > 0.2 else 0)
+                g[y][x] = v * 16 > BAYER[y % 4][x % 4] + 0.5
+    if kind == 'unexplored':
+        q = grid(QMARK)
+        for j, r in enumerate(q):
+            for i, on in enumerate(r):
+                g[11 + j][13 + i] = on
+    return g, inside
+
+
+def outline_mask(g):
+    """Inside = everything not reachable from the border through clear pixels."""
+    out = [[False] * 32 for _ in range(32)]
+    stack = [(x, y) for x in range(32) for y in (0, 31)] + [(x, y) for y in range(32) for x in (0, 31)]
+    while stack:
+        x, y = stack.pop()
+        if x < 0 or y < 0 or x > 31 or y > 31 or out[y][x] or g[y][x]:
+            continue
+        out[y][x] = True
+        stack += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    return [[not out[y][x] for x in range(32)] for y in range(32)]
+
+
+def edge(inside):
+    """The outline: inside pixels that touch the outside."""
+    e = [[False] * 32 for _ in range(32)]
+    for y in range(32):
+        for x in range(32):
+            if not inside[y][x]:
+                continue
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                X, Y = x + dx, y + dy
+                if X < 0 or Y < 0 or X > 31 or Y > 31 or not inside[Y][X]:
+                    e[y][x] = True
+    return e
+
+
+def save(name, g, inside):
+    im = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+    for y in range(32):
+        for x in range(32):
+            if inside[y][x]:
+                im.putpixel((x, y), (255, 255, 255, 255) if g[y][x] else (0, 0, 0, 255))
+    im.save(os.path.join(OUT, 'sprites', name + '.png'))
+
+
+def main():
+    os.makedirs(os.path.join(OUT, 'sprites'), exist_ok=True)
+    names = []
+    icons = {'unexplored': round_icon('unexplored'), 'explored': round_icon('explored')}
+    for k, s in (('colony', COLONY), ('enemy', ENEMY)):
+        g = grid(s)
+        icons[k] = (g, outline_mask(g))
+    for k, (g, inside) in icons.items():
+        save('m10' + k, g, inside)
+        e = edge(inside)
+        sel = [[(True if e[y][x] else not g[y][x]) if inside[y][x] else False for x in range(32)] for y in range(32)]
+        save('m10' + k + '-sel', sel, inside)
+        names += ['m10' + k, 'm10' + k + '-sel']
+    dot = Image.new('RGBA', (5, 5), (0, 0, 0, 0))
+    for y in range(5):
+        for x in range(5):
+            dot.putpixel((x, y), (255, 255, 255, 255) if (x + y) % 2 == 0 else (0, 0, 0, 255))
+    dot.save(os.path.join(OUT, 'sprites', 'm10fleet.png'))
+    names.append("m10fleet")
+    if len(sys.argv) > 1:  # the title picture: the manual's cover (the page-1 scan), 384 wide, 1-bit (Floyd-Steinberg)
+        from PIL import ImageOps
+        im = ImageOps.autocontrast(Image.open(sys.argv[1]).convert('L').crop((14, 2, 1020, 660)), cutoff=1)
+        im.resize((384, round(im.height * 384 / im.width)), Image.LANCZOS).convert('1').convert('RGB').save(os.path.join(OUT, 'sprites', 'cover.png'))
+    names.append('cover')
+    with open(os.path.join(OUT, 'manifest.json'), 'w') as f:
+        json.dump({'sprites': sorted(names)}, f, indent=1)
+        f.write('\n')
+
+
+if __name__ == '__main__':
+    main()
