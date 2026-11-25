@@ -3881,7 +3881,8 @@ function openGiveWindow(W) {
 function chatLimitToast() {
   // rs.chatLimit, a number or (G) => one (5.0.5: 3, its Send Message greyed out once three are sent)
   const L = HO.rules(G).chatLimit, n = typeof L === 'function' ? L(G) : L;
-  toast(n === 10 ? 'Sorry, you can only send ten messages per turn.' : `You have sent the ${n} messages you may send this turn.`);
+  const lim = n === 10 ? 'Sorry, you can only send ten messages per turn.' : `You have sent the ${n} messages you may send this turn.`;
+  if (!(n === 10 && T.plainAlert && T.plainAlert(tl(lim)))) toast(lim); // (a skin's own box for it: DOS 2.0's MsgBox, Jake's capture image0190)
 }
 function openCanned(C) {
   const send = (m) => {

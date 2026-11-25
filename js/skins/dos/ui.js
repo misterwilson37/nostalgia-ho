@@ -136,6 +136,16 @@ window.HOTHEME = {
   endTurnPics: { de: P + 'd5000-de', fr: P + 'd5000-fr', tr: P + 'd5000-tr', es: P + 'd5000-es' },
   // pressed (FUN_2000_9b03: on the press the program draws picture 5001, 5501 in German, and holds the mouse until it is let go); the drawn languages have none
   endTurnPicDown: P + 'd5001', endTurnPicsDown: { de: P + 'd5001-de' },
+  // the program's End Turn button stays on the map while the report bubble is up (Jake's image0012, 0015, 0182): the classic page leaves its button
+  // out while a report card shows, so the skin puts the same button at its place then (as the Windows 95 skin's extraClock)
+  afterMsg(box) {
+    if (!box || !frameOn() || winOn()) return;
+    const want = box.querySelector('.card:not(.end):not(.waiting)') && !box.querySelector('.clock'); if (!want) return;
+    const a = window.HOAPI, L = (window.HOUI && HOUI.lang) || 'en', up = a.IMG[(this.endTurnPics || {})[L] || this.endTurnPic], dn = a.IMG[(this.endTurnPicsDown || {})[L] || this.endTurnPicDown]; if (!up || !up.src) return;
+    const btn = a.el('button', { class: 'clock pic dd-extraclock', 'aria-label': 'End turn', onclick: (e) => { e.stopPropagation(); a.doEndTurn(); } }), im = a.el('img', { src: up.src, alt: '' }); btn.append(im);
+    if (dn && dn.src && L === 'en' || (dn && L === 'de')) { btn.addEventListener('pointerdown', () => { im.src = dn.src; }); ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => btn.addEventListener(t, () => { im.src = up.src; })); }
+    box.prepend(btn);
+  },
   battlePlanet: P + 'i1004', // the planet in a battle: the DOS game's own plain planet (as the Mac skins built on this one)
   // stand-ins: an ally's halo over the planet (3.0.1's), the rank pictures
   allyPic: (IMG, small) => { const n = small ? 'p507' : 'p506', k = fillNames(n).map(x => P + x).find(x => IMG[x]); return k ? IMG[k] : null; }, // (always a stand-in: a skin's own is made see-through round the halo)
@@ -279,8 +289,19 @@ window.HOTHEME = {
   nameStarLayout(f, o) { return winOn() && window.HOWIN31 && window.HOWIN31.nameStar ? window.HOWIN31.nameStar(f, o) : frameOn() ? nameStarDos(f, o) : false; },
   closingGame(go) { return frameOn() ? closingGameDos(go) : false; },
   // (a question whose caller asks for the program's Yes/No box: labels ['Yes', 'No'], the remake's own words before they are put in the page's language, or labels.yesNo)
-  confirm(text, yes, labels) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: labels ? tx(labels[0]) : 'OK', def: true, fn: yes }, { label: labels ? tx(labels[1]) : 'Cancel' }], { yesNo: !!labels && (!!labels.yesNo || (labels[0] === 'Yes' && labels[1] === 'No')) }) : false; },
-  alert(kind, text, yes) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: 'OK', def: true, fn: yes }, { label: 'Cancel' }]) : false; },
+  confirm(text, yes, labels) {
+    if (!frameOn()) return false;
+    const yn = !!labels && (!!labels.yesNo || (labels[0] === 'Yes' && labels[1] === 'No')), go = { label: labels ? tx(labels[0]) : 'OK', def: true, fn: yes }, no = { label: labels ? tx(labels[1]) : 'Cancel' };
+    // (DOS: a question puts Cancel first and the action after it, as in its captured questions (revert, abandon); its Yes/No box keeps Yes, No)
+    return !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], yn || winOn() ? [go, no] : [no, go], { yesNo: yn });
+  },
+  alert(kind, text, yes) {
+    if (!frameOn()) return false;
+    // (End Turn with colonies left short: the program's box 5060, its words and its buttons Cancel and Let 'em Die, captured (Jake's image0056, 0087))
+    if (kind === 'underfunded' && !winOn()) return !!alertDos([tx('Warning! You are not spending enough money to support some of your colonies.  Do you really want to abandon them?')], [{ label: tx('Cancel') }, { label: tx('Let ’em Die'), fn: yes }]);
+    return !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], winOn() ? [{ label: 'OK', def: true, fn: yes }, { label: 'Cancel' }] : [{ label: 'Cancel' }, { label: 'OK', fn: yes }]); // (DOS: Cancel first, as in its captured questions)
+  },
+  plainAlert(text) { return frameOn() && !winOn() ? !!alertDos([text], [{ label: 'OK', def: true }], { plain: true }) : false; }, // (the box without the mascot: MsgBox)
   window(name) { if (name === 'saved' && winOn() && window.HOWIN31 && window.HOWIN31.show('fileOpen', arguments[1])) return true; // (the Windows program's File Open window, template 12)
     if (winOn() && window.HOAPI.G && window.HOWIN31 && W31WIN[name] && window.HOWIN31.show(W31WIN[name], arguments[1])) return true; // (the Windows program's own windows: js/skins/dos/win31/dialogs.js)
     if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
@@ -484,12 +505,18 @@ function condenseCaps() {
 }
 // The bolt's three colours in the DOS program, by the shooting group's Weapons (Mac 2.0.1 DrawLaserBlast @d3e20: the middle line at hue (W - 1) x 4000,
 // full value; the lines 1 and 2 to each side 7500 and 15000 further round at values 45000 and 25000; the DOS program's palette puts them on these,
-// measured on its battles, W 1 to 5: battles/v20dos-orig-battle01..06). Past 5 (not captured) the hue rule itself, at the DOS step of 2000 a level.
-const BOLT = { 1: ['#ff0000', '#9a3000', '#653000'], 2: ['#ff3000', '#9a6500', '#653000'], 3: ['#ff6500', '#9a6500', '#653000'], 4: ['#ff9a00', '#9a9a00', '#656500'], 5: ['#ffcf00', '#00aa00', '#006500'] };
+// measured on its battles, W 1 to 5: battles/v20dos-orig-battle01..06, and 9: Jake's image0134). Between and past those, not captured, the hue is interpolated.
+const BOLT = { 1: ['#ff0000', '#9a3000', '#653000'], 2: ['#ff3000', '#9a6500', '#653000'], 3: ['#ff6500', '#9a6500', '#653000'], 4: ['#ff9a00', '#9a9a00', '#656500'], 5: ['#ffcf00', '#00aa00', '#006500'],
+  9: ['#00ff65', '#009a9a', '#006565'] }; // (9: Jake's Tornado (9/8) fighters, image0134)
 function boltColours(W) {
   if (BOLT[W]) return BOLT[W];
-  const hsv = (h, v) => { h = ((h % 65536) / 65536) * 6; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, g2, b2] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return `rgb(${Math.round(r * 255)},${Math.round(g2 * 255)},${Math.round(b2 * 255)})`; };
-  const h0 = (W - 1) * 2000; return [hsv(h0, 1), hsv(h0 + 7500, 45000 / 65535), hsv(h0 + 15000, 25000 / 65535)];
+  // (not captured: the hue between the measured levels' hues, the wheel's step from the last two measured past them; the values as measured)
+  const hue = (hex) => { const r = parseInt(hex.slice(1, 3), 16), g2 = parseInt(hex.slice(3, 5), 16), b2 = parseInt(hex.slice(5, 7), 16), mx = Math.max(r, g2, b2), mn = Math.min(r, g2, b2), d = mx - mn || 1;
+    return ((mx === r ? (g2 - b2) / d : mx === g2 ? 2 + (b2 - r) / d : 4 + (r - g2) / d) * 60 + 360) % 360; };
+  const hsv = (h, v) => { h = (((h % 360) + 360) % 360) / 60; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, g2, b2] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return `rgb(${Math.round(r * 255)},${Math.round(g2 * 255)},${Math.round(b2 * 255)})`; };
+  const ks = Object.keys(BOLT).map(Number).sort((p2, q2) => p2 - q2), lo = ks.filter(k => k < W).pop(), hi = ks.find(k => k > W);
+  const at = (k) => hue(BOLT[k][0]), h = hi != null ? at(lo) + (at(hi) - at(lo)) * (W - lo) / (hi - lo) : at(lo) + (at(lo) - at(ks[ks.length - 2])) / (lo - ks[ks.length - 2]) * (W - lo);
+  return [hsv(h, 1), hsv(h + 41, 0.6), hsv(h + 82, 0.4)];
 }
 // ======== Review Battle: the program's battle window (Windows template 7, "Skip"; measured on the summary of a battle reviewed in DOSBox) ========
 // 456 x 364 with the program's frame (the interior black with 35 white stars): the two sides' faces (a red-brown cross over a side with nothing left), the viewer's group
@@ -542,7 +569,7 @@ function battleDos(b, k) {
   const mo = new MutationObserver(() => { if (!d.isConnected) { stop = true; mo.disconnect(); } }); mo.observe(document.body, { childList: true });
   const pat = (col) => { const p = document.createElement('canvas'); p.width = p.height = 2; const q = p.getContext('2d'); q.fillStyle = col; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); };
   const grayPat = pat('#000'), whiteGray = pat('#fff');
-  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "13px 'Win31 System', 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif") : bold ? F9B : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
+  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "13px 'Win31 System', 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif") : bold ? C12 : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); }; // (the title, the names, the result and "Round n" in Chicago 12, the groups' words in Geneva 9: Jake's battle captures, image0033-0174)
   let seed = (b.id | 0) * 7919 + 13; const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
   const stars = Array.from({ length: 35 }, () => [rnd(5, 440), rnd(5, 348)]);
   const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) x.fillRect(h, v, 1, 1); };
@@ -550,27 +577,32 @@ function battleDos(b, k) {
     const p = g.players[o]; if (!p) return;
     const id = o === ME ? (p.female ? 1500 : 1000) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20), im = pic('i' + id);
     if (im) x.drawImage(im, FACE[ci][0], FACE[ci][1], 32, 32);
-    if (o !== ME || (k.live && !win)) text(p.name || '', FACE[ci][0] + 38 + (ci ? 0 : 0), FACE[ci][1] + 29, true); // (a battle announced in the turn's reports names your side too: captured, battles/v20dos-orig-battle01..06; Review Battle's summary does not, v20dos-orig-battle-summary)
+    if (o !== ME || (k.live && !win)) text(p.name || '', FACE[ci][0] + (win ? 38 : 36), FACE[ci][1] + (win ? 29 : 28), true); // (DOS: 2 left and 1 up of the Windows look's place, in Chicago 12: image0033) // (a battle announced in the turn's reports names your side too: captured, battles/v20dos-orig-battle01..06; Review Battle's summary does not, v20dos-orig-battle-summary)
   };
   const groupWords = (gr) => { if (gr.planet) return P0.planetWords(pop); const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, name: '', W: 1, S: 1 }; return P0.shipWords(dd, gr.units.filter(i => alive[i]).length, gr.units.length, u.o === ME); };
   const drawGroup = (gr) => {
-    const [sx0, sy0] = SHIP[gr.ci], gy = sy0 + PIT * gr.row;
-    x.fillStyle = '#000'; x.fillRect(sx0 - 40, gy - 2, 200, PIT - 2);
+    let [sx0, sy0] = SHIP[gr.ci]; const gy = sy0 + PIT * gr.row;
+    x.fillStyle = '#000'; x.fillRect(sx0 - 40, gy - 3, 200, PIT - 1);
     let im = null, w = 97, h = 35;
-    if (gr.planet) { im = null; } else { const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }; im = a.shipPic(dd, u.o); }
+    // (a planet, and a satellite, is one 40 x 40 picture, not the three parts of a ship: the small set's planet 12757 and satellite 12900 + Weapons (Mac 2.0.1
+    // DrawShipPicture: 2257 + 500 + 10000; the DOS program's d12757, d12901-12926), at its own size, centred on the group's words and 3 above its row: fitted to
+    // Jake's captures with no pixel off (image0033: the planet at 73, 59 of the window and its satellites 53 apart; image0153: the planet on the right at 348, 59))
+    const one = groupOne(gr);
+    if (one) { const [ox, oy] = oneAt(gr); x.drawImage(one, ox, oy, 40, 40); sx0 = ox; w = 40; }
+    else if (!gr.planet) { const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }; im = a.shipPic(dd, u.o); }
     if (im) { w = Math.round(im.width * 35 / im.height); x.drawImage(im, sx0, gy, w, 35); }
     const n = gr.units.filter(i => alive[i]).length;
     if (!gr.planet) {
       let f = 0, q = -1; for (const i of gr.units) { const hh = hurt[i]; if (hh && hh.n > q && alive[i]) { q = hh.n; f = hh.f; } }
       let l = sx0, r = sx0 + w; if (n > 0) r = Math.min(sx0 + w, sx0 + Math.trunc(w * Math.max(0, Math.min(1, f))));
-      if (r > l) { x.fillStyle = grayPat; x.fillRect(l, gy, r - l, 35); }
+      if (r > l) { x.fillStyle = grayPat; if (one) x.fillRect(l, oneAt(gr)[1], r - l, 40); else x.fillRect(l, gy, r - l, 35); }
     }
     text(groupWords(gr), CAPC[gr.ci], gy + 47, false, true); drawStars();
   };
-  const paintHead = () => { x.fillStyle = '#000'; x.fillRect(0, 0, W, Hh); drawStars(); text(P0.head[0], 219, 34, true, true); text(P0.head[1], 219, 50, true, true); [0, 1].forEach(ci => { if (owners[ci] != null) face(owners[ci], ci); }); };
-  const roundLabel = (n) => { x.fillStyle = '#000'; x.fillRect(190, 266, 80, 18); text(tx('Round %d').replace('%d', n), 198, 280, true); };
+  const paintHead = () => { x.fillStyle = '#000'; x.fillRect(0, 0, W, Hh); drawStars(); text(P0.head[0], win ? 219 : 220, 34, true, true); text(P0.head[1], win ? 219 : 220, 50, true, true); [0, 1].forEach(ci => { if (owners[ci] != null) face(owners[ci], ci); }); };
+  const roundLabel = (n) => { x.fillStyle = '#000'; x.fillRect(190, 263, 80, 21); text(tx('Round %d').replace('%d', n), 198, win ? 280 : 277, true); }; // (DOS: 3 higher, image0033)
   paintHead();
-  [0, 1].forEach(ci => { if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || '', 150, 100, true); text(L.destroyed || '', 150, 116, true); skip = true; } else cols[ci].forEach(drawGroup); });
+  [0, 1].forEach(ci => { if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || '', win ? 150 : 159, win ? 100 : 116, true); text(L.destroyed || '', win ? 150 : 159, win ? 116 : 132, true); /* (DOS: at 164, 112 and 128 of the window, the glyphs' tops: Jake's image0058, 0063, 0170) */ skip = true; } else cols[ci].forEach(drawGroup); });
   const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
   const cellOf = (ev, shooter) => shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti));
   const pxLine = (h0, v0, h1, v1, col) => { x.fillStyle = col; let dx = Math.abs(h1 - h0), dy = -Math.abs(v1 - v0), sx = h0 < h1 ? 1 : -1, sy = v0 < v1 ? 1 : -1, e = dx + dy;
@@ -593,7 +625,7 @@ function battleDos(b, k) {
     // -battle02-00566, -battle05-01374): over the group's picture rectangle, 59 framed ovals from the middle out, the s-th inset s across and s / 3
     // down (40 s / 120), its hue (59 - s) x 175 from red; the DOS palette gives three bands, measured: s 45 and up red, 20 to 44 (255, 48, 0), 1 to
     // 19 (255, 101, 0). Then the same ovals in black from the outside in, and the group is drawn again. Two ovals a tick, as the program's BattleWait.
-    const [sx0, sy0] = SHIP[t.ci], gy = sy0 + PIT * t.row, w = groupW(t), L = sx0, T0 = gy, R = sx0 + w, B = gy + 35;
+    const [sx0, sy0] = SHIP[t.ci], gy = sy0 + PIT * t.row, w = groupW(t), one = groupOne(t) ? oneAt(t) : null, L = one ? one[0] : sx0, T0 = one ? one[1] : gy, R = L + w, B = T0 + (one ? 40 : 35);
     // an oval's row spans (its rectangle l..r x tp..bt, ends excluded, as QuickDraw's); a ring is the s-th oval less the (s + 1)-th, so whole pixels
     // and nothing left over when the same rings are drawn in black
     const spans = (s) => { const l = L + s, r = R - s, tp = T0 + Math.trunc(s / 3), bt = B - Math.trunc(s / 3), m = new Map(); if (r - l < 1 || bt - tp < 1) return m;
@@ -608,7 +640,9 @@ function battleDos(b, k) {
   }
   // the shooting group's Weapons: its design's, or for a planet its owner's (as the shot's colour, DrawLaserBlast @d3e20's hue (W - 1) x 4000)
   function shooterW(s) { if (s.planet) { const p = g.players[s.o]; return Math.max(1, Math.trunc(p && p.tech ? p.tech.weapons || 1 : 1)); } const u = b.start[s.units[0]], dd = u && H.getDesign(g, u.o, u.did); return Math.max(1, Math.trunc(dd && dd.W || 1)); }
-  function groupW(gr) { if (gr.planet) return 97; const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }, im = a.shipPic(dd, u.o); return im ? Math.round(im.width * 35 / im.height) : 97; }
+  function groupOne(gr) { if (win) return null; if (gr.planet) return pic('d12757'); const u = b.start[gr.units[0]], dd = u && H.getDesign(g, u.o, u.did); return dd && dd.type === 'satellite' ? pic('d' + (12900 + Math.max(1, Math.min(26, dd.W | 0)))) : null; }
+  function oneAt(gr) { return [Math.ceil(CAPC[gr.ci] - 20), SHIP[gr.ci][1] + PIT * gr.row - 3]; }
+  function groupW(gr) { if (groupOne(gr)) return 40; if (gr.planet) return 97; const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }, im = a.shipPic(dd, u.o); return im ? Math.round(im.width * 35 / im.height) : 97; }
   const apply = (ev) => { if (ev.p) { if (ev.php != null) pop = ev.php / 1000; } else { if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) alive[ev.ti] = false; } };
   const finish = () => {
     if (stop) return;
@@ -1151,7 +1185,10 @@ function dButton(txt, l, t, w, h, fn, o) {
   const a = window.HOAPI, b = a.el('button', { type: 'button', class: 'dd-btn' + (o && o.def ? ' def' : ''), onclick: fn });
   const hot = o && o.hot != null ? o.hot : -1, sp = a.el('span', { translate: 'no' });
   if (hot >= 0) { sp.append(txt.slice(0, hot), a.el('span', { class: 'hotu' }, txt[hot]), txt.slice(hot + 1)); } else sp.textContent = txt;
-  b.append(sp); return dAt(b, l, t, w, h);
+  b.append(sp);
+  // (a label centred on a half pixel blurred the bitmap face: put it on the next whole pixel, where the program's centring lands, e.g. "Cancel" 19 in from a 78-wide button's edge)
+  requestAnimationFrame(() => { if (!b.isConnected) return; const x = sp.getBoundingClientRect().left, d = Math.ceil(x - 0.01) - x; if (d > 0.01) { sp.style.position = 'relative'; sp.style.left = d + 'px'; } });
+  return dAt(b, l, t, w, h);
 }
 // a scroll-bar slider (the control the program calls a scroll bar: an arrow at each end, a small thumb): min..max, value; the arrows step by one, a click on the track by a tenth
 function dSlider(l, t, w, h, min, max, val, onChange, label) {
@@ -1206,7 +1243,7 @@ function battleSpeedDos() {
   cb.setAttribute('aria-checked', String(full)); cb.addEventListener('click', flip); cb.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } });
   flip(); flip();
   dDialog(280, 182, null, [dText(tx('Battle Speed:'), 16, 42), dText(tx('Fast'), 16, 70), dSlider(64, 70, 144, 14, O.min, O.max, v, (n) => { v = n; }, 'Battle Speed'), dText(tx('Slow'), 208, 70), cb,
-    dButton('OK', 177, 127, 70, 26, () => { P.battleSpeed = v; P.fullAnim = full; a.savePrefs(); a.closeModal(); }, { hot: 0, def: true })], 'Battle Speed');
+    dButton('OK', 176, 126, 72, 28, () => { P.battleSpeed = v; P.fullAnim = full; a.savePrefs(); a.closeModal(); }, { hot: 0, def: true })], 'Battle Speed');
   return true;
 }
 // Options, Auto Play: 376 x 266
@@ -1523,8 +1560,11 @@ function skillsDos(under) {
   const d = a.el('div', { class: 'dd dd-over', role: 'dialog', 'aria-label': tx('List of all players and their skill levels:') });
   d.style.width = du(432); d.style.height = du(308); dAt(d, 56, 0);
   const box = dListBox(397, 213, 18, 33); let cur = 0;
-  const show = () => { box.textContent = ''; g.players.forEach((q, i) => box.append(a.el('div', { class: 'dd-row dd-skill' + (i === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(i === cur), translate: 'no', onclick: () => { cur = i; show(); } },
-    a.el('span', { class: 'n' }, q.name), a.el('span', { class: 'k' }, skillName(q.skill))))); };
+  // (in the name's order, and a computer reads Novice: its skill field is never set, the player's choice at registration being the only one written;
+  // Jake's image0083, "Bert Novice", "Jake Novice" with Dumb computers, as the Windows program shows it, js/skins/dos/win31/dialogs.js)
+  const order = g.players.slice().sort((p2, q2) => String(p2.name).localeCompare(String(q2.name), undefined, { sensitivity: 'base' }));
+  const show = () => { box.textContent = ''; order.forEach((q, i) => box.append(a.el('div', { class: 'dd-row dd-skill' + (i === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(i === cur), translate: 'no', onclick: () => { cur = i; show(); } },
+    a.el('span', { class: 'n' }, q.name), a.el('span', { class: 'k' }, skillName(q.human ? q.skill : 'novice'))))); };
   show();
   const ok = dButton('OK', 328, 266, 71, 27, () => d.remove(), { hot: 0 });
   d.append(dText(tx('List of all players and their skill levels:'), 22, 14, { hot: lang === 'en' || !lang ? 0 : -1 }), box, dText(tx('Computer Intelligence:') + ' ' + iq, 22, 266), ok);
@@ -1532,28 +1572,36 @@ function skillsDos(under) {
   d.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); d.remove(); } }, true);
   return d;
 }
-// The program's alert box (captured: the fuel alert, 352 x 210): the text in the screen font from 24 right and 13 down (40 characters a line, a blank line between paragraphs),
-// the mascot (d3520) under it at 23 / 6 below the text, the buttons beside it at 23 below the picture's top; the box is 19 under the picture, and sits 7 above the screen's middle.
-// Kept difference: only the fuel alert was captured, so the picture and the button words of other alerts, and the box's height for other lengths, follow the same rule.
+// The program's alert box, measured on seven captured alerts (the fuel alert; Jake's 24 Nov captures: abandon, revert, a fleet in hyperspace, a star's name taken,
+// ten messages: the private repo's audit/dos-2.0.1/captures, image0056, 0084, 0159, 0165, 0190). Its size follows its words, in screen cells (8 x 14): the text wraps at 40
+// characters and the box is 6 cells wider than its longest line (or as wide as its buttons need), as many rows as its lines and 8 more (with the mascot) or 6 (without).
+// It is placed by the program's rule for every window (placeDos). With the mascot (PicMsgBox): the text from cell 2 (pixel 23) and 13 down, the mascot (d3520) 6 below
+// the text at 22, the buttons 23 below the picture's top. Without it (MsgBox; "Sorry, you can only send ten messages per turn."): a grey box, the text from cell (1, 1),
+// the buttons a row under it. The buttons are all as wide as the widest (a one-word label is padded with a space each side: " OK " 8 cells at least, " Cancel " 9,
+// "Let 'em Die" 12; 8 x cells + 8 pixels) and spaced evenly between cell 11 (1 without the mascot) and 4 cells from the right edge, a cell's spare left over.
 function alertDos(paras, btns, o) {
   if (winOn() && window.HOWIN31 && window.HOWIN31.alert) { const w = window.HOWIN31.alert(paras, btns, o); if (w) return w; } // (the Windows program's alert box, template 4: js/skins/dos/win31/dialogs.js)
-  const a = window.HOAPI, wrap = (t) => { const out = []; String(t).split('\n').forEach(par => { let line = ''; par.split(' ').forEach(w => { if (line && (line + ' ' + w).length > 40) { out.push(line); line = w; } else line = line ? line + ' ' + w : w; }); out.push(line); }); return out; };
-  const lines = []; paras.forEach((t, i) => { if (i) lines.push(''); wrap(t).forEach(l => lines.push(l)); });
-  const pic = 13 + 14 * lines.length + 6, h = pic + 74 + 19, d = a.el('div', { class: 'dd dd-alert', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] });
-  d.style.width = du(352); d.style.height = du(h);
+  const a = window.HOAPI, plain = !!(o && o.plain), wrap = (t) => { const out = []; String(t).split('\n').forEach(par => { let line = ''; par.split(' ').forEach(w => { if (line && (line + ' ' + w).length > 40) { out.push(line); line = w; } else line = line ? line + ' ' + w : w; }); out.push(line); }); return out; };
+  const dosq = (t) => String(t).replace(/[‘’]/g, "'").replace(/[“”]/g, '"'); // (the DOS character set has no curly quotes: the program's straight ones, captured)
+  const lines = []; paras.forEach((t, i) => { if (i) lines.push(''); wrap(dosq(t)).forEach(l => lines.push(l)); }); btns.forEach(b => { b.label = dosq(b.label); });
+  const n = btns.length, bw = Math.max(8, ...btns.map(b => { const L = String(b.label).length; return (/\s/.test(b.label) ? L : L + 2) + 1; }));
+  const L0 = plain ? 1 : 11, need = L0 + n * bw + 2 * (n + 1) + 1 + 4, cols = Math.max(Math.max(0, ...lines.map(l => l.length)) + 6, need), rows = lines.length + (plain ? 6 : 8);
+  const w = 8 * cols, h = 14 * rows, pic = 13 + 14 * lines.length + 6, by = plain ? 28 + 14 * lines.length + 14 : pic + 23;
+  const d = a.el('div', { class: 'dd dd-alert' + (plain ? ' plain' : ''), role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] });
+  d.style.width = du(w); d.style.height = du(h);
   const done = () => back.remove();
-  lines.forEach((l, i) => l && d.append(dText(l, 23, 13 + 14 * i)));
-  const im = a.IMG['dos:d3520']; if (im) { const c = a.el('canvas', { class: 'dd-pic', 'aria-hidden': 'true' }); c.width = 74; c.height = 74; c.getContext('2d').drawImage(im, 0, 0); dAt(c, 22, pic, 74, 74); c.style.imageRendering = 'pixelated'; d.append(c); }
-  const n = btns.length, bw = 72, gap = 16, x0 = Math.round(176 - (n - 1) * (bw + gap) / 2);
-  btns.forEach((b, i) => d.append(dButton(b.label, x0 + i * (bw + gap), pic + 23, bw, 28, () => { done(); if (b.fn) b.fn(); }, { hot: 0, def: b.def })));
-  const cb = [...d.querySelectorAll('.dd-btn')].pop(); if (cb) cb.setAttribute('data-esc-close', '1');
-  // (the program's Yes/No boxes, FUN_9000_0000's types 0 and 1 (" Yes ", " No "[, " Cancel "]: "The file %s already exists.  Overwrite?", "%s, do you want to save the
-  // changes ..."), take the keys Y and N as their first two buttons: their window procedures FUN_b000_36f9 and FUN_b000_3656 compare the keys y and n, whatever the
-  // language (the German build's buttons say Ja and Nein). The box is the Yes/No box because its caller says so (o.yesNo), not by its words; the keys, the patch's
-  // letters and the modern conveniences' typed words: markYesNo, js/skins/classic/ui.js. Every other question box takes the typed words only.)
+  lines.forEach((l, i) => l && d.append(plain ? dText(l, 16, 29 + 14 * i) : dText(l, 24, 15 + 14 * i))); // (a pixel lower and, beside the mascot, a pixel right of where the fuel alert's first measure put them: all seven captures)
+  const im = a.IMG['dos:d3520']; if (im && !plain) { const c = a.el('canvas', { class: 'dd-pic', 'aria-hidden': 'true' }); c.width = 74; c.height = 74; c.getContext('2d').drawImage(im, 0, 0); dAt(c, 23, pic, 74, 74); c.style.imageRendering = 'pixelated'; d.append(c); }
+  const R = cols - 4, gap = Math.floor((R - L0 - n * bw) / (n + 1));
+  // (the thick border: on the first button, the one the program gives the focus: Cancel in its questions, a lone OK (images 0165, 0190, the fuel alert; the
+  // hyperspace alert, opened over the fleet list, left the focus there, image 0159))
+  btns.forEach((b, i) => d.append(dButton(b.label, 8 + 8 * (L0 + gap * (i + 1) + bw * i), by, 8 * bw + 8, 28, () => { done(); if (b.fn) b.fn(); }, { hot: /^Revert$/.test(b.label) ? 0 : -1, def: i === 0 }))); // (an underlined letter only where the program's label has one: Revert; " OK ", " Cancel " and Let 'em Die none)
+  const cb = [...d.querySelectorAll('.dd-btn')].find(x => /cancel/i.test(x.textContent)) || [...d.querySelectorAll('.dd-btn')].pop(); if (cb) cb.setAttribute('data-esc-close', '1');
   const bs = d.querySelectorAll('.dd-btn');
-  if (btns.length >= 2 && a.markYesNo) a.markYesNo(d, bs[0], bs[1], !!(o && o.yesNo));
-  const back = a.el('div', { class: 'scrim dd-alertscrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } }, a.el('div', { class: 'dd-alertpos' }, d));
+  const yi = btns.findIndex(b => b.fn), ni = btns.findIndex(b => !b.fn);
+  if (btns.length >= 2 && a.markYesNo && yi >= 0 && ni >= 0) a.markYesNo(d, bs[yi], bs[ni], !!(o && o.yesNo));
+  const pos = a.el('div', { class: 'dd-alertpos' }, d); pos.style.transform = `translate(${du(8 * Math.floor((80 - cols) / 2) - (640 - w) / 2)}, ${du(14 * Math.floor((34 - rows) / 2) - (476 - h) / 2)})`; // (placeDos's rule)
+  const back = a.el('div', { class: 'scrim dd-alertscrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } }, pos);
   document.body.append(back); const f = d.querySelector('.dd-btn.def') || d.querySelector('.dd-btn'); if (f) f.focus();
   return back;
 }
@@ -1561,14 +1609,15 @@ function alertDos(paras, btns, o) {
 // DOSHO.EXE keeps its 32 windows as templates in a far data segment (40df:xxxx in the unpacked image, 0x430 bytes apart, from RegisterDlgBox to PatchDlgBox): a name,
 // the window's size in screen cells (8 x 14 pixels), then each item as x, y, height and width in cells, its control class (9 a button, 11 a line of words, 18 a picture
 // the window's procedure paints, 4 an edit field ...), its words and its id. An item at cell (x, y) sits at (8 + 8x, 14 + 14y) of the window: Battle Speed (35 x 13
-// cells, 280 x 182) and Auto Play (47 x 19) were measured so; a button is 8w + 6 by 26 from a pixel inside its cell (Battle Speed's OK: 21, 8, 8 wide -> 177, 127, 70 x 26).
+// cells, 280 x 182) and Auto Play (47 x 19) were measured so; a button is 8w + 8 by 28 from its cell's corner (Battle Speed's OK: 21, 8, 8 wide -> 176, 126, 72 x 28; it had been
+// measured a pixel inside, before the button's cut corners were drawn).
 const cell = (x, y) => [8 + 8 * x, 14 + 14 * y];
-function tplButton(txt, x, y, w, fn, o) { const [l, t] = cell(x, y); return dButton(txt, l + 1, t + 1, 8 * w + 6, 26, fn, o); }
-function tplText(lines, x, y) { const [l, t] = cell(x, y); return lines.map((ln, i) => dText(ln, l, t + 14 * i)); }
+function tplButton(txt, x, y, w, fn, o) { const [l, t] = cell(x, y); return dButton(txt, l, t, 8 * w + 8, 28, fn, o); } // (the button fills its cells from their corner, 8 w + 8 by 28 with its cut corners: Battle Speed's OK and You Won's, measured on v20dos-orig-battlespeed and Jake's image0160)
+function tplText(lines, x, y) { const [l, t] = cell(x, y); return lines.map((ln, i) => dText(ln, l, t + 1 + 14 * i)); } // (a row lower than dText's cell: You Won, You Lost (Jake's image0160, 0179), as Player Entry and the alerts)
 function tplPic(name, x, y, w, h) {
   const a = window.HOAPI, im = a.IMG['dos:' + name], [l, t] = cell(x, y); if (!im) return null;
-  const c = a.el('canvas', { class: 'dd-pic', 'aria-hidden': 'true' }); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); // (painted at the item's corner at its own size, not fitted to the item: FUN_2000_2ac4)
-  return dAt(c, l, t, im.width, im.height);
+  const c = a.el('canvas', { class: 'dd-pic', 'aria-hidden': 'true' }); c.width = im.width; c.height = im.height; { const x2 = c.getContext('2d'); x2.fillStyle = '#000'; x2.fillRect(0, 0, c.width, c.height); x2.drawImage(im, 0, 0); } /* (opaque, on black: the extracted sprites keep black as see-through, and the window's white showed through: Jake's image0160, 0161, 0179) */ // (painted at its own size, not fitted to the item: FUN_2000_2ac4)
+  return w == null ? dAt(c, l, t, im.width, im.height) : dAt(c, l + Math.floor((8 * w - im.width) / 2), t + Math.floor((14 * h - im.height) / 2), im.width, im.height); // (centred in the item's cells: You Won's 149 x 151 in 19 x 11 cells, Name a Star's 74 x 74 in 10 x 5: Jake's image0160, 0161, 0179)
 }
 // You Won and You Lost: YouWonDlgBox (21 x 20 cells, 168 x 280) and YouLostDlgBox (21 x 21, 168 x 294), opened by the turn's news (FUN_b000_88b3, alerts 5040 and 5050
 // through FUN_3000_8395) with the window procedure FUN_9000_76c0, which loads picture 5040 or 5050 and paints it in item 999 (cell 0, 0, 19 x 11); the words, item 100, at

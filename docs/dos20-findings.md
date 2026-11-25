@@ -109,3 +109,27 @@ dw − 249). Off, or on the title screen and the New Game window, the screen is 
 so turning the setting on or off in Preferences changes it at once. Not for the Windows 3.1 look: WINHO's main window had its own sizing
 frame and maximize box, so Windows could resize it (the remake's Windows desktop is still the fixed 640 x 480; making its window sizable is
 its own job). The Amiga skin does the same (docs/amiga-skin.md).
+
+## Jake's captures put to work (25 Nov 2026)
+
+From Jake's DOSBox captures of 24 Nov (private repo `audit/dos-2.0.1/captures/image0001-0190`), each window placed and compared pixel by pixel:
+
+- **The alert box** (js/skins/dos/ui.js `alertDos`), measured on seven: its size follows its words (40-column wrap, the box 6 cells wider than the
+  longest line or as wide as its buttons need, lines + 8 rows with the mascot, + 6 without), placed by placeDos's rule; the buttons all as wide as the
+  widest (a one-word label padded a space each side), spaced evenly from cell 11 (1 without the mascot) to 4 cells from the right; the first button
+  has the thick border (the focus: Cancel in a question, a lone OK); no focus mark; straight quotes; an underlined letter only on Revert. The
+  box without the mascot (MsgBox: "Sorry, you can only send ten messages per turn.") is grey (`T.plainAlert`; it had been a toast). The End Turn
+  question with colonies short is the program's box 5060 ("Warning! You are not spending enough money...", Cancel / Let 'em Die). Every DOS
+  question puts Cancel first (the Yes/No boxes keep Yes, No). All seven within a few pixels (the pointer).
+- **Buttons** everywhere in the DOS look: the program's drawing (a black edge with its corners cut, two white lines top and left, two of #8a8a8a
+  bottom and right, the default's edge 2 pixels), the label on whole pixels; a template's button fills its cells from their corner, 8 w + 8 by
+  28 (Battle Speed's OK and You Won's: they had been measured a pixel inside).
+- **You Won, You Lost, Name a Star**: pictures opaque on black (the sprites keep black see-through) and centred in their item's cells; the
+  words a row lower (`tplText`). Within a few hundred pixels (the pointer, the text cursor).
+- **Battles**: the title, names, result and "Round n" in Chicago 12 (they were Geneva 9 Bold), "Round" 3 higher, the names 2 left and 1 up; a planet
+  and a satellite are one 40 x 40 picture (d12757, d12900 + Weapons) at their own size, centred on the words, 3 above the row (fitted with no pixel
+  off); "You have no information. / You were destroyed immediately." at the captured place; the bolt of Weapons 9 measured (0, 255, 101), the
+  levels between interpolated by hue.
+- **The screen**: the title bar stays at the program's own 640 (a narrow-screen rule had hidden it); the End Turn button stays beside the report
+  bubble (`afterMsg`) at 245, 33. **Show Skills**: in the names' order, computers Novice.
+- **Not done**: Revert To Saved stays dimmed (the remake saves as it goes); the report bubble's step and sounds (the two audit gaps).

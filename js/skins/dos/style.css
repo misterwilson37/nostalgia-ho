@@ -190,7 +190,7 @@ html.dosframe #panel .dosbudget h3.dosstrip::after { content: ""; position: abso
 
 /* the reports' cards: the End Turn button keeps the map's top-left corner (the program's), the cards stand at the map's foot, never wider than the map */
 html.dosframe #msg { position: absolute; inset: 0; left: 0; top: 0; bottom: 0; max-width: none; display: block; pointer-events: none; }
-html.dosframe #msg .clock { position: absolute; left: calc(4 * var(--du)); top: calc(4 * var(--du)); pointer-events: auto; }
+html.dosframe #msg .clock { position: absolute; left: calc(3 * var(--du)); top: calc(2 * var(--du)); pointer-events: auto; } /* (at 245, 33 of the screen: Jake's image0015, 0182) */
 html.dosframe #msg .card { position: absolute; left: calc(4 * var(--du)); bottom: calc(4 * var(--du)); max-width: calc(380 * var(--du)); pointer-events: auto; }
 
 /* the program's window frame: five pixels, light on the top and left, dark at the bottom and right (an 11 x 11 picture cut in nine, drawn over the box) */
@@ -315,3 +315,16 @@ html:not(.os-win31) .dd-vs .a.d::after { background-image: url("data:image/svg+x
 /* the frame grown to the window (a modern convenience, html.dosgrow, setUnit): the same scale, the left column the program's, the map the rest */
 html.dosframe.dosgrow #app { left: 0; top: 0; margin: 0; width: calc(var(--dw) * var(--du)); height: calc(var(--dh) * var(--du)); }
 html.dosframe.dosgrow #main { height: calc((var(--dh) - 28) * var(--du)); }
+/* the program's alert without the mascot (MsgBox: "Sorry, you can only send ten messages per turn.", Jake's image0190): grey inside its frame */
+.dd.dd-alert.plain { background: #aaa; }
+/* The program's button, as every captured window draws it (Player Entry, the alerts: Jake's image0056, 0084, 0159; v20dos-orig-playerentry): a black edge with
+   its four corner pixels cut, two white lines inside at the top and left, the grey face, two of #8a8a8a at the bottom and right; the default button's edge
+   two pixels (the first of a question's buttons). */
+.dd .dd-btn { border: calc(1 * var(--du)) solid #000 !important; box-shadow: inset calc(2 * var(--du)) calc(2 * var(--du)) 0 #fff, inset calc(-2 * var(--du)) calc(-2 * var(--du)) 0 #8a8a8a !important;
+  clip-path: polygon(calc(1 * var(--du)) 0, calc(100% - 1 * var(--du)) 0, 100% calc(1 * var(--du)), 100% calc(100% - 1 * var(--du)), calc(100% - 1 * var(--du)) 100%, calc(1 * var(--du)) 100%, 0 calc(100% - 1 * var(--du)), 0 calc(1 * var(--du))); }
+.dd .dd-btn.def { border-width: calc(2 * var(--du)) !important; }
+.dd .dd-btn:active { box-shadow: inset calc(2 * var(--du)) calc(2 * var(--du)) 0 #8a8a8a !important; }
+/* (the program draws no focus mark on an alert's buttons: Jake's captures) */
+.dd-alert .dd-btn:focus-visible { outline: none !important; }
+/* the program's title bar stays at every width: the page's narrow-screen rule (max-width 760px: #title none) hid it at the program's own 640 (found against Jake's captures) */
+html.dosframe #menubar #title { display: block; }
