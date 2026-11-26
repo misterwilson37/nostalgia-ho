@@ -22,6 +22,8 @@ let SOME = false; // the Budget Window's "all" / "some" (p. 15)
 let BTOP = 0, FTOP = 0; // the Budget Window's and the Planet Window's fleet list's scroll
 let HELP = 'This is the help window. Move the mouse on top of something to learn about it.'; // (p. 7, as the figure has it)
 
+// where the manual came from (js/ui-text.js has it in every language)
+const SOURCE = 'Its manual was provided by PC Games Vault (pcgamesvault.com).';
 window.HOMAC10_BUILD = (K) => {
   const { A, G, H } = K;
   // 1.0 was English only: its own windows and dialogs show in an English game; in another language the 1.2 skin's (its French, 1.2F's own
@@ -536,6 +538,8 @@ window.HOMAC10_BUILD = (K) => {
     page(doc) {
       const c = doc.querySelector('#titlescreen .credit');
       if (c) c.textContent = 'In the look of Spaceward Ho! 1.0 for the Macintosh (Delta Tao Software, 1990: written by Peter Commons), redrawn from its manual, the only part of it known to survive. The picture is the manual’s cover.';
+      // (Jake, 26 Nov 2026: the manual came from PC Games Vault, as the Mac 2.0.1 disks did; credited wherever its figures or words are used)
+      if (c && !doc.querySelector('#titlescreen .credit-src')) { const t = doc.createElement('p'); t.className = 'credit credit-src'; t.textContent = SOURCE; c.after(t); }
       const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 1.0';
     },
     // a new game in this skin: English, 1.0's only language, unless the player picks another

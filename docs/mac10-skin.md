@@ -2,7 +2,8 @@
 
 Spaceward Ho! 1.0 for the Macintosh (Delta Tao Software, 1990; on sale by April 1991) was the first version. No copy of the program
 is known, so nothing of it can be extracted or decompiled. What survives is its **manual** (44 pages, "Copyright © 1990, Delta Tao
-Software, Inc."), whose screen shots are the only record of how 1.0 looked. This skin is drawn from them. The scans are in the private
+Software, Inc."), whose screen shots are the only record of how 1.0 looked. This skin is drawn from them. **The manual was provided by PC Games Vault (pcgamesvault.com)**, who also gave the project its Mac 2.0.1 disks;
+the skin's title screen says so, and anything else that uses its figures or words should too. The scans are in the private
 repo (`originals/mac-1.0-manual/`); nothing from them is committed here except what the skin redraws.
 
 That it is 1.0's manual: it is dated 1990, the year before 1.2 (1992); System 7 "isn't generally available as this is being written";
@@ -37,7 +38,7 @@ prints, so a pixel or two either way is within what they can tell.
 | Your colony | p. 8 (Canopus): the planet in the cowboy hat; "Your colonies are the planets that look like good guys" | `m10colony`: the figure reduced to 32 x 32 (`tools/skins/mac10_icons.py`) |
 | Explored star | p. 10 (Adhara): a round planet, lighter at its top left | `m10explored`, drawn by rule from the figure |
 | Unexplored star | p. 11 (Mizar): a white rim, a dotted band, "?" | `m10unexplored`, drawn by rule; also for a star a fleet of yours is heading to (1.2 had its own picture for that; 1.0's isn't shown) |
-| Enemy star | p. 11 (Merak): the bandit in the black hat; "Any planet you lose a battle at becomes an enemy planet"; "Enemy planets look like a wide variety of bad guys" | `m10enemy`, the figure reduced; the manual shows one bad guy, so every rival's star and every star where a battle was seen wears it |
+| Enemy star | p. 11 (Merak): the bandit in the black hat (a flat crown and wide brim); "Any planet you lose a battle at becomes an enemy planet"; "Enemy planets look like a wide variety of bad guys" | `m10enemy`: the figure reduced, then (Jake, 26 Nov) a bowler in place of the printed hat, everything under the brim as printed; the printed one is kept as `m10enemy-flat`. The manual shows one bad guy, so every rival's star and every star where a battle was seen wears it |
 | Selected star | p. 9 (Nasl, "looks funny because it is selected"): its inside light where Mizar's is dark | the icon inverted inside its outline (`-sel`) |
 | Fleet there | p. 10 (Adhara): "Any planet with a dot next to it has at least one fleet there": a small dotted square at the top right | `m10fleet`, 5 x 5, 13 right and 21 up of the star's middle |
 | Satellites | p. 8: "it will have a circle around it" | a white circle round the icon (its size is a guess: no figure shows one) |
@@ -56,6 +57,43 @@ prints, so a pixel or two either way is within what they can tell.
 | Compare Players | pp. 36-37, figure 460 x 281 | "Item" / "Rank": the five technologies, stars, income, ship power with "1st (tied)" and so on, the time limit, "There are currently N players in the game" (players out not counted, p. 36) |
 | Dialog frame | pp. 21-37 | a 1-pixel black line, 2 white, 2 black, no title bar |
 | Title | the cover | the manual's cover, 384 wide in 1 bit (1.0's own start-up picture isn't known) |
+
+## What the manual says about 1.0's rules (26 November 2026)
+
+Read against the 1.2 rules (`js/rules-12.js` on `js/rules-dos.js`, `docs/12-findings.md`). The manual describes play rather than
+formulas, so these are what a 1.0 ruleset could rest on; nothing here is built.
+
+**Stated plainly, and different from 1.2:**
+
+| 1.0 (manual) | 1.2 | Page |
+|---|---|---|
+| New Galaxy has choices: 1-10 human players, 0-10 computers, 32-109 stars (60 shown), Spiral / Circle / Random, Normal / Fast, Dumb / Average / Smart, a turn limit (10 minutes, 24 hours, 24 hours on weekdays, never) | no choices: a small (21-32 star) Circle, one Average computer | 33-35 |
+| a Fast game: each planet makes much more money and homes start with more metal; "you can often initially colonize five or more planets" | no Fast game | 34-35 |
+| new players may join until two turns have been processed | humans join only in 2000 | 33 |
+| the home planet makes "about $20,000 per turn" (the figures: Canopus $20,370 in 2020) | about $30,000 (`homeInc: 30000`; the remake's 1.2 game shows $30,664) | 24, 17 |
+| a colony costs "a base of $7,500" to support | a new colony is given a $15,000 share | 24 |
+| a planet over 2.0 G or under 0.5 G "will never be able to make a profit" (twice the home's gravity) | the line is 2.56 times the home's gravity | 8, 23, 42 |
+| the build queue is a list of any length (four ships in the figure) and can loop (Loop Queue) | three slots of one design each | 20-21 |
+| a scout is any design whose name begins with "Scout"; "Scouts in New Fleets" puts each in a fleet of its own; fighters join a fleet holding their type | Fighters and Satellites join an idle fleet of their type | 29, 40 |
+| fleets hold any mix of ships (Organize Fleets moves ships between fleets freely; the figure has a fighter fleet beside another) | one design a fleet | 22-23 |
+| no end: "If you've killed off everyone else, you've probably won ... keep playing" | the last player standing wins, with a message | 5 |
+| options 1.2 hasn't got: Turn Always Done, I'll Update Turns, Spend On New Stars (enough money to a new colony, automatically), Graphic Battles off (battles as text in the Report Window) | | 38-40 |
+| the budget bars are linear only ("0 all 100"); no Lin / Log switch | Lin / Log | 14 |
+
+**Stated, and the same as 1.2:** years go by ten a turn; a home world of 72° and 1.00 G with 500,000 people (501,053 in the 2020 figure);
+technology starts at Range 6, Speed 2, Weapons 2, Defense 2, Mini 0; the budget starts 85 % home, 15 % Tech (p. 15); Range is fuel, refilled at
+a colony held for a turn; Speed is spaces a turn ("speed 3 ... five spaces ... in only two turns"); a satellite has no Speed or Range;
+the first ship of a type costs twice the rest ("Development Cost": Satellite $2296 (D) then $1148 (P), the 1.2 rule at Mini 0); 75 % of the
+metal back for scrapping; ten colonists a colony ship ("The population there is now 10"); colony ships are shot first; money not spent is
+saved; metal of destroyed ships is gone; a colony left without money is evacuated, its satellites staying.
+
+**Hints only:** the ship costs in the figure don't all fit 1.2's formula (a Satellite at $1148 is $10 off 1.2's price at Weapons 3 /
+Shields 3, and the design isn't known); the Glossary's "a Range 6 ship can go out 5 and be stuck" contradicts p. 26's "go 6 spaces"; Compare
+Players ranks the same five technologies, stars, income and ship power as 1.2.
+
+So a "1.0 rules" ruleset is possible in outline: 1.2's rules with the New Galaxy choices back, a Fast speed, $20,000 homes, $7,500 support,
+the 2.0 G line, longer looping queues, name-based scouts, mixed fleets and no winner. Its numbers (how much more a Fast planet makes, how
+support grows with distance, the costs) the manual doesn't give, and those would be guesses.
 
 ## Not built
 
