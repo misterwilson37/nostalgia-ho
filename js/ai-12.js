@@ -255,7 +255,7 @@ function fillInStarStatus(C) {
     const k = know(G, p, s.id), x = rs.x12(G, p, s.id);
     if (!k.explored) cls[s.id] = x.by >= 2000 ? 3 : 0;
     else if (s.owner === p.id) {
-      if ((s.oInc || 0) < 0) cls[s.id] = E.RULESETS.original.hab(p, s).gR > 256 ? 8 : 9;
+      if ((s.oInc || 0) < 0) cls[s.id] = E.RULESETS.original.hab(p, s).gR > (rs.grLimit ? rs.grLimit(G) : 256) ? 8 : 9; // (rs.grLimit: the Mac 1.0 reconstruction's line)
       else cls[s.id] = 10;
     } else cls[s.id] = k.owner >= 0 && k.owner !== p.id ? 4 : 2;
   }
@@ -375,7 +375,7 @@ function starQuality(C, sid) {
   const gR = hg > g ? trunc(100 * hg / Math.max(1, g)) : trunc(100 * g / Math.max(1, hg));
   const dT = Math.abs(Math.round(p.homeT * 10) - Math.round(k.t * 10));
   let q = 0;
-  if (gR <= 256) {
+  if (gR <= (E.rules(G).grLimit ? E.rules(G).grLimit(G) : 256)) { // (rs.grLimit: the Mac 1.0 reconstruction's line)
     const gi = trunc(gR / 10) - 10, ti = trunc(dT / 330);
     q = trunc(Math.max(23, 100 - gi * (gi + 1)) * Math.max(40, 100 - ti * (ti + 1)) / 527) + 2;
   }

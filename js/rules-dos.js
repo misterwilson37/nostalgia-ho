@@ -137,7 +137,8 @@ function makeGalaxy(G, opts, nPlayers) {
   const shape = SHAPES.includes(opts.shape) ? opts.shape : 'random';
   const size = sizeKey(opts.size);
   const sparse = opts.density === 'sparse' || (typeof opts.density === 'number' && opts.density >= 50);
-  const n = shape === 'grid' ? GRID_COUNT[size] : size === 'huge' ? RI(G, 101, 190) : RI(G, 1, COUNT[size][1]) + COUNT[size][0];
+  // (opts.starCount: a number of stars asked for, the Mac 1.0 reconstruction's 32 to 109; no other ruleset sets it)
+  const n = opts.starCount > 0 ? clamp(opts.starCount | 0, 8, 190) : shape === 'grid' ? GRID_COUNT[size] : size === 'huge' ? RI(G, 101, 190) : RI(G, 1, COUNT[size][1]) + COUNT[size][0];
   // CONFIRMED (Create Galaxy dialog, shape routines): Dense step 4 / cap 35,
   // Sparse step 6 / cap 49 for rings; grid spacing 4 or 6 ly
   const step = sparse ? 6 : 4, cap = sparse ? 49 : 35;
@@ -414,6 +415,7 @@ function shipyard(G, p, s, M, shipMoney) { // shipMoney: 2.0's per-mille share o
       addShipsToStar(G, p.id, s.id, d, 1);
       built[d.id] = (built[d.id] || 0) + 1;
       if (--it.n <= 0) q.shift();
+      if (s.loopQueue && E.rules(G).loopQueue) q.push({ did: d.id, n: 1 }); // (the Mac 1.0 reconstruction's Loop Queue: what is built goes back on the end)
     } else {
       const fm = trunc(S * 100 / c.money), fx = trunc(p.metal * 100 / Math.max(1, c.metal));
       if (S < c.money && fm < fx) { s.yard = S; S = 0; s.yardMetal = trunc(fm * c.metal / 100); }
@@ -466,16 +468,20 @@ function research(G, p, T) {
 
 // ---------- pass 2: savings, interest, meteors, growth, income (FUN_1040_27ee) ----------
 // CONFIRMED (FUN_1040_27ee): ln of the integer square root
-function incomeU(u, H) {
+function incomeU(u, H, div = 76) {
   const r = isqrt(u), mult = r > 0 ? Math.max(1, Math.log(r)) : 1;
-  return trunc(mult * u / 76) - trunc((H / 40 + 100) * u / 10000 + 7500);
+  return trunc(mult * u / div) - trunc((H / 40 + 100) * u / 10000 + 7500);
 }
-function planetIncome(G, p, s) { return incomeU(popU(s), hab(p, s).H); }
+// a ruleset built on this one may change the 76 (rs.incomeDiv(G): the Mac 1.0 reconstruction, js/rules-10.js) and with it the gravity ratio
+// past which a colony can never pay (rs.grLimit(G); 2.0's 2.56); every ruleset that doesn't set them plays as before
+const IDIV = (G) => { const r = E.rules(G); return r.incomeDiv ? r.incomeDiv(G) : 76; };
+const GRL = (G) => { const r = E.rules(G); return r.grLimit ? r.grLimit(G) : 256; };
+function planetIncome(G, p, s) { return incomeU(popU(s), hab(p, s).H, IDIV(G)); }
 // (No longer used: 2.0 and Mac 1.2 both use pass2_20 below.)
 function afterMovement(G, p) {
   // CONFIRMED (1040:284f-2995): kept money plus refunds earns 10 x isqrt of itself; no borrowing
   const saved = (p.oKept || 0) + (p.oRefund || 0);
-  const interest = 10 * isqrt(saved);
+  const interest = E.rules(G).noInterest ? 0 : 10 * isqrt(saved); // (rs.noInterest: the Mac 1.0 reconstruction)
   let M = saved + interest;
   p.oKept = 0; p.oRefund = 0;
   meteors(G, p);
@@ -495,7 +501,7 @@ function afterMovement(G, p) {
       if (u + add >= mx) msg(G, p.id, `${s.name}’s population growth rate has slowed.`, { icon: 'm9030', star: s.id, quiet: true });
     }
     u += add; setPopU(s, u);
-    const inc = incomeU(u, hab(p, s).H);
+    const inc = incomeU(u, hab(p, s).H, IDIV(G));
     s.oInc = inc;
     if (inc > 0) { M += inc; gross += inc; } // a losing colony is paid from its own share
     net += inc;
@@ -556,7 +562,7 @@ function settle(G, p, s, f) {
   f.colonists = 0;
   s.owner = p.id; setPopU(s, n); s.everProfit = false; s._warned = false;
   s.oInc = -7501; s.oSink = 0; s.oStarve = false; s.oNew = true;
-  s.terra = hab(p, s).gR > 256 ? 0 : 0.9; s.ship = 0;
+  s.terra = hab(p, s).gR > GRL(G) ? 0 : 0.9; s.ship = 0;
   s.queue = []; s.yard = 0; s.yardMetal = 0;
   p.budget.col[s.id] = 0;
   (p.colOrder || (p.colOrder = [])).unshift(s.id); // its slot goes in front (colOrder)
@@ -599,6 +605,7 @@ function battle(G, sid, hooks) {
   }
   for (const o of ownerIds) for (const e of army[o]) { e.n0 = e.n; for (let i = 0; i < e.n; i++) { e.alive.push(rec.start.length); rec.start.push({ o, t: e.d.type, did: e.d.id }); } }
   const planet = planetOwner >= 0 ? { planet: true, o: planetOwner, hp: popU(s), W: G.players[planetOwner].tech.weapons } : null;
+  const speedless = !!E.rules(G).speedlessBattles; // (rs.speedlessBattles: the Mac 1.0 reconstruction, where Speed doesn't decide who fires first)
   let debris = 0, lastRounds = 0;
   const hasShips = (o) => army[o].some(e => e.n > 0);
   const standing = (o) => hasShips(o) || (planet && o === planetOwner && planet.hp > 0);
@@ -618,7 +625,7 @@ function battle(G, sid, hooks) {
       if (e.n <= 0) continue;
       const ids = e.alive.slice(0, e.n), size = g > 0 && army[o].filter(x => x.n > 0).length < 5 ? g : e.n;
       for (let i = 0; i < ids.length && U.length < 20; i += size)
-        U.push({ o, e, type: e.d.type, init: e.d.V, W: e.d.W, S: e.d.S, hp: e.c.hp, debris: trunc(e.c.metal / 5), dmg: 0, idx: ids.slice(i, i + size), n: Math.min(size, ids.length - i) });
+        U.push({ o, e, type: e.d.type, init: speedless ? 1 : e.d.V, W: e.d.W, S: e.d.S, hp: e.c.hp, debris: trunc(e.c.metal / 5), dmg: 0, idx: ids.slice(i, i + size), n: Math.min(size, ids.length - i) });
     }
     if (defending && planet && o === planetOwner && planet.hp > 0) U.push({ o, planet: true, init: 0, W: planet.W, S: planet.W, hp: planet.hp, n: 1, idx: [] });
     return U;
@@ -848,7 +855,7 @@ function checkElimination(G) {
       }
     } else { p.alive = false; p.dying = false; }
   }
-  if (!G.over && G.year + 10 > 2009 && G.players.length > 1) {
+  if (!G.over && !E.rules(G).noWinner && G.year + 10 > 2009 && G.players.length > 1) { // (rs.noWinner: the Mac 1.0 reconstruction, which names no winner)
     const standing = G.players.filter(p => p.alive && !p.dying);
     if (standing.length === 1) {
       G.over = true; G.winner = standing[0].id;
@@ -1071,7 +1078,7 @@ function terraMine20(G, p, s, M) {
       const ex = got - have;
       p.oRefund += trunc((ex * ex + 224) / 225);
       got = have; X = -1;
-      msg(G, p.id, h.gR > 256 ? `${s.name} has run out of metal. You should probably abandon it.` : `${s.name} has run out of metal.`, { icon: 'm9001', star: s.id });
+      msg(G, p.id, h.gR > GRL(G) ? `${s.name} has run out of metal. You should probably abandon it.` : `${s.name} has run out of metal.`, { icon: 'm9001', star: s.id });
     }
     s.metal -= got; p.metal += got;
   }
@@ -1544,7 +1551,7 @@ function income20(G, p) {
   sync20(G, p, true);
   const share = shareOf20(G, p);
   const saved = share('sav') + (p.oRefund || 0);
-  const interest = 10 * isqrt(saved);
+  const interest = E.rules(G).noInterest ? 0 : 10 * isqrt(saved); // (rs.noInterest: the Mac 1.0 reconstruction)
   let M = saved + interest, gross = 0, net = 0;
   p.oRefund = 0; p.oKept = 0;
   for (const sid of slots20(G, p).slice()) {
@@ -1579,13 +1586,13 @@ function income20(G, p) {
       if (u + add >= mx) msg(G, p.id, `${s.name}’s population growth rate has slowed.`, { icon: 'm9030', star: s.id, quiet: true });
     }
     u += add; setPopU(s, u);
-    const h = hab(p, s), inc = incomeU(u, h.H);
+    const h = hab(p, s), inc = incomeU(u, h.H, IDIV(G));
     s.oInc = inc;
     if (inc > 0) { M += inc; gross += inc; }
     net += inc;
     if (before < 0 && inc >= 0) { s.everProfit = true; msg(G, p.id, `${s.name} has just become a profitable colony.`, { icon: 'm9000', sound: 2000, star: s.id }); }
     if (before <= -7500 && inc > -7500) msg(G, p.id, `It’s a baby boom! The population at ${s.name} has started growing quickly.`, { icon: 'm9023', star: s.id });
-    s.cls20 = inc >= 0 ? 0 : h.gR > 256 ? 2 : 1;
+    s.cls20 = inc >= 0 ? 0 : h.gR > GRL(G) ? 2 : 1;
   }
   p.savings = M;
   p.oInterest = interest; p.oInc = gross;

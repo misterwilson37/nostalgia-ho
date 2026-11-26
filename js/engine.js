@@ -2179,6 +2179,7 @@ if (typeof module !== 'undefined') {
   require('./rules-405.js'); require('./ai-405.js');
   require('./rules-301.js'); require('./ai-301.js');
   require('./rules-12.js'); require('./ai-12.js');
+  require('./rules-10.js'); // (the Mac 1.0 reconstruction, on 1.2's rules and computer players)
   require('./rules-palm.js'); require('./ai-palm.js');
   require('./rules-ios.js');
   require('./rules-android.js');

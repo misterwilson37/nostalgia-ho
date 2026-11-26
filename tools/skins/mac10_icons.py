@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-"""The Mac 1.0 skin's map pictures (assets/skins/mac10/sprites), redrawn from the 1990 manual.
+"""The Mac 1.0 skin's map pictures (assets/skins/mac10/sprites), from the 1990 manual.
 
-No copy of Spaceward Ho! 1.0 (1990) is known, so its icons can't be extracted. Its manual (Delta Tao, 1990; scans in the
-private repo, originals/mac-1.0-manual) prints the four kinds of star on pages 8-11 and a Star Map on page 9. Every figure
-there is printed at about 1.67 times the Mac's pixels (the star names under the icons are Geneva 9: 58, 50, 45 and 42
-printed pixels for Canopus, Adhara, Merak and Mizar against Geneva 9's 35, 30, 27 and 25; a menu item, 16 pixels, is 27.5
-printed), so each icon is a 32 x 32 icon whose picture is 22 to 31 pixels across.
+No copy of Spaceward Ho! 1.0 (1990) is known, so its icons can't be extracted. Its manual (Delta Tao, 1990, provided by PC Games
+Vault, pcgamesvault.com; Jake's 300 dpi scans in the private repo, originals/mac-1.0-manual/scans-300dpi) prints the four kinds of star
+on pages 8-11 and a Star Map on page 9. At 300 dpi a Mac pixel is 8.3 to 8.4 scan pixels, sharp enough to read every one: each
+figure was fitted (tools/skins/mac10_scan_grid.py) with a pixel grid (its pitch and offset chosen to make the cells most black-or-white; every fit scored 0.497 to
+0.500 of 0.5) and each cell's middle sampled. The grids below are that output, cropped to the picture:
 
-- unexplored (Mizar, p. 11) and explored (Adhara, p. 10): round, drawn here by rule from what the scans show: a white rim,
-  a black ring, then a dotted band round a black middle with a white "?" (unexplored), or a planet shaded lighter at its
-  top left (explored);
-- colony (Canopus, p. 8: the cowboy hat on the planet) and enemy (Merak, p. 11: the bandit in the black hat): the printed
-  figure reduced to 32 x 32 by area and thresholded (tools: box filter at 1/1.67, white above 118 of 255), then kept as
-  it came out; the grids below are that output. The bad guy then got a bowler in place of the printed flat-crowned hat at Jake's
-  request (26 Nov 2026): ENEMY; the printed one is ENEMY_FLAT (m10enemy-flat).
-- selected (Nasl, p. 9, "looks funny because it is selected"): the same icon with what is inside its outline inverted
-  (Nasl's middle is light where Mizar's is dark); the outline stays white.
-- the fleet dot (Adhara, p. 10: "Any planet with a dot next to it has at least one fleet there"): a 5 x 5 dotted square
-  above the icon's top right.
+- COLONY (Canopus, p. 8: the cowboy hat on the planet), EXPLORED (Adhara, p. 10), ENEMY (Merak, p. 11: the bandit): their own
+  figures; UNEXPLORED: Mizar on the Star Map (p. 9; its p. 11 figure gives the same 22 x 23 picture);
+- selected (Nasl, p. 9, which "looks funny because it is selected"): Nasl is Mizar with every pixel inside the picture's outline
+  inverted, the outline too (the Finder's selected icon), so its outer ring goes black; its name is drawn bold (the map's code);
+- the fleet dot (Adhara, p. 10): a 5 x 5 checkerboard, its top left 16 right of the planet's middle and 20 above it.
 
-Outside each icon's outline is transparent; inside it is black, as on the black map.
-The title picture (cover.png) is the manual's cover, 384 wide in 1 bit, from the scan of its first page (pdfimages -png on the
-private repo's PDF gives it as the first image); without that argument the cover already in the folder is kept.
-Run: python3 -I tools/skins/mac10_icons.py [cover page scan]  (writes assets/skins/mac10/sprites/*.png and the manifest)
+The bad guys. The manual shows one ("Enemy planets look like a wide variety of bad guys", p. 11) and 1.0 took 10 players, so at
+most nine rivals: BAD[0] is the manual's bandit in a bowler (Jake, 26 Nov 2026: "try a bowler hat instead of flat hat"), BAD[1] the
+manual's bandit as printed; BAD[2] to BAD[8] are the remake's own (GUESS: drawn here, not in the manual), the same head and body with
+another hat (top hat, Stetson, sombrero) or another face (a handlebar moustache, an outlaw's bandana, an eye patch, stubble).
+They are handed out in that order, the manual's first.
+
+Each picture sits in the middle of a 32 x 32 icon; outside its outline is transparent, inside black, as on the black map.
+The title picture (cover.png) is the manual's cover, 384 wide in 1 bit (Floyd-Steinberg), from the 300 dpi scan of the cover.
+Run: python3 -I tools/skins/mac10_icons.py [cover scan]  (writes assets/skins/mac10/sprites/*.png and the manifest; without the
+argument the cover already there is kept)
 """
 import json, os, sys
 from PIL import Image
@@ -31,220 +31,251 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, '..', '..', 'assets', 'skins', 'mac10')
 
 COLONY = """
-................................
-.............#####..............
-..........####..###.............
-........###....#.###............
-.......##...#####..##...........
-.......##.########..######......
-.......#.###..#####.#######.....
-.....###.#####.#####.###..##....
-...###...#..########..###..##...
-...##..####...#######.####..#...
-..###.#######...####..####..#...
-..#..##########......#.####.#...
-..#.#############.####.####.#...
-..#.#############..########.#...
-..#.###############....####.#...
-..#..#######.....####..###.##...
-..##.####.........####.###.##...
-...##..#......#.....#####..#....
-....##....#.#....#........##....
-.....##..##....#........#.##....
-......##.###.#......#####.#.....
-.......#.####.#.#..######.#.....
-.......#.###...##.#######.#.....
-.......##.#####.########.##.....
-........#..#.###.#.####..#......
-........##..#####.#.#..###......
-.........##..###.#.....###......
-..........##..........##........
-...........###......###.........
-...........############.........
-................................
-................................
+...........#####...........
+........####...##..........
+......###....#..##.........
+.....##...#####..##........
+.....#..########..######...
+.....#.###...####......##..
+...###.#####.#####.###..##.
+..##......########..###..##
+.##..####...#######.####..#
+##..#######...####...####.#
+#..##########......#.####.#
+#.#############.####..###.#
+#.#############...###.###.#
+#.###############.....###.#
+#..#######......###..###..#
+##..###...........##..##.##
+.##..#......#......####..#.
+..##....#.#....#........##.
+...##..##....#........#.#..
+....##.#.#.#.......####.#..
+.....#.####.#.#..######.#..
+.....#..##.#.#..#.####..#..
+.....##.#####.#.####.#.##..
+......#..#.#.#.#.#.##..#...
+......##..#####.#.#...##...
+.......##..#.#.#.....##....
+........##..........##.....
+.........###......###......
+...........########........
 """
 
-ENEMY_FLAT = """
-................................
-................................
-................................
-........###############.........
-........#.............##........
-.......##..............##.......
-.......##..............##.......
-......##................##......
-......##................##......
-......#.################.#......
-#######.################.######.
-#.............................#.
-#.............................#.
-#######..#.#.............######.
-......#.##....#.......##.#......
-......#.#.#.#.......####.#......
-......#.####.#.#..######.#......
-......#..####.#.##.##.#..#......
-......##.##........####.##......
-.......#......##........#.......
-.......##..###.###.#..###.......
-........##..#.#...#...##........
-......####............###.......
-.....##.................###.....
-.....#......##..###.......#.....
-.....#......##..###.......#.....
-.....#......###.###......##.....
-.....#####...##.##...######.....
-.........#############..........
-................................
-................................
-................................
+EXPLORED = """
+.......#########.......
+.....###.......###.....
+....##...#####...##....
+...##..##.##.###..##...
+..##..#.#########..##..
+.##..#.#.##.##.###..##.
+.#..#.####.######.#..#.
+##.#.#.#.###.#.#####.##
+#....##.##.#####.###..#
+#.#.#..#.####.####.##.#
+#.....#.##.#.##.#####.#
+#.#.#.....#.######.##.#
+#..#...#.#.#.#.#.####.#
+#...#.....#.###.####..#
+##.#.#.#.#.#.#.##.##.##
+.#..#.#.......#.###..#.
+.##..###.#.#.#...#..##.
+..##..#.#.....#.#..##..
+...##..###.#.#.#..##...
+....##....#.#....##....
+.....###.......###.....
+.......#########.......
 """
 
-# the bad guy in a bowler (Jake, 26 Nov 2026: "try a bowler hat instead of flat hat"): the manual's figure from the brim down, the hat
-# redrawn as a dome with a short brim turned up at its tips; ENEMY_FLAT above is the figure as printed (m10enemy-flat)
+UNEXPLORED = """
+......##########......
+....###........###....
+...##...#.##.#...##...
+..##..##.#.##.##..##..
+.##..#..........#..##.
+.#..#.#..........#..#.
+##.#.#..######..#.#.##
+#..###..######..###..#
+#.#.#...##..##...#.#.#
+#..#....##..##....#..#
+#.##.#......##....##.#
+#.#.#.....####..#..#.#
+#.##......##......##.#
+#..##.#...##.....##..#
+#.#.#..........#.#.#.#
+#..###....##.....##..#
+##.#..#...##...##.#.##
+.#..##.#.....#..##..#.
+.##..#........#.#..##.
+..##..###.#.#.##..##..
+...##...##.#.#...##...
+....###........###....
+......##########......
+"""
+
 ENEMY = """
-................................
-................................
-............########............
-..........##........##..........
-........##............##........
-........#..............#........
-.......##..............##.......
-.......#................#.......
-......##................##......
-...#..#.################.#..#...
-...####.################.####...
-...#........................#...
-...####..................####...
-......#..#.#.............#......
-......#.##....#.......##.#......
-......#.#.#.#.......####.#......
-......#.####.#.#..######.#......
-......#..####.#.##.##.#..#......
-......##.##........####.##......
-.......#......##........#.......
-.......##..###.###.#..###.......
-........##..#.#...#...##........
-......####............###.......
-.....##.................###.....
-.....#......##..###.......#.....
-.....#......##..###.......#.....
-.....#......###.###......##.....
-.....#####...##.##...######.....
-.........#############..........
-................................
-................................
-................................
+........################.......
+........#..............#.......
+.......##..............##......
+.......#................#......
+......##................##.....
+......#..................#.....
+......#.################.#.....
+#######.################.######
+#.............................#
+#.............................#
+#######..#.#....#........######
+......#.##....#........#.#.....
+......#.#.#.#.......####.#.....
+......#.####.#.#..######.#.....
+......#..####.#..#.##.#..#.....
+......##.##.........###.##.....
+.......#......###.......#......
+.......##..###.#.#.#...##......
+........##..#.#.#.#...##.......
+......####............###......
+.....##.................###....
+.....#......##...##.......#....
+.....#......##...##.......#....
+.....#......###.###.......#....
+.....#####...##.##...######....
+.........#############.........
 """
 
-QMARK = """
-.#####.
-##...##
-##...##
-....##.
-...##..
-...##..
-...##..
-.......
-...##..
-...##..
-"""
+E = ENEMY.strip('\n').split('\n')  # 31 x 26
+R10 = '......#..#.#....#........#.....'  # (the manual's row under the hat, from the head's sides in)
+def H(*rows): return list(rows)
+HATS = {
+ 'flat': E[:11],  # the manual's own hat
+ 'bowler': H('............########...........',
+             '..........##........##.........',
+             '........##............##.......',
+             '.......##..............##......',
+             '......#..................#.....',
+             '......#..................#.....',
+             '..#...#.################.#...#.',
+             '..#####.################.#####.',
+             '..#..........................#.',
+             '...####..................####..', R10),
+ 'tophat': H('.........##############........',
+             '.........#............#........',
+             '.........#............#........',
+             '.........#............#........',
+             '.........#............#........',
+             '.........##############........',
+             '.........##############........',
+             '...#########################...',
+             '...#.......................#...',
+             '....###..................##....', R10),
+ 'stetson': H('...........###...###...........',
+              '..........#...#.#...#..........',
+              '.........#.....#.....#.........',
+              '.........#...........#.........',
+              '........#.............#........',
+              '........#.............#........',
+              '.#......###############......#.',
+              '.##.....###############.....##.',
+              '..#######.............#######..',
+              '......#..................#.....', R10),
+ 'sombrero': H('..............###..............',
+               '.............#...#.............',
+               '............#.....#............',
+               '...........#.......#...........',
+               '..........#.........#..........',
+               '.........#.#.#.#.#.#.#.........',
+               '........#.#.#.#.#.#.#.#........',
+               '###############################',
+               '#.............................#',
+               '.######..................#####.', R10),
+}
+def face(kind):
+    f = [list(r) for r in E[11:]]  # rows 11..25 -> index 0..14
+    def put(r, cols, v='#'):
+        for c in cols: f[r][c] = v
+    if kind == 'stache':   # a handlebar moustache under the nose
+        for r in (6, 7): put(r, range(8, 24), '.')
+        put(6, [7, 24]); put(7, [7, 8, 23, 24])
+        put(6, range(14, 17)); put(7, range(10, 21)); put(6, [9, 21]); put(7, [9, 21], '.'); put(6, [10, 20])
+    if kind == 'bandana':  # an outlaw's bandana over the nose and mouth, its point at the chin
+        for r in (5, 6, 7):
+            for c in range(8, 24): f[r][c] = '#' if (r + c) % 2 == 0 else '.'
+        put(4, range(8, 24))
+        put(8, [15]); put(8, [14, 16], '.')
+    if kind == 'patch':    # an eye patch over the left eye and its strap
+        for r in (1, 2, 3):
+            for c in range(8, 13): f[r][c] = '.'
+        put(1, range(8, 13)); put(3, range(8, 13)); put(2, [8, 12])
+        put(0, range(7, 25)); put(1, [13, 14])
+    if kind == 'beard':    # stubble round the mouth and down the chin
+        for r in (6, 7):
+            for c in range(9, 23): f[r][c] = '#' if (c % 2 == 0 or r == 7 and c % 2) else '.'
+        for c in range(11, 20): f[8][c] = '#' if c % 2 else '.'
+    return [''.join(r) for r in f]
+# the nine, in the order rivals get them: the manual's bandit first (in Jake's bowler, then as printed), then the remake's own
+NINE = [('bowler', 'plain'), ('flat', 'plain'), ('tophat', 'stache'), ('stetson', 'bandana'), ('sombrero', 'stache'),
+        ('bowler', 'patch'), ('flat', 'beard'), ('tophat', 'bandana'), ('stetson', 'patch')]
+def badguy(h, f):
+    rows = HATS[h][:11] + face(f)
+    assert len(rows) == 26 and all(len(r) == 31 for r in rows), (h, f)
+    return rows
 
-BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
 
-
-def grid(s):
-    rows = [r for r in s.strip('\n').split('\n')]
-    return [[c == '#' for c in r] for r in rows]
-
-
-def round_icon(kind):
+def grid(rows):
+    rows = rows.strip('\n').split('\n') if isinstance(rows, str) else rows
     g = [[False] * 32 for _ in range(32)]
-    inside = [[False] * 32 for _ in range(32)]
-    cx = cy = 15.5
-    for y in range(32):
-        for x in range(32):
-            d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
-            if d > 11.6:
-                continue
-            inside[y][x] = True
-            if d > 10.6:
-                g[y][x] = True  # the white rim
-            elif d > 9.6:
-                g[y][x] = False  # a black ring
-            elif kind == 'unexplored':
-                g[y][x] = d > 7.0 and (x + y) % 2 == 0 and y % 2 == 0  # the dotted band; the middle black
-            else:  # explored: a planet lit from its top left, lighter again at the foot's rim
-                lx, ly = (x - cx) / 9.6, (y - cy) / 9.6
-                v = 0.55 - 0.45 * lx - 0.40 * ly + (0.35 if d > 8.2 and ly > 0.2 else 0)
-                g[y][x] = v * 16 > BAYER[y % 4][x % 4] + 0.5
-    if kind == 'unexplored':
-        q = grid(QMARK)
-        for j, r in enumerate(q):
-            for i, on in enumerate(r):
-                g[11 + j][13 + i] = on
-    return g, inside
+    h, w = len(rows), len(rows[0]); oy, ox = (32 - h) // 2, (32 - w) // 2
+    for y, r in enumerate(rows):
+        for x, c in enumerate(r): g[oy + y][ox + x] = c == '#'
+    return g
 
 
-def outline_mask(g):
-    """Inside = everything not reachable from the border through clear pixels."""
+def inside(g):
+    """The picture's silhouette: everything not reachable from the border through clear pixels."""
     out = [[False] * 32 for _ in range(32)]
     stack = [(x, y) for x in range(32) for y in (0, 31)] + [(x, y) for y in range(32) for x in (0, 31)]
     while stack:
         x, y = stack.pop()
-        if x < 0 or y < 0 or x > 31 or y > 31 or out[y][x] or g[y][x]:
-            continue
+        if x < 0 or y < 0 or x > 31 or y > 31 or out[y][x] or g[y][x]: continue
         out[y][x] = True
         stack += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
     return [[not out[y][x] for x in range(32)] for y in range(32)]
 
 
-def edge(inside):
-    """The outline: inside pixels that touch the outside."""
-    e = [[False] * 32 for _ in range(32)]
-    for y in range(32):
-        for x in range(32):
-            if not inside[y][x]:
-                continue
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                X, Y = x + dx, y + dy
-                if X < 0 or Y < 0 or X > 31 or Y > 31 or not inside[Y][X]:
-                    e[y][x] = True
-    return e
-
-
-def save(name, g, inside):
+def save(name, g, m):
     im = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
     for y in range(32):
         for x in range(32):
-            if inside[y][x]:
-                im.putpixel((x, y), (255, 255, 255, 255) if g[y][x] else (0, 0, 0, 255))
+            if m[y][x]: im.putpixel((x, y), (255, 255, 255, 255) if g[y][x] else (0, 0, 0, 255))
     im.save(os.path.join(OUT, 'sprites', name + '.png'))
 
 
 def main():
     os.makedirs(os.path.join(OUT, 'sprites'), exist_ok=True)
+    for f in os.listdir(os.path.join(OUT, 'sprites')):
+        if f.startswith('m10') and f.endswith('.png'): os.remove(os.path.join(OUT, 'sprites', f))
+    pics = {'colony': COLONY, 'explored': EXPLORED, 'unexplored': UNEXPLORED}
+    for i, (h, f) in enumerate(NINE): pics['bad%d' % (i + 1)] = badguy(h, f)
     names = []
-    icons = {'unexplored': round_icon('unexplored'), 'explored': round_icon('explored')}
-    for k, s in (('colony', COLONY), ('enemy', ENEMY), ('enemy-flat', ENEMY_FLAT)):
-        g = grid(s)
-        icons[k] = (g, outline_mask(g))
-    for k, (g, inside) in icons.items():
-        save('m10' + k, g, inside)
-        e = edge(inside)
-        sel = [[(True if e[y][x] else not g[y][x]) if inside[y][x] else False for x in range(32)] for y in range(32)]
-        save('m10' + k + '-sel', sel, inside)
+    for k, rows in pics.items():
+        g = grid(rows); m = inside(g)
+        save('m10' + k, g, m)
+        save('m10' + k + '-sel', [[m[y][x] and not g[y][x] for x in range(32)] for y in range(32)], m)  # (Nasl: all of it inverted)
         names += ['m10' + k, 'm10' + k + '-sel']
     dot = Image.new('RGBA', (5, 5), (0, 0, 0, 0))
     for y in range(5):
-        for x in range(5):
-            dot.putpixel((x, y), (255, 255, 255, 255) if (x + y) % 2 == 0 else (0, 0, 0, 255))
-    dot.save(os.path.join(OUT, 'sprites', 'm10fleet.png'))
-    names.append("m10fleet")
-    if len(sys.argv) > 1:  # the title picture: the manual's cover (the page-1 scan), 384 wide, 1-bit (Floyd-Steinberg)
+        for x in range(5): dot.putpixel((x, y), (255, 255, 255, 255) if (x + y) % 2 == 0 else (0, 0, 0, 255))
+    dot.save(os.path.join(OUT, 'sprites', 'm10fleet.png')); names.append('m10fleet')
+    if len(sys.argv) > 1:
         from PIL import ImageOps
-        im = ImageOps.autocontrast(Image.open(sys.argv[1]).convert('L').crop((14, 2, 1020, 660)), cutoff=1)
-        im.resize((384, round(im.height * 384 / im.width)), Image.LANCZOS).convert('1').convert('RGB').save(os.path.join(OUT, 'sprites', 'cover.png'))
+        Image.MAX_IMAGE_PIXELS = None
+        im = Image.open(sys.argv[1]).convert('L')
+        w, h = im.size
+        im = im.crop((int(w * 0.012), int(h * 0.012), int(w * 0.988), int(h * 0.975)))
+        im = im.resize((384, round(im.height * 384 / im.width)), Image.LANCZOS)
+        # the paper's grain and the print's black are levelled first (darker than 70 black, lighter than 175 white), so only the
+        # picture's own shading (the hat, the planet) is dithered
+        im = im.point(lambda v: 0 if v < 70 else 255 if v > 175 else int((v - 70) * 255 / 105))
+        im.convert('1').convert('RGB').save(os.path.join(OUT, 'sprites', 'cover.png'))
     names.append('cover')
     with open(os.path.join(OUT, 'manifest.json'), 'w') as f:
         json.dump({'sprites': sorted(names)}, f, indent=1)

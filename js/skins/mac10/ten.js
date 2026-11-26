@@ -7,7 +7,8 @@
 'use strict';
 const DIR = 'assets/skins/mac10/sprites/';
 const PIC = {};
-for (const n of ['colony', 'explored', 'unexplored', 'enemy']) for (const s of ['', '-sel']) { const im = new Image(); im.src = DIR + 'm10' + n + s + '.png'; PIC[n + s] = im; }
+// (tools/skins/mac10_icons.py: read from the 300 dpi scans pixel for pixel; bad1-bad9 the bad guys, the manual's first)
+for (const n of ['colony', 'explored', 'unexplored', 'bad1', 'bad2', 'bad3', 'bad4', 'bad5', 'bad6', 'bad7', 'bad8', 'bad9']) for (const s of ['', '-sel']) { const im = new Image(); im.src = DIR + 'm10' + n + s + '.png'; PIC[n + s] = im; }
 { const im = new Image(); im.src = DIR + 'm10fleet.png'; PIC.fleet = im; }
 const COVER = new Image(); COVER.src = DIR + 'cover.png';
 // which windows are closed (a window's close box, the Windows menu), kept for the next game as the program kept them ("Spaceward Ho!
@@ -38,17 +39,26 @@ window.HOMAC10_BUILD = (K) => {
   // ---------- the Star Map (pp. 8-11) ----------
   // Four kinds of star, each a 32 x 32 icon (tools/skins/mac10_icons.py): yours ("the planets that look like good guys": the cowboy hat), one
   // explored and nobody's, one never seen ("?"), and an enemy's ("Any planet you lose a battle at becomes an enemy planet ... Enemy planets look
-  // like a wide variety of bad guys": the manual shows one, the bandit, and it stands for them all). A selected star "looks funny": inverted
-  // inside its outline (Nasl, p. 9). A dot at its top right when a fleet is there (Adhara, p. 10); a circle round it when it has satellites (p. 8).
+  // like a wide variety of bad guys"). 1.0 took ten players, so nine rivals at most, and each has its own bad guy: the first rival the manual's
+  // bandit in Jake's bowler, the second the manual's bandit as printed, the rest the remake's own (tools/skins/mac10_icons.py); a star where a
+  // battle was seen and whose owner isn't known, the first. A selected star "looks funny": all of it inverted inside its outline, its name in
+  // bold (Nasl, p. 9). A dot at its top right when a fleet is there (Adhara, p. 10); a circle round it when it has satellites (p. 8).
   // (the look arrives as the skin's picture number, the DOS game's scheme that 1.2 uses: 1000-1003 and 1100, 1500-1603 yours, 1004-1006 and
   // 1010-1011 explored, 1007 and 1008 never seen, 1009 a battle seen there, 2000 on someone else's)
   const kind = (look) => {
     const b = String(look.base || ''), n = +(/(\d{4})$/.exec(b) || [])[1];
     if (b === 'unknown' || b === 'soon' || n === 1007 || n === 1008) return 'unexplored';
-    if (b === 'battle' || n === 1009 || n >= 2000 || (look.hat && look.hat.startsWith('bad'))) return 'enemy';
+    if (n >= 2000) return badOf((n - 2000) % 500);
+    if (look.hat && look.hat.startsWith('bad')) return badOf(+look.hat.slice(3).split('_')[0]);
+    if (b === 'battle' || n === 1009) return 'bad1';
     if (look.hat || (n >= 1000 && n <= 1003) || (n >= 1100 && n < 1200) || (n >= 1500 && n < 1700)) return 'colony';
     return 'explored';
   };
+  // a rival's bad guy by its place among the rivals (slot order), from its face number
+  function badOf(face) {
+    const g = G(), rivals = g ? g.players.filter(p => p.id !== ME()) : [], i = rivals.findIndex(p => (p.face || 0) % 20 === face % 20);
+    return 'bad' + ((Math.max(0, i) % 9) + 1);
+  }
   function drawStar(cx, i) {
     if (!K.own()) return false;
     const a = A(), g = i.G, s = i.s, u = i.view.s / 2, zi = K.zoomIdx(i.view.s);
@@ -64,11 +74,13 @@ window.HOMAC10_BUILD = (K) => {
       cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.beginPath(); cx.arc(Math.round(i.x) + 0.5, Math.round(i.y) + 0.5, 14.5 * f + 2, 0, Math.PI * 2); cx.stroke();
     }
     // a fleet there (yours; or anyone's at your colony)
-    if (g.fleets.some(fl => fl.star === s.id && fl.to == null && !fl.sat && (fl.owner === i.ME || s.owner === i.ME)) && PIC.fleet.complete) cx.drawImage(PIC.fleet, Math.round(i.x + 13 * f), Math.round(i.y - 21 * f), 5 * Math.max(1, f), 5 * Math.max(1, f));
+    // (measured on Adhara: its top left 16 right of the planet's middle, 20 above it)
+    if (g.fleets.some(fl => fl.star === s.id && fl.to == null && !fl.sat && (fl.owner === i.ME || s.owner === i.ME)) && PIC.fleet.complete) cx.drawImage(PIC.fleet, Math.round(i.x + 16 * f), Math.round(i.y - 20 * f), 5 * Math.max(1, f), 5 * Math.max(1, f));
     // its name under it, white Geneva 9, from the second zoom on (1.2's rule)
-    cx.font = K.G9; cx.fillStyle = '#fff'; cx.textAlign = 'center'; cx.textBaseline = 'alphabetic';
+    // (the name's baseline 14 under the picture, which is 23 high: the middle + 25 at the largest zoom, Mizar and Nasl on p. 9; bold when selected)
+    cx.font = i.sel ? K.G9B : K.G9; cx.fillStyle = '#fff'; cx.textAlign = 'center'; cx.textBaseline = 'alphabetic';
     if (zi === 1) cx.letterSpacing = '-1px';
-    cx.fillText(s.name, Math.round(i.x), Math.round(i.y + d / 2 + 12));
+    cx.fillText(s.name, Math.round(i.x), Math.round(i.y + (u >= 17 ? 25 * f : 14)));
     cx.letterSpacing = '0px'; cx.restore();
     return 'all';
   }
@@ -285,7 +297,7 @@ window.HOMAC10_BUILD = (K) => {
   document.addEventListener('pointermove', (e) => { // a star on the map: what kind it is (pp. 8-11)
     const a = A(); if (!a || !a.G || !document.documentElement.classList.contains('mac10lay') || !e.target.closest || !e.target.closest('#map')) return;
     const h = a.UI.hover; if (h == null || !a.starLook) return;
-    setHelp(STAR_HELP[kind(a.starLook(h) || {})]);
+    { const k = kind(a.starLook(h) || {}); setHelp(STAR_HELP[/^bad/.test(k) ? 'enemy' : k]); }
   });
 
   function panel10(panel, B) {
@@ -348,7 +360,7 @@ window.HOMAC10_BUILD = (K) => {
   function build10(sid) {
     const a = A(), el = a.el, g = G(), p = a.me(), s = g.stars[sid];
     if (!s || s.owner !== ME() || !H().feature(g, 'buildQueue')) return false;
-    const before = JSON.stringify(s.queue || []);
+    const before = JSON.stringify(s.queue || []), loop0 = !!s.loopQueue;
     const ds = p.designs.filter(d => !d.scrapped);
     BQ.q.pick = -1; BQ.t.pick = ds.length ? 0 : -1; // (the first type chosen when it opens, so Add works at once: the figure has one chosen; which one 1.0 chose first isn't known)
     const box = el('div', { style: 'position:absolute;left:0;top:0;width:465px;height:305px' });
@@ -370,7 +382,10 @@ window.HOMAC10_BUILD = (K) => {
         list10([77, 29, 229, 274], rows, BQ.q, { label: 'Queue', redraw: draw }),
         list10([77, 303, 228, 436], ds.map(d => ({ cols: [[d.name, 7]] })), BQ.t, { label: 'Avail. Types', redraw: draw, dbl: () => add() }),
       );
-      const cb = el('label', { style: K.at20([22, 306, 38, 420]) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' }, el('input', { type: 'checkbox', disabled: 'disabled' }), K.raw('span', 'Loop Queue'));
+      // (Loop Queue works where the ruleset loops a queue: rs.loopQueue, the 1.0 reconstruction; dimmed elsewhere)
+      const loops = !!H().rules(g).loopQueue, lq = el('input', { type: 'checkbox', disabled: loops ? null : 'disabled', onchange: (e) => { s.loopQueue = e.target.checked; } });
+      lq.checked = loops && !!s.loopQueue;
+      const cb = el('label', { style: K.at20([22, 306, 38, 420]) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' }, lq, K.raw('span', 'Loop Queue'));
       box.append(cb);
       box.append(button('Delete', [246, 69, 265, 128], () => { const r = rows[BQ.q.pick]; if (!r) return; H().unqueueShip(g, ME(), sid, r.slot); BQ.q.pick = -1; draw(); }, { off: !rows[BQ.q.pick] }));
       box.append(button('Add', [246, 173, 265, 231], () => add(), { off: !ds[BQ.t.pick] })); // (dimmed until a type is chosen, as Delete is in the figure)
@@ -380,7 +395,7 @@ window.HOMAC10_BUILD = (K) => {
     // (Done and Cancel first: a dialog's items 1 and 2, the default button and Cancel, as a Mac DITL orders them)
     const dl = K.dlog20(465, 305,
       button('Done', [261, 276, 280, 334], () => { a.closeModal(); a.save(); a.renderPanel(); }, { def: true }),
-      button('Cancel', [261, 356, 281, 415], () => { s.queue = JSON.parse(before); a.closeModal(); a.renderPanel(); }), box);
+      button('Cancel', [261, 356, 281, 415], () => { s.queue = JSON.parse(before); s.loopQueue = loop0; a.closeModal(); a.renderPanel(); }), box);
     a.modal('', dl, { cls: 'mac12 dl20w mac10dlg', label: 'Ship Building Queue For ' + s.name });
     return true;
   }
@@ -455,6 +470,52 @@ window.HOMAC10_BUILD = (K) => {
     a.modal('', dl, { cls: 'mac12 dl20w mac10dlg', label: 'Compare Players' });
     return true;
   }
+  // Create New Galaxy (the 1.0 manual, p. 34; the figure is 501 x 299 with its frame): over the remake's New Game form when the 1.0 rules
+  // are chosen, its fields the form's own (people, computers, js/rules-10.js's stars, map style, speed and skill). "Max # of Human Players",
+  // "# of Computer Players" and "Number of Stars" each with its figure, its least, a scroll bar and its most; Map Style, Game Speed, Comp.
+  // Skill and Turn Length as radio buttons; Create (the default) and Cancel. Turn Length's timed choices are dimmed: the remake has no
+  // clock to keep them (2.0 dropped them too: "we couldn't adjust for people with different clock settings", 2.0 p. 69). The remake's own
+  // choices (version, skin, language ...) under "More…", as the 2.0.1 skin's.
+  function createGalaxy10(f) {
+    const a = A(), el = a.el, win = f.closest('.win'); if (!win || f.querySelector('.cg10')) return;
+    const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => { n.dispatchEvent(new Event('input', { bubbles: true })); n.dispatchEvent(new Event('change', { bubbles: true })); };
+    const parts = [label('Create New Galaxy', [8, 87, 24, 260])];
+    const bar = (title, top, name, min, max, get, set) => {
+      const v = K.raw('span', String(get()), { class: 'dt20', style: K.at20([top + 1, 180, top + 17, 214]) + ';text-align:right' });
+      const sl = el('input', { type: 'range', min, max, value: get(), style: K.at20([top, 270, top + 16, 371]), 'aria-label': title,
+        oninput: (e) => { set(e.target.value); v.textContent = e.target.value; } });
+      parts.push(label(title, [top + 1, 21, top + 17, 175]), v, label(String(min), [top + 1, 240, top + 17, 262]), sl, label(String(max), [top + 1, 385, top + 17, 420]));
+      return sl;
+    };
+    const hum = field('humans'), comp = field('computers'), stars = field('t_stars');
+    bar('Max # of Human Players:', 33, 'humans', 1, 10, () => (hum ? hum.value : 1), (x) => { if (hum) { hum.value = String(Math.min(x, Math.max(...[...hum.options].map(o => +o.value || 0)))); fire(hum); } });
+    bar('# of Computer Players:', 65, 'computers', 0, 10, () => (comp && /^\d+$/.test(comp.value) ? comp.value : 4), (x) => { if (comp) { comp.value = String(x); fire(comp); } });
+    bar('Number of Stars:', 95, 't_stars', 32, 109, () => (stars ? stars.value : 60), (x) => { if (stars) { stars.value = String(x); fire(stars); } });
+    const radios = (title, top, name, opts) => {
+      const s = field(name); parts.push(label(title, [top, 21, top + 16, 130]));
+      opts.forEach(([v, t, x, off]) => {
+        const r = el('input', { type: 'radio', name: 'cg10_' + name, value: v, disabled: off ? 'disabled' : null, style: K.at20([top + 2, x, top + 14, x + 12]) + ';margin:0', 'aria-label': t,
+          onchange: () => { if (s) { s.value = v; fire(s); } } });
+        if (s ? s.value === v : v === 'never') r.checked = true;
+        parts.push(r, label(t, [top, x + 16, top + 16, x + 100]));
+      });
+    };
+    radios('Map Style:', 145, 't_shape', [['spiral', 'Spiral', 126], ['circle', 'Circle', 226], ['random', 'Random', 326]]);
+    radios('Game Speed:', 167, 't_speed', [['normal', 'Normal', 126], ['fast', 'Fast', 226]]);
+    radios('Comp. Skill:', 190, 't_iq', [['dumb', 'Dumb', 126], ['average', 'Average', 226], ['smart', 'Smart', 326]]);
+    radios('Turn Length:', 219, 'cg10_turn', [['10m', '10 Mins.', 115, true], ['24h', '24 Hours', 194, true], ['24w', '24 Hrs./Wkdys.', 277, true], ['never', 'Never', 403]]);
+    let opened = false;
+    const more = el('button', { type: 'button', class: 'ok20', style: 'position:absolute;left:13px;top:251px;min-width:0;padding:0 6px;height:20px;z-index:2', title: 'The remake’s own choices: version, skin, language and more', onclick: () => { opened = !opened; dress(); } }, K.raw('span', 'More…'));
+    const box = K.dlog20(487, 285,
+      button('Create', [249, 191, 268, 255], () => f.requestSubmit(), { def: true }),
+      button('Cancel', [251, 298, 268, 359], () => a.closeModal()), more,
+      el('div', { style: 'position:absolute;inset:0' }, ...parts));
+    const holder = el('div', { class: 'cg20 cg10' }, box);
+    const rest = [...f.childNodes]; f.prepend(holder);
+    const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
+    const rs = field('rules'), dress = () => { const on = !rs || rs.value === '10'; box.style.display = on ? '' : 'none'; win.classList.toggle('mac10dlg', on && !opened); for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
+    if (rs) rs.addEventListener('change', dress); dress();
+  }
   const window0 = window.HOMAC12 && window.HOMAC12.window, panel0 = window.HOMAC12 && window.HOMAC12.panel;
   function windows10(name, ...x) {
     if (G() && en()) {
@@ -500,7 +561,8 @@ window.HOMAC10_BUILD = (K) => {
       '-',
       // (the rules these three choose are the ruleset's, not the skin's: shown as they stand, dimmed)
       it('Graphic Battles', () => {}, { ghost: () => true, checked: () => true }),
-      it('Scouts in New Fleets', () => {}, { ghost: () => true, checked: () => true }),
+      // (a ruleset's own choice where it has one: the 1.0 reconstruction's opts.scouts10; elsewhere what the ruleset does, dimmed)
+      it('Scouts in New Fleets', () => { const g = G(); g.opts.scouts10 = g.opts.scouts10 === false; A().save(); }, { ghost: () => noGame() || !H().rules(G()).reconstructed, checked: () => !G() || G().opts.scouts10 !== false }),
       it('Spend On New Stars', () => {}, { ghost: () => true, checked: () => true }),
       '-',
       it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { ghost: noGame, checked: () => A().Sound.on }),
@@ -522,6 +584,14 @@ window.HOMAC10_BUILD = (K) => {
   return {
     drawStar,
     window: windows10,
+    // three zooms, not 1.2's four: 2.0 "added a zoom level between medium and far" (the 2.0 manual, p. 69, "Changes From Version 1"), so
+    // 1.0 had 1.2's far (6), medium (12) and near (17), without the 9 (the remake's closer ones with modern conveniences, as in 1.2)
+    zoomTo(s0, f) {
+      if (!K.own()) return Math.max(12, Math.min(140, s0 * f));
+      const Z = K.zooms().filter(z => Math.abs(z - 18) > 0.5), near = (v) => Z.reduce((b, z, j) => (Math.abs(Math.log(z / v)) < Math.abs(Math.log(Z[b] / v)) ? j : b), 0);
+      const cur = near(s0); let j = near(s0 * f); if (j === cur && Math.abs(Math.log(f)) >= 0.13) j = cur + (f > 1 ? 1 : -1);
+      return Z[Math.max(0, Math.min(Z.length - 1, j))];
+    },
     mapBg: '#000', bgStars: false,
     panel(panel, B) { if (en()) return panel10(panel, B || {}); const low = document.getElementById('low10'); if (low) low.remove(); document.documentElement.classList.remove('mac10lay', 'mac10help'); if (panel0) panel0(panel, B); },
     afterTurn: (go) => { const a = A(); if (a && a.Prefs && a.Prefs.m10report !== false && closed.has('report')) { closed.delete('report'); saveClosed(); } return afterTurn0 ? afterTurn0(go) : go(); },
@@ -543,7 +613,7 @@ window.HOMAC10_BUILD = (K) => {
       const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 1.0';
     },
     // a new game in this skin: English, 1.0's only language, unless the player picks another
-    newGame(f) { const s = f && f.querySelector('select[name=lang]'); if (s && !s.dataset.m10 && [...s.options].some(o => o.value === 'en')) { s.value = 'en'; s.dataset.m10 = '1'; s.dispatchEvent(new Event('change', { bubbles: true })); } },
+    newGame(f) { if (f) setTimeout(() => createGalaxy10(f), 0); const s = f && f.querySelector('select[name=lang]'); if (s && !s.dataset.m10 && [...s.options].some(o => o.value === 'en')) { s.value = 'en'; s.dataset.m10 = '1'; s.dispatchEvent(new Event('change', { bubbles: true })); } },
   };
 };
 })();

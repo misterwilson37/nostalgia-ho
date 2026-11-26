@@ -1539,6 +1539,12 @@ root.HOUI.add([
 ['Revert To Saved', 'Revenir à la version enregistrée', 'Zur gesicherten Version', 'Kaydedilene dön', 'Volver a lo guardado'],
 ['Force Turn Update', 'Forcer la mise à jour du tour', 'Zugaktualisierung erzwingen', 'Tur güncellemesini zorla', 'Forzar la actualización del turno'],
 ['Exit', 'Quitter', 'Beenden', 'Çıkış', 'Salir'],
+// ---------- the Mac 1.0 reconstruction (js/rules-10.js): its New Game box and its edition's name ----------
+['Number of stars', 'Nombre d’étoiles', 'Anzahl der Sterne', 'Yıldız sayısı', 'Número de estrellas'],
+['Game speed', 'Vitesse du jeu', 'Spieltempo', 'Oyun hızı', 'Velocidad de juego'],
+['Mac (reconstructed)', 'Mac (reconstitué)', 'Mac (rekonstruiert)', 'Mac (yeniden kurgulandı)', 'Mac (reconstruido)'],
+['Mac, rebuilt from its manual and 2.0’s', 'Mac, reconstitué d’après son manuel et celui de la 2.0', 'Mac, nach seinem Handbuch und dem der 2.0 rekonstruiert', 'Mac, kendi kılavuzundan ve 2.0’ınkinden yeniden kurgulandı', 'Mac, reconstruido a partir de su manual y el de la 2.0'],
+['Mac 1.0 (1990, reconstructed)', 'Mac 1.0 (1990, reconstitué)', 'Mac 1.0 (1990, rekonstruiert)', 'Mac 1.0 (1990, yeniden kurgulandı)', 'Mac 1.0 (1990, reconstruido)'],
 // ---------- the Mac 1.0 skin's menus (js/skins/mac10/ten.js: the 1990 manual's Windows and Options menus, pp. 7 and 38; its Ships and Galaxy
 // commands, pp. 20-37). 1.0 was English only: these are the remake's own, in the official translations' voice ----------
 ['Windows', 'Fenêtres', 'Fenster', 'Pencereler', 'Ventanas'],
