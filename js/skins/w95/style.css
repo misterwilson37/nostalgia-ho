@@ -334,7 +334,7 @@ html.w95win .w95dlg .sbw .sba { flex: none; width: 16px; box-sizing: border-box;
 html.w95win .w95dlg .sbw .sba.l { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path d='M4 0v7L0 3.5z'/></svg>"); }
 html.w95win .w95dlg .sbw .sba.r { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path d='M0 0v7l4-3.5z'/></svg>"); }
 html.w95win .w95dlg .sbw input.sb { flex: 1 1 auto; height: auto; min-width: 0; margin: 0; border: 0; box-shadow: none; -webkit-appearance: none; appearance: none;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2'><path fill='%23c0c0c0' d='M0 0h1v1H0zM1 1h1v1H1z'/></svg>") 0 0 / 2px 2px, #fff; }
+  background: #c0c0c0; } /* (plain grey in Jake's captures of 26 Nov, Auto Play and Configure: no dither) */
 html.w95win .w95dlg .sbw input.sb::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 17px; border: 0; background: #c0c0c0; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
 html.w95win .w95dlg .sbw input.sb::-moz-range-thumb { width: 16px; height: 17px; border: 0; border-radius: 0; background: #c0c0c0; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
 html.w95win .w95dlg .sbw input.sb:disabled { opacity: 1; }
@@ -481,3 +481,5 @@ html.w95win .scrim > .win .w95help .htab { position: relative; background: #c0c0
   margin: 2px 0 0 !important; padding: 2px 7px 3px !important; }
 html.w95win .scrim > .win .w95help .htab.on { margin: 0 -2px !important; padding: 3px 9px 5px !important; z-index: 2; }
 html.w95win .w95help .hpane { border: 0; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #000, inset -2px -2px 0 #808080; }
+/* Radical Research (dialog 348): the picked program's words struck through the whole of their box (Jake's capture of 26 Nov, 9.44.48) */
+html.w95win .w95dlg .st.w95cut { background: linear-gradient(transparent calc(50% - 0.5px), #000 calc(50% - 0.5px), #000 calc(50% + 0.5px), transparent calc(50% + 0.5px)); }

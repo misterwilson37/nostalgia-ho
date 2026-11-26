@@ -88,7 +88,18 @@ function abandonPlanet() {
   if (!on) return go();
   const joke = rs.evacuateJoke && rs.evacuateJoke(g, s), inc = s.oInc != null ? s.oInc : H().planetIncome(g, a.me(), s);
   const ask = joke || (inc >= 0 ? 'Do you really want to abandon a profitable planet?' : inc > -7500 ? 'Do you really want to abandon a planet that will be profitable very soon?' : null);
-  if (ask) a.confirmBox(joke ? H().say(g, ask) : TL(ask), go); else go();
+  if (ask) { if (!abandonAsk(joke ? H().say(g, ask) : TL(ask), go)) a.confirmBox(joke ? H().say(g, ask) : TL(ask), go); } else go();
+}
+// The question in dialog 360 (Jake's capture of 26 Nov, 9.43.40: "Do you really want to abandon a profitable planet?"): the program's picture box,
+// the mascot (control 1138, bitmap 3520) at the left, the words (1106) at the right, Cancel and OK; OK abandons.
+function abandonAsk(text, go) {
+  if (!W95ON()) return false;
+  const a = A(), dl = W95DLG(360); if (!dl) return false;
+  if (dl.by[1106]) { dl.by[1106].textContent = text; dl.by[1106].classList.add('ml'); }
+  const im = a.IMG['w95:b3520']; if (im && im.src && dl.by[1138]) dl.by[1138].style.background = `url("${edgeURL(im)}") left top / 80px 74px no-repeat`;
+  dl.by[1].addEventListener('click', () => { a.closeModal(); go(); }); dl.by[2].addEventListener('click', () => a.closeModal());
+  showDlg(dl, TL('Abandon Planet'));
+  return true;
 }
 // the key equivalents the captures show, by the remake's item (its English label)
 const KEYS = { 'New game…': 'N', 'Saved games…': 'O', 'Export this game…': 'S', 'Quit to title': 'Q', 'Build ships at selected colony…': 'B', 'List all fleets…': 'L',
@@ -916,7 +927,7 @@ function autoPlayDialog() {
   const cfg = () => { dl.by[1168].disabled = !(R[0] && R[0].checked); }; R.forEach(r => r && r.addEventListener('change', cfg)); cfg();
   const bar = dl.by[1167], out = dl.by[1170]; bar.min = 0; bar.max = 10; bar.step = 1; bar.value = AP.every;
   const show = () => { out.textContent = String(bar.value); }; bar.addEventListener('input', show); show();
-  dl.by[1168].addEventListener('click', () => { a.closeModal(); if (a.openAutoPlaySettings) a.openAutoPlaySettings(() => autoPlayDialog()); });
+  dl.by[1168].addEventListener('click', () => { const under = keepUnder(); a.closeModal(); if (configDialog(() => autoPlayDialog(), under)) return; if (a.openAutoPlaySettings) a.openAutoPlaySettings(() => autoPlayDialog()); });
   dl.by[1].addEventListener('click', () => {
     AP.mode = Math.max(0, R.findIndex(r => r && r.checked)); AP.every = +bar.value;
     a.closeModal();
@@ -925,6 +936,27 @@ function autoPlayDialog() {
     a.runAutoPlay({ turns: Infinity, computer: AP.mode === 0, won: stop, lost: stop, news: stop, every: AP.every, stopButton: true });
   });
   showDlg(dl, 'Auto Play Options');
+}
+
+// Configure Computer's Auto Play Style (dialog 380, Auto Play's Config...; Jake's capture of 26 Nov, 9.39.19): "Friendly" and "Aggressive" either side
+// of scroll bar 1171 (the rules' aggressiveness, rs.autoPlayRange.aggr), "No Defense" and "Dig In" of 1172 (the share of colonies defended, 0 to 100),
+// Cancel and OK; OK keeps them (rs.autoPlaySettings), both go back to Auto Play Options. A ruleset without the settings keeps the remake's window.
+// (the capture shows Configure over Auto Play, which stays on the screen behind it: the remake has one window at a time, so a still copy of Auto Play
+// is kept in its place under Configure)
+function keepUnder() { const w = document.querySelector('.w95dlgwin'); if (!w) return null; const r = w.getBoundingClientRect(), c = w.cloneNode(true);
+  c.setAttribute('inert', ''); c.setAttribute('aria-hidden', 'true'); c.removeAttribute('role'); Object.assign(c.style, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', margin: '0', pointerEvents: 'none' }); return c; }
+function configDialog(back, under) {
+  const a = A(), g = a.G, rs = g && H().rules(g); if (!rs || !rs.autoPlaySettings) return false;
+  const dl = W95DLG(380); if (!dl) return false;
+  const cur = rs.autoPlaySettings(g, a.me()) || { aggr: 0, colDef: 50 }, [lo, hi] = (rs.autoPlayRange || {}).aggr || [0, 10];
+  const ag = dl.by[1171], dg = dl.by[1172]; if (!ag || !dg) return false;
+  ag.min = lo; ag.max = hi; ag.step = 1; ag.value = cur.aggr; dg.min = 0; dg.max = 100; dg.step = 1; dg.value = cur.colDef;
+  ag.setAttribute('aria-label', TL('Friendly') + ' / ' + TL('Aggressive')); dg.setAttribute('aria-label', TL('No Defense') + ' / ' + TL('Dig In'));
+  const done = () => { a.closeModal(); if (back) back(); };
+  dl.by[1].addEventListener('click', () => { rs.autoPlaySettings(g, a.me(), { aggr: +ag.value, colDef: +dg.value }); a.save(); done(); });
+  dl.by[2].addEventListener('click', done);
+  const w = showDlg(dl, "Configure Computer's Auto Play Style"); if (under && w && w.parentNode) { w.parentNode.insertBefore(under, w); w.style.position = 'relative'; w.style.zIndex = '1'; }
+  return true;
 }
 
 // Build / Design Ships (dialog 176, shots 041, 053, 093; BuildDesignShips: FUN_0044d00c sets it up, FUN_00468f83 is its OK). At the left the
@@ -1376,6 +1408,31 @@ T.window = (name, ...args) => {
 };
 
 
+// Radical Research (dialog 348, FUN_00471587 / FUN_0047a6f8; Jake's captures of 26 Nov, 9.44.36-9.44.51): "You can cancel one research program:"
+// in bold (1080), the four programs one a row, each its picture (1070-1073: bitmap 3105) and its words (1076-1079); a click picks the one to
+// cancel, which shows bitmap 4023 and its words struck through the whole line (another click picks another, or the same one again un-picks it); OK
+// cancels it (rs.radicalHand.discard), or nothing when none is picked.
+function radicalDialog() {
+  const a = A(), g = a.G, RH = g && H().rules(g).radicalHand; if (!RH || g.over) return false;
+  const cards = RH.cards(g, a.me()); if (!cards.length) return false;
+  const dl = W95DLG(348); if (!dl) return false;
+  // (the program sets its words in a larger face than the template's 8 points: the capture's lines are a sixth wider, 10 points, 13 px)
+  [1080, 1076, 1077, 1078, 1079].forEach(id => { if (dl.by[id]) { dl.by[id].style.fontSize = '13px'; dl.by[id].style.lineHeight = '16px'; dl.by[id].style.whiteSpace = 'nowrap'; } });
+  if (dl.by[1080]) dl.by[1080].style.fontWeight = 'bold';
+  let pick = -1;
+  const pic = (n) => { const im = a.IMG['w95:b' + n]; return im && im.src ? `url("${im.src}") left top / 32px 32px no-repeat` : ''; };
+  const rows = [0, 1, 2, 3].map(i => ({ p: dl.by[1070 + i], t: dl.by[1076 + i], c: cards[i] }));
+  const paint = () => rows.forEach((r, i) => { if (!r.p || !r.t) return; r.p.style.background = r.c ? pic(i === pick ? 4023 : 3105) : ''; r.p.style.width = r.p.style.height = '32px';
+    r.t.textContent = r.c ? H().say(g, r.c.text) : ''; r.t.classList.toggle('w95cut', i === pick); });
+  rows.forEach((r, i) => { if (!r.c) return; [r.p, r.t].forEach(e => { if (!e) return; e.style.cursor = 'pointer'; e.setAttribute('role', 'button'); e.addEventListener('click', () => { pick = pick === i ? -1 : i; paint(); }); }); });
+  paint();
+  dl.by[1].addEventListener('click', () => { if (pick >= 0 && cards[pick]) { RH.discard(g, a.me(), cards[pick].id); a.save(); } a.closeModal(); });
+  showDlg(dl, TL('You can cancel one research program:'));
+  return true;
+}
+const prevWindowR = T.window;
+T.window = (name, ...args) => ((name === 'radical' && W95ON() && radicalDialog()) || (prevWindowR ? prevWindowR(name, ...args) : false));
+
 // ---------- start-up (unit 9): the splash as dialog 315 (shot 001) ----------
 // 231 x 251 units: the picture (control 1051, 231 x 149 at the top: the "Version 4" animation, js/skins/w95/ui.js title), the credits
 // (its STATIC at (4, 154)), New World Computing's logo (control 1174 at (159, 152): bitmap 383), and Open Game, New Game and Quit along
@@ -1504,6 +1561,7 @@ function battleWindow95(b, k) {
     if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || TL('You have no information.'), 145, 85); text(L.destroyed || TL('You were destroyed immediately.'), 145, 100); skip = true; }
     else cols[ci].forEach(gr => drawGroup(gr));
   });
+  if (skip) roundLabel(b.rounds.length); // ("Round 1" under the picture all the same: Jake's capture of 26 Nov, 9.43.31)
   const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
   const cellOf = (ev, shooter) => shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti));
   const hsv = (h, v) => { h = (h % 65535) / 65535 * 6; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, gg, bb] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return 'rgb(' + [r, gg, bb].map(u => Math.round(u * 255)).join(',') + ')'; };
