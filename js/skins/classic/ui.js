@@ -5057,7 +5057,7 @@ const titleLang = () => UIL.pref.get() || 'en';
 const TITLE_RULES = { mac3: '301', mac3c: '301', mac4: 'mac405', mac4c: 'mac405', w95: '405', mac2: 'mac20', mac2c: 'mac20', dos: 'dos', mac12: '12' };
 // each skin's own rules: New Game opens on them for the skin the title shows (Jake, 20 Nov 2026: "if I chose the 1.2 skin, it should choose the
 // 1.2 ruleset and its defaults initially"); the player can still pick others there (the Amiga 2.x plays DOS 2.0's rules: docs/amiga-skin.md)
-const SKIN_RULES = Object.assign({}, TITLE_RULES, { classic: 'original', palm: 'palm', ios: 'ios', android: 'android', amiga: 'dos', cozy: 'claude', gemini: 'gemini' });
+const SKIN_RULES = Object.assign({}, TITLE_RULES, { classic: 'original', palm: 'palm', ios: 'ios', android: 'android', amiga: 'dos', cozy: 'claude', gemini: 'gemini', mac10: '10' }); // (the Mac 1.0 skin: the 1.0 reconstruction, js/rules-10.js)
 const skinRules = () => { const id = window.HOSKINS && SKIN_RULES[HOSKINS.current]; return id && HO.RULESETS[id] ? id : null; };
 function titleWindows(lang) {
   const id = window.HOSKINS && TITLE_RULES[HOSKINS.current], rs = id && HO.RULESETS[id];
@@ -5180,7 +5180,7 @@ const ED_FALLBACK = {
 };
 // the New Game window starts every edition with its own rules (tools/human-play.js asks)
 window.HONEWGAME_EDITIONS = true;
-const FAMILY_NAMES = { '1.2': '1.2', '2.0': '2.0', '3.0': '3.0', '4.0': '4.0', '5': '5', remake: 'AI homages', claude: 'AI homages' };
+const FAMILY_NAMES = { '1.0': '1.0', '1.2': '1.2', '2.0': '2.0', '3.0': '3.0', '4.0': '4.0', '5': '5', remake: 'AI homages', claude: 'AI homages' };
 // a ruleset's version: its own, else from its version number ('2.0.1' is 2.0, '5.0.5' is 5)
 function familyOf(id) {
   const rs = HO.RULESETS[id] || {};
@@ -5288,7 +5288,9 @@ function skinOSPickers(rulesId) {
   // the edition changed: its own skins first, its first one chosen unless one was picked by hand
   const forEdition = (id) => {
     const own = editionSkins(id);
-    fillSkins(skinSel, id, !picked.get('skin') && own.length ? own[0] : skinSel.value);
+    // (a skin made for another edition's rules, js/skins.js keepRules: the Mac 1.0 skin, which has no rules of its own, stays for 1.2's)
+    const cur = window.HOSKINS && HOSKINS.list.find(k => k.id === HOSKINS.current), keep = !!(cur && cur.keepRules === id);
+    fillSkins(skinSel, id, keep && !picked.get('skin') ? cur.id : !picked.get('skin') && own.length ? own[0] : skinSel.value);
     fillOS(osSel, skinSel.value, HOSKINS.osDefault(skinSel.value)); // a new skin starts in its own look
   };
   return { skinSel, osSel, forEdition };
@@ -6464,6 +6466,13 @@ function newGameDialog() {
     sel('m_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),
     sel('m_density', 'Galaxy density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
     sel('m_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50'], ['100', '100']], '10'));
+  // Mac 1.0 rules (js/rules-10.js, a reconstruction): its Create New Galaxy window (the 1.0 manual, p. 34): the stars, map style, game speed and
+  // computer skill (the people and computers are the window's own fields)
+  const tenBox = el('div', { class: 'group' },
+    slider('t_stars', 'Number of stars', 32, 109, 60, '32', '109'),
+    sel('t_shape', 'Map style', [['spiral', 'Spiral'], ['circle', 'Circle'], ['random', 'Random']], 'circle'),
+    sel('t_speed', 'Game speed', [['normal', 'Normal'], ['fast', 'Fast']], 'normal'),
+    sel('t_iq', 'Computer skill', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'average'));
   // Mac 1.2 rules: 1.2 had no New Game window; every game was the same
   const mac12Box = el('div', { class: 'group' }, el('p', { class: 'sub note12' },
     '1.2 had no New Game choices: every game is a small, dense circle galaxy with one average computer player, and everyone starts at normal skill.'));
@@ -6547,7 +6556,7 @@ function newGameDialog() {
     sel('computers', 'Computer players', [...[...Array(20).keys()].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
     seats,
     startSel,
-    claudeBox, origBox, dosBox, w95Box, mac3Box, mac12Box,
+    claudeBox, origBox, dosBox, w95Box, mac3Box, mac12Box, tenBox,
     tlRow,
     buddyRow,
     el('fieldset', { class: 'opts' }, el('legend', null, 'Options'),
@@ -6576,8 +6585,8 @@ function newGameDialog() {
       el('button', { type: 'submit' }, 'Create galaxy')));
   // which of the window's settings an edition has: its own, or (an edition
   // the window doesn't know by name) its version's other edition's
-  const KIND = { claude: 'claude', original: 'original', palm: 'original', dos: 'dos', '405': '405', '301': '301', '12': '12' };
-  const FAM_KIND = { '1.2': '12', '2.0': 'dos', '3.0': '301', '4.0': '405', '5': 'original', remake: 'claude' };
+  const KIND = { claude: 'claude', original: 'original', palm: 'original', dos: 'dos', '405': '405', '301': '301', '12': '12', '10': '10' };
+  const FAM_KIND = { '1.0': '10', '1.2': '12', '2.0': 'dos', '3.0': '301', '4.0': '405', '5': 'original', remake: 'claude' };
   const kindOf = (id) => KIND[id] || FAM_KIND[famKey(familyOf(id))] || null;
   // the rating: the edition's own difficulty, else its version's
   const rater = (id, k) => (HO.RULESETS[id] && HO.RULESETS[id].difficulty) ? HO.RULESETS[id] : HO.RULESETS[k];
@@ -6600,21 +6609,21 @@ function newGameDialog() {
     // rs.anyComputers false: no "Any (1-8)" (Palm OS, iOS); rs.iqStep: the IQ
     // slider's step (iOS: 10); rs.maxHumans: how many people may play (iOS: 1)
     const ngr = HO.RULESETS[d.rules] || {};
-    const palm = d.rules === 'palm', orig = k === 'original', dos = k === 'dos', w95 = k === '405', mac3 = k === '301', mac12 = k === '12';
+    const palm = d.rules === 'palm', orig = k === 'original', dos = k === 'dos', w95 = k === '405', mac3 = k === '301', mac12 = k === '12', ten = k === '10';
     // the Claude rules' own settings show only for them (not for any ruleset the window doesn't know)
     { const b = f.querySelector('.ngcreate'); if (b) b.textContent = tl(w95 || mac3 ? 'Create' : 'Create galaxy'); }
-    claudeBox.hidden = k !== 'claude'; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
+    claudeBox.hidden = k !== 'claude'; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; tenBox.hidden = !ten; startSel.hidden = dos || w95 || mac3 || mac12 || ten;
     // your home system just after the computers' IQ, as the original window has it
     const box = k === 'claude' ? claudeBox : orig ? origBox : null;
     if (box && startSel.parentNode !== box) box.insertBefore(startSel, box.children[1]);
     buddyO.hidden = !orig; buddyC.hidden = k !== 'claude';
     // 1.2 fixes the computers (one) and has no women
     f.querySelector('select[name=computers]').closest('label').hidden = mac12;
-    f.querySelector('select[name=female]').closest('label').hidden = mac12;
+    f.querySelector('select[name=female]').closest('label').hidden = mac12 || ten;
     // up to 19 computers with 4.0.5 and 3.0.1 rules, 8 otherwise
     const csel = f.querySelector('select[name=computers]');
-    for (const o of csel.options) if (/^\d+$/.test(o.value) && +o.value > 8) o.hidden = !w95 && !mac3;
-    if (!w95 && !mac3 && +csel.value > 8) csel.value = '8';
+    for (const o of csel.options) if (/^\d+$/.test(o.value) && +o.value > 8) o.hidden = !w95 && !mac3 && !(ten && +o.value <= 10); // (1.0: up to 10)
+    if (!w95 && !mac3 && +csel.value > (ten ? 10 : 8)) csel.value = ten ? '10' : '8';
     // Palm OS 5 has no "Any" choice for the computers, and alliances, luck and novas are always on
     const noAny = palm || ngr.anyComputers === false, noBoxes = palm || ngr.optionBoxes === false;
     csel.querySelector('option[value=any]').hidden = noAny;
@@ -6731,6 +6740,8 @@ function newGameDialog() {
       return { d, o: Object.assign(common, { start: d.m_skill, iq: d.m_iq, shape: d.m_shape, size: d.m_size, density: d.m_density, yearsPerTurn: +d.m_years, novas: true, luck: true }) };
     } else if (k === 'dos') {
       return { d, o: Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }) };
+    } else if (k === '10') { // (the Mac 1.0 reconstruction: js/rules-10.js fixOptions keeps the rest)
+      return { d, o: Object.assign(common, { iq: d.t_iq, shape: d.t_shape, starCount: +d.t_stars, fast10: d.t_speed === 'fast', scouts10: true }) };
     } else if (k === 'claude' || k === '12') {
       // (1.2 had no New Game window: its ruleset fixes every choice, rs.fixOptions)
       return { d, o: Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density,

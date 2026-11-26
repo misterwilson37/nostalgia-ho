@@ -5172,6 +5172,14 @@ window.HOMAC12 = {
   // menu: Jake's 1.2 game in the System 7 look, 17 Nov 2026)
   menuLayoutNow() { return menuLayout(); },
 };
+// the Mac 1.0 skin (js/skins/mac10): 1.0's own parts in place of 1.2's, drawn with this file's tools (js/skins/mac10/ten.js); the other skins never set it
+if (window.HOMAC10 && window.HOMAC10_BUILD) {
+  const K = { A, G, H, lang, own, own12Rules, qdCanvas, G9, G9B, SYS12, vbars, dragBars, drawBar, colonyBars, setColonyBars, planetWords, RS12, langView, titleBar12,
+    orPat, GRAY, wheel12, zoomIdx, zooms, atZoom, it, run, noGame, selStar, selFleet, mine, lastBattle, createType, organize, battleSpeed12, fixStep, menuLayout12,
+    measureMac, MACS, raw, nice, ask12, alertBox, win, btn, buildShips, ranksWindow, menus12, dlog20, txt20, at20, put20, dbl12, fill, DONE,
+    keyEquiv: (e) => keyEquiv(e), get ITEMS() { return ITEMS; } };
+  Object.defineProperties(window.HOMAC12, Object.getOwnPropertyDescriptors(window.HOMAC10_BUILD(K)));
+}
 // key equivalents: ⌘ or Ctrl and the item's key, as the menus show them (a browser keeps some of them, ⌘N, ⌘W, ⌘T, ⌘Q, for itself)
 function keyEquiv(e) {
   if (!(e.metaKey || e.ctrlKey) || e.altKey || !A() || !G() || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;

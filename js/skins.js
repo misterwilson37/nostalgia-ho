@@ -85,6 +85,9 @@ const SOUNDS = {
   // 1.2 has thirteen sounds: good and bad news, battle, exploring, end of turn
   // (7018, "You have colonized": PlayAnnounceSound @130f08 gives a new colony snd 2000, the tech level's and the new year's, with no other sound for it)
   mac12: { name: '1.2 (Mac, French, 1992)', year: 1992, dir: 'assets/skins/mac12/', map: { 11111: 7000, 7018: 2000 } },
+  // 1.0 (1990): no copy of the program is known, so none of its sounds; the manual says only that it had them (the Options menu's
+  // Sound). Its skin plays 1.2's, the nearest version we have (the same set, not listed twice)
+  mac10: { name: '1.2 (Mac, French, 1992)', year: 1992, dir: 'assets/skins/mac12/', map: { 11111: 7000, 7018: 2000 }, same: 'mac12' },
   // 2.0.1 has the same thirteen sounds as 1.2 (the same files); no click
   mac2: { name: '2.0.1 (Mac, 1992)', year: 1992, dir: 'assets/skins/mac2/', map: { 11111: 7000 } },
   mac2c: { name: '2.0.1 (Mac, 1992)', year: 1992, dir: 'assets/skins/mac2c/', map: { 11111: 7000 }, same: 'mac2' },
@@ -157,6 +160,9 @@ const OSES = [
 const SKINS = [
   { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993, os: ['dos', 'win31'], icon: 'dos' },
   { id: 'amiga', version: '2.x', platform: 'Amiga', label: '2.x Amiga (1994–95)', year: 1994, os: ['workbench'], icon: 'amiga' },
+  // 1.0 (1990): drawn from its manual, the only thing of it we have (js/skins/mac10, docs/mac10-skin.md); its icon is 1.2's
+  // (keepRules: New Game keeps this skin for that edition's rules instead of offering the edition's own: 1.0's rules are unknown, so 1.2's)
+  { id: 'mac10', bw: true, version: '1.0', platform: 'Mac, black and white, from the manual', year: 1990, os: ['system6', 'system7'], icon: 'mac12', keepRules: '12' },
   { id: 'mac12', bw: true, version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system6', 'system7'], icon: 'mac12' },
   { id: 'mac2', bw: true, version: '2.0.1', platform: 'Mac, black and white', year: 1992, os: ['system7', 'system6'], icon: 'mac2' },
   { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'], icon: 'mac2c' },
