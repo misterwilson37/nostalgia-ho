@@ -253,3 +253,7 @@ Then the rest of the same set (40 more shots, missed at first):
 - **Menus** (9.31.51-9.32.01, 9.40.59): Dip Into Savings shows Ctrl+D; the English Galaxy menu says "Compare Players...." (four dots,
   as the original). The Ctrl+ keys are shown, not wired, as before. The start-up screens, Build Ships and Tech Spending in the set
   repeat earlier shots and were already built from them.
+
+**Open (26 Nov):** whether 4.0.5 ever shows "Save changes?" (dialog 405, OK / Don't Save): Jake's 26 Nov shots don't have it; to settle
+from the code (its caller), not with another capture. The windows' 12-16 pixel placement difference (above). Keyboard shortcuts:
+`docs/shortcuts-plan.md`.
