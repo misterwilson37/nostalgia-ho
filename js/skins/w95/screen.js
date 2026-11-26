@@ -59,9 +59,10 @@ T.menuLayout = {
     [lab('List All Fleets'), 'Ships/List all fleets…'], [lab('Organize Ships...'), () => { const a = HOAPI; if (a && a.G && a.UI.sel != null) (W95ON() ? organizeDialog(a.UI.sel) : a.openOrganize(a.UI.sel)); }, null, null, () => noGame() || HOAPI.UI.sel == null], [() => { const f = HOAPI.curFleet && HOAPI.curFleet(); return TL(f && f.scrap301 ? "Don't Scrap Current Fleet" : 'Scrap current fleet'); }, 'Ships/#3'], '-', // (shots 042 / 046)
     // (the last item names the selected star's battle, or reads "No Battles here..." dimmed: shot 042)
     [null, 'Ships/#1']],
-  Galaxy: [[lab('Compare Players...'), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('Statistics...'), () => statsDialog(), null, null, () => noGame() || !(A().me() && A().me().st405)], // (shot 047; dialog 355 from the 405 rules' counters, p.st405: a game begun before them dimmed)
+  // ("Compare Players....": four dots in the English menu, Jake's captures of 26 Nov, 9.31.58 and 9.40.59)
+  Galaxy: [[() => (TL('Compare Players...') === 'Compare Players...' ? 'Compare Players....' : TL('Compare Players...')), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('Statistics...'), () => statsDialog(), null, null, () => noGame() || !(A().me() && A().me().st405)], // (shot 047; dialog 355 from the 405 rules' counters, p.st405: a game begun before them dimmed)
      [lab('List All Explored Stars...'), 'Galaxy/List explored stars…'], '-',
-    [lab('Dip Into Savings'), () => { if (!dipDialog()) A().openDip(); }], [() => (abandonMarked() ? TL("Don't Abandon Planet") : TL('Abandon Planet')), () => abandonPlanet(), null, null, () => !abandonable(), 'A'], '-',
+    [lab('Dip Into Savings'), () => { if (!dipDialog()) A().openDip(); }, null, null, () => noGame() || !!(HOAPI.G && HOAPI.G.over), 'D'], [() => (abandonMarked() ? TL("Don't Abandon Planet") : TL('Abandon Planet')), () => abandonPlanet(), null, null, () => !abandonable(), 'A'], '-', // (Dip Into Savings' Ctrl+D: Jake's capture of 26 Nov, 9.31.58)
     [lab('Alliances...'), () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], [lab('Give Money/Metal...'), 'Galaxy/Give money or metal…'], [lab('Surrender To...'), 'Galaxy/#9'], [lab('Send Message...'), 'Galaxy/Send a message…'], '-',
     [lab('Armageddon'), 'Galaxy/#10']],
   // (shot 050: no ticks; Chat Window is dimmed out of a network game; Zoom In dimmed at the closest zoom)
@@ -1358,46 +1359,112 @@ async function helpBooks(base) {
   books.extra = lists.slice(1).flatMap(l => [...l.querySelectorAll('a')].map(link));
   return (HELPT.cache[base] = books);
 }
+// a help page's own words: its <main> without the copy's Contents link and footer
+function helpMain(d) { const m = (d.querySelector('main') || d.body).cloneNode(true); m.querySelectorAll('nav, footer, script').forEach(e => e.remove()); return m; }
+// The page itself (Jake's capture of 26 Nov, 9.32.17): Windows Help's own window, "HoHelp", 472 x 442, its menu (File, Edit, Bookmark, Options,
+// Help: the remake's are inert), the buttons Help Topics, Back, Print, << and >> (the browse sequence: the books' pages in order; a page no
+// book lists, as the capture's, has neither), and the page on grey: its title in bold, then its words. A link goes to its page in the
+// same window; Back returns.
+function helpViewer(u0, books) {
+  const a = A(), seq = (books || []).flatMap(b => b.topics).map(t => t.u), hist = [];
+  const box = document.createElement('div'); box.className = 'w95msg w95hv';
+  box.innerHTML = '<div class="mcap"><span>HoHelp</span><i class="mn"></i><i class="mx"></i><i class="x"></i></div><div class="hvmenu"></div><div class="hvbar"></div><div class="hvpage" tabindex="0"></div>';
+  box.querySelector('.mcap span').textContent = TL('HoHelp');
+  ['File', 'Edit', 'Bookmark', 'Options', 'Help'].forEach(t => { const m = document.createElement('span'); accText(m, t); box.querySelector('.hvmenu').append(m); });
+  const page = box.querySelector('.hvpage'), bar = box.querySelector('.hvbar');
+  const bt = (t, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'pb'; accText(b, t); b.addEventListener('click', fn); bar.append(b); return b; };
+  let cur = null;
+  const show = async (u, back) => {
+    if (cur && !back) hist.push(cur); cur = u;
+    let d; try { d = new DOMParser().parseFromString(await (await fetch(u)).text(), 'text/html'); } catch (e) { page.textContent = TL('The help could not be read.'); return; }
+    const m = helpMain(d), here = new URL(u, location.href);
+    m.querySelectorAll('[src]').forEach(e => e.setAttribute('src', new URL(e.getAttribute('src'), here).href));
+    m.querySelectorAll('a[href]').forEach(l => { const to = new URL(l.getAttribute('href'), here); l.addEventListener('click', (ev) => { if (to.origin === location.origin && /\.html$/.test(to.pathname)) { ev.preventDefault(); show(to.href); } }); });
+    page.innerHTML = ''; page.append(...m.childNodes); page.scrollTop = 0;
+    const i = seq.indexOf(new URL(u, location.href).href) >= 0 ? seq.indexOf(new URL(u, location.href).href) : seq.indexOf(u);
+    bk.disabled = !hist.length; pv.disabled = i <= 0; nx.disabled = i < 0 || i >= seq.length - 1;
+  };
+  bt('Help Topics', () => { a.closeModal(); helpTopics(); });
+  const bk = bt('Back', () => { if (hist.length) show(hist.pop(), true); });
+  bt('Print', () => { const w = window.open('', '_blank'); if (w) { w.document.write('<!doctype html><meta charset="utf-8"><title>HoHelp</title>' + page.innerHTML); w.document.close(); w.print(); } });
+  const step = (k) => { const i = seq.indexOf(cur); if (i >= 0 && seq[i + k]) show(seq[i + k]); };
+  const pv = bt('<<', () => step(-1)), nx = bt('>>', () => step(1));
+  box.querySelector('.x').addEventListener('click', () => a.closeModal());
+  a.modal('', box, { cls: 'w95msgwin w95hvwin', label: 'HoHelp' });
+  show(u0); page.focus();
+  return true;
+}
 function helpTopics() {
+  // (Jake's captures of 26 Nov, 9.32.05-9.32.12: the window keeps one size, 440 x 442, on every tab. Contents: the lead line and the books.
+  // Index: "1 Type the first few letters of the word you're looking for.", a box, "2 Click the index entry you want, and then click Display.",
+  // the entries A to Z as plain words (typing moves to the first that starts so; nothing is hidden). Find: "1 Type the word(s) you want to
+  // find" over a box, "2 Select some matching words to narrow your search" over the words (all picked, in navy), "3 Click a topic, then click
+  // Display" over the topics with a check box each, "N Topics Found" and "All words, Begin, Auto, Pause" under them, and Clear, Options...,
+  // Find Similar... (dimmed), Find Now (dimmed) and Rebuild... down the right. Index and Find say Display, Contents Open.)
   const a = A(), base = helpBase();
   const box = document.createElement('div'); box.className = 'w95msg w95help';
-  box.innerHTML = '<div class="mcap"><span></span><i class="q">?</i><i class="x"></i></div><div class="htabs" role="tablist"></div><div class="hpane"><p class="hlead"></p><div class="hin"></div><div class="hlist" role="tree" tabindex="0"></div></div><div class="hbtns"></div>';
+  box.innerHTML = '<div class="mcap"><span></span><i class="q">?</i><i class="x"></i></div><div class="htabs" role="tablist"></div><div class="hpane"></div><div class="hbtns"></div>';
   box.querySelector('.mcap span').textContent = TL('Help Topics: HoHelp');
-  const tabs = box.querySelector('.htabs'), lead = box.querySelector('.hlead'), list = box.querySelector('.hlist'), inp = box.querySelector('.hin');
+  const tabs = box.querySelector('.htabs'), pane = box.querySelector('.hpane');
   const mk = (t, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'pb' + (cls ? ' ' + cls : ''); b.textContent = TL(t); if (fn) b.addEventListener('click', fn); return b; };
-  let tab = 'contents', open = {}, sel = null, books = [];
-  const go = (u) => { try { window.open(u, '_blank', 'noopener'); } catch (e) {} a.closeModal(); };
+  const put = (e, x, y, w, h) => { Object.assign(e.style, { position: 'absolute', left: x + 'px', top: y + 'px' }); if (w) e.style.width = w + 'px'; if (h) e.style.height = h + 'px'; pane.append(e); return e; };
+  const lab = (t, x, y) => { const p = document.createElement('div'); p.className = 'hlab'; p.textContent = t; return put(p, x, y); };
+  const lst = (cls, x, y, w, h) => { const l = document.createElement('div'); l.className = 'hlist ' + cls; l.setAttribute('role', 'listbox'); l.tabIndex = 0; l.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); openSel(); } }); return put(l, x, y, w, h); };
+  let tab = 'contents', open = {}, sel = null, books = [], q = '', wordPick = null;
+  const go = (u) => { a.closeModal(); helpViewer(u, books); };
   const openSel = () => { if (!sel) return; if (sel.book != null) { open[sel.book] = !open[sel.book]; draw(); } else go(sel.u); };
-  const row = (cls, text, data, depth) => { const r = document.createElement('div'); r.className = 'hrow ' + cls + (sel && sel.key === data.key ? ' sel' : ''); r.style.paddingLeft = (2 + 18 * depth) + 'px'; r.setAttribute('role', 'treeitem');
+  const row = (list, cls, text, data, depth) => { const r = document.createElement('div'); r.className = 'hrow ' + cls + (sel && sel.key === data.key ? ' sel' : ''); r.style.paddingLeft = (2 + 18 * depth) + 'px'; r.setAttribute('role', 'option');
     const i = document.createElement('i'); i.className = 'hic'; r.append(i, span('ht', text));
-    r.addEventListener('click', () => { sel = data; draw(); }); r.addEventListener('dblclick', () => { sel = data; openSel(); }); list.append(r); };
-  const all = () => books.flatMap(b => b.topics).concat(books.extra || []);
-  const draw = () => {
+    r.addEventListener('click', () => { sel = data; draw(); }); r.addEventListener('dblclick', () => { sel = data; openSel(); }); list.append(r); return r; };
+  const all = () => { const seen = new Set(); return books.flatMap(b => b.topics).concat(books.extra || []).filter(t => !seen.has(t.t) && seen.add(t.t)).sort((x, y) => x.t.localeCompare(y.t)); };
+  const box1 = (y, w, x) => { const f = document.createElement('input'); f.type = 'text'; f.value = q; f.addEventListener('input', () => { q = f.value; sel = null; wordPick = null; draw(true); }); return put(f, x || 18, y, w); };
+  const draw = (keepFocus) => {
+    const had = keepFocus && pane.querySelector('input'), pos = had ? had.selectionStart : 0;
     [...tabs.children].forEach(c => c.classList.toggle('on', c.dataset.t === tab));
-    list.innerHTML = '';
+    pane.innerHTML = '';
     if (tab === 'contents') {
-      lead.textContent = TL('Click a book, and then click Open. Or click another tab, such as Index.'); inp.hidden = true;
-      books.forEach((b, i) => { row(open[i] ? 'bk open' : 'bk', b.t, { key: 'b' + i, book: i }, 0); if (open[i]) b.topics.forEach((t, j) => row('pg', t.t, { key: 'p' + i + '.' + j, u: t.u }, 1)); });
+      lab(TL('Click a book, and then click Open. Or click another tab, such as Index.'), 18, 24);
+      const L = lst('', 20, 51, 374, 273);
+      books.forEach((b, i) => { row(L, open[i] ? 'bk open' : 'bk', b.t, { key: 'b' + i, book: i }, 0); if (open[i]) b.topics.forEach((t, j) => row(L, 'pg', t.t, { key: 'p' + i + '.' + j, u: t.u }, 1)); });
+    } else if (tab === 'index') {
+      lab('1  ' + TL('Type the first few letters of the word you\'re looking for.'), 18, 24); const f = box1(45, 358, 30);
+      lab('2  ' + TL('Click the index entry you want, and then click Display.'), 18, 74);
+      const L = lst('plain', 30, 92, 358, 224), ts = all(), lq = q.toLowerCase().trim();
+      const hit = lq ? ts.findIndex(t => t.t.toLowerCase().startsWith(lq)) : -1;
+      if (hit >= 0 && (!sel || sel.auto)) sel = { key: 'i' + hit, u: ts[hit].u, auto: true };
+      ts.forEach((t, k) => { const r = row(L, 'pg', t.t, { key: 'i' + k, u: t.u }, 0); if (sel && sel.key === 'i' + k) setTimeout(() => r.scrollIntoView({ block: 'nearest' }), 0); });
+      if (had) { f.focus(); f.setSelectionRange(pos, pos); }
     } else {
-      inp.hidden = false; const q = (inp.querySelector('input').value || '').toLowerCase().trim();
-      lead.textContent = tab === 'index' ? TL('Type the first few letters of the word you\'re looking for.') : TL('Type the word(s) you want to find.');
-      let ts = all().slice().sort((x, y) => x.t.localeCompare(y.t));
-      if (tab === 'index' && q) ts = ts.filter(t => t.t.toLowerCase().startsWith(q) || t.t.toLowerCase().split(/\W+/).some(w => w.startsWith(q)));
-      if (tab === 'find' && q) { const ws = q.split(/\s+/); ts = ts.filter(t => { const tx = (HELPT.text[t.u] || '') + ' ' + t.t.toLowerCase(); return ws.every(w => tx.includes(w)); }); }
-      ts.forEach((t, k) => row('pg', t.t, { key: 'i' + k + t.u, u: t.u }, 0));
+      lab('1  ' + TL('Type the word(s) you want to find'), 18, 18); const f = box1(37, 290);
+      lab('2  ' + TL('Select some matching words to narrow your search'), 18, 67);
+      const ws = q.toLowerCase().split(/\s+/).filter(Boolean), last = ws[ws.length - 1] || '';
+      const words = [...new Set(Object.values(HELPT.words || {}).flat())].filter(w => !last || w.toLowerCase().startsWith(last)).sort((x, y) => x.toLowerCase().localeCompare(y.toLowerCase()) || (x < y ? 1 : -1));
+      const W = lst('words', 18, 83, 290, 90);
+      words.slice(0, 400).forEach(w => { const r = document.createElement('div'); r.className = 'hrow wd' + (wordPick == null || wordPick === w ? ' on' : ''); r.textContent = w; r.addEventListener('click', () => { wordPick = wordPick === w ? null : w; sel = null; draw(); }); W.append(r); });
+      lab('3  ' + TL('Click a topic, then click Display'), 18, 188);
+      const has = (t, w) => (' ' + (HELPT.text[t.u] || '') + ' ' + t.t.toLowerCase()).includes(w);
+      let ts = all();
+      if (wordPick) ts = ts.filter(t => has(t, wordPick.toLowerCase())); else if (ws.length) ts = ts.filter(t => ws.every(w => has(t, w)));
+      if (!sel && ts.length) sel = { key: 'f0', u: ts[0].u };
+      const L = lst('checks', 18, 204, 390, 92);
+      ts.forEach((t, k) => row(L, 'pg', t.t, { key: 'f' + k, u: t.u }, 0));
+      const st = (t, x, w) => { const d = document.createElement('div'); d.className = 'hstat'; d.textContent = t; put(d, x, 310, w, 19); };
+      st(cfmt(TL('%d Topics Found'), ts.length), 18, 187); st(TL('All words, Begin, Auto, Pause'), 216, 191);
+      [['Clear', 34, () => { q = ''; wordPick = null; sel = null; draw(); }], ['Options...', 64], ['Find Similar...', 93, null, true], ['Find Now', 123, null, true], ['Rebuild...', 152]]
+        .forEach(([t, y, fn, dim]) => { const b = mk(t, fn); b.disabled = !!dim; accText(b, t); put(b, 318, y, 82, 23); });
+      if (had) { f.focus(); f.setSelectionRange(pos, pos); }
     }
-    const ob = box.querySelector('.hbtns .op'); if (ob) accText(ob, sel && sel.book != null && open[sel.book] ? 'Close' : sel && sel.book == null ? 'Display' : 'Open');
+    const ob = box.querySelector('.hbtns .op'); if (ob) accText(ob, tab !== 'contents' ? 'Display' : sel && sel.book != null && open[sel.book] ? 'Close' : sel && sel.book == null ? 'Display' : 'Open');
   };
   ['Contents', 'Index', 'Find'].forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.className = 'htab'; b.dataset.t = t.toLowerCase(); b.textContent = TL(t); b.setAttribute('role', 'tab');
-    b.addEventListener('click', async () => { tab = t.toLowerCase(); sel = null; if (tab === 'find') await helpText(); draw(); inp.querySelector('input').focus(); }); tabs.append(b); });
-  const fi = document.createElement('input'); fi.type = 'text'; inp.append(fi); fi.addEventListener('input', () => { sel = null; draw(); });
-  const helpText = async () => { await Promise.all(all().filter(t => HELPT.text[t.u] == null).map(async t => { try { const h = await (await fetch(t.u)).text(); HELPT.text[t.u] = new DOMParser().parseFromString(h, 'text/html').body.textContent.toLowerCase(); } catch (e) { HELPT.text[t.u] = ''; } })); };
-  const pr = mk('Print...'); pr.disabled = true; accText(pr, 'Print...'); // (shot 284: Open's O and Print's P underlined, Cancel and the tabs not; Close and Display, not captured, as Open)
+    b.addEventListener('click', async () => { tab = t.toLowerCase(); sel = null; q = ''; wordPick = null; if (tab === 'find') await helpText(); draw(); const f = pane.querySelector('input'); if (f) f.focus(); }); tabs.append(b); });
+  const helpText = async () => { await Promise.all(all().filter(t => HELPT.text[t.u] == null).map(async t => { try { const h = await (await fetch(t.u)).text(); const tx = helpMain(new DOMParser().parseFromString(h, 'text/html')).textContent; (HELPT.raw = HELPT.raw || {})[t.u] = tx; HELPT.text[t.u] = tx.toLowerCase(); } catch (e) { HELPT.text[t.u] = ''; } }));
+    HELPT.words = HELPT.words || {}; all().forEach(t => { if (!HELPT.words[t.u]) HELPT.words[t.u] = [...new Set(((HELPT.raw || {})[t.u] || HELPT.text[t.u] || '').match(/[A-Za-zÀ-ÿ]+(?:'[A-Za-zÀ-ÿ]+)*/g) || [])].filter(w => w.length > 0); }); };
+  const pr = mk('Print...'); pr.disabled = true; accText(pr, 'Print...'); // (shot 284: Open's O and Print's P underlined, Cancel and the tabs not)
   box.querySelector('.hbtns').append(mk('Open', openSel, 'op def'), pr, mk('Cancel', () => a.closeModal()));
   box.querySelector('.x').addEventListener('click', () => a.closeModal());
-  list.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); openSel(); } });
   a.modal('', box, { cls: 'w95msgwin w95helpwin', label: 'Help Topics' });
-  helpBooks(base).then(b => { books = b; if (!sel && books.length) sel = { key: 'b0', book: 0 }; draw(); }) /* (the first book chosen as it opens: shot 284) */.catch(() => { lead.textContent = TL('The help could not be read.'); });
+  helpBooks(base).then(b => { books = b; if (!sel && books.length) sel = { key: 'b0', book: 0 }; draw(); }) /* (the first book chosen as it opens: shot 284) */.catch(() => { pane.textContent = TL('The help could not be read.'); });
   draw();
   return true;
 }
@@ -1695,11 +1762,16 @@ T.confirm = (text, yes, labels) => {
   box.querySelector('p').textContent = t;
   const mk = (label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', fn); return b; };
   const ok = mk(L2 ? L2[0] : 'OK', () => { a.closeModal(); yes(); }), no = mk(L2 ? L2[1] : 'Cancel', () => a.closeModal());
-  box.querySelector('.mbtns').append(ok, no); box.querySelector('.x').addEventListener('click', () => a.closeModal());
+  box.querySelector('.mbtns').append(...(L2 && L2.length === 1 ? [ok] : [ok, no])); // (one button: the "saved" box, OK alone) box.querySelector('.x').addEventListener('click', () => a.closeModal());
   const w = a.modal('', box, { cls: 'w95msgwin', label: 'V4.0.5' }); if (a.markYesNo) try { a.markYesNo(w, ok, no); } catch (e) {}
   ok.focus(); return true;
 };
 
+
+// Save Game: 4.0.5 writes the file and says so in its message box (Jake's capture of 26 Nov, 9.44.15: "V4.0.5", the warning sign,
+// "Game has been saved successfully", OK). The remake's Save Game is its export (the browser's download standing in for Windows' Save As
+// window), and the box follows it.
+T.exported = () => W95ON() && T.confirm(TL('Game has been saved successfully'), () => {}, [TL('OK')]);
 
 // a button's words with its first letter underlined, as Windows draws an access letter (English only: the words of other languages are the remake's)
 function accText(b, en) {

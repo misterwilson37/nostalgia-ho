@@ -46,14 +46,14 @@ choices set (`-newgalaxy-set`), **Player Entry** (`-playerentry`, `-playerentry-
 
 ## Windows 95 4.0.5 (SPACEHO.EXE)
 
-Jake's 327 shots cover nearly every screen. **26 Nov:** Jake captured Radical Research, Configure Auto Play, Abandon Planet and a
-battle destroyed immediately; all four are built and checked (status-w95.md). Still not captured, and not needed:
+Jake's 327 shots cover nearly every screen. **26 Nov:** Jake captured Radical Research, Configure Auto Play, Abandon Planet, a
+battle destroyed immediately, Help Topics' Index and Find, a help page, the "saved" box and Open Game's question; all are built and
+checked (status-w95.md). Still not captured, and not needed:
 
 | Screen | Why it matters | Who |
 |---|---|---|
 | **Save changes?** (dialog 405, OK / Don't Save) on New Game or Exit with an unsaved game | Not built | Jake or Claude |
 | **Open Game**'s file window (Windows 95 common dialog) | A browser can't show it: a kept difference, but worth one picture | Jake |
-| Help Topics' **Index** and **Find** tabs | Only Contents (shot 284) was captured | Jake or Claude |
 | **Chat** window and the take-over windows (dialogs 389-391, 404) | Network play only | Nobody (no network game) |
 
 Already captured and so not missing: Processing Year (shots 286, 314), Please Identify Yourself (004-005, 312), Waiting For
