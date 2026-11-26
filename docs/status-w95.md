@@ -223,3 +223,19 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
   Mac shot 002's Base Difficulty 49 now the form's opening rating). Organize Ships: the 405 ruleset has it (organizeFleets, the classic
   page's pile window under 4.0.5's name) for every other skin; the Mac and Windows skins keep the program's own window, and the classic
   page's leftover item is no longer repeated in their Ho! menus (T.ownOrganize).
+
+## Jake's captures of 26 Nov (Radical Research, Configure Auto Play, Abandon Planet, destroyed immediately)
+
+Built or checked against `audit/win-4.0.5/captures/Screenshot 2026-11-26 at 9.39-9.44` (private repo), each cropped to 640 x 480:
+
+- **Radical Research** (dialog 348, screen.js `radicalDialog`, through `T.window('radical')`): the bold prompt, four rows each with
+  bitmap 3105 and the program's words; a click picks the one to cancel (bitmap 4023, its words struck through), OK cancels it. The
+  program sets the words at 10 points, not the template's 8 (the capture's lines are a sixth wider).
+- **Configure Computer's Auto Play Style** (dialog 380, `configDialog`): Friendly/Aggressive and No Defense/Dig In from the rules'
+  autoPlaySettings, OK / Cancel back to Auto Play, which stays on screen behind it (a still copy: the remake has one window at a time).
+  The dialogs' scroll-bar troughs are plain grey, as in the captures (no dither).
+- **Abandon Planet** (dialog 360, `abandonAsk`): the mascot at left, the question, Cancel and OK: matches 9.43.40.
+- **Destroyed immediately** (9.43.31): the words, the loser's red cross, the luck pictures and "Done" already matched; "Round 1" is
+  now drawn under the picture as in the capture.
+- Still different: the original centres its windows on the screen above the taskbar, so they sit 12-16 pixels higher than the
+  remake's (which centres on the whole page).
