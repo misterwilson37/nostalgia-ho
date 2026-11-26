@@ -239,3 +239,17 @@ Built or checked against `audit/win-4.0.5/captures/Screenshot 2026-11-26 at 9.39
   now drawn under the picture as in the capture.
 - Still different: the original centres its windows on the screen above the taskbar, so they sit 12-16 pixels higher than the
   remake's (which centres on the whole page).
+
+Then the rest of the same set (40 more shots, missed at first):
+
+- **Help Topics** (9.32.05-9.32.12): one window size on every tab. Index: the two numbered steps, a box, the entries as plain words
+  (typing moves to the first match). Find: the three numbered steps, the word list (all picked, navy), the topics with check boxes,
+  "N Topics Found" and "All words, Begin, Auto, Pause", and Clear / Options... / Find Similar... / Find Now / Rebuild... at the right.
+  Index and Find say Display. Find no longer matches the help copy's own footer words.
+- **The help page** (9.32.17): `helpViewer`, Windows Help's "HoHelp" window inside the page (it had opened a browser tab): its menu
+  (inert), Help Topics, Back, Print, << and >> (the books' pages in order), the page's title in bold and its words; links stay in it.
+- **"Game has been saved successfully"** (9.44.15): shown after Save Game's export (`T.exported`).
+- **"Are you sure you want to open a game?"** (9.44.24): already matched.
+- **Menus** (9.31.51-9.32.01, 9.40.59): Dip Into Savings shows Ctrl+D; the English Galaxy menu says "Compare Players...." (four dots,
+  as the original). The Ctrl+ keys are shown, not wired, as before. The start-up screens, Build Ships and Tech Spending in the set
+  repeat earlier shots and were already built from them.

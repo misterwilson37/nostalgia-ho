@@ -5728,7 +5728,7 @@ function exportGame() {
     closeModal(); downloadText(out, name);
     if (G.online) toast('Exported a snapshot of this online game as it stands on this computer. Imported, it opens as a local game, not online.');
     else if (locked) toast('Exported with a password. Keep it: it can’t be recovered.');
-    maybeSaveOffer();
+    if (!(T.exported && T.exported())) maybeSaveOffer(); // (a skin's own word that the game was saved: 4.0.5's message box)
   };
   const can = pwOK(), M = pwManual();
   const err = el('p', { class: 'note', role: 'alert' });

@@ -483,3 +483,40 @@ html.w95win .scrim > .win .w95help .htab.on { margin: 0 -2px !important; padding
 html.w95win .w95help .hpane { border: 0; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #000, inset -2px -2px 0 #808080; }
 /* Radical Research (dialog 348): the picked program's words struck through the whole of their box (Jake's capture of 26 Nov, 9.44.48) */
 html.w95win .w95dlg .st.w95cut { background: linear-gradient(transparent calc(50% - 0.5px), #000 calc(50% - 0.5px), #000 calc(50% + 0.5px), transparent calc(50% + 0.5px)); }
+/* Help Topics as Jake's captures of 26 Nov (9.32.05-9.32.12): one size on every tab, each tab's parts placed in the pane */
+html.w95win .w95help { width: 440px; height: 420px; display: flex; flex-direction: column; }
+html.w95win .w95help .hpane { position: relative; height: 350px; padding: 0; flex: none; }
+html.w95win .w95help .hlab { white-space: nowrap; }
+html.w95win .w95help .hpane input[type=text] { height: 20px; margin: 0; box-sizing: border-box; font: inherit; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; padding: 1px 3px; }
+html.w95win .w95help .hpane .hlist { box-sizing: border-box; padding: 1px; }
+html.w95win .w95help .hlist.plain .hic { display: none; }
+html.w95win .w95help .hlist.plain .hrow, html.w95win .w95help .hlist.words .hrow { height: 13px; }
+html.w95win .w95help .hlist.words { background: #fff; }
+html.w95win .w95help .hlist.words .hrow { padding-left: 4px; cursor: default; }
+html.w95win .w95help .hlist.words .hrow.on { background: #000080; color: #fff; }
+html.w95win .w95help .hlist.checks .hrow { height: 13px; }
+html.w95win .w95help .hlist.checks .hic { width: 11px; height: 11px; background: #fff; box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf, inset 2px 2px 0 #000; }
+html.w95win .w95help .hstat { box-sizing: border-box; padding: 2px 4px; white-space: nowrap; box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff; }
+html.w95win .w95help .hpane .pb { min-width: 0; }
+html.w95win .w95help { height: 438px; }
+html.w95win .w95help .hpane { height: 366px; }
+html.w95win .w95help .hpane input[type=text]:focus { outline: none; border-color: #808080 #fff #fff #808080; }
+html.w95win .w95help .hlist.checks .hrow.sel .ht { background: none; color: inherit; outline: 0; }
+html.w95win .w95help .hlist.checks .hrow.sel { background: #000080; color: #fff; }
+/* Windows Help's page window (Jake's capture of 26 Nov, 9.32.17) */
+html.w95win .scrim > .win.w95hvwin { max-width: none; }
+html.w95win .w95hv { width: 472px; height: 442px; display: flex; flex-direction: column; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; background: #c0c0c0; }
+html.w95win .w95hv .mcap .mn, html.w95win .w95hv .mcap .mx { width: 16px; height: 14px; margin-right: 0; background: #c0c0c0; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff, inset -2px -2px 0 #808080; }
+html.w95win .w95hv .mcap .mx { margin-right: 2px; }
+html.w95win .w95hv .hvmenu { display: flex; gap: 0; padding: 2px 0 3px; }
+html.w95win .w95hv .hvmenu span { padding: 0 6px; }
+html.w95win .w95hv .hvbar { display: flex; margin: 0 2px; box-shadow: inset 0 1px 0 #808080, inset 0 2px 0 #fff; padding-top: 2px; }
+html.w95win .scrim > .win .w95hv .hvbar .pb { min-width: 0 !important; width: 65px; height: 21px; padding: 0 !important; }
+html.w95win .w95hv .hvpage { flex: 1; overflow-y: auto; margin: 0 2px 2px; padding: 6px 12px; outline: none; box-shadow: inset 1px 1px 0 #808080, inset 2px 2px 0 #000, inset -1px -1px 0 #fff; }
+html.w95win .w95hv .hvpage h1 { font: bold 13px/16px Arial, sans-serif; margin: 2px 0 10px; }
+html.w95win .w95hv .hvpage p { margin: 0 0 8px; }
+html.w95win .w95hv .hvpage a { color: #008000; }
+html.w95win .w95hv .mcap .mn { background: #c0c0c0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='14'%3E%3Cpath d='M4 9h6v2H4z'/%3E%3C/svg%3E") no-repeat; }
+html.w95win .w95hv .mcap .mx { background: #c0c0c0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='14'%3E%3Cpath d='M3 2h9v9H3z' fill='none' stroke='%23000'/%3E%3Cpath d='M3 3h9' stroke='%23000'/%3E%3C/svg%3E") no-repeat; }
+html.w95win .w95hv .hvpage { box-shadow: inset 0 1px 0 #808080, inset 0 2px 0 #fff; }
+html.w95win .scrim > .win .w95hv .hvbar .pb, html.w95win .scrim > .win .w95hv .hvbar .pb:focus { outline: none !important; border: 0 !important; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf !important; }
