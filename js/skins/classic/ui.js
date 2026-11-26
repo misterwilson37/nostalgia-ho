@@ -6472,7 +6472,7 @@ function newGameDialog() {
     slider('t_stars', 'Number of stars', 32, 109, 60, '32', '109'),
     sel('t_shape', 'Map style', [['spiral', 'Spiral'], ['circle', 'Circle'], ['random', 'Random']], 'circle'),
     sel('t_speed', 'Game speed', [['normal', 'Normal'], ['fast', 'Fast']], 'normal'),
-    sel('t_iq', 'Computer skill', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'dumb'));
+    sel('t_iq', 'Computer skill', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'average'));
   // Mac 1.2 rules: 1.2 had no New Game window; every game was the same
   const mac12Box = el('div', { class: 'group' }, el('p', { class: 'sub note12' },
     '1.2 had no New Game choices: every game is a small, dense circle galaxy with one average computer player, and everyone starts at normal skill.'));

@@ -19,7 +19,8 @@ const R12 = E.RULESETS['12'], D = E.RULESETS.dos;
 
 // ---------- the galaxy (MANUAL p. 33-35, its Create New Galaxy figure) ----------
 // 1 to 10 human players, 0 to 10 computers, 32 to 109 stars (60 in the figure), Spiral, Circle or Random, a Normal or a Fast game,
-// Dumb, Average or Smart computers. The figure's own settings are the defaults: 4 computers, 60 stars, Circle, Normal, Dumb.
+// Dumb, Average or Smart computers. The figure's own settings are the defaults (4 computers, 60 stars, Circle, Normal), but Average
+// computers rather than its Dumb (Jake, 27 Nov 2026: Dumb ones start like Experts, with nothing, and barely play).
 // (The remake: at most 8 people on one computer, and 10 players in all.)
 const SHAPES10 = ['spiral', 'circle', 'random'];
 function fixOptions(opts) {
@@ -27,7 +28,7 @@ function fixOptions(opts) {
   opts.starCount = Math.max(32, Math.min(109, (+opts.starCount | 0) || 60));
   opts.size = 'medium'; // (unused once starCount is set: rules-dos makeGalaxy)
   opts.density = 'dense'; // GUESS: the manual has no density; 1.2's
-  opts.iq = ['dumb', 'average', 'smart'].includes(opts.iq) ? opts.iq : 'dumb';
+  opts.iq = ['dumb', 'average', 'smart'].includes(opts.iq) ? opts.iq : 'average';
   opts.fast10 = !!opts.fast10;
   opts.start = 'normal'; // MANUAL: no skill for people, only "Comp. Skill" (p. 34): 2.0's Normal start, GUESS for its numbers
   opts.female = false; // GUESS: 1.2's rule (every player a man); the manual calls every player "he"
@@ -96,7 +97,7 @@ E.registerRules('10', Object.assign({}, R12, {
   // MANUAL: "You'll want to set it to 1 if you're playing alone" ... up to 10 players in all (pp. 4, 33)
   maxPlayers: 10, maxHumans: 8,
   fixedOptions: { density: 'dense', start: 'normal', female: false, novas: false, alliances: false, luck: false, yearsPerTurn: 10 }, fixOptions,
-  newGameDefaults: { computers: '4', t_stars: '60', t_shape: 'circle', t_speed: 'normal', t_iq: 'dumb' }, // MANUAL: the figure's own (p. 34)
+  newGameDefaults: { computers: '4', t_stars: '60', t_shape: 'circle', t_speed: 'normal', t_iq: 'average' }, // MANUAL: the figure's own (p. 34), but Average computers (Jake's choice; the figure's are Dumb)
   makeGalaxy: D.makeGalaxy, setupPlayer: setupPlayer10, defaultDesigns: defaultDesigns10,
   incomeDiv, grLimit,
   noInterest: true, // GUESS: the 1.0 manual says money not spent "will be saved until next turn" (p. 15) and never mentions interest; 2.0's does ("Plus some interest", its p. 13)

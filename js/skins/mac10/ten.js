@@ -8,8 +8,9 @@
 const DIR = 'assets/skins/mac10/sprites/';
 const PIC = {};
 // (tools/skins/mac10_icons.py: read from the 300 dpi scans pixel for pixel; bad1-bad9 the bad guys, the manual's first)
-for (const n of ['colony', 'explored', 'unexplored', 'bad1', 'bad2', 'bad3', 'bad4', 'bad5', 'bad6', 'bad7', 'bad8', 'bad9']) for (const s of ['', '-sel']) { const im = new Image(); im.src = DIR + 'm10' + n + s + '.png'; PIC[n + s] = im; }
+for (const n of ['colony', 'explored', 'unexplored', 'red', 'nova', 'wreck'].concat([...Array(19).keys()].flatMap(i => ['bad' + (i + 1), 'gal' + (i + 1)]))) for (const s of ['', '-sel']) { const im = new Image(); im.src = DIR + 'm10' + n + s + '.png'; PIC[n + s] = im; }
 { const im = new Image(); im.src = DIR + 'm10fleet.png'; PIC.fleet = im; }
+{ const im = new Image(); im.src = DIR + 'm10halo.png'; PIC.halo = im; }
 const COVER = new Image(); COVER.src = DIR + 'cover.png';
 // which windows are closed (a window's close box, the Windows menu), kept for the next game as the program kept them ("Spaceward Ho!
 // automatically saves your window configuration when you quit and restores it the next time you play", p. 6)
@@ -48,16 +49,19 @@ window.HOMAC10_BUILD = (K) => {
   const kind = (look) => {
     const b = String(look.base || ''), n = +(/(\d{4})$/.exec(b) || [])[1];
     if (b === 'unknown' || b === 'soon' || n === 1007 || n === 1008) return 'unexplored';
-    if (n >= 2000) return badOf((n - 2000) % 500);
-    if (look.hat && look.hat.startsWith('bad')) return badOf(+look.hat.slice(3).split('_')[0]);
+    if (n >= 2000) return badOf((n - 2000) % 500, n >= 2500);
+    if (look.hat && look.hat.startsWith('bad')) { const [fc, fm] = look.hat.slice(3).split('_'); return badOf(+fc, fm === '1'); }
     if (b === 'battle' || n === 1009) return 'bad1';
     if (look.hat || (n >= 1000 && n <= 1003) || (n >= 1100 && n < 1200) || (n >= 1500 && n < 1700)) return 'colony';
     return 'explored';
   };
-  // a rival's bad guy by its place among the rivals (slot order), from its face number
-  function badOf(face) {
-    const g = G(), rivals = g ? g.players.filter(p => p.id !== ME()) : [], i = rivals.findIndex(p => (p.face || 0) % 20 === face % 20);
-    return 'bad' + ((Math.max(0, i) % 9) + 1);
+  // a rival's bad guy by its place among the rivals (slot order), from its face number: the manual's bandit first; 1.0's ten players need
+  // nine, later rulesets' twenty nineteen; a woman rival (later rulesets have them) a bad gal (tools/skins/mac10_icons.py)
+  function badFor(o) { const g = G(), i = g.players.filter(p => p.id !== ME()).indexOf(o); return (o.female ? 'gal' : 'bad') + ((Math.max(0, i) % 19) + 1); }
+  function badOf(face, female) {
+    const g = G(), rivals = g ? g.players.filter(p => p.id !== ME()) : [];
+    let i = rivals.findIndex(p => (p.face || 0) % 20 === face % 20 && !!p.female === !!female); if (i < 0) i = rivals.findIndex(p => (p.face || 0) % 20 === face % 20);
+    return (female ? 'gal' : 'bad') + ((Math.max(0, i) % 19) + 1);
   }
   function drawStar(cx, i) {
     if (!K.own()) return false;
@@ -65,7 +69,13 @@ window.HOMAC10_BUILD = (K) => {
     const look = a.starLook ? a.starLook(s.id) : i.look;
     // the smallest zoom: a dot ("A lot of detail is lost when you zoom out all the way", p. 37), as 1.2's
     if (zi === 0) { cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(i.x, i.y, 2.5, 0, Math.PI * 2); cx.fill(); return 'all'; }
-    const d = u >= 17 ? 32 * Math.max(1, u / 17) : 16, k = kind(look || {}), im = PIC[k + (i.sel ? '-sel' : '')];
+    let k = kind(look || {});
+    // (the rival as this player knows the star's owner: the engine deals sixteen faces, so in a twenty-player game two rivals can share one)
+    // a later ruleset's nova (1.0 had none: tools/skins/mac10_icons.py): turning red (10-209), going nova this turn, the wreck after
+    { const kn = H().know(g, a.me(), s.id), nv = (s.owner === ME() ? s : kn || {}).nova || 0;
+      if (nv >= 10 && nv < 210) k = 'red'; else if (nv >= 210) k = nv >= g.year ? 'nova' : 'wreck'; }
+    if (/^(bad|gal)/.test(k)) { const kn = H().know(g, a.me(), s.id), o = kn && kn.owner >= 0 && kn.owner !== ME() ? g.players[kn.owner] : null; if (o) k = badFor(o); }
+    const d = u >= 17 ? 32 * Math.max(1, u / 17) : 16, im = PIC[k + (i.sel ? '-sel' : '')];
     cx.save(); cx.imageSmoothingEnabled = false;
     if (im && im.complete && im.naturalWidth) cx.drawImage(im, Math.round(i.x - d / 2), Math.round(i.y - d / 2), d, d);
     const f = d / 32;
@@ -231,7 +241,11 @@ window.HOMAC10_BUILD = (K) => {
   // their foot at 57, "0" beside it, the names under them, every other one a row lower.
   function tech10() {
     const a = A(), g = G(), p = a.me(), Wd = 245, HT = 82, sc = H().barScale(g, 'tech');
-    const keys = ['range', 'speed', 'weapons', 'shields', 'mini'], names = ['Range', 'Speed', 'Weapons', 'Defense', 'Mini'];
+    // (a later ruleset's Radical research, 5.0.5's and the Palm's: a sixth bar, 14 wide with 8 before it so the six fit, as the 1.2 skin does;
+    // no level for it. The remake's own in 1.0's window: 1.0 had five technologies)
+    const rad = !H().feature(g, 'noRadical') && H().TECHS.includes('radical');
+    const keys = ['range', 'speed', 'weapons', 'shields', 'mini'].concat(rad ? ['radical'] : []), names = ['Range', 'Speed', 'Weapons', 'Defense', 'Mini'].concat(rad ? ['Radical'] : []);
+    const geo = rad ? { b: 14, g: 8 } : null, step = rad ? 22 : 27, bx = rad ? 104 : 105, bw = rad ? 14 : 18;
     const q = K.qdCanvas(Wd, HT, 'Tech Spending Window');
     q.c.dataset.help = 'tech';
     const toPix = (v) => Math.trunc(50 * sc.toX(v)), fromPix = (px) => sc.toValue(px / 50);
@@ -240,13 +254,13 @@ window.HOMAC10_BUILD = (K) => {
       q.rect(0, 0, Wd, HT, '#fff');
       q.text('Tech Spending', 3, 12); q.text('100', 0, 13, K.G9, { right: 93 }); q.text('0', 0, 58, K.G9, { right: 93 });
       q.text('Current Levels:', 3, 25);
-      keys.forEach((k, i) => { q.text(names[i], 7, 35 + 10 * i); q.text(String(p.tech[k]), 58, 35 + 10 * i); });
-      K.vbars(q, 96, 7, vals(), 2, names, toPix); q.rect(94, 7, 96, 57, '#fff'); // (no ticks, as the figure)
+      keys.slice(0, 5).forEach((k, i) => { q.text(names[i], 7, 35 + 10 * i); q.text(String(p.tech[k]), 58, 35 + 10 * i); });
+      K.vbars(q, 96, 7, vals(), 2, names, toPix, geo); q.rect(94, 7, 96, 57, '#fff'); // (no ticks, as the figure)
     };
     draw();
-    q.c.dataset.bars = JSON.stringify(vals().map((v, i) => ({ x: 105 + 27 * i, y: 7, w: 18, h: 50, vert: true, frac: toPix(v) / 50, label: names[i] })));
+    q.c.dataset.bars = JSON.stringify(vals().map((v, i) => ({ x: bx + step * i, y: 7, w: bw, h: 50, vert: true, frac: toPix(v) / 50, label: names[i] })));
     q.c.dataset.w = String(Wd); q.c.dataset.h = String(HT);
-    K.dragBars(q, 96, 7, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix);
+    K.dragBars(q, 96, 7, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix, geo);
     return q.c;
   }
 
@@ -297,7 +311,7 @@ window.HOMAC10_BUILD = (K) => {
   document.addEventListener('pointermove', (e) => { // a star on the map: what kind it is (pp. 8-11)
     const a = A(); if (!a || !a.G || !document.documentElement.classList.contains('mac10lay') || !e.target.closest || !e.target.closest('#map')) return;
     const h = a.UI.hover; if (h == null || !a.starLook) return;
-    { const k = kind(a.starLook(h) || {}); setHelp(STAR_HELP[/^bad/.test(k) ? 'enemy' : k]); }
+    { const k = kind(a.starLook(h) || {}); setHelp(STAR_HELP[/^(bad|gal)/.test(k) ? 'enemy' : k]); }
   });
 
   function panel10(panel, B) {
@@ -576,6 +590,10 @@ window.HOMAC10_BUILD = (K) => {
       '-',
       it('Hide Floating Windows', () => { hideAll = !hideAll; A().renderPanel(); }, { ghost: noGame, key: 'W' }),
     ];
+    // a later ruleset's items, where the 1.2 skin puts them and shown only when the ruleset has them: the fleet orders (battle stance,
+    // arrive late) at the foot of Ships, Evacuate at the foot of Galaxy, the preferences at the foot of Options (K.menuLayout12's own)
+    const M12 = K.menuLayout12();
+    M.Ships.push(...M12.Ships.slice(9)); M.Galaxy.push(M12.Galaxy[6]); M.Options.push(...M12.Options.slice(6));
     return { File: M.File, Edit: M.Edit, Windows: M.Windows, Ships: M.Ships, Galaxy: M.Galaxy, Options: M.Options };
   }
 
@@ -584,6 +602,16 @@ window.HOMAC10_BUILD = (K) => {
   return {
     drawStar,
     window: windows10,
+    // an ally's star (a later ruleset's alliances; 1.0 had none): a white ring over the picture, the remake's own (tools/skins/mac10_icons.py)
+    allyAt: ({ x, y, view }) => (view.s / 2 >= 17 ? { x: Math.round(x - 14), y: Math.round(y - 21), w: 28, h: 8, small: false } : null),
+    allyPic: () => (PIC.halo.complete && PIC.halo.naturalWidth ? PIC.halo : null),
+    // the commands 1.2 has and 1.0 hasn't (Set Battle Speed, List All Fleets, List All Explored Stars, Fix Spending) stay reachable, in the
+    // Ho! menu with the remake's own (1.2 skin's menus12 puts the rest there)
+    menus(M, ho) {
+      K.menus12(M, ho);
+      const M12 = K.menuLayout12();
+      ho.push(['-'], M12.Options[0], M12.Ships[3], M12.Galaxy[0], M12.Galaxy[5]);
+    },
     // three zooms, not 1.2's four: 2.0 "added a zoom level between medium and far" (the 2.0 manual, p. 69, "Changes From Version 1"), so
     // 1.0 had 1.2's far (6), medium (12) and near (17), without the 9 (the remake's closer ones with modern conveniences, as in 1.2)
     zoomTo(s0, f) {

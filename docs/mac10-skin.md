@@ -76,7 +76,7 @@ number worked out from a 1.0 figure and checked against something else), **GUESS
 
 | 1.0 | Label | How |
 |---|---|---|
-| New Galaxy: 1-10 people (the remake: 8 on one computer), 0-10 computers, 32-109 stars, Spiral / Circle / Random, Normal / Fast, Dumb / Average / Smart; defaults the figure's (4 computers, 60 stars, Circle, Normal, Dumb) | MANUAL pp. 33-35 | `fixOptions`; `opts.starCount` in rules-dos `makeGalaxy` |
+| New Galaxy: 1-10 people (the remake: 8 on one computer), 0-10 computers, 32-109 stars, Spiral / Circle / Random, Normal / Fast, Dumb / Average / Smart; defaults the figure's (4 computers, 60 stars, Circle, Normal), but Average computers where the figure has Dumb (Jake's choice, 27 Nov: Dumb ones start like Experts and barely play) | MANUAL pp. 33-35 | `fixOptions`; `opts.starCount` in rules-dos `makeGalaxy` |
 | **Normal was the old "slow" game**: a colony's income ln(√people) x people / **100** where 2.0 has / 76 | FITTED | 1.0's home of 501,053 people makes **$20,364** (the figure, p. 17: **$20,370**; "about $20,000", p. 24; 2.0's "about $30,000"). **Checked:** with 100 a fully grown, terraformed colony stops paying at **2.07x** the home's gravity; the 1.0 manual says **2.0 G / 0.5 G** (pp. 8, 23, 42). 2.0's 76 gives 2.53x, and the 2.0 manual says 2.5 G / 0.4 G. Two figures, one number. (`rs.incomeDiv`, `rs.grLimit`) |
 | The colony upkeep's base, $7,500 | MANUAL p. 24 (and 2.0 p. 21) | 2.0's, unchanged |
 | **Fast**: income / 62.5 (a home makes about $40,000, so 2.0's $30,000 sits midway, "between the old slow and fast speeds"); its never-profitable line 2.88x; home planets 20,000 metal | GUESS, from MANUAL "five or more planets" at $7,500 (p. 35), "more metal" (p. 34), 2.0 p. 69 | `incomeDiv`, `grLimit`, `setupPlayer10` |
@@ -108,6 +108,34 @@ Stars as a choice (1.2's automatic share is always on), Graphic Battles off.
 - **A window's position**: 1.0's windows floated where the player put them; here they stand in a column beside the map, the Report
   Window under it.
 - **°F with the 1.2 rules**: they show °C (the French edition did); the 1.0 rules show °F.
+
+## Later rulesets in the 1.0 skin (27 November 2026)
+
+Any ruleset can be played in this skin. What 1.0 never had, it draws as follows.
+
+**Made for it (the remake's own, in 1.0's style: `tools/skins/mac10_icons.py`):**
+- **Rivals: 19 bad guys and 19 bad gals**, enough for twenty-player games (2.0 on). Each rival keeps one by its place among the rivals,
+  the manual's bandit first; a woman (later rulesets have them) gets a bad gal: the same hats and head with long hair. Nine hats (the
+  manual's flat one, Jake's bowler, top hat, Stetson, sombrero, beret, newsboy cap, head scarf, the manual's hat with a feather) and
+  faces (the manual's, a handlebar moustache, an outlaw's bandana, an eye patch, stubble, a monocle, a goatee, dark glasses, a scar).
+- **Novas** (5.0.5, 3.0.1, 4.0.5): a star turning red (the explored planet with a dashed rim), going nova (rays), and its wreck after.
+- **Allies** (3.0.1 on): a white ring over the star's picture (the remake's colour halo doesn't suit a black-and-white screen).
+- **Radical research** (5.0.5, the Palm): a sixth bar in the Tech Spending window, narrower so six fit, as the 1.2 skin does.
+- **Menus**: a later ruleset's own items (battle stance, Arrive late, Evacuate, its preferences) at the foot of 1.0's Ships, Galaxy and
+  Options menus, shown only when the ruleset has them; 1.2's commands that 1.0 lacks (Set Battle Speed, List All Fleets, List All
+  Explored Stars, Fix Spending) in the Ho! menu.
+
+**Still 1.2's or the remake's, with no 1.0 look (no figure shows them; each could be drawn in 1.0's style if wanted):**
+- the **battle window** and the **ship pictures** in it (1.2's: 1.0 had graphic battles, p. 30, but the manual shows none), and the
+  new ship classes (Tanker, Dreadnought, Biological, Decoy: stand-ins from later versions);
+- the **announcements** (1.2's report bubble at the map's foot; 1.0's "Announce Events" used dialogs, p. 39);
+- the **Budget window** under a later economy: no Ship Savings line (3.0.1, 4.0.5), interest or borrowing shown, only Money and Metal;
+- the windows for what 1.0 lacked: Players and alliances, Send Message, Give, Surrender, Dip Into Savings, Radical tech's hand, Auto
+  Play, Preferences, the Halls of Fame and Shame, Master Points, ranks (1.2 skin's own windows, or the remake's dressed in 1.2's look);
+- **You Won / You Lost**, Name a Star (1.2's alerts; 1.0 had no winner);
+- Armageddon's shake and the supernova flash (3.0.1, 4.0.5: only their own skins draw them);
+- the Fleet Window (named on p. 7, never shown);
+- the remake's own screens (the hot-seat cover, online play, the title's account).
 
 ## Languages
 
