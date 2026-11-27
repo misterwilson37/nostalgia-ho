@@ -3021,7 +3021,10 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // \u00b0F)"; "AutoSave Each Turn"; the group "Sound" over "Vocalize Chat
   // Keywords". Cancel leaves everything as it was; OK keeps it. The remake's
   // own options are below a line (js/skins/classic/ui.js prefs505).
-  prefsWindow: { title: 'Preferences', show: 'Show Event Messages', important: 'But Only The Most Important Ones', review: 'Review Battles', hints: 'Give Helpful Game Play Hints', buddies: 'Tell You About Stars Best Buddies Explore', speed: 'Battle Review Speed:', slow: 'Slow', fast: 'Fast', range: [0, 30], def: 15, sex: 'Player Sex:', sexes: ['Male', 'Female'], celsius: 'Temperatures in Celsius (not \u00b0F)', autosave: 'AutoSave Each Turn', sound: 'Sound', vocal: 'Vocalize Chat Keywords', cancel: 'Cancel', ok: 'OK' },
+  prefsWindow: { title: 'Preferences', show: 'Show Event Messages', important: 'But Only The Most Important Ones', review: 'Review Battles', hints: 'Give Helpful Game Play Hints', buddies: 'Tell You About Stars Best Buddies Explore', speed: 'Battle Review Speed:', slow: 'Slow', fast: 'Fast', range: [0, 30], def: 15, sex: 'Player Sex:', sexes: ['Male', 'Female'], celsius: 'Temperatures in Celsius (not \u00b0F)', autosave: 'AutoSave Each Turn', sound: 'Sound', vocal: 'Vocalize Chat Keywords', cancel: 'Cancel', ok: 'OK',
+    // CONFIRMED (FUN_10072490, the preferences' first values): Show Event Messages +0x208 = 1, But Only The Most Important Ones +0x209 = 0,
+    // Review Battles +0x20a = 1, Hints +0x20b = 1, Celsius +0x20d = 0
+    defaults: { review: true } },
   // the windows' own words (docs/505-windows.md; js/skins/classic/ui.js):
   // Dip Into Savings (PPob 157, FUN_1005d380: a slider 0-30 set from and to
   // the player's +0x54, 30% at the top), Surrender (PPob 147, FUN_1005d5a0:
