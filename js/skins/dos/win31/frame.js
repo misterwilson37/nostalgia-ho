@@ -68,6 +68,18 @@ ${S} #msg .clock.pic { position: absolute; width: ${u(51)}; height: ${u(33)}; bo
 ${S} #msg .clock.pic img { visibility: hidden; }
 ${S} #msg .clock.pic::after { content: attr(aria-label) "\\A Ctrl+T"; text-transform: capitalize; position: absolute; left: ${u(2)}; top: ${u(5)}; width: ${u(46)}; height: ${u(23)}; display: flex; align-items: center; justify-content: center; text-align: center; white-space: pre; font: ${u(10)}/${u(10)} ${F}; color: #000; pointer-events: none; }
 ${S} #msg .clock.pic:active::after { transform: translate(${u(1)}, ${u(1)}); }
+/* the report bubble as the Windows program draws it (FUN_10c0_0f08; Jake's win20-jake-vga16-shot0039-0041, 0053, measured): the DOS program's 185 x 79 at the map's
+   foot, 4 in, but in a frame of three: the button face round it (its bottom row the shade), inside it a white top row and the face at the sides, then a cyan top
+   row, dark cyan sides and a shaded bottom; the picture at 14, half the height less 24; the words in MS Sans Serif 8 (lines 14 apart) from 54, 8 to 10 short
+   of the right; "--more--" in the same font at 8 from the left, 5 above the foot (TEXTOUT at the foot - 5 - the font's height) */
+${S} #msg .card { width: ${u(185)}; min-height: ${u(79)}; max-width: none; box-sizing: border-box; position: absolute; left: ${u(3)}; bottom: ${u(3 + 17)}; display: block; color: #000; border: 0; border-radius: 0; box-shadow: none;
+  background: ${[[3, 3, -6, -6, WH], [2, 2, -4, 1, '#00ffff'], [2, 3, 1, -5, '#55aaaa'], [-3, 3, 1, -5, '#55aaaa'], [3, -3, -6, 1, SHADE], [1, 1, -2, 1, WH], [2, -2, -4, 1, SHADE], [1, -1, -2, 1, SHADE]]
+    .map(([x, y, w, h, c]) => `linear-gradient(${c}, ${c}) ${x < 0 ? `right ${u(-x - 1)}` : `left ${u(x)}`} ${y < 0 ? `bottom ${u(-y - 1)}` : `top ${u(y)}`} / ${w > 0 ? u(w) : `calc(100% - ${u(-w)})`} ${h > 0 ? u(h) : `calc(100% - ${u(-h)})`} no-repeat`).join(', ')}, ${FACE};
+  padding: ${u(9)} ${u(10)} ${u(22)} ${u(53)}; font: ${u(11)}/${u(14)} ${F}; } /* (the words 54, 8 in the program, whose DrawText puts the capitals 3 below the line top: 9 and 53 put this font's capitals on the same pixels) */
+${S} #msg .card .icon, ${S} #msg .card .bigicon { position: absolute; left: ${u(14)}; top: calc(50% - ${u(24)}); width: ${u(32)}; height: ${u(32)}; }
+${S} #msg .card:focus-visible { outline: none; } /* (no focus mark: the Windows program draws none on its bubble) */
+${S} #msg .card .mtext p { font: inherit; margin: 0; }
+${S} #msg .card .count { position: absolute; left: ${u(7)}; bottom: ${u(5)}; margin: 0; font: ${u(11)}/${u(14)} ${F}; color: #000; }
 ${S} .dosbar.v { left: ${u(375)}; top: 0; width: ${u(17)}; height: ${u(293)}; }
 ${S} .dosbar.h { left: 0; top: ${u(293)}; width: ${u(375)}; height: ${u(17)}; }
 ${S} #panel .doslow { height: ${u(85)}; border-bottom: 0; box-shadow: inset ${u(-1)} 0 0 #000; font: ${u(11)} ${F}; }
