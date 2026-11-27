@@ -5054,7 +5054,7 @@ const titleLang = () => UIL.pref.get() || 'en';
 // 3.0.1 and 4.0.5 in French show 3.0.1F's menus and windows: HO.windowWords; with no game, the
 // title screen of a 3.0.1 or 4.0.5 skin shows them too, its New Game is 3.0.1F's: Jake, October 2026;
 // 2.0 and 1.2 show 1.2F's, 2.0 with 3.0.1F's for what only 3.0.1 has)
-const TITLE_RULES = { mac3: '301', mac3c: '301', mac4: 'mac405', mac4c: 'mac405', w95: '405', mac2: 'mac20', mac2c: 'mac20', dos: 'dos', mac12: '12' };
+const TITLE_RULES = { mac3: '301', mac3c: '301', mac4: 'mac405', mac4c: 'mac405', w95: '405', mac2: 'mac20', mac2c: 'mac20', dos: 'dos', mac12: '12', mac5: 'original' };
 // each skin's own rules: New Game opens on them for the skin the title shows (Jake, 20 Nov 2026: "if I chose the 1.2 skin, it should choose the
 // 1.2 ruleset and its defaults initially"); the player can still pick others there (the Amiga 2.x plays DOS 2.0's rules: docs/amiga-skin.md)
 const SKIN_RULES = Object.assign({}, TITLE_RULES, { classic: 'original', palm: 'palm', ios: 'ios', android: 'android', amiga: 'dos', cozy: 'claude', gemini: 'gemini', mac10: '10' }); // (the Mac 1.0 skin: the 1.0 reconstruction, js/rules-10.js)

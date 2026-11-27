@@ -74,6 +74,8 @@ for (const n of [2000, 2001, 3000, 3001, 3002, 3003, 4000, 4001, 5000, 5001, 500
   7018, 7019, 7020, 7021, 7022, 7023, 7024, 8000, 10000]) MAC4_MAP['m' + n] = n;
 const SOUNDS = {
   classic: { name: '5.0.5 (Mac OS 9 and X, 2003)', year: 2003, dir: null },
+  // the Mac 5.0.5 skin plays the same sounds (the remake's default ones are 5.0.5's own)
+  mac5: { name: '5.0.5 (Mac OS 9 and X, 2003)', year: 2003, dir: null, same: 'classic' },
   // The DOS game numbers its sounds like the Mac game (2000 good news,
   // 2001 bad news, 3000-3003 battle shots, 4000/4001 fleet stays/goes,
   // 5000 message sent, 6000-6002 exploring, 7000 end of turn, 1000 the
@@ -177,6 +179,8 @@ const SKINS = [
   { id: 'android', version: '1.2.8', platform: 'Android', year: 2015, os: ['fireos', 'android4'], icon: 'android' },
   { id: 'cozy', version: 'Cozy western', platform: 'by Claude', year: 2026, homage: true, os: ['macos8', 'macos9', 'macosx', 'firefox', 'safari', 'edge', 'safari1', 'firefox1'] },
   { id: 'gemini', version: 'Tactical console', platform: 'by Gemini', year: 2026, homage: true, os: ['macosx', 'macos9', 'win95', 'macos8', 'system7', 'win31', 'firefox', 'safari', 'edge', 'safari1', 'firefox1'] },
+  // 5.0.5 as its own window draws it (js/skins/mac5, docs/status-505.md; Jake, 27 Nov 2026: the classic page's layout is not 5.0.5's)
+  { id: 'mac5', version: '5.0.5', platform: 'Mac OS 9', year: 2003, os: ['macos9', 'macos8'], icon: 'classic' },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx', 'safari1'], icon: 'classic' },
 ].map(k => Object.assign(k, { name: k.label || `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))
   .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));

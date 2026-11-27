@@ -339,7 +339,7 @@ async function playRun(browser, job, outDir, idx) {
     if (errs.size) { for (const e of errs) fail(e); errs.clear(); }
 
     // ============ 4. Build: queue / buy a ship ============
-    const BUILD_RE = /^\s*(build|buy|ships?|construct)\b|build ships/i;
+    const BUILD_RE = /^\s*(build|buy|ships?(?! power)|construct)\b|build ships/i; // (not 5.0.5's graph button "Ship Power": js/skins/mac5)
     await step('build', async () => {
       await G((id) => { HOAPI.UI.sel = id; HOAPI.renderPanel(); HOAPI.draw(); }, info.home); await sleep(150);
       const s0 = await state(); await mark(); let how = '';

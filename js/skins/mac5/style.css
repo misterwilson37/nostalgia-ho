@@ -1,0 +1,132 @@
+/* Spaceward Ho! web remake — the Mac 5.0.5 skin (js/skins/mac5/screen.js, docs/status-505.md).
+   Every size below is in Mac pixels times --m5 (one CSS pixel a Mac pixel on a 1024 x 768 screen's worth of browser).
+   Measured on Jake's shots 008, 011 and 034 (Mac OS 9.0.4, 1024 x 768): the menu bar 0-19 (its black line at 19); the desktop
+   two pixels round the window; the window's dark edge, then its Platinum frame (5 wide at the sides and foot), the title bar
+   22-42 with the close box at the left and the zoom and collapse boxes at the right, the content from (8, 43). */
+@import url("../classic/style.css");
+html.m5win { --u: calc(var(--m5) * 1px); }
+html.m5win body { background: #565685; overflow: hidden; }
+html.m5win #app { position: fixed; inset: 0; background: #565685; }
+/* the menu bar: Mac OS 9's, 20 high (shot 008) */
+html.m5win #menubar { position: fixed; left: 0; top: 0; right: 0; height: calc(19 * var(--u)); border-bottom: var(--u) solid #000;
+  background: linear-gradient(#f4f4f4, #dcdcdc); padding: 0 0 0 calc(10 * var(--u)); display: flex; align-items: center; gap: 0;
+  font: bold calc(12 * var(--u)) / 1 Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif; }
+html.m5win #menubar .mbtn { height: calc(19 * var(--u)); padding: 0 calc(8 * var(--u)); font: inherit; background: none; border: 0; color: #000; }
+html.m5win #menubar .mbtn[aria-expanded="true"] { background: #3d3dc8; color: #fff; }
+/* (the Ho! menu stands in the Apple menu's place, as in the other Mac skins: Jake, 20 Nov) */
+html.m5win #menubar .mbtn.logo { padding: 0 calc(8 * var(--u)); }
+html.m5win #menubar .dropdown { top: calc(19 * var(--u)); min-width: calc(160 * var(--u)); background: #dddddd; border: var(--u) solid #444; box-shadow: calc(2 * var(--u)) calc(2 * var(--u)) calc(3 * var(--u)) rgba(0,0,0,.45);
+  padding: calc(2 * var(--u)) 0; font: bold calc(12 * var(--u)) / 1 Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif; }
+html.m5win #menubar .dropdown button[role=menuitem] { display: flex; justify-content: space-between; gap: calc(24 * var(--u)); width: 100%; height: calc(16 * var(--u)); padding: 0 calc(14 * var(--u)) 0 calc(20 * var(--u));
+  background: none; border: 0; text-align: left; font: inherit; color: #000; white-space: nowrap; }
+html.m5win #menubar .dropdown button[role=menuitem]:hover:not(:disabled) { background: #3d3dc8; color: #fff; }
+html.m5win #menubar .dropdown button[role=menuitem]:disabled { color: #8c8c8c; }
+html.m5win #menubar .dropdown button.check.on::before { content: '✓'; position: absolute; margin-left: calc(-14 * var(--u)); }
+html.m5win #menubar .dropdown hr { margin: calc(3 * var(--u)) 0; border: 0; border-top: var(--u) solid #999; box-shadow: 0 var(--u) 0 #fff; }
+html.m5win #menubar .mkey { font: inherit; }
+/* the window's title, moved out of the menu bar into the title bar */
+html.m5win #menubar #title { display: none; }
+#m5cap { display: none; }
+html.m5win #m5cap { display: flex; position: fixed; left: calc(2 * var(--u)); right: calc(2 * var(--u)); top: calc(22 * var(--u)); height: calc(20 * var(--u));
+  border: var(--u) solid #2c2c33; border-bottom: 0; align-items: center; justify-content: center; z-index: 2;
+  background: repeating-linear-gradient(#f0f0f0 0 var(--u), #a8a8a8 var(--u) calc(2 * var(--u))) center / 100% calc(12 * var(--u)) no-repeat, #d8d8d8; }
+html.m5win #m5cap #title { display: block; position: static; padding: 0 calc(6 * var(--u)); background: #d8d8d8; color: #000;
+  font: bold calc(12 * var(--u)) / calc(20 * var(--u)) Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif; white-space: nowrap; }
+html.m5win #m5cap .m5close { position: absolute; left: calc(5 * var(--u)); top: calc(3 * var(--u)); width: calc(13 * var(--u)); height: calc(13 * var(--u));
+  border: var(--u) solid #333; background: linear-gradient(135deg, #fff, #c4c4c4); box-sizing: border-box; }
+html.m5win #m5cap .m5boxes { position: absolute; right: calc(5 * var(--u)); top: calc(3 * var(--u)); width: calc(29 * var(--u)); height: calc(13 * var(--u));
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='29' height='13'><g fill='%23e8e8e8' stroke='%23333'><rect x='.5' y='.5' width='12' height='12'/><rect x='16.5' y='.5' width='12' height='12'/></g><rect x='2.5' y='2.5' width='5' height='5' fill='none' stroke='%23333'/><path d='M18 6.5h9' stroke='%23333'/></svg>") 0 0 / 100% 100% no-repeat; }
+/* the window's content: the column at the left, the map in the rest (PPob 136) */
+html.m5win #main { position: fixed; left: calc(2 * var(--u)); right: calc(2 * var(--u)); top: calc(42 * var(--u)); bottom: calc(2 * var(--u));
+  border: var(--u) solid #2c2c33; border-top: 0; padding: var(--u) calc(5 * var(--u)) calc(5 * var(--u)); background: #d8d8d8; box-sizing: border-box;
+  display: flex; box-shadow: inset 0 0 0 var(--u) #f4f4f4; }
+html.m5win #panel { position: relative; flex: none; width: calc(197 * var(--u)); height: 100%; overflow: hidden; padding: 0; margin: 0; background: #fff;
+  border: 0; display: flex; flex-direction: column; font: calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5noinfo.m5win #panel { display: none; }
+html.m5win #mapwrap { flex: 1; position: relative; border-left: var(--u) solid #000; }
+html.m5win #panel .m5hidden { display: none; }
+/* LHoIncomeView: 197 x 40 on its backdrop */
+html.m5win .m5inc { position: relative; flex: none; height: calc(40 * var(--u)); background: url("../../../assets/skins/mac5/incbg.png") 0 0 / 100% 100%; image-rendering: pixelated; color: #7e7e84; }
+html.m5win .m5inc span { position: absolute; font: bold calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; white-space: nowrap; }
+html.m5win .m5inc .lb { right: calc((197 - 52) * var(--u)); }
+html.m5win .m5inc .vl { left: calc(57 * var(--u)); }
+html.m5win .m5inc .vl.neg { color: #dd0806; }
+html.m5win .m5inc .rt { right: calc(4 * var(--u)); font-weight: normal; }
+/* the bar controls */
+html.m5win .m5bars { position: relative; flex: none; }
+html.m5win .m5tech { height: calc(87 * var(--u)); background: url("../../../assets/skins/mac5/techbg.png") 0 0 / 100% 100%; image-rendering: pixelated; }
+html.m5win .m5budget { height: calc(85 * var(--u)); flex: 1 1 auto; min-height: calc(85 * var(--u)); overflow-y: auto; overflow-x: hidden; background: #fff; }
+html.m5win .m5binner { position: relative; }
+html.m5win .m5row { position: absolute; left: 0; width: 100%; height: calc(7 * var(--u)); display: block; }
+html.m5win .m5row .blabel { position: absolute; right: calc((197 - 62) * var(--u)); top: calc(-2 * var(--u)); width: auto; max-width: none; color: #000;
+  font: calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; white-space: nowrap; overflow: visible; text-align: right; }
+html.m5win .m5tech .m5row .blabel { color: #7e7e84; right: calc((197 - 62) * var(--u)); }
+html.m5win .m5budget .m5row .blabel { right: calc((197 - 61) * var(--u)); }
+html.m5win .m5row .bval { display: none; }
+html.m5win .m5row .track { position: absolute; left: calc(64 * var(--u)); top: 0; width: calc(133 * var(--u)); height: calc(7 * var(--u)); background: none; border: 0; box-shadow: none; border-radius: 0; padding: 0; margin: 0; cursor: pointer; }
+html.m5win .m5budget .m5row .track { left: calc(63 * var(--u)); width: calc(115 * var(--u)); }
+html.m5win .m5row .track .grid { display: none; }
+html.m5win .m5row .fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 0; background: var(--bf, #bc2a46); box-sizing: content-box;
+  box-shadow: 0 calc(-2 * var(--u)) 0 var(--bl, #d86a80), calc(2 * var(--u)) calc(2 * var(--u)) 0 var(--bd, #7a1828); }
+html.m5win .m5tech .m5row { --bf: #bc2a46; --bl: #c9506a; --bd: #6e1a30; }
+html.m5win .m5budget .m5row.sav { --bf: #f19f58; --bl: #f6c79c; --bd: #a1734a; }
+html.m5win .m5budget .m5row.tech { --bf: #cf4af7; --bl: #e4a0fa; --bd: #8d42a3; }
+html.m5win .m5budget .m5row.losing .blabel { color: #dd0806; text-decoration: underline; }
+html.m5win .m5budget .m5row:not(.sav):not(.tech):not(.losing) .blabel { color: #0000d4; }
+html.m5win .m5budget .m5row.evac .blabel { color: #999; text-decoration: underline; }
+html.m5win .m5budget .m5row.evac .fill { display: none; }
+html.m5win .m5budget .m5row.evac .track::after { content: attr(data-evac); position: absolute; left: calc(3 * var(--u)); top: calc(-2 * var(--u)); color: #999;
+  font: calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; white-space: nowrap; }
+html.m5win .m5sep { position: absolute; left: calc(63 * var(--u)); width: calc(200 * var(--u)); height: var(--u); background: #000; }
+/* the ticks: a 3-pixel black mark at the top, then the light line down (pen mode addOver: the light cyan of shot 034) */
+html.m5win .m5ticks { position: absolute; top: 0; pointer-events: none; border-left: var(--u) solid #000; margin-left: calc(-1 * var(--u)); }
+html.m5win .m5ticks i { position: absolute; top: 0; bottom: 0; width: var(--u); background: linear-gradient(#000 0 calc(3 * var(--u)), #9ef0f0 calc(3 * var(--u))); }
+html.m5win .m5tech .m5ticks { border-left-color: #000; }
+html.m5win .m5tech .m5ticks i { background: linear-gradient(#000 0 calc(3 * var(--u)), #b0f2f8 calc(3 * var(--u))); }
+html.m5win .m5resz { flex: none; height: calc(3 * var(--u)); background: #000; border-top: var(--u) solid #d8d8d8; cursor: ns-resize; }
+/* LHoPlayerListView */
+html.m5win .m5players { flex: none; height: calc(131 * var(--u)); overflow-y: auto; overflow-x: hidden; background: #fff; border-bottom: var(--u) solid #000; }
+html.m5win .m5prow { position: relative; height: calc(24 * var(--u)); display: flex; align-items: center; font: calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win .m5prow .ck { width: calc(9 * var(--u)); text-align: right; font-weight: bold; }
+html.m5win .m5prow .face { width: calc(22 * var(--u)); height: calc(22 * var(--u)); object-fit: contain; margin: 0 calc(3 * var(--u)) 0 calc(2 * var(--u)); }
+html.m5win .m5prow .nm { flex: 1; overflow: hidden; white-space: nowrap; }
+html.m5win .m5pop { width: calc(90 * var(--u)); height: calc(18 * var(--u)); margin-right: calc(10 * var(--u)); border: var(--u) solid #333; border-radius: calc(3 * var(--u));
+  background: linear-gradient(#f2f2f2, #d6d6d6); font: bold calc(12 * var(--u)) / 1 Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif; color: #000; padding: 0 calc(4 * var(--u)); }
+html.m5win .m5pop:disabled { opacity: 1; color: #000; }
+/* LHoGraphView */
+html.m5win .m5graph { position: relative; flex: none; height: calc(90 * var(--u)); background: #fff; }
+html.m5win .m5graph .none { position: absolute; left: calc(9 * var(--u)); top: calc(30 * var(--u)); font: calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win .m5gbtns { position: absolute; left: calc(3 * var(--u)); top: calc(70 * var(--u)); display: flex; gap: var(--u); }
+html.m5win .m5bevel { width: calc(18 * var(--u)); height: calc(18 * var(--u)); padding: 0; border: var(--u) solid #666; border-radius: 0; background: linear-gradient(#f4f4f4, #c8c8c8) !important; box-shadow: none !important; }
+html.m5win .m5row .fill { background-image: none !important; }
+html.m5win .m5gbtns .m5bevel { min-width: 0 !important; margin: 0; }
+/* the reports (unit 5 to do: the Message History window, PPob 143, and the bubble LHoMessageView): for now the page's card, in a
+   floating window at the map's right, where shot 008 has Message History (227 x 395 at (770, 348)) */
+html.m5win #msg { position: absolute; left: auto; right: calc(18 * var(--u)); bottom: calc(18 * var(--u)); width: calc(227 * var(--u)); max-width: none;
+  background: #fff; border: var(--u) solid #2c2c33; box-shadow: calc(2 * var(--u)) calc(2 * var(--u)) calc(4 * var(--u)) rgba(0,0,0,.5); padding-top: calc(13 * var(--u)); }
+html.m5win #msg::before { content: 'Message History'; position: absolute; left: 0; right: 0; top: 0; height: calc(12 * var(--u)); border-bottom: var(--u) solid #777;
+  background: repeating-linear-gradient(#f0f0f0 0 var(--u), #a8a8a8 var(--u) calc(2 * var(--u))) center / 100% calc(8 * var(--u)) no-repeat, #d8d8d8;
+  font: bold calc(9 * var(--u)) / calc(12 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; text-align: center; }
+html.m5win #msg:empty { display: none; }
+html.m5win #msg .card { position: static; width: auto; max-width: none; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: #fff; padding: calc(4 * var(--u));
+  font: calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win #msg .card .icon { width: calc(40 * var(--u)); height: calc(40 * var(--u)); }
+html.m5win .m5row .track .grid { display: none !important; }
+html.m5win #mapwrap { min-width: 0; overflow: hidden; }
+html.m5win .m5gbtns .m5bevel { padding: 0 !important; width: calc(18 * var(--u)) !important; }
+/* (the ticks under the bars: shot 034 shows the light lines on white and on the backdrop, never across a bar) */
+html.m5win .m5ticks { z-index: 0; }
+html.m5win .m5row { z-index: 1; }
+/* the lists' scroll bars, always there (PBAR's 'Bscr', the players' scrolling view): Platinum's grey track */
+html.m5win .m5budget, html.m5win .m5players { overflow-y: scroll; scrollbar-color: #bcbcbc #eeeeee; }
+html.m5win .m5budget::-webkit-scrollbar, html.m5win .m5players::-webkit-scrollbar { width: calc(16 * var(--u)); background: #eee; border-left: var(--u) solid #000; }
+html.m5win .m5budget::-webkit-scrollbar-thumb, html.m5win .m5players::-webkit-scrollbar-thumb { background: #bcbcbc; border: var(--u) solid #555; }
+/* the pop-up's double arrow at its right (shot 034, x3: a 23-pixel cell with ⇕) */
+html.m5win .m5pop { appearance: none; -webkit-appearance: none; padding-right: calc(24 * var(--u));
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='23' height='16'><path d='M.5 0v16' stroke='%23777'/><path d='M8 6.5l3.5-4 3.5 4z M8 9.5l3.5 4 3.5-4z' fill='%23000'/></svg>") right center / calc(23 * var(--u)) calc(16 * var(--u)) no-repeat, linear-gradient(#f2f2f2, #d6d6d6); }
+html.m5win #m5cap #title { position: static !important; inset: auto !important; transform: none !important; margin: 0 auto; max-width: 70%; overflow: hidden; text-overflow: ellipsis; }
+html.m5win #msg .card, html.m5win #msg .card:focus { border: 0 !important; outline: none; }
+html.m5win #msg .card p { font: inherit; margin: 0; }
+html.m5win #msg .card { position: relative !important; padding-bottom: calc(22 * var(--u)) !important; }
+html.m5win #msg .card .mbtns { position: absolute; right: calc(4 * var(--u)); bottom: calc(3 * var(--u)); margin: 0; }
+html.m5win #msg .card .count { position: absolute; left: calc(4 * var(--u)); bottom: calc(5 * var(--u)); }
