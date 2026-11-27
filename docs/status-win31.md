@@ -84,4 +84,8 @@ Sources (private repo `nostalgia-ho-sources`):
 
 1. Jake's look at the preview: the menus, the bubble, the system menu, the dialogs' places.
 2. "Needs a shared file" above (the main session or Jake).
-3. Not captured, so not checked: Organize Ships with more than four piles, Page Setup, the Printing box (docs/missing-screenshots.md).
+3. The display audit's 8 gaps left (`node tools/display-audit.js win20 --gaps`, each row says what differs): an eliminated player's face crossed out in the
+   players pane (the remake dims the row), the battle window's cross in the 16 colours, the battle's "You have no information." lines (17 px high), New Game's
+   "Writing New Game File..." Status window, Close's empty main window, star names in the small face at the 9-pixel zoom, a plain letter flashing an
+   ALERTBOX button, one bevel helper with no caller found. The other 53 of the 61 rows were attributed 27 Nov (38 matched, 23 notShown, 682 internal in all).
+4. Not captured, so not checked: Organize Ships with more than four piles, Page Setup, the Printing box (docs/missing-screenshots.md).
