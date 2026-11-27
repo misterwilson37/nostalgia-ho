@@ -125,7 +125,7 @@ W.licenceFirst = function (next) {
   };
   [200, 201, 202].forEach((id, i) => { on[id] = (_, d) => { ans = i; radios(d); }; });
   const dlg = W.open(14, {
-    title: 'Spaceward Ho! License', label: 'Spaceward Ho! License',
+    title: 'Spaceward Ho! License', label: 'Spaceward Ho! License', centre: true, // (centred by LICENSEEDLGPROC, FUN_1108_0a3b)
     text: { 100: L.name, 101: L.org, 200: 'Yes', 201: 'No', 202: 'No, but I will', 2: 'Cancel', 1: 'OK', '#7': 'Please Personalize Your Copy of Spaceward Ho! 2.0:', '#8': 'Name:',
       '#9': 'Organization:', '#10': 'Have you sent in your Warranty Registration/Survey?', '#11': '© 1992 New World Computing\nAll Rights Reserved' },
     on,
@@ -456,7 +456,7 @@ D.renameType = function (d, back) {
   const a = root.HOAPI, H = root.HO, g = a.G; if (!g || !d) return false;
   let v = '';
   const dlg = W.open(20, {
-    label: 'Rename',
+    label: 'Rename', parent: 31, // (placed in List Ship Types' client: captured at 72, 93, win20-orig-vga16-nametype.png)
     text: { '#0': 'Type your new ship name or click on "Name It" for a suggestion:', 100: '', 101: 'Name It', 2: 'Cancel', 1: 'OK' },
     on: {
       100: (x, dl) => { v = String(x); const ok = dl.get('1'); if (ok) ok.disabled = !v.trim(); },
@@ -847,7 +847,9 @@ D.sendMsg = function () {
   const hat = (q) => 'dos:i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
   const pl = (id) => g.players[+id];
   let step = 0; const ch = [null, null, null, null]; let right = [];
-  const rects = { '#26': [16, 17, 170, 16], 100: [196, 17, 340, 16], '#28': [196, 41, 310, 211], '#30': [16, 110, 79, 16], '#31': [16, 57, 79, 16], 2: [259, 276, 99, 31], 1: [409, 276, 99, 31] };
+  // (re-measured 27 Nov on Jake's shots 62-65 and win20-orig-vga16-sendmsg.png: the client is 319 high, its top at 74 on the screen, the frames 4 and the words 3 higher than first
+  // written, which had taken the client's top 4 pixels too high)
+  const rects = { '#26': [16, 14, 170, 16], 100: [196, 14, 340, 16], '#28': [196, 37, 310, 211], '#30': [16, 107, 79, 16], '#31': [16, 54, 79, 16], 2: [259, 272, 99, 31], 1: [409, 272, 99, 31] };
   const pics = {}, on = {}, cells = {};
   const paint = (c) => (x, w, h) => {
     x.clearRect(0, 0, w, h); if (!c) return;
@@ -855,8 +857,8 @@ D.sendMsg = function () {
     x.font = '11px ' + SANS; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillStyle = c.off ? '#808080' : '#000';
     x.fillText(c.name || '', Math.floor((w - x.measureText(c.name || '').width) / 2), c.icon ? 43 : 28); // (on a whole pixel: a half one greys the bitmap font)
   };
-  for (let k = 0; k < 4; k++) { rects[200 + k] = [104, 49 + 48 * k, 78, 48]; pics[200 + k] = (x, w, h) => paint(ch[k])(x, w, h); on[200 + k] = () => { if (ch[k]) { for (let j = k; j < 4; j++) ch[j] = null; step = k; refresh(); } }; }
-  for (let i = 0; i < 20; i++) { rects[300 + i] = [209 + 57 * (i % 5), 49 + 48 * Math.floor(i / 5), 56, 47]; pics[300 + i] = (x, w, h) => paint(right[i])(x, w, h); on[300 + i] = () => { const c = right[i]; if (c && !c.off) { ch[step] = { id: c.id, i: c.i, name: c.name, icon: c.icon, kind: c.kind }; step = ch[1] && ch[1].i === 2 && step === 1 ? 2 : step + 1; refresh(); } }; }
+  for (let k = 0; k < 4; k++) { rects[200 + k] = [104, 45 + 48 * k, 78, 48]; pics[200 + k] = (x, w, h) => paint(ch[k])(x, w, h); on[200 + k] = () => { if (ch[k]) { for (let j = k; j < 4; j++) ch[j] = null; step = k; refresh(); } }; }
+  for (let i = 0; i < 20; i++) { rects[300 + i] = [209 + 57 * (i % 5), 45 + 48 * Math.floor(i / 5), 56, 47]; pics[300 + i] = (x, w, h) => paint(right[i])(x, w, h); on[300 + i] = () => { const c = right[i]; if (c && !c.off) { ch[step] = { id: c.id, i: c.i, name: c.name, icon: c.icon, kind: c.kind }; step = ch[1] && ch[1].i === 2 && step === 1 ? 2 : step + 1; refresh(); } }; }
   const choices = () => {
     if (step === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
     if (step === 1) return C.actions.map((x, i) => ({ id: i, i, name: x.label, icon: 'dos:i' + (3000 + i) }));
@@ -873,7 +875,7 @@ D.sendMsg = function () {
     const f = right.length && dlg.get('300'); if (f && !a.noFocus) f.focus(); // (the first choice has the focus, its dotted frame: captured)
   };
   dlg = W.open(30, {
-    label: 'Send Message', client: [549, 323], rects, pics, on: Object.assign(on, {
+    label: 'Send Message', client: [549, 319], rects, pics, on: Object.assign(on, {
       2: (_, d) => d.close(),
       1: (_, d) => { if (step <= 3) return; const r = H.sendCanned(g, ME, C.make(g, ME, isNaN(+ch[0].id) ? ch[0].id : +ch[0].id, ch[1].i, [ch[2].i, isNaN(+ch[3].id) ? ch[3].id : +ch[3].id]));
         if (r === 'limit') { a.chatLimitToast(); return; } if (r !== 'ok') return; a.Sound.play(5000); d.close(); a.save(); } }),

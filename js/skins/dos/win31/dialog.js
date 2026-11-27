@@ -317,8 +317,23 @@ W.open = function (id, o) {
   o = o || {};
   a.modal('', dlg.el, { cls: 'w31dlg', label: o.label || o.title || 'Spaceward Ho!', sticky: true, onClose: o.onClose });
   dlg.focus();
-  if (o.at) W.placeAt(dlg, o.at);
+  const at = o.at || (o.centre ? null : W.place(id, o.parent));
+  if (at) W.placeAt(dlg, at);
   return dlg;
+};
+// Where the program's dialogs open (measured on every capture of one opened from the menus: About 120, 56; Battle Speed 152, 141; Auto Play 112, 97; Polling Time
+// 120, 127; Build Ships 48, 63; Create New Ship Type 24, 73; List Ship Types 32, 57; Organize 32, 73; Compare Players 32, 73; Send Message 32, 69; the two lists 24, 40;
+// File Open 8, 65): the template's x, y put the client that many dialog units from the owner's client corner (the main window's, 4, 42 on the screen; a dialog opened
+// from another dialog, that one's: Rename from List Ship Types at 72, 93), the frame 5 outside it (24 above it with a caption), and Windows byte-aligns the window's
+// left edge, (x + 4) & ~7. The windows the program centres itself (LICENSEEDLGPROC's FUN_1108_0a3b, the alerts, Startup, Player Entry) take o.centre.
+// W.place(id, parent): that corner; parent, the template of the owning dialog (placed the same way) or an [x, y] client corner.
+W.place = function (id, parent) {
+  const t = W.templates && W.templates[id]; if (!t) return null;
+  const capOf = (tt) => (tt.style & WS_CAPTION) === WS_CAPTION;
+  let pc = [4, 42];
+  if (Array.isArray(parent)) pc = parent;
+  else if (parent && W.templates[parent]) { const q = W.place(parent); pc = [q[0] + FR.side, q[1] + (capOf(W.templates[parent]) ? FR.capTop : FR.top)]; }
+  return [((pc[0] + 2 * t.x - FR.side) + 4) & ~7, pc[1] + 2 * t.y - (capOf(t) ? FR.capTop : FR.top)];
 };
 // o.at: [x, y], the dialog's outer corner in the 640 x 480 screen's pixels (a window the program creates over its main window, not centred: Status, Closing Game)
 // Windows 3.1 byte-aligns a dialog's window at 16 colours: its left edge falls on a multiple of 8 (every captured placement is one: Closing Game 32, File Open 8, Battle Speed 152, Status 224)

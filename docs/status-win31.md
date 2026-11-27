@@ -38,20 +38,20 @@ Sources (private repo `nostalgia-ho-sources`):
 | Create New Galaxy | shot 2, `-newgalaxy` | done 27 Nov | Beside shot 2, aligned on the frame and zoomed x3: words, frames, picture buttons, scroll bar, Cancel and Create. Fixed: the buttons' names were drawn by canvas centred on a half pixel, so most came out grey (the capture: all black); now on whole pixels. Kept: placed in the remake's New Game window (top of the screen, the remake's options under it), not centred; the pictures in their 256 colours: the 16-colour capture's are not nearest-colour (Dense: 688 of 1,024 pixels agree; the VGA driver's own mapping, not reproduced). |
 | Player Entry | shots 3, 42 | done | Beside shot 3 and zoomed: words, fields, Cancel, OK (the default), Info... dimmed. Kept: placed in the remake's New Game window. |
 | "Play alone or wait" alert | shot 5 | done 27 Nov | Was missing. WINHO.EXE 1050:0fcd-10b2 (disassembled: Ghidra's C of FUN_1050_0d02 drops it): at the end of the year-2000 turn, unless 20 players, while the header's +0xc is -1, one human gets ALERT 3230 ("&Wait", "&Continue", the text and "(Computer Opponents: %s)"); Continue (201) sets +0xc to 0 and the turn goes on, Wait leaves it undone (End Turn asks again); with more humans ALERT 3070 (the remake's hot seat has its own hand-over). Built in js/skins/dos/ui.js playAloneWin through T.turnProgress (the DOS ruleset only; the answer kept as g.alone20, not in the rules' state: digests unchanged). Beside shot 5: the same box, words, mascot, buttons; checked Wait (still 2000, asked again) and Continue (2010, not asked again). The DOS look does not ask: DOSHO.EXE's words are packed, not read. |
-| End Turn button | `win20-jake-vga16-main-endturn` | to compare | |
-| Build Ships (shipbuilding queue) | shots 12, 14 | to compare | |
-| Create New Ship Type | shots 17, 18, 28 | to compare | |
+| End Turn button | `win20-jake-vga16-main-endturn` | done 27 Nov | Pixel for pixel with shot 6 (0 of 1,683 pixels differ, at 247, 44, 51 x 33): one cyan row and the dark cyan corners under it, the stepped dark foot (it had two cyan rows and a square foot), and the English words as the capture's pixels: the program's small face is not Small Fonts 7 (SMALLE.FON read: its E is a pixel wider) and is otherwise unidentified, and our MS Sans Serif at 10 pixels came out blurred and a row high. Other languages keep the words as text. |
+| Build Ships (shipbuilding queue) | shots 12, 14 | done 27 Nov | Beside shot 12 at first load: frame (48, 63 to 581, 404, as captured), words, the list of types, the three queue cells, Cancel, OK. It had been centred (see the byte-alignment row). The capture's queue holds a ship; the remake's opens empty in a new game (Jake had queued one). |
+| Create New Ship Type | shots 17, 18, 28 | done 27 Nov | Beside shot 17: frame 24, 73 to 543, 368 as captured; the five bars (a one-value bar keeps its thumb at the start: captured in chunk 3), Class, costs, buttons. |
 | Battle window | shots 13, 15, 16, 19-24, 30-36, 45-49, 60 | to compare | |
 | Warnings (underfunded colonies, fuel) | shots 25, 26, 29 | to compare | |
 | Copy protection (28 REGISTER) | shot 27 | not built | The remake asks no copy protection in any skin (docs/win20-findings.md, chunk 5a). |
 | You won the galaxy (3 ALERT_CPIC) | shot 37 | to compare | |
 | Name a Star | shot 38 | to compare | |
 | You have been eliminated | shots 50-52 | to compare | |
-| About Spaceward Ho! | shots 57, 58 | to compare | |
+| About Spaceward Ho! | shots 57, 58 | done 27 Nov | Beside shot 57: frame 120, 56 to 513, 396 as captured, the picture, the licence lines (Jake's organisation line blank). Its system menu (shot 58): below. |
 | Help window (WinHelp) | shots 55, 56 | kept difference | The remake's How to play is its own window. |
-| List of All Explored Stars | shot 61 | to compare | |
-| Send Message | shots 62-65 | to compare | |
-| List of All Fleets | shot 66 | to compare | |
+| List of All Explored Stars | shot 61 | done 27 Nov | Beside shot 61: frame 24, 40 to 599, 408 as captured, the fixed-pitch rows, Go To Star dimmed, OK. |
+| Send Message | shots 62-65 | done 27 Nov | Beside shots 62-65 and win20-orig-vga16-sendmsg: the client is 319 high (it was built 323), and the frames 4 and the words 3 pixels higher than first written (the first measurement took the client's top 4 too high); now the lists' frames, cells and buttons on the capture's rows; frame at 32, 69 as captured. |
+| List of All Fleets | shot 66 | done 27 Nov | Beside shot 66: frame 24, 40 to 599, 408 as captured. |
 | Print Map's alert | shot 67 | to compare | |
 | Status (Pass n for Player m) | image0069, 0073 | to compare | |
 | Event alert without a picture (5 ALERT_NOPIC) | none | open | |
