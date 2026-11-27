@@ -100,7 +100,7 @@ T.menuLayout = {
     [lab('Give Money/Metal To…'), 'Galaxy/Give money or metal…'], [lab('Send Message To…'), 'Galaxy/Send a message…'], [lab('Surrender To…'), 'Galaxy/#9'], '-',
     [lab('Auto Play…'), 'Game/Auto play…'], [lab('Play One Turn For Me'), 'Game/Auto-play this turn'], '-',
     [lab('Armageddon…'), 'Galaxy/#10']],
-  Window: [[lab('Message History'), () => T.m5history(), null, () => !!(document.getElementById('m5hist') && !document.getElementById('m5hist').hidden), noGame, '1'], [lab('Graph History'), 'Game/Players and history'], '-',
+  Window: [[lab('Message History'), () => T.m5history(), null, () => !!(document.getElementById('m5hist') && !document.getElementById('m5hist').hidden), noGame, '1'], [lab('Graph History'), () => graphWindow(), null, () => !!(document.getElementById('m5graphwin') && !document.getElementById('m5graphwin').hidden), noGame, '2'], '-',
     [() => TL(infoOff() ? 'Show Information' : 'Hide Information'), () => setInfo(infoOff()), null, null, noGame],
     [() => TL(boxOff() ? 'Show Planet Info Box' : 'Hide Planet Info Box'), () => setBox(boxOff()), null, null, noGame, 'I'],
     [lab('Zoom In'), 'View/Zoom in'], [lab('Zoom Out'), 'View/Zoom out'], '-',
@@ -110,7 +110,7 @@ T.menuLayout = {
 };
 // the keys MENU 129-136 give the items the page already has (the layout's own items carry theirs above)
 const KEYS = { 'New game…': 'N', 'Saved games…': 'O', 'Export this game…': 'S', 'Quit to title': 'Q', 'Build ships at selected colony…': 'B',
-  'Review battle…': 'R', 'List explored stars…': 'L', 'Auto-play this turn': 'U', 'Zoom in': '=', 'Zoom out': '-', 'Players and history': '2' };
+  'Review battle…': 'R', 'List explored stars…': 'L', 'Auto-play this turn': 'U', 'Zoom in': '=', 'Zoom out': '-' };
 const DIMS = { 'Review battle…': () => !battleHere() };
 T.menus = (menus, ho) => {
   // (the Apple menu, MENU 128: About Spaceward Ho!... and Rank History..., first in the Ho! menu, which stands in its place)
@@ -270,19 +270,65 @@ function playersList() {
   box.append(list);
   return box;
 }
-// LHoGraphView ('grvw', 197 x 90 at the window's foot): the history drawn by Graph History's routine; "No Graph Information
-// Available" before the first update (shot 008); ten bevel buttons 18 x 18 at (3 + 19 i, 70) choosing the line (Income, Metal,
-// Savings, Ship Power, then Rank, Range, Speed, Weapons, Shields, Mini against the other players): their pictures to extract (unit 3).
+// LHoGraphView (FUN_100ba580): the column's ('grvw', 197 x 90 at the window's foot, ten bevel buttons 18 x 18 at (3 + 19 i, 70)) and the
+// Graph History window's (PPob 138, 600 x 320, buttons 52 x 52 along its foot). Black axes at the left and the foot with a tick at each
+// tenth; fewer than two records: "No Graph Information Available" (STR# 6001.48) at (axis + 10, the middle + 5). The buttons choose the
+// line (PICT 9000-9009: the remake's m9000-m9009): Money, Metal, Savings (the window: Ship Money), Ship Power, then Rank, Range, Speed,
+// Weapons, Shields and Mini against the other players, one line for each player still in, in the players' colours. In the window the
+// years under the foot's ticks. The records are the engine's history (p.hist: inc, hx.met, hx.sav, hx.pw, hx.rk, hx.tr). (The line
+// colours and the exact margins: from the shots, not yet read in the routine's second half.)
 const GRAPH_HINTS = ['Income', 'Metal', 'Savings', 'Ship Power', 'Rank vs. Other Players', 'Range vs. Other Players', 'Speed vs. Other Players', 'Weapons vs. Other Players', 'Shields vs. Other Players', 'Mini vs. Other Players'];
+const GRAPH = { pick: 0 };
+const seriesOf = (rec, i) => { if (!rec) return null; const hx = rec.hx || {}; return [rec.inc, hx.met, hx.sav, hx.pw != null ? hx.pw : rec.ships, hx.rk][i] ?? (hx.tr ? hx.tr[i - 5] : null); };
+function drawGraph(cv, W, H, big) {
+  const a = A(), g = a.G, x = cv.getContext('2d'), z = (M5.s || 1) * (window.devicePixelRatio || 1);
+  cv.width = W * z; cv.height = H * z; x.setTransform(z, 0, 0, z, 0, 0); x.clearRect(0, 0, W, H);
+  const L = big ? 60 : 6, T0 = big ? 10 : 4, R = W - (big ? 20 : 6), B = H - (big ? 75 : 24);
+  x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.moveTo(L + .5, T0); x.lineTo(L + .5, B + .5); x.lineTo(R, B + .5); x.stroke();
+  for (let i = 1; i <= 10; i++) { const y = Math.round(B - (B - T0) * i / 10) + .5, xx = Math.round(L + (R - L) * i / 10) + .5; x.beginPath(); x.moveTo(L, y); x.lineTo(L + (i % 2 ? 2 : 4), y); x.moveTo(xx, B); x.lineTo(xx, B - (i % 2 ? 2 : 4)); x.stroke(); }
+  const me = a.me(), hist = me.hist || [], vs = GRAPH.pick >= 4;
+  x.font = '9px Geneva, "Lucida Grande", Verdana, sans-serif'; x.fillStyle = '#000';
+  if (hist.length < 2) { x.fillText(TL('No Graph Information Available'), L + 10, (T0 + B) / 2 + 5); return; }
+  const who = vs ? g.players.filter(q => q.hist && q.hist.length) : [me];
+  let max = vs ? 100 : 1; if (!vs) for (const r of hist) max = Math.max(max, seriesOf(r, GRAPH.pick) || 0);
+  const y0 = hist[0].y, y1 = hist[hist.length - 1].y, span = Math.max(1, y1 - y0);
+  const px = (yr) => L + (R - L) * (yr - y0) / span, py = (v) => B - (B - T0) * Math.max(0, v) / max;
+  if (big) { x.textAlign = 'center'; const step = (g.opts && +g.opts.yearsPerTurn) || 10; for (let i = 0; i <= 4; i++) { const yr = y0 + Math.round(span * i / 4 / step) * step; x.fillText(String(yr), px(yr), B + 14); } x.textAlign = 'left'; }
+  who.forEach(q => {
+    const hs = q.hist; x.strokeStyle = q === me ? '#20c020' : ownerColour(g, q.id); x.beginPath();
+    hs.forEach((r, i) => { const v = seriesOf(r, GRAPH.pick); if (v == null) return; const X = px(r.y), Y = py(v); if (i === 0) x.moveTo(X, Y); else x.lineTo(X, Y); });
+    x.stroke();
+  });
+}
+function graphButtons(big, onPick) {
+  const bar = document.createElement('div'); bar.className = big ? 'm5gbtnsbig' : 'm5gbtns';
+  GRAPH_HINTS.forEach((h, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'm5bevel' + (GRAPH.pick === i ? ' on' : ''); b.title = TL(big && i === 0 ? 'Money' : big && i === 2 ? 'Ship Money' : h); b.setAttribute('aria-label', b.title);
+    const im = document.createElement('img'); im.src = `assets/sprites/m900${i}.png`; im.alt = ''; b.append(im); b.addEventListener('click', () => { GRAPH.pick = i; onPick(); }); bar.append(b); });
+  return bar;
+}
 function graphView() {
-  const a = A(), g = a.G;
   const box = document.createElement('section'); box.className = 'm5graph';
-  const hist = (g.history || []).length;
-  if (!hist || g.year <= (g.startYear || 2000)) { const t = document.createElement('span'); t.className = 'none'; t.textContent = TL('No Graph Information Available'); box.append(t); }
-  const bar = document.createElement('div'); bar.className = 'm5gbtns';
-  GRAPH_HINTS.forEach((h, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'm5bevel'; b.title = TL(h); b.setAttribute('aria-label', TL(h)); b.addEventListener('click', () => { const m = A(); if (m && m.openPlayers) m.openPlayers(); }); bar.append(b); });
-  box.append(bar);
+  const cv = document.createElement('canvas'); cv.className = 'm5gcv'; box.append(cv);
+  const redraw = () => { drawGraph(cv, 197, 90, false); box.querySelectorAll('.m5bevel').forEach((b, i) => b.classList.toggle('on', i === GRAPH.pick)); };
+  box.append(graphButtons(false, () => { redraw(); const w = document.getElementById('m5graphwin'); if (w && w.redraw) w.redraw(); }));
+  requestAnimationFrame(redraw);
   return box;
+}
+// Graph History (PPob 138: a floating window 600 x 320; Window > Graph History, ⌘2)
+function graphWindow() {
+  const wrap = document.getElementById('main'); if (!wrap) return;
+  let w = document.getElementById('m5graphwin');
+  if (w && !w.hidden) { w.hidden = true; return; }
+  if (!w) {
+    w = document.createElement('section'); w.id = 'm5graphwin'; w.dataset.rpClose = '.m5close';
+    const bar = document.createElement('div'); bar.className = 'm5wtitle'; bar.innerHTML = '<i class="m5close"></i><span></span><i class="m5wbox"></i>'; bar.querySelector('span').textContent = TL('Graph History');
+    bar.querySelector('.m5close').addEventListener('click', () => { w.hidden = true; });
+    const cv = document.createElement('canvas'); cv.className = 'm5gcvbig';
+    w.redraw = () => { drawGraph(cv, 600, 320, true); w.querySelectorAll('.m5bevel').forEach((b, i) => b.classList.toggle('on', i === GRAPH.pick)); };
+    w.append(bar, cv, graphButtons(true, () => { w.redraw(); A().renderPanel(); }));
+    wrap.append(w); dragBy(bar, w);
+  }
+  w.hidden = false; w.redraw();
 }
 T.panel = (panel, B) => {
   if (!M5ON()) return;

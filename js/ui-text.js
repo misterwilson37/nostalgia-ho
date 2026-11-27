@@ -418,6 +418,7 @@ root.HOUI.add([
 ['Fleet', 'Flotte', 'Flotte', 'Filo', 'Flota'],
 ['Fuel: %s', 'Carburant : %s', 'Tank: %s', 'Yakıt: %s', 'Combustible: %s', { de: '~Amiga' }],
 ['Empty Fleet', 'Flotte vide', 'Leere Flotte', 'Boş Filo', 'Flota vacía', I],
+['Ship Money', 'Argent des vaisseaux', 'Schiffsgeld', 'Gemi Parası', 'Dinero en naves'],
 ['About Spaceward Ho!…', 'À propos de Spaceward Ho!…', 'Über Spaceward Ho!…', 'Spaceward Ho! Hakkında…', 'Acerca de Spaceward Ho!…'],
 ['Written By Peter Commons', 'Écrit par Peter Commons', 'Geschrieben von Peter Commons', 'Yazan: Peter Commons', 'Escrito por Peter Commons'],
 ['Designed By Joe Williams and Peter Commons', 'Conçu par Joe Williams et Peter Commons', 'Entworfen von Joe Williams und Peter Commons', 'Tasarım: Joe Williams ve Peter Commons', 'Diseñado por Joe Williams y Peter Commons'],

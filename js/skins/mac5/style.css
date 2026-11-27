@@ -348,3 +348,20 @@ html.m5win form.m5auto .m5z0 { left: calc(136 * var(--u)); } html.m5win form.m5a
 html.m5win form.m5auto .btns { display: flex; justify-content: space-between; }
 html.m5win form.m5auto fieldset > label.chk:nth-of-type(3) { width: auto !important; padding: 0 calc(3 * var(--u)); background: #dddddd; z-index: 1; font-size: calc(11 * var(--u)); }
 html.m5win form.m5auto .slider output { margin-left: calc(-2 * var(--u)); }
+/* the graphs (LHoGraphView) */
+html.m5win .m5gcv { position: absolute; left: 0; top: 0; width: calc(197 * var(--u)); height: calc(90 * var(--u)); }
+html.m5win .m5graph .m5bevel, html.m5win .m5gbtnsbig .m5bevel { background-size: 80% 80% !important; background-position: center !important; background-repeat: no-repeat !important; background-color: #e4e4e4 !important; }
+html.m5win .m5graph .m5bevel { background-image: inherit; }
+html.m5win .m5bevel.on { box-shadow: inset var(--u) var(--u) calc(2 * var(--u)) rgba(0,0,0,.5) !important; background-color: #b8b8b8 !important; }
+#m5graphwin { display: none; }
+html.m5win #m5graphwin:not([hidden]) { display: block; position: absolute; left: calc(220 * var(--u)); top: calc(60 * var(--u)); width: calc(600 * var(--u)); height: calc(320 * var(--u) + 13 * var(--u)); z-index: 7;
+  background: #fff; border: var(--u) solid #2c2c33; box-shadow: calc(2 * var(--u)) calc(2 * var(--u)) calc(4 * var(--u)) rgba(0,0,0,.45); }
+html.m5win #m5graphwin .m5wtitle { position: relative; height: calc(13 * var(--u)); border-bottom: var(--u) solid #555; cursor: move; text-align: center;
+  background: repeating-linear-gradient(#f0f0f0 0 var(--u), #a8a8a8 var(--u) calc(2 * var(--u))) center / 100% calc(7 * var(--u)) no-repeat, #d8d8d8; }
+html.m5win #m5graphwin .m5wtitle span { padding: 0 calc(4 * var(--u)); background: #d8d8d8; font: bold calc(10 * var(--u)) / calc(13 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win #m5graphwin .m5close, html.m5win #m5graphwin .m5wbox { position: absolute; top: calc(2 * var(--u)); width: calc(9 * var(--u)); height: calc(9 * var(--u)); border: var(--u) solid #333; box-sizing: border-box; background: linear-gradient(135deg, #fff, #c4c4c4); }
+html.m5win #m5graphwin .m5close { left: calc(3 * var(--u)); cursor: pointer; } html.m5win #m5graphwin .m5wbox { right: calc(3 * var(--u)); }
+html.m5win .m5gcvbig { position: absolute; left: 0; top: calc(14 * var(--u)); width: calc(600 * var(--u)); height: calc(320 * var(--u)); }
+html.m5win .m5gbtnsbig { position: absolute; left: calc(4 * var(--u)); top: calc(14 * var(--u) + 259 * var(--u)); display: flex; gap: calc(7 * var(--u)); }
+html.m5win .m5gbtnsbig .m5bevel { width: calc(52 * var(--u)); height: calc(52 * var(--u)); padding: 0 !important; min-width: 0; border: var(--u) solid #666 !important; border-radius: 0 !important; }
+html.m5win .m5bevel img { width: 85%; height: 85%; object-fit: contain; pointer-events: none; display: block; margin: auto; }
