@@ -59,6 +59,21 @@ ${S} .dropdown button.check { position: relative; }
 ${S} .dropdown button.check::before { content: ""; position: absolute; left: ${u(4)}; top: ${u(2)}; width: ${u(8)}; height: ${u(10)}; margin: 0;
   background: ${svg(8, 10, [[7, 0, 1, 2, K], [6, 2, 2, 1, K], [6, 3, 1, 1, K], [5, 4, 2, 1, K], [0, 5, 2, 1, K], [5, 5, 1, 1, K], [1, 6, 2, 1, K], [4, 6, 2, 1, K], [2, 7, 1, 1, K], [4, 7, 1, 1, K], [2, 8, 3, 1, K], [3, 9, 1, 1, K]])} 0 0 / 100% 100% no-repeat; }
 ${S} .dropdown button.check:hover::before { filter: invert(1); }
+/* the system menu (the control-menu box's), as captured: Jake's win20-jake-vga16-shot0006.png (the main window's: a menu at 4, 22, 167 wide, items 18 apart, "Alt+F4"
+   83 past the words; the box drawn pressed, its colours swapped as VGA XOR draws them: face and shade, black and white) and shot 0058 (About's: Move, Close) */
+.w31sysm { position: fixed; z-index: 1000; display: grid; grid-template-columns: minmax(calc(97 * var(--du)), max-content) auto; width: max-content; min-width: calc(167 * var(--du));
+  box-sizing: border-box; background: #fff; border: ${u(1)} solid #000; box-shadow: ${u(1)} ${u(1)} 0 ${FACE}; padding: 0; margin: 0; }
+html .w31sysm button { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; text-align: left; white-space: nowrap; border: 0; border-radius: 0; box-shadow: none; margin: 0;
+  min-width: 0; min-height: 0; background: #fff; color: #000; font: ${u(13)}/${u(18)} "Win31 System", ${F}; padding: 0 ${u(12)} 0 ${u(15)}; cursor: default; text-shadow: none; }
+html .w31sysm button:hover, html .w31sysm button:focus-visible { background: var(--w31hi, #000080); color: #fff; outline: none; }
+html .w31sysm button[disabled], html .w31sysm button[disabled]:hover { background: #fff; color: ${SHADE}; }
+.w31sysm hr { grid-column: 1 / -1; width: 100%; border: 0; border-top: ${u(1)} solid #000; margin: ${u(3)} 0; }
+.w31sysm .k { white-space: nowrap; }
+.w31sysm u { text-decoration: underline; text-underline-offset: ${u(1)}; }
+#w31sysbox { position: absolute; left: 0; top: 0; width: ${u(18)}; height: ${u(18)}; padding: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: none; min-width: 0; min-height: 0; cursor: default; display: none; }
+${S} #w31sysbox { display: block; }
+#w31sysbox.on, .w31d .w31sys.on { background: ${svg(18, 18, [[0, 0, 18, 18, SHADE], [2, 7, 13, 3, WH], [3, 8, 11, 1, K], [3, 10, 13, 1, FACE], [15, 8, 1, 2, FACE]])} 0 0 / 100% 100% no-repeat; }
+.w31d .w31sys.on::before { display: none; }
 ${S} .dropdown .mkey { margin-left: 0; white-space: nowrap; }
 ${S} #menubar > .menu:has(> .logo) { display: none; }
 ${S} #menubar > .menu:last-child { position: absolute; right: 0; top: ${u(19)}; }
@@ -162,7 +177,7 @@ let wired = false;
 W.frame = {
   // the Tech Spending window's picture (ui.js techBoxDos) and the Reports window's rows ({el, go}: ui.js reportRows)
   panes(techCanvas, reps) {
-    style();
+    style(); sysBox();
     if (!wired) {
       wired = true; activate('main');
       for (const id of ['menubar', 'main']) { const e = document.getElementById(id); if (e) e.addEventListener('pointerdown', () => activate('main')); }
@@ -187,5 +202,68 @@ W.frame = {
     }
   },
 };
+// The system menu (the control-menu box at a window's top left): the main window's (Restore dimmed, Move, Size, Minimize, Maximize; Close Alt+F4; Switch To... Ctrl+Esc)
+// and a dialog's (Move; Close Alt+F4), as Windows 3.1 shows them (captured, Jake's shots 6, 56, 58). Close is the program's Exit (the main window) or closes the dialog; Move,
+// Size, Minimize, Maximize and Switch To... are Windows' own work on a window, which a page cannot do to the browser's: they close the menu and do nothing (the remake's
+// screen is fixed). Opened by a click on the box, or Alt+Space (the main window) and Alt+- (a dialog), as in Windows.
+let sysOpen = null;
+function sysClose() {
+  if (!sysOpen) return;
+  const o = sysOpen; sysOpen = null; o.m.remove(); o.box.classList.remove('on');
+  document.removeEventListener('pointerdown', o.away, true); document.removeEventListener('keydown', o.key, true);
+}
+function sysMenu(box, items) {
+  if (sysOpen) { const same = sysOpen.box === box; sysClose(); if (same) return; }
+  const m = document.createElement('div'); m.className = 'w31sysm'; m.setAttribute('role', 'menu');
+  for (const it of items) {
+    if (it === '-') { m.append(document.createElement('hr')); continue; }
+    const [label, hot, key, fn, off] = it, b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'menuitem'); if (off) b.disabled = true;
+    const w = document.createElement('span'), un = document.createElement('u'); un.textContent = label[hot]; w.append(label.slice(0, hot), un, label.slice(hot + 1));
+    const k = document.createElement('span'); k.className = 'k'; k.textContent = key || '';
+    b.append(w, k); b.dataset.hot = label[hot].toLowerCase();
+    b.addEventListener('click', (e) => { e.stopPropagation(); sysClose(); if (fn) fn(); });
+    m.append(b);
+  }
+  document.body.append(m);
+  const r = box.getBoundingClientRect(); m.style.left = Math.round(r.left) + 'px'; m.style.top = Math.round(r.bottom) + 'px';
+  box.classList.add('on');
+  const away = (e) => { if (!m.contains(e.target) && e.target !== box) sysClose(); };
+  const key = (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); sysClose(); return; }
+    const bs = [...m.querySelectorAll('button:not([disabled])')], i = bs.indexOf(document.activeElement), n = bs.length;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); bs[((i < 0 ? 0 : i) + (e.key === 'ArrowDown' ? 1 : n - 1)) % n].focus(); return; }
+    if (e.key === 'Enter' && i >= 0) { e.preventDefault(); e.stopPropagation(); bs[i].click(); return; }
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) { const b = bs.find(x => x.dataset.hot === e.key.toLowerCase()); if (b) { e.preventDefault(); e.stopPropagation(); b.click(); } }
+  };
+  sysOpen = { m, box, away, key };
+  setTimeout(() => { if (sysOpen && sysOpen.m === m) { document.addEventListener('pointerdown', away, true); document.addEventListener('keydown', key, true); } }, 0);
+  const first = m.querySelector('button:not([disabled])'); if (first) first.focus({ preventScroll: true });
+}
+const noop = () => {};
+function mainSysMenu(box) {
+  const a = root.HOAPI;
+  sysMenu(box, [['Restore', 0, '', noop, true], ['Move', 0, '', noop], ['Size', 0, '', noop], ['Minimize', 2, '', noop], ['Maximize', 2, '', noop], '-',
+    ['Close', 0, 'Alt+F4', () => { if (a && a.G) a.quitToTitle(); }], '-', ['Switch To...', 1, 'Ctrl+Esc', noop]]);
+}
+function dlgSysMenu(box) {
+  const d = box.closest('.w31d'), h = d && d.w31dlg;
+  sysMenu(box, [['Move', 0, '', noop], ['Close', 0, 'Alt+F4', () => { if (h) h.close(); }]]);
+}
+function sysBox() {
+  const t = document.getElementById('menubar'); if (!t || document.getElementById('w31sysbox')) return; // (in the menu bar over the title's corner: the title's words are rewritten each year)
+  const b = document.createElement('button'); b.id = 'w31sysbox'; b.type = 'button'; b.setAttribute('aria-label', 'Control menu'); b.setAttribute('aria-haspopup', 'menu');
+  b.addEventListener('click', (e) => { e.stopPropagation(); mainSysMenu(b); });
+  t.append(b);
+}
+document.addEventListener('click', (e) => { const s = e.target.closest && e.target.closest('.w31d .w31sys'); if (s && de.classList.contains('os-win31')) { e.stopPropagation(); dlgSysMenu(s); } }, true);
+document.addEventListener('keydown', (e) => {
+  if (!de.classList.contains('os-win31') || !e.altKey || e.ctrlKey || e.metaKey) return;
+  const dl = [...document.querySelectorAll('.w31d .w31sys')].pop();
+  if (e.code === 'Space' && !dl) { const b = document.getElementById('w31sysbox'); if (b) { e.preventDefault(); mainSysMenu(b); } }
+  else if (e.key === '-' && dl) { e.preventDefault(); dlgSysMenu(dl); }
+});
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sysBox); else sysBox();
+W.sysMenu = sysMenu;
 style();
 })(typeof window !== 'undefined' ? window : globalThis);

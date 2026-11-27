@@ -425,7 +425,7 @@ function menuLayoutDos() {
     const iu = M.Options.findIndex(i => i[0] === 'I’ll Update Turns');
     if (iu >= 0) M.Options[iu] = it('I’ll Update Turns', () => {}, { ghost: noGame, checked: () => !noGame() });
     M.Window = [it('Tech Spending Window', () => {}, { key: 'Alt+1' }), ['Report Window', 'Galaxy/Report window…'], '-', it('Clean Up Windows', () => {}, { ghost: off }), M.Window[2]];
-    M.Help = [['Help on Ho!', 'Help/How to play']];
+    M.Help = [it('Help on Ho!', () => A().openHelp(), { key: 'F1' })]; // (F1 shown and taken, as captured: shot 54; dosKeys)
   } else if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
   return M;
 }
@@ -489,6 +489,11 @@ function hotMenus() {
 const WINKEY = { 'Ctrl+Y': 'Ctrl+M', '+': 'Ctrl+=', '-': 'Ctrl+-' }, WINKEY_DOS = { 'Ctrl+M': 'Ctrl+Y', 'Ctrl+=': '+', 'Ctrl+-': '-' };
 function dosKeys() {
   // The Windows look's menu bar: Alt+letter opens the menu whose underlined first letter it is, and a letter chosen in an open menu presses the item with that underlined letter
+  // F1: Help on Ho! (the Windows program's Help menu, shot 54), the remake's How to play; not while a window of the remake's is open
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'F1' || !frameOn() || !winOn() || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.scrim')) return;
+    e.preventDefault(); window.HOAPI.openHelp();
+  });
   document.addEventListener('keydown', (e) => {
     if (!frameOn() || !winOn() || e.ctrlKey || e.metaKey || e.shiftKey || e.key.length !== 1 || !/[a-z]/i.test(e.key)) return;
     const k = e.key.toLowerCase(), open = document.querySelector('#menubar .dropdown.open');

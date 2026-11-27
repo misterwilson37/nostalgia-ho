@@ -360,7 +360,7 @@ W.build = function (id, o) {
     d.append(c);
   }
   const client = at(mk('div', 'w31client'), FR.side - 1, top - 1, cw, ch); d.append(client);
-  const dlg = { el: d, id, get: (k) => client.querySelector(`[data-w31="${k}"]`), value: (k) => { const e = dlg.get(k); return e && e.w31 ? e.w31.value : e && 'value' in e ? e.value : null; }, close: () => (o.close ? o.close() : a.closeModal()) };
+  const dlg = d.w31dlg = { el: d, id, get: (k) => client.querySelector(`[data-w31="${k}"]`), value: (k) => { const e = dlg.get(k); return e && e.w31 ? e.w31.value : e && 'value' in e ? e.value : null; }, close: () => (o.close ? o.close() : a.closeModal()) };
   t.items.forEach((it, n) => client.append(control(it, n, o, dlg)));
   // the keyboard: Return is IDOK (the button with id 1, or the default push button), as in Windows
   d.addEventListener('keydown', (e) => {
