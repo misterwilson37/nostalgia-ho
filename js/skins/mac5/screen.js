@@ -404,6 +404,38 @@ T.afterDraw = () => {
   rows.forEach(([l, val], i) => { const r = line('row', ''); r.style.top = U(25 + 10 * i - 9); r.append(span2('lb', l), span2('vl', val)); b.append(r); });
   if (gauge) b.append(gaugeOf(st));
 };
+// ---------- End Turn (unit 5) ----------
+// LHoEndTurnView (FUN_100a6f64; PPob 136 'Hend', 83 x 83): the glass globe, PICT 10000 (0, 423)-(83, 506), or (85, 423)-(168, 506) while
+// pressed, in transparent mode; on it the clock's window, PICT 10000 (158, 147)-(196, 167) at (22, 50), and in it the time the turn has
+// taken, minutes:seconds, Geneva 9, right-aligned at 55 on the baseline 63, in the colour table's +0x12 (green, sampled from shot 034).
+// A click inside the oval ends the turn (FUN_100a6dd4: PtInRgn on the oval). It stands at the map's foot left (shots 008, 034: 7 in
+// from the map's edge, 4 above the scroll bar). (The arc the routine can paint over it for a timed turn shows in no capture: left out.)
+const CLK = { t0: Date.now(), turn: null, timer: null };
+function globe() {
+  const wrap = document.getElementById('mapwrap'); if (!wrap) return null;
+  let g = document.getElementById('m5clk');
+  if (!g) {
+    g = document.createElement('div'); g.id = 'm5clk';
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'clock m5globe'; b.setAttribute('aria-label', TL('End Turn')); b.setAttribute('aria-keyshortcuts', 'T');
+    const t = document.createElement('span'); t.className = 'm5time'; b.append(t);
+    // (inside the oval only, as the program's PtInRgn)
+    const inOval = (e) => { const r = b.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; return x * x + y * y <= 0.25; };
+    b.addEventListener('pointerdown', (e) => { if (inOval(e)) b.classList.add('down'); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(k => b.addEventListener(k, () => b.classList.remove('down')));
+    b.addEventListener('click', (e) => { if (e.detail && !inOval(e)) return; const a = A(); if (a && a.G && !a.G.over) a.doEndTurn(); });
+    g.append(b); wrap.append(g);
+  }
+  return g;
+}
+function clockTick() {
+  const a = A(), g = document.getElementById('m5clk'); if (!g) return;
+  const on = mapOn() && a && a.G && !a.G.over; g.hidden = !on; if (!on) return;
+  if (CLK.turn !== a.G.turn) { CLK.turn = a.G.turn; CLK.t0 = Date.now(); }
+  const sec = Math.floor((Date.now() - CLK.t0) / 1000);
+  g.querySelector('.m5time').textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+}
+const prevAfterDraw2 = T.afterDraw;
+T.afterDraw = () => { if (prevAfterDraw2) prevAfterDraw2(); if (!mapOn()) { const g = document.getElementById('m5clk'); if (g) g.hidden = true; return; } globe(); clockTick(); if (!CLK.timer) CLK.timer = setInterval(clockTick, 1000); };
 const line = (cls, text) => { const e = document.createElement('div'); e.className = cls; e.textContent = text; return e; };
 const span2 = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
 // the terraform / mine gauge at the box's left (FUN_100933f0, to read): green above for terraforming, blue below for mining, the red

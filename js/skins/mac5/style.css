@@ -144,3 +144,13 @@ html.m5win #m5info.wide .row .lb { left: calc(21 * var(--u)); }
 html.m5win #m5info.wide .row .vl { left: calc(61 * var(--u)); }
 html.m5win #m5info .gauge { position: absolute; left: calc(5 * var(--u)); top: calc(5 * var(--u)); width: calc(9 * var(--u)); height: calc(64 * var(--u)); border: var(--u) solid #223;
   background: linear-gradient(#40c040 0 calc(var(--t) * 100%), #c02020 calc(var(--t) * 100%) calc(var(--t) * 100% + 2 * var(--u)), #2040e0 calc(var(--t) * 100% + 2 * var(--u))); }
+/* the End Turn globe (LHoEndTurnView) at the map's foot left; the page's own End Turn clock in the report card is not 5.0.5's */
+#m5clk { display: none; }
+html.m5win #m5clk:not([hidden]) { display: block; position: absolute; left: calc(7 * var(--u)); bottom: calc(4 * var(--u)); width: calc(83 * var(--u)); height: calc(83 * var(--u)); z-index: 3; }
+html.m5win #m5clk .m5globe { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; margin: 0; border: 0 !important; border-radius: 50% !important; box-shadow: none !important; min-width: 0;
+  background: url("../../../assets/skins/mac5/globe.png") 0 0 / 100% 100% no-repeat !important; image-rendering: pixelated; cursor: pointer; }
+html.m5win #m5clk .m5globe.down { background-image: url("../../../assets/skins/mac5/globe-down.png") !important; }
+html.m5win #m5clk .m5globe::before { content: ''; position: absolute; left: calc(22 * var(--u)); top: calc(50 * var(--u)); width: calc(38 * var(--u)); height: calc(20 * var(--u));
+  background: url("../../../assets/skins/mac5/clockwin.png") 0 0 / 100% 100%; image-rendering: pixelated; }
+html.m5win #m5clk .m5time { position: absolute; right: calc((83 - 55) * var(--u)); top: calc((63 - 9) * var(--u)); color: #54c83c; font: calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win #msg .clock { display: none !important; }
