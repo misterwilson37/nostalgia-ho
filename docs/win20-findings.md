@@ -403,3 +403,20 @@ Windows look now draws them so (js/skins/dos/ui.js `win16`, `groupOne`; the kill
 capture). The groups' words are drawn in the DOS look's Geneva 9 (they had been MS Sans Serif 11); the program's own face is smaller still (about 3.6
 pixels a letter, Windows' Small Fonts, which the remake does not have): a kept difference. Also in the set, for later: the system menu (Restore, Move,
 Size, Minimize, Maximize, Close, Switch To...) on the help and About windows (image0056, 0058), WinHelp's window (0055).
+
+## 27 Nov 2026: whole screens beside Jake's captures (docs/status-win31.md)
+
+Each screen loaded as it first appears (`tools/win31-compare.js`: 1280 x 960 halved, beside the capture), then each part at x3. The screen-by-screen
+record, with the evidence for every line, is now `docs/status-win31.md`; what changed, and what this file said before:
+- **Menus** in the System font (they were MS Sans Serif bold scaled to 13), "..." (the "…" kept by chunk 5c drew a block: the fonts have no such glyph),
+  Windows' check mark, each menu's key column and width as captured; Save... and I'll Update Turns enabled (I'll Update Turns ticked), as captured.
+- **System menu** built (the main window's and a dialog's; shot 6: 0 black pixels differ); **F1** opens Help on Ho!.
+- **Dialogs' places**: the template's x, y from the owner's client corner, the frame outside it, the left edge (x + 4) & ~7 (every captured menu dialog;
+  `W.place` in dialog.js). They had been centred.
+- **Send Message**: its client is 319 high, not 323, and everything sits 4 pixels higher than "Chunk 5b" above measured (the client's top had been taken 4 high).
+- **Report bubble**: the Windows program's own (FUN_10c0_0f08), not the DOS one. **End Turn**: pixel for pixel. **Underfunded colonies**: Cancel / Let 'em Die.
+- **ALERT 3230** ("play alone, or wait for more humans to join?", year 2000, one human) found in the disassembly at 1050:0fcd and built.
+- **The won and lost boxes' pictures**: HOCOLOR.DLL's 5040 and 5050 are pixel for pixel the DOS skin's d5040 / d5050, so they were already the Windows program's.
+- **5 ALERT_NOPIC**: no code of WINHO.EXE holds any of the alerts 3090-3170 (scanned); unreachable, as docs/coverage-20.md found for 2.0. Not built.
+- **Pictures in 16 colours**: the VGA driver's mapping of the 256-colour bitmaps is not nearest-colour (Create New Galaxy's Dense: 688 of 1,024 pixels agree);
+  the remake shows them as 256 colours do (the README's recommended mode).
