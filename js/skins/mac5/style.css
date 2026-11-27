@@ -263,3 +263,14 @@ html.m5win .m5lvd.on { background: #e8e8e8; }
 html.m5win .m5lvpic { width: calc(40 * var(--u)); height: calc(40 * var(--u)); object-fit: contain; }
 html.m5win .m5pic4900 { background: url("../../../assets/skins/mac5/p4900.png") 0 0 / 100% 100%; }
 html.m5win .m5list .m5big { font-size: calc(12 * var(--u)); }
+/* Group Fleets (PPob 140) */
+html.m5win .m5glist { background: #fff; }
+html.m5win .m5grow { position: relative; box-sizing: border-box; border-bottom: var(--u) solid #e0e0e0; font: calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; user-select: none; }
+html.m5win .m5gh { padding: calc(4 * var(--u)) calc(8 * var(--u)); cursor: default; white-space: nowrap; overflow: hidden; }
+html.m5win .m5gh.on { background: #ccccff; }
+html.m5win .m5gp { height: calc(40 * var(--u)); display: flex; align-items: center; justify-content: center; cursor: grab; }
+html.m5win .m5gp.on { background: #ccccff; }
+html.m5win .m5gp .shippic { height: calc(30 * var(--u)) !important; pointer-events: none; }
+html.m5win .m5gn { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); min-width: calc(14 * var(--u)); padding: 0 calc(2 * var(--u)); background: #fff; border-radius: calc(3 * var(--u)); text-align: center; font-size: calc(9 * var(--u)); pointer-events: none; }
+html.m5win .m5grp.dim, html.m5win .m5grp.dim .m5t, html.m5win .m5grp.dim legend { color: #999; }
+html.m5win .m5sub legend { font-weight: normal; }

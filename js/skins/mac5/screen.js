@@ -795,8 +795,130 @@ function starsWindow() {
   const cols = [{ t: 'Star', w: 62 }, { t: 'Name', w: 100 }, { t: 'Quality', w: 60, key: (r) => r.q, desc: true }, { t: 'Temp', w: 80 }, { t: 'Gravity', w: 65 }, { t: 'Metal', w: 65 }, { t: 'Info Date', w: 75 }];
   return listWindow('Explored Stars', cols, rows, { x: 13, y: 12, w: 524, h: 334, px: 548, py: 13, okx: 557, sort: 2, desc: true });
 }
+// ---------- Group Fleets (PPob 140, LOrganizeFleetsDialog) ----------
+// A modal window 587 x 399 (shots 018, 089-092). At the left the fleets at the star (LFleetsDataBrowser, 210 x 383): each fleet's line
+// ("25 Dragon (6/6) Fighters", a fleet of several designs "20 Whisper (6/6) Fighters +3") and under it a row for each pile, the design's
+// picture with the count on it; a fleet emptied while the window is open stays as "Empty Fleet", and one "Empty Fleet" is at
+// the end when the window opens (shot 089). A pile is dragged onto another fleet (or an Empty Fleet, which becomes a new fleet); with Option the program asks how many
+// (PPob 155 "How Many?"). Split halves the chosen pile into a new fleet at the end (shot 090: 25 Dragon -> 13 and 12); with one ship it
+// sends each other pile of the fleet to a fleet of its own. Group All puts every fleet into the chosen one (or the first). At the right:
+// Fleet Information (Range, Current Fuel, Speed, Num. Colonists, Departing To / Final Destination and their Arriving In, Scrap Value:
+// 3/4 of the ships' metal, as dismantling gives a human), Ship Information for the chosen pile (Delayed Arrival, Battle Attitude:
+// Offensive / Defensive / Normal; dimmed while a fleet line is chosen) and Ship Type Information (its design's figures).
+// The rules are the engine's (HO.splitFleet, HO.mergeFleets, HO.canMerge; the pile's stance as the page keeps it, f.dstance).
+function groupWindow(sid) {
+  const a = A(), g = a.G, p = a.me(); if (!g || sid == null) return false;
+  const here = () => g.fleets.filter(f => f.owner === a.ME && f.star === sid && f.to == null && !f.sat && H().fleetCount(f) > 0);
+  const W = { order: here().map(f => 'f' + f.id).concat(['e0']), sel: null, ne: 1 };
+  const fleetOf = (key) => key && key[0] === 'f' ? g.fleets.find(f => f.id === +key.slice(1) && H().fleetCount(f) > 0) : null;
+  const piles = (f) => Object.keys(f.ships || {}).filter(k => f.ships[k] > 0).map(Number);
+  const line = (f) => { const ds = piles(f); if (!ds.length) return TL('Empty Fleet'); const d0 = H().getDesign(g, f.owner, ds[0]), n0 = f.ships[ds[0]], T0 = H().TYPES[d0.type];
+    const rest = H().fleetCount(f) - n0; return `${n0} ${d0.name} (${d0.W}/${d0.S}) ${TL(n0 === 1 ? T0.name : T0.plural)}` + (rest ? ' +' + rest : ''); };
+  const stance = (f, did) => (f.dstance && f.dstance[did] != null ? f.dstance[did] : (f.delayed ? 1 : 0) | (f.stance === 'defensive' ? 2 : f.stance === 'offensive' ? 4 : 0));
+  const body = elx('div', 'm5build m5group'); body.style.width = U(587); body.style.height = U(399);
+  const list = at(elx('div', 'm5blist m5glist'), 8, 8, 210, 383);
+  const box = (title, x, y, w, h) => { const b = at(elx('fieldset', 'm5grp'), x, y, w, h); b.append(elx('legend', '', TL(title))); body.append(b); return b; };
+  const finf = box('Fleet Information', 228, 8, 350, 120), shin = box('Ship Information', 228, 136, 350, 80), shty = box('Ship Type Information', 228, 224, 350, 116);
+  const pair = (bx, label, x, y, vx, w) => { bx.append(at(elx('span', 'm5t b', TL(label)), x, y - 8, w || 90, 14)); const v = at(elx('span', 'm5t', ''), vx, y - 8, 70, 14); bx.append(v); return v; };
+  const F = { rng: pair(finf, 'Range:', 13, 18, 97), fue: pair(finf, 'Current Fuel:', 169, 18, 276, 101), spd: pair(finf, 'Speed:', 13, 38, 97), col: pair(finf, 'Num. Colonists:', 169, 38, 276, 101),
+    dst: pair(finf, 'Departing To:', 12, 58, 97), fds: pair(finf, 'Final Destination:', 169, 58, 276, 101), atm: pair(finf, 'Arriving In:', 12, 78, 97), fsa: pair(finf, 'Arriving In:', 169, 78, 276, 101),
+    sval: pair(finf, 'Scrap Value:', 12, 98, 97) };
+  const dela = at(elx('label', 'm5chk'), 11, 14 - 8, 159, 18); const delc = elx('input'); delc.type = 'checkbox'; dela.append(delc, elx('span', '', TL('Delayed Arrival'))); shin.append(dela);
+  const att = at(elx('fieldset', 'm5grp m5sub'), 10, 36 - 8, 328, 35); att.append(elx('legend', '', TL('Battle Attitude'))); shin.append(att);
+  const radios = [['Offensive', 4, 11], ['Defensive', 2, 129], ['Normal', 0, 235]].map(([t, bit, x]) => { const l = at(elx('label', 'm5chk'), x + 2, 5 + 8 - 8, 90, 18); const r = elx('input'); r.type = 'radio'; r.name = 'm5att'; l.append(r, elx('span', '', TL(t))); att.append(l); return { r, bit }; });
+  const T = { r: pair(shty, 'Range:', 10, 16, 66, 49), dev: pair(shty, 'Dev Cost:', 154, 16, 225, 65), v: pair(shty, 'Speed:', 9, 36, 66, 49), pro: pair(shty, 'Pro Cost:', 154, 36, 225, 65),
+    w: pair(shty, 'Weapons:', 9, 56, 66, 49), met: pair(shty, 'Metal Cost:', 154, 56, 225, 65), sh: pair(shty, 'Shields:', 9, 76, 66, 49), nb: pair(shty, 'Num. Built:', 154, 76, 225, 65),
+    m: pair(shty, 'Mini:', 9, 96, 66, 49), ne: pair(shty, '# Existing:', 154, 96, 225, 65) };
+  const btn = (t, x, w, def) => { const b = at(elx('button', 'm5btn' + (def ? ' def' : ''), TL(t)), x, 358, w, 20); b.type = 'button'; body.append(b); return b; };
+  const split = btn('Split', 239, 80), group = btn('Group All', 332, 80), done = btn('Done', 498, 69, true);
+  body.prepend(list);
+  const nm = (id) => (id != null && g.stars[id] ? g.stars[id].name : '');
+  const turnsTo = (f, to) => { const d = H().starDist(g, f.star, to), v = Math.max(1, H().fleetSpeed(g, f)); return Math.ceil(d / v); };
+  const show = () => {
+    const sf = W.sel && fleetOf(W.sel.key), did = W.sel && W.sel.did;
+    Object.values(F).forEach(v => { v.textContent = ''; }); Object.values(T).forEach(v => { v.textContent = ''; });
+    finf.classList.toggle('dim', !sf); shin.classList.toggle('dim', !(sf && did != null)); shty.classList.toggle('dim', !(sf && did != null));
+    if (sf) {
+      F.rng.textContent = String(H().fleetMaxRange(g, sf)); F.fue.textContent = String(Math.floor(sf.fuel)); F.spd.textContent = String(H().fleetSpeed(g, sf)); F.col.textContent = String(sf.colonists || 0);
+      const fin = sf.path && sf.path.length ? sf.path[sf.path.length - 1] : sf.dest;
+      if (sf.dest != null) { F.dst.textContent = nm(sf.dest); F.atm.textContent = String(H().arrivalYear(g, turnsTo(sf, sf.dest))); }
+      if (fin != null) { F.fds.textContent = nm(fin); F.fsa.textContent = String(H().arrivalYear(g, turnsTo(sf, fin))); }
+      F.sval.textContent = H().niceNum(piles(sf).reduce((m, k) => { const d = H().getDesign(g, sf.owner, k); return m + Math.trunc(sf.ships[k] * H().designCost(g, d).metal * 3 / 4); }, 0));
+    }
+    const on = !!(sf && did != null); delc.disabled = !on; radios.forEach(x => { x.r.disabled = !on; });
+    if (on) {
+      const b = stance(sf, did); delc.checked = !!(b & 1); radios.forEach(x => { x.r.checked = x.bit ? !!(b & x.bit) : !(b & 6); });
+      const d = H().getDesign(g, sf.owner, did), c = H().designCost(g, d);
+      T.r.textContent = String(d.R); T.v.textContent = String(d.V); T.w.textContent = String(d.W); T.sh.textContent = String(d.S); T.m.textContent = String(Math.max(0, d.M));
+      T.dev.textContent = a.money(c.protoTotal != null ? c.protoTotal : c.money + c.proto); T.pro.textContent = a.money(c.money); T.met.textContent = H().niceNum(c.metal);
+      T.nb.textContent = String(d.built || 0); T.ne.textContent = String(inService(g, a.ME, d.id));
+    } else { delc.checked = false; radios.forEach(x => { x.r.checked = x.bit === 0; }); }
+  };
+  const setBits = (fn) => { const sf = W.sel && fleetOf(W.sel.key); if (!sf || W.sel.did == null) return; const b = fn(stance(sf, W.sel.did)); sf.dstance = Object.assign({}, sf.dstance, { [W.sel.did]: b }); a.save(); show(); };
+  delc.addEventListener('change', () => setBits(b => (delc.checked ? b | 1 : b & ~1)));
+  radios.forEach(x => x.r.addEventListener('change', () => setBits(b => (b & ~6) | x.bit)));
+  // a pile onto a fleet or an Empty Fleet: the engine's split, then its merge
+  const move = (fromKey, did, toKey, n) => {
+    const f = fleetOf(fromKey); if (!f || !f.ships[did]) return;
+    n = Math.max(1, Math.min(f.ships[did], n || f.ships[did]));
+    const to = fleetOf(toKey); if (to === f) return;
+    if (to && !H().canMerge(g, to, f) && !(piles(f).length === 1 && n === f.ships[did])) { /* (the engine refuses: Biologicals apart) */ }
+    const nf = H().splitFleet(g, f, { [did]: n }); if (!nf) return;
+    if (to) { if (H().canMerge(g, to, nf)) H().mergeFleets(g, to, nf); }
+    else { const i = W.order.indexOf(toKey); W.order[i] = 'f' + nf.id; } // (an Empty Fleet row becomes the new fleet: shots 090-091)
+    W.sel = { key: to ? toKey : 'f' + nf.id, did }; a.save(); a.renderPanel(); a.draw(); render();
+  };
+  const howMany = (max, go) => {
+    // PPob 155 "How Many?": "How many ships would you like to move?"
+    const v = window.prompt(TL('How many ships would you like to move?'), String(max)); if (v == null) return; const n = parseInt(v, 10); if (n > 0) go(Math.min(max, n));
+  };
+  let drag = null;
+  const render = () => {
+    list.innerHTML = '';
+    W.order.forEach(key => {
+      const f = fleetOf(key);
+      const head = elx('div', 'm5grow m5gh' + (W.sel && W.sel.key === key && W.sel.did == null ? ' on' : ''), f ? line(f) : TL('Empty Fleet')); head.dataset.key = key;
+      head.addEventListener('click', () => { if (!f) return; W.sel = { key, did: null }; render(); });
+      list.append(head);
+      if (f) piles(f).forEach(did => {
+        const d = H().getDesign(g, f.owner, did), row = elx('div', 'm5grow m5gp' + (W.sel && W.sel.key === key && W.sel.did === did ? ' on' : '')); row.dataset.key = key;
+        if (a.shipImgEl) row.append(a.shipImgEl(d, 30)); row.append(elx('span', 'm5gn', String(f.ships[did])));
+        row.addEventListener('pointerdown', (e) => { W.sel = { key, did }; drag = { key, did, alt: e.altKey, x: e.clientX, y: e.clientY, moved: false }; render(); });
+        list.append(row);
+      });
+    });
+    split.disabled = !(W.sel && W.sel.did != null && fleetOf(W.sel.key));
+    show();
+  };
+  const up = (e) => {
+    if (!drag) return; const d0 = drag; drag = null;
+    if (Math.abs(e.clientX - d0.x) + Math.abs(e.clientY - d0.y) < 6) return;
+    const t = document.elementFromPoint(e.clientX, e.clientY), row = t && t.closest && t.closest('.m5grow'); if (!row || !list.contains(row)) return;
+    const toKey = row.dataset.key; if (toKey === d0.key) return;
+    const f = fleetOf(d0.key); if (!f) return;
+    if (d0.alt || e.altKey) howMany(f.ships[d0.did], (n) => move(d0.key, d0.did, toKey, n)); else move(d0.key, d0.did, toKey, 0);
+  };
+  window.addEventListener('pointerup', up);
+  split.addEventListener('click', () => {
+    const f = W.sel && fleetOf(W.sel.key), did = W.sel && W.sel.did; if (!f || did == null) return;
+    const n = f.ships[did]; let nf = null;
+    if (n > 1) nf = H().splitFleet(g, f, { [did]: n >> 1 });
+    else for (const k of piles(f).filter(k => k !== did)) nf = H().splitFleet(g, f, { [k]: f.ships[k] }) || nf, nf && W.order.push('f' + nf.id);
+    if (n > 1 && nf) W.order.push('f' + nf.id);
+    a.save(); a.renderPanel(); a.draw(); render();
+  });
+  group.addEventListener('click', () => {
+    const fl = here(), pick = W.sel && fleetOf(W.sel.key), tgt = pick || fl[0]; if (!tgt) return;
+    for (const f of fl) if (f !== tgt && g.fleets.includes(f) && H().canMerge(g, tgt, f)) H().mergeFleets(g, tgt, f);
+    a.save(); a.renderPanel(); a.draw(); render();
+  });
+  done.addEventListener('click', () => a.closeModal());
+  a.modal(TL('Group Fleets'), body, { cls: 'm5dlg m5groupwin', onClose: () => { window.removeEventListener('pointerup', up); a.renderPanel(); a.draw(); a.save(); } });
+  render();
+  return true;
+}
 const prevWindow = T.window;
-T.window = (name, ...args) => { if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; if (mapOn() && name === 'fleets' && fleetsWindow()) return true; if (mapOn() && name === 'stars' && starsWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
+T.window = (name, ...args) => { if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; if (mapOn() && name === 'fleets' && fleetsWindow()) return true; if (mapOn() && name === 'group' && groupWindow(args[0])) return true; if (mapOn() && name === 'stars' && starsWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
 const line = (cls, text) => { const e = document.createElement('div'); e.className = cls; e.textContent = text; return e; };
 const span2 = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
 // the terraform / mine gauge at the box's left (FUN_100933f0, to read): green above for terraforming, blue below for mining, the red
