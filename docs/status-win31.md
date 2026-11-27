@@ -64,7 +64,24 @@ Sources (private repo `nostalgia-ho-sources`):
   names a look; the game then starts in `os-dos`. A link that names `os` should keep it, as one that names `skin` keeps the skin (the same file's
   "a link that names one keeps it"). Until then `tools/win31-compare.js` opens the window with `&form`, picks the look in it and submits.
 
+## Kept differences (whole-look)
+
+- **Pictures in 16 colours.** Jake's captures are the 16-colour VGA display; the remake shows every picture (planets, ships, the won and lost boxes,
+  Create New Galaxy's buttons) in its 256 colours, as the program shows them in 256-colour mode (its README's recommended one). Windows' VGA mapping of
+  a 256-colour bitmap is a fixed function but not nearest-colour (Dense: 688 of 1,024 pixels agree with nearest-colour), and it was not worked out.
+- **The program's small face** (the End Turn button's words, the battle groups' words) is not Small Fonts 7 (SMALLE.FON read: its E is a pixel wider)
+  and is not identified; the End Turn button's English words are drawn from the capture's pixels.
+- **The New Game dialogs** (Startup, Create New Galaxy, Player Entry, New Player Registration) live in the remake's title page and New Game window,
+  with the remake's own choices beside or under them, so they are not where the program centres them.
+
+## Seen, not this look's
+
+- `node tools/ui-lang-audit.js dos` finds one French string left in English in the New Game window ("ptions"); `main` has the same finding (checked
+  27 Nov in a worktree of origin/main).
+- real-play: the year-2000 question (ALERT 3230) is answered as a person does, with Continue (`tools/real-play.js`, as it already answered Mac 3.0.1's).
+
 ## Next
 
-The rows marked "to compare", in the table's order; then the open ones (system menu, F1, ALERT_NOPIC, byte alignment), then the audit's
-61 unattributed rows of `docs/display/win20.json`.
+1. Jake's look at the preview: the menus, the bubble, the system menu, the dialogs' places.
+2. "Needs a shared file" above (the main session or Jake).
+3. Not captured, so not checked: Organize Ships with more than four piles, Page Setup, the Printing box (docs/missing-screenshots.md).

@@ -408,6 +408,8 @@ async function playRun(browser, job, outDir, idx) {
       // a question the program asks at End Turn, answered with its default button (the Mac 3.0.1 skins' play-alone alert, ALRT 3230: "Continue";
       // its other button, Wait, leaves the turn unended, so a person who wants to play presses Continue)
       await sleep(250); await press('.dl20 .def20', { soft: true, what: 'End Turn question (default button)', wait: 150 });
+      // (the Windows 3.1 look's same question, ALERT 3230 in WINHO.EXE: "Continue" is the program's rightmost button, the leftmost, Wait, drawn as the default; docs/status-win31.md)
+      await press('.w31alert button', { re: /^continue$/i, soft: true, what: 'End Turn question (Continue)', wait: 150 });
       for (let i = 0; i < 40; i++) { await sleep(150); if ((await G(() => HOAPI.G.turn)) !== t0) break; await drain('end turn'); }
       await sleep(200); await drain(what || 'end turn');
       const t1 = await G(() => HOAPI.G.turn); if (t1 === t0 && !(await G(() => HOAPI.G.over))) { fail('End Turn did nothing (turn stays ' + t0 + ')'); return false; }
