@@ -107,7 +107,9 @@ T.menuLayout = {
 const KEYS = { 'New game…': 'N', 'Saved games…': 'O', 'Export this game…': 'S', 'Quit to title': 'Q', 'Build ships at selected colony…': 'B',
   'Review battle…': 'R', 'List explored stars…': 'L', 'Auto-play this turn': 'U', 'Zoom in': '=', 'Zoom out': '-', 'Players and history': '2' };
 const DIMS = { 'Review battle…': () => !battleHere() };
-T.menus = (menus) => {
+T.menus = (menus, ho) => {
+  // (the Apple menu, MENU 128: About Spaceward Ho!... and Rank History..., first in the Ho! menu, which stands in its place)
+  if (ho && mapOn() !== null) ho.unshift([lab('About Spaceward Ho!…'), () => aboutWindow()], ['-']);
   for (const m in menus) for (const it of menus[m]) {
     if (typeof it[0] !== 'string') continue;
     if (KEYS[it[0]]) it[5] = KEYS[it[0]];
@@ -920,8 +922,58 @@ function groupWindow(sid) {
   render();
   return true;
 }
+// ---------- About (PPob 162) and Rank History (PPob 163) ----------
+// About Spaceward Ho! (the Apple menu's first item; shot 009): PICT 4902 at (11, 6), "Spaceward Ho!" and the version, the copyright,
+// two rules, the credits, then Screen Name, Serial Number and Name, Deregister… and OK, the system font (Txtr 128). The licence lines
+// carry the player's name (Jake's rule: the signed-in account's display name, else the New Game name; never a stranger's) and no
+// serial number of anyone's; Deregister… is dimmed (the remake has no registration).
+function aboutWindow() {
+  const a = A(), g = a.G, nm = (a.cloudUser && a.cloudUser() && a.cloudUser().displayName) || (g && a.me() && a.me().name) || '';
+  const body = elx('div', 'm5build m5about'); body.style.width = U(461); body.style.height = U(264);
+  const t = (txt, x, y, w) => at(elx('span', 'm5t m5sys', txt), x, y, w, 18);
+  const sep = (y) => at(elx('i', 'm5sepl'), 146, y, 250, 3);
+  body.append(at(elx('div', 'm5p4902'), 11, 6, 64, 64), t('Spaceward Ho!', 87, 6, 101), t('5.0.5', 192, 6, 101), t('©1990-2002 Peter Commons and Delta Tao Software, Inc.', 87, 26, 360), sep(50),
+    t(TL('Written By Peter Commons'), 87, 58, 360), t(TL('Designed By Joe Williams and Peter Commons'), 87, 78, 360), t(TL('Artwork by Howard Vives and Bob van de Walle'), 87, 98, 360), t(TL('Sounds by Mark Madeley'), 87, 118, 360), sep(142),
+    t(TL('Screen Name:'), 87, 150, 119), t(nm, 208, 150, 220), t(TL('Serial Number:'), 87, 170, 119), t('—', 208, 170, 220), t(TL('Name:'), 87, 190, 119), t(nm, 208, 190, 220));
+  const der = at(elx('button', 'm5btn', TL('Deregister…')), 87, 224, 100, 20); der.disabled = true;
+  const ok = at(elx('button', 'm5btn def', TL('OK')), 374, 224, 69, 20); ok.addEventListener('click', () => a.closeModal());
+  der.type = ok.type = 'button'; body.append(der, ok);
+  a.modal(TL('About Spaceward Ho!'), body, { cls: 'm5dlg m5aboutwin' });
+  return true;
+}
+// Rank History (the Apple and Edit menus; shot 013): PICT 4900 at (418, 8), Network Master Points (0: no network game), Total Master
+// Points, MPs Needed to Advance (the next rank's points less yours), and LMasterPointsDataBrowser's two columns, Rank and Achieved (the
+// date in Mac OS's long form). The remake's profile keeps no dates, so the skin notes the day it first sees each rank (this browser's).
+function rankWindow() {
+  const a = A(); if (!a.profile || !a.rankOf) return false;
+  const pr = a.profile(), cur = a.rankOf(pr.points), R = H().DATA.ranks || [];
+  let dates = {}; try { dates = JSON.parse(localStorage.getItem('ho5.m5rankdates') || '{}'); } catch (e) {}
+  const lang = (window.HOUI && HOUI.lang) || 'en';
+  for (let i = 0; i <= cur; i++) if (!dates[i]) dates[i] = Date.now();
+  try { localStorage.setItem('ho5.m5rankdates', JSON.stringify(dates)); } catch (e) {}
+  const body = elx('div', 'm5build m5rank'); body.style.width = U(512); body.style.height = U(350);
+  const t = (txt, x, y, w) => at(elx('span', 'm5t m5sys', txt), x, y, w, 18);
+  const next = R[cur + 1] ? R[cur + 1][1] - pr.points : 0;
+  body.append(at(elx('div', 'm5pic4900'), 418, 8, 85, 214), t(TL('Network Master Points:'), 8, 12, 172), t('0', 190, 12, 150), t(TL('Total Master Points:'), 8, 32, 171), t(H().niceNum(pr.points), 190, 32, 150),
+    t(TL('MPs Needed to Advance:'), 8, 52, 171), t(H().niceNum(Math.max(0, next)), 190, 52, 150));
+  const box = at(elx('div', 'm5lv'), 8, 80, 401, 260), head = elx('div', 'm5lvh'), list = elx('div', 'm5lvb');
+  [['Rank', 150], ['Achieved', 249]].forEach(([n, w], i) => { const h = elx('button', 'm5lvc' + (i === 1 ? ' on' : ''), TL(n)); h.type = 'button'; h.style.width = U(w); head.append(h); });
+  for (let i = cur; i >= 0; i--) { const r = elx('div', 'm5lvr'); const c1 = elx('div', 'm5lvd l', '◆ ' + TL(R[i][0])), c2 = elx('div', 'm5lvd on l', new Date(dates[i]).toLocaleDateString(lang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })); c1.style.width = U(150); c2.style.width = U(249); r.append(c1, c2); list.append(r); }
+  box.append(head, list);
+  const ok = at(elx('button', 'm5btn def', TL('OK')), 429, 316, 69, 20); ok.type = 'button'; ok.addEventListener('click', () => a.closeModal());
+  body.append(box, ok);
+  a.modal(a.me ? TL('Rank History') : TL('Rank History'), body, { cls: 'm5dlg m5rankwin' });
+  return true;
+}
+// the page's own 5.0.5 windows, dressed as the program's (Dip 157, Surrender 147: PICT 4902 at its left, Send Message 160: "Send", Give 154)
+function dress(name) {
+  const w = document.querySelector('.scrim .win'); if (!w) return;
+  w.classList.add('m5dlg', 'm5w-' + name);
+  if (name === 'surrender' && !w.querySelector('.m5p4902')) { const f = w.querySelector('form'); if (f) f.prepend(elx('div', 'm5p4902')); }
+  if (name === 'chat') { const b = w.querySelector('button[type=submit]'); if (b) b.textContent = TL('Send'); }
+}
 const prevWindow = T.window;
-T.window = (name, ...args) => { if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; if (mapOn() && name === 'fleets' && fleetsWindow()) return true; if (mapOn() && name === 'group' && groupWindow(args[0])) return true; if (mapOn() && name === 'stars' && starsWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
+T.window = (name, ...args) => { if (mapOn() && ['dip', 'surrender', 'chat', 'give'].includes(name)) setTimeout(() => dress(name)); if (mapOn() && name === 'ranks' && rankWindow()) return true; if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; if (mapOn() && name === 'fleets' && fleetsWindow()) return true; if (mapOn() && name === 'group' && groupWindow(args[0])) return true; if (mapOn() && name === 'stars' && starsWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
 const line = (cls, text) => { const e = document.createElement('div'); e.className = cls; e.textContent = text; return e; };
 const span2 = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
 // the terraform / mine gauge at the box's left (FUN_100933f0, to read): green above for terraforming, blue below for mining, the red

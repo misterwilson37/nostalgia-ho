@@ -279,3 +279,24 @@ html.m5win .m5budget .m5row.txt .fill { display: none; }
 html.m5win .m5budget .m5row.txt .track::after { content: attr(data-evac); position: absolute; left: calc(3 * var(--u)); top: calc(-2 * var(--u)); color: #0000d4;
   font: calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; white-space: nowrap; }
 html.m5win .m5budget .m5row.txt.losing .track::after { color: #dd0806; }
+/* About, Rank History; the page's own 5.0.5 windows dressed as the program's */
+html.m5win .m5sys { font: calc(12 * var(--u)) / calc(18 * var(--u)) Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif; }
+html.m5win .m5sepl { display: block; border-top: var(--u) solid #888; border-bottom: var(--u) solid #fff; height: 0; }
+html.m5win .m5p4902 { background: url("../../../assets/skins/mac5/p4902.png") 0 0 / 100% 100%; width: calc(64 * var(--u)); height: calc(64 * var(--u)); image-rendering: pixelated; }
+html.m5win .win.m5dlg.m5w-dip, html.m5win .win.m5dlg.m5w-surrender, html.m5win .win.m5dlg.m5w-chat, html.m5win .win.m5dlg.m5w-give { font: calc(12 * var(--u)) / 1.3 Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif; }
+html.m5win .win.m5w-dip > .wbody, html.m5win .win.m5w-surrender > .wbody, html.m5win .win.m5w-chat > .wbody, html.m5win .win.m5w-give > .wbody { padding: calc(14 * var(--u)) calc(16 * var(--u)) calc(12 * var(--u)); }
+html.m5win .win.m5w-dip { width: calc(306 * var(--u)) !important; }
+html.m5win .win.m5w-surrender { width: calc(336 * var(--u)) !important; }
+html.m5win .win.m5w-chat { width: calc(266 * var(--u)) !important; }
+html.m5win .win.m5w-give { width: calc(318 * var(--u)) !important; }
+html.m5win .win.m5w-surrender form { display: grid; grid-template-columns: calc(70 * var(--u)) 1fr; column-gap: 0; align-items: start; }
+html.m5win .win.m5w-surrender form > .m5p4902 { grid-row: 1 / span 2; }
+html.m5win .win.m5w-surrender form > .btns { grid-column: 1 / -1; }
+html.m5win .win.m5w-chat form label { display: flex; align-items: center; gap: calc(6 * var(--u)); margin-bottom: calc(10 * var(--u)); font: bold calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win .win.m5dlg select { appearance: none; -webkit-appearance: none; border: var(--u) solid #333; border-radius: calc(3 * var(--u)); padding: 0 calc(22 * var(--u)) 0 calc(6 * var(--u)); height: calc(20 * var(--u)); font: bold calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><path d='M.5 0v18' stroke='%23777'/><path d='M6 7l3-4 3 4z M6 11l3 4 3-4z'/></svg>") right center / calc(18 * var(--u)) calc(18 * var(--u)) no-repeat, linear-gradient(#f4f4f4, #d4d4d4) !important; box-shadow: none !important; outline: none; }
+html.m5win .win.m5dlg .btns button { min-width: calc(69 * var(--u)); height: calc(20 * var(--u)); padding: 0 calc(8 * var(--u)) !important; border: var(--u) solid #333 !important; border-radius: calc(4 * var(--u)) !important;
+  background: linear-gradient(#f8f8f8, #d4d4d4) !important; box-shadow: inset var(--u) var(--u) 0 #fff, inset calc(-1 * var(--u)) calc(-1 * var(--u)) 0 #999 !important; font: bold calc(12 * var(--u)) / 1 Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif !important; color: #000; }
+html.m5win .win.m5dlg .btns button[type=submit] { box-shadow: 0 0 0 calc(2 * var(--u)) #dddddd, 0 0 0 calc(3 * var(--u)) #333, inset var(--u) var(--u) 0 #fff, inset calc(-1 * var(--u)) calc(-1 * var(--u)) 0 #999 !important; }
+html.m5win .win.m5w-chat form label > span { white-space: nowrap; flex: none; }
+html.m5win .win.m5w-chat form label > select { flex: 1; min-width: 0; }
