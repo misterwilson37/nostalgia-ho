@@ -130,3 +130,17 @@ html.m5win #msg .card p { font: inherit; margin: 0; }
 html.m5win #msg .card { position: relative !important; padding-bottom: calc(22 * var(--u)) !important; }
 html.m5win #msg .card .mbtns { position: absolute; right: calc(4 * var(--u)); bottom: calc(3 * var(--u)); margin: 0; }
 html.m5win #msg .card .count { position: absolute; left: calc(4 * var(--u)); bottom: calc(5 * var(--u)); }
+/* the Planet Info Box (FUN_10092300) */
+#m5info { display: none; }
+html.m5win #m5info:not([hidden]) { display: block; position: absolute; z-index: 3; height: calc(75 * var(--u)); pointer-events: none; border-radius: calc(6 * var(--u)); overflow: hidden;
+  background: url("../../../assets/skins/mac5/infobox.png") 0 0 / 100% 100%; opacity: .97; color: #54b53a; font: calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win #m5info.wide { background-image: url("../../../assets/skins/mac5/infobox2.png"); }
+html.m5win #m5info .nm { position: absolute; left: 0; right: 0; top: calc(3 * var(--u)); text-align: center; font-weight: bold; }
+html.m5win #m5info .none { position: absolute; left: 0; right: 0; top: calc(21 * var(--u)); text-align: center; }
+html.m5win #m5info .row { position: absolute; left: 0; right: 0; height: calc(10 * var(--u)); }
+html.m5win #m5info .row .lb { position: absolute; left: calc(11 * var(--u)); }
+html.m5win #m5info .row .vl { position: absolute; left: calc(51 * var(--u)); white-space: nowrap; }
+html.m5win #m5info.wide .row .lb { left: calc(21 * var(--u)); }
+html.m5win #m5info.wide .row .vl { left: calc(61 * var(--u)); }
+html.m5win #m5info .gauge { position: absolute; left: calc(5 * var(--u)); top: calc(5 * var(--u)); width: calc(9 * var(--u)); height: calc(64 * var(--u)); border: var(--u) solid #223;
+  background: linear-gradient(#40c040 0 calc(var(--t) * 100%), #c02020 calc(var(--t) * 100%) calc(var(--t) * 100% + 2 * var(--u)), #2040e0 calc(var(--t) * 100% + 2 * var(--u))); }
