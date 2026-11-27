@@ -39,19 +39,25 @@ ${S} #app { height: ${u(480)}; margin-top: ${u(-240)}; background: var(--w31work
 ${S} #app::before { content: ""; position: absolute; left: 0; top: 0; width: ${u(640)}; height: ${u(356)}; box-sizing: border-box; border: ${u(1)} solid #000; box-shadow: inset 0 0 0 ${u(2)} ${FACE}, inset 0 0 0 ${u(3)} #000; background: #fff; }
 ${S} #menubar { left: ${u(4)}; top: ${u(4)}; width: ${u(632)}; height: ${u(38)}; box-sizing: border-box; padding: ${u(19)} 0 0 0; background: #fff; border-bottom: ${u(1)} solid #000; }
 ${S} #menubar #title { display: block; left: 0; top: 0; height: ${u(19)}; box-sizing: border-box; padding: 0 ${u(38)} 0 ${u(19)}; border-bottom: ${u(1)} solid #000; color: var(--w31captext);
-  background: ${SYS} left top / ${u(19)} ${u(18)} no-repeat, ${MINMAX} right top / ${u(38)} ${u(18)} no-repeat, var(--w31cap); font: bold ${u(13)}/${u(18)} ${F}; white-space: nowrap; }
+  background: ${SYS} left top / ${u(19)} ${u(18)} no-repeat, ${MINMAX} right top / ${u(38)} ${u(18)} no-repeat, var(--w31cap); font: ${u(13)}/${u(18)} "Win31 System", ${F}; white-space: nowrap; }
 ${S}:not(.w31-act-main) #menubar #title { background-color: #fff; color: #000; }
-${S} #menubar .mbtn { font: bold ${u(13)}/${u(18)} ${F}; height: ${u(18)}; padding: 0 ${u(8)}; color: #000; background: none; border: 0; border-radius: 0; }
+${S} #menubar .mbtn { font: ${u(13)}/${u(18)} "Win31 System", ${F}; height: ${u(18)}; padding: 0 ${u(8)}; color: #000; background: none; border: 0; border-radius: 0; }
 ${S} #menubar .mbtn:hover, ${S} #menubar .mbtn[aria-expanded="true"] { background: var(--w31hi, #000080); color: #fff; }
 ${S} #menubar > .menu:first-child { top: ${u(19)}; }
-${S} .dropdown { top: ${u(18)}; max-height: calc(100vh - ${u(42)} - 50vh + ${u(240)}); overflow-y: auto; }
+${S} .dropdown { border: ${u(1)} solid #000; box-shadow: ${u(1)} ${u(1)} 0 ${FACE}; top: ${u(18)}; max-height: calc(100vh - ${u(42)} - 50vh + ${u(240)}); overflow-y: auto; }
 /* the menus' items 18 apart, their words 16 in, a separator 7 (measured on win20-orig-vga16-optionsmenu.png); a menu longer than the screen scrolls */
-${S} .dropdown button { font: bold ${u(13)}/${u(18)} ${F}; padding: 0 ${u(16)}; }
+${S} .dropdown button { font: ${u(13)}/${u(18)} "Win31 System", ${F}; padding: 0 ${u(12)} 0 ${u(16)}; }
 /* the key text in a column, left aligned, as Windows tabs it (captured: win20-jake-vga16-shot0007.png); the words never wrap (the Ships menu's keys wrapped at 640 pixels); the Ho! button is not in the program (its commands are at the end of Help) */
 ${S} .dropdown.open { display: grid; grid-template-columns: auto auto; width: max-content; }
 ${S} .dropdown.open > button { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; white-space: nowrap; align-items: center; text-align: left; }
 ${S} .dropdown.open > hr { grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
-${S} .dropdown .mkey { margin-left: ${u(24)}; white-space: nowrap; }
+/* the check mark: Windows' own 8 x 10 bitmap, 4 in from the menu's edge, 2 below the item's top, its foot on the words' baseline (measured on
+   win20-jake-vga16-shot0008.png, the Options menu; it had been the classic skin's text tick, a grid cell of its own that pushed the words into the keys' column) */
+${S} .dropdown button.check { position: relative; }
+${S} .dropdown button.check::before { content: ""; position: absolute; left: ${u(4)}; top: ${u(2)}; width: ${u(8)}; height: ${u(10)}; margin: 0;
+  background: ${svg(8, 10, [[7, 0, 1, 2, K], [6, 2, 2, 1, K], [6, 3, 1, 1, K], [5, 4, 2, 1, K], [0, 5, 2, 1, K], [5, 5, 1, 1, K], [1, 6, 2, 1, K], [4, 6, 2, 1, K], [2, 7, 1, 1, K], [4, 7, 1, 1, K], [2, 8, 3, 1, K], [3, 9, 1, 1, K]])} 0 0 / 100% 100% no-repeat; }
+${S} .dropdown button.check:hover::before { filter: invert(1); }
+${S} .dropdown .mkey { margin-left: 0; white-space: nowrap; }
 ${S} #menubar > .menu:has(> .logo) { display: none; }
 ${S} #menubar > .menu:last-child { position: absolute; right: 0; top: ${u(19)}; }
 ${S} #menubar > .menu:last-child .dropdown { left: auto; right: 0; }
@@ -106,7 +112,7 @@ ${S} .dd-vs .th { box-shadow: none; background: ${TH} center / 100% 100% no-repe
 ${S} .w31pop { display: block; position: absolute; box-sizing: border-box; background: #fff; border: ${u(1)} solid #000; z-index: 4; font: ${u(11)}/${u(13)} ${F}; color: #000; }
 ${S} .w31pop.sz { box-shadow: inset 0 0 0 ${u(2)} ${FACE}, inset 0 0 0 ${u(3)} #000; }
 ${S} .w31pop .w31pcap { position: absolute; height: ${u(19)}; box-sizing: border-box; border-bottom: ${u(1)} solid #000; background: ${SYS} left top / ${u(19)} ${u(18)} no-repeat, #fff;
-  padding-left: ${u(19)}; text-align: center; font: bold ${u(13)}/${u(18)} ${F}; white-space: nowrap; overflow: hidden; }
+  padding-left: ${u(19)}; text-align: center; font: ${u(13)}/${u(18)} "Win31 System", ${F}; white-space: nowrap; overflow: hidden; }
 ${S} .w31pop.act .w31pcap { background-color: var(--w31cap); color: var(--w31captext); }
 ${S} .w31pop .w31pcl { position: absolute; overflow: hidden; }
 ${S} .w31pop canvas.dq { display: block; image-rendering: pixelated; }

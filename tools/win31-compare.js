@@ -8,7 +8,7 @@
 //   node tools/win31-compare.js <name> <capture file> ['<js run in the page first>']
 //   The capture is a file of the private repo's audit/win-2.0/captures (CAPS to change); a 1920 x 1440 DOSBox shot is sampled [1::3, 1::3].
 //   env: BASE (a server already serving the repo, default http://127.0.0.1:8765), OUT (default the temp folder), SEED, Q (more address
-//   parameters, e.g. "&computers=5"), TITLE=1 (stop at the title page: no game), WAIT (ms after the snippet, default 700), ZOOM.
+//   parameters, e.g. "&computers=5"), TITLE=1 (stop at the title page: no game), CLEAR=1 (the report bubbles clicked away first), WAIT (ms after the snippet, default 700), ZOOM.
 // Uses no Python: the halving and the x3 are done in a page canvas (image-rendering: pixelated, every second pixel drawn).
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -30,6 +30,9 @@ const [name = 'main', capName = 'win20-jake-vga16-shot0007.png', snippet = ''] =
     await page.evaluate(() => { const f = document.querySelector('form.newgame'), o = f.querySelector('select[name=os]'); o.value = 'win31'; o.dispatchEvent(new Event('change')); f.requestSubmit(); });
     await page.waitForFunction(() => window.HOAPI && HOAPI.G, null, { timeout: 30000 }); await sleep(1000);
   } else await sleep(2500);
+  if (process.env.CLEAR) for (let n = 0; n < 30 && await page.locator('#msg .card').count(); n++) { // (CLEAR=1: the report bubbles clicked away, as the player does)
+    await page.evaluate(() => { const c = document.querySelector('#msg .card'); if (c) c.click(); }); await sleep(60);
+  }
   if (snippet) { await page.evaluate(snippet); }
   await sleep(+(process.env.WAIT || 700));
   const full = await page.screenshot();

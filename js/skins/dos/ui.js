@@ -412,10 +412,15 @@ function menuLayoutDos() {
     // Page Setup and Print Map: the program's Print Map says "Unable to create printer device context" when there is no printer (shot0067); the remake prints nothing, so
     // it says that (T.printAlert); Page Setup is dimmed (its box was not captured).
     const endTurn = M.File.find(i => i[0] === 'End Turn'), exit = M.File.find(i => i[0] === 'Exit');
-    M.File = [['New…', 'Game/New game…'], it('Open…', () => A().openSavedGames()), it('Save…', () => {}, { ghost: off, key: 'Ctrl+S' }), it('Revert to Saved…', () => {}, { ghost: off }),
+    M.File = [['New…', 'Game/New game…'], it('Open…', () => A().openSavedGames()), it('Save…', () => A().save(true), { ghost: noGame, key: 'Ctrl+S' }), it('Revert to Saved…', () => {}, { ghost: off }),
       it('Close…', () => A().quitToTitle(), { ghost: noGame, key: 'Ctrl+W' }), '-', endTurn,
       it('End Turn & Switch Players', () => A().switchPlayers(), { ghost: () => noGame() || !rs().switchPlayers || !A().hotSeat(), key: 'Ctrl+/' }), '-',
       it('Page Setup…', () => {}, { ghost: off }), it('Print Map…', () => printMapAlert(), { ghost: noGame, key: 'Ctrl+P' }), '-', exit];
+    // Save... and I'll Update Turns are enabled in the program (shots 7 and 8, I'll Update Turns ticked: the machine works out its own turns). Save... saves the game
+    // now (the remake also saves after every move); I'll Update Turns stays ticked (there is no other machine to wait for). Revert to Saved... stays dimmed: the
+    // remake keeps no older copy of the game to go back to.
+    const iu = M.Options.findIndex(i => i[0] === 'I’ll Update Turns');
+    if (iu >= 0) M.Options[iu] = it('I’ll Update Turns', () => {}, { ghost: noGame, checked: () => !noGame() });
     M.Window = [it('Tech Spending Window', () => {}, { key: 'Alt+1' }), ['Report Window', 'Galaxy/Report window…'], '-', it('Clean Up Windows', () => {}, { ghost: off }), M.Window[2]];
     M.Help = [['Help on Ho!', 'Help/How to play']];
   } else if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
@@ -436,7 +441,20 @@ const WIN_HOT = Object.assign({}, MENU_HOT, { 'Give Overspending Warnings': 5, '
 // Print Map without a printer: the program's alert (captured, win20-jake-vga16-shot0067.png), the remake prints nothing
 function printMapAlert() { if (!(window.HOWIN31 && window.HOWIN31.printAlert && window.HOWIN31.printAlert())) window.HOAPI.toast('Unable to create printer device context'); }
 function hotMenus() {
-  const mark = (dd) => dd.querySelectorAll('button[role=menuitem]').forEach(b => {
+  // (the Windows program's items end in three full stops, "Save...": menus.txt and every captured menu, win20-jake-vga16-shot0007-0011; MS Sans Serif and the
+  // System font have no "…", which they drew as a block)
+  const dots = (b) => { if (!winOn()) return; const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT); for (let n; (n = w.nextNode());) if (n.nodeValue.includes('…')) n.nodeValue = n.nodeValue.replace(/…/g, '...'); };
+  // (each Windows menu's key column and width as captured, from the words' left edge and between the borders: File, shot 7; Options 8; Ships 9; Galaxy 10;
+  // Window 11; Help 54. Windows' own rule did not come out of these five: the column is 9 past the widest words in File and Ships, but not in Galaxy or
+  // Window. A longer star name in "Build Ships at" widens the column, as Windows would.)
+  const WCOL = { File: [180, 252], Options: [0, 221], Ships: [168, 236], Galaxy: [175, 235], Window: [168, 229], Help: [144, 186] };
+  const cols = (dd) => {
+    const b = dd.previousElementSibling, k = b && WCOL[(b.textContent || '').trim()];
+    dd.style.gridTemplateColumns = winOn() && k && k[0] ? `minmax(calc(${k[0] + 16} * var(--du)), max-content) auto` : '';
+    dd.style.minWidth = winOn() && k ? `calc(${k[1] + 2} * var(--du))` : '';
+  };
+  const mark = (dd) => { cols(dd); dd.querySelectorAll('button[role=menuitem]').forEach(b => { mark1(b); dots(b); }); };
+  const mark1 = (b) => {
     if (b.dataset.hot || (b.disabled && !winOn()) || !frameOn()) return;
     const n = b.firstChild; if (!n || n.nodeType !== 3) return;
     const t = n.nodeValue, W = winOn(); let i = (W ? WIN_HOT : MENU_HOT)[t];
@@ -445,7 +463,7 @@ function hotMenus() {
     if (i == null || i < 0 || i >= t.length) return;
     b.dataset.hot = '1'; const sp = document.createElement('span'); sp.className = 'mhot'; sp.textContent = t[i];
     const w = document.createElement('span'); w.setAttribute('translate', 'no'); w.append(t.slice(0, i), sp, t.slice(i + 1)); n.replaceWith(w);
-  });
+  };
   new MutationObserver(() => document.querySelectorAll('.dropdown.open').forEach(mark)).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
 }
 // The key equivalents the menus show ("[Ctrl+K]"): the keys the browser lets a page have. Ctrl+W, Ctrl+T and Ctrl+N belong to the browser (kept difference); the first letter T
