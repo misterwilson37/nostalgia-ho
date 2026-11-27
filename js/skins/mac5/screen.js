@@ -352,7 +352,7 @@ let RING = { complete: false, width: 0 };
 RING_IMG.onload = () => {
   const c = document.createElement('canvas'); c.width = RING_IMG.width; c.height = RING_IMG.height; const x = c.getContext('2d'); x.drawImage(RING_IMG, 0, 0);
   try { const d = x.getImageData(0, 0, c.width, c.height), q = d.data; for (let i = 0; i < q.length; i += 4) { const m = Math.max(q[i], q[i + 1], q[i + 2]); if (m < 40) q[i + 3] = 0; } x.putImageData(d, 0, 0); } catch (e) {}
-  c.complete = true; RING = c;
+  c.complete = true; RING = c; const a = A(); if (a && a.G && mapOn()) a.draw();
 };
 const SEL = { n: 0, timer: null };
 const prevUnder = T.mapUnder;
@@ -404,6 +404,44 @@ T.afterDraw = () => {
   rows.forEach(([l, val], i) => { const r = line('row', ''); r.style.top = U(25 + 10 * i - 9); r.append(span2('lb', l), span2('vl', val)); b.append(r); });
   if (gauge) b.append(gaugeOf(st));
 };
+// ---------- the map's scroll bars ----------
+// The scrolling view 'Mscr' (PPob 136) keeps a Mac OS 9 scroll bar, 16 wide, at the map's right and foot: Platinum's proportional thumb
+// (lavender, shots 008 and 034: (153, 153, 248) with its lighter left and darker right edge) and both arrows together at the end, as
+// Appearance's "smart scrolling" draws them (shot 008: the horizontal bar's arrows at 975 and 990, the vertical's at 700 and 720).
+const BAR = 16;
+T.mapInset = () => (de.classList.contains('m5win') ? [BAR * (M5.s || 1), BAR * (M5.s || 1)] : [0, 0]);
+const SB = { h: null, v: null };
+const mapBox = () => { const a = A(), m = a && a.map && a.map(); return m ? [m.w, m.h] : [0, 0]; };
+function scrollBar(vertical) {
+  const b = document.createElement('div'); b.className = 'm5sb ' + (vertical ? 'v' : 'h'); b.setAttribute('aria-hidden', 'true');
+  b.innerHTML = '<i class="tr"><i class="th"></i></i><i class="ar a0"></i><i class="ar a1"></i>';
+  const step = (d, page) => { const a = A(), v = a.UI.view, [w, h] = mapBox(); const n = page ? (vertical ? h : w) * 0.9 : v.s;
+    if (vertical) v.oy -= d * n; else v.ox -= d * n; T.clampView(v, { G: a.G, mapW: w, mapH: h }); a.draw(); };
+  const hold = (el, d) => el.addEventListener('pointerdown', (e) => { e.preventDefault(); step(d); const t = setInterval(() => step(d), 80); const up = () => { clearInterval(t); window.removeEventListener('pointerup', up); }; window.addEventListener('pointerup', up); });
+  hold(b.querySelector('.a0'), -1); hold(b.querySelector('.a1'), 1);
+  const tr = b.querySelector('.tr'), th = b.querySelector('.th');
+  tr.addEventListener('pointerdown', (e) => { if (e.target !== tr) return; e.preventDefault(); const r = th.getBoundingClientRect(); step((vertical ? e.clientY < r.top : e.clientX < r.left) ? -1 : 1, true); });
+  th.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation(); const a = A(), v = a.UI.view, [w, h] = mapBox(), L = limits(v, a.G, w, h), R = tr.getBoundingClientRect(), T0 = th.getBoundingClientRect();
+    const span0 = (vertical ? R.height - T0.height : R.width - T0.width) || 1, lim = vertical ? L.y : L.x, p0 = vertical ? e.clientY : e.clientX, o0 = vertical ? v.oy : v.ox;
+    const mv = (ev) => { const d = ((vertical ? ev.clientY : ev.clientX) - p0) / span0 * (lim[1] - lim[0]); if (vertical) v.oy = o0 - d; else v.ox = o0 - d; T.clampView(v, { G: a.G, mapW: w, mapH: h }); a.draw(); };
+    const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+  });
+  return b;
+}
+const prevAfterDrawSB = T.afterDraw;
+T.afterDraw = () => {
+  if (prevAfterDrawSB) prevAfterDrawSB();
+  const wrap = document.getElementById('mapwrap'); if (!wrap) return;
+  if (!mapOn()) { wrap.querySelectorAll('.m5sb, .m5corner').forEach(x => x.remove()); SB.h = SB.v = null; return; }
+  if (!SB.h || !SB.h.isConnected) { SB.h = scrollBar(false); SB.v = scrollBar(true); const c = document.createElement('i'); c.className = 'm5corner'; wrap.append(SB.h, SB.v, c); }
+  const a = A(), v = a.UI.view, [w, h] = mapBox(), L = limits(v, a.G, w, h);
+  const put = (bar, lim, o, vis, tot) => { const th = bar.querySelector('.th'), f = lim[1] > lim[0] ? (lim[1] - o) / (lim[1] - lim[0]) : 0;
+    bar.classList.toggle('off', !(lim[1] > lim[0])); th.style.setProperty('--f', String(Math.max(0, Math.min(1, f)))); th.style.setProperty('--z', String(Math.max(0.06, Math.min(1, vis / tot)))); };
+  put(SB.h, L.x, v.ox, w, a.G.W * v.s); put(SB.v, L.y, v.oy, h, a.G.H * v.s);
+};
+
 // ---------- End Turn (unit 5) ----------
 // LHoEndTurnView (FUN_100a6f64; PPob 136 'Hend', 83 x 83): the glass globe, PICT 10000 (0, 423)-(83, 506), or (85, 423)-(168, 506) while
 // pressed, in transparent mode; on it the clock's window, PICT 10000 (158, 147)-(196, 167) at (22, 50), and in it the time the turn has

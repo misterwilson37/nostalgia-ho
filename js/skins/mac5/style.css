@@ -169,3 +169,25 @@ html.m5win #m5hist .m5wtitle span { padding: 0 calc(4 * var(--u)); background: #
 html.m5win #m5hist .m5close { position: absolute; left: calc(3 * var(--u)); top: calc(2 * var(--u)); width: calc(9 * var(--u)); height: calc(9 * var(--u)); border: var(--u) solid #333; box-sizing: border-box; background: linear-gradient(135deg, #fff, #c4c4c4); cursor: pointer; }
 html.m5win #m5hist .m5wbox { position: absolute; right: calc(3 * var(--u)); top: calc(2 * var(--u)); width: calc(9 * var(--u)); height: calc(9 * var(--u)); border: var(--u) solid #333; box-sizing: border-box; background: linear-gradient(135deg, #fff, #c4c4c4); }
 html.m5win #m5hist .m5hlist { flex: 1; overflow-y: scroll; padding: calc(4 * var(--u)); color: #000; scrollbar-color: #bcbcbc #eeeeee; }
+/* the map's scroll bars (Mac OS 9 Platinum) */
+html.m5win .m5sb { position: absolute; z-index: 4; display: flex; background: #eeeeee; }
+html.m5win .m5sb.h { left: 0; right: calc(16 * var(--u)); bottom: 0; height: calc(16 * var(--u)); flex-direction: row; border-top: var(--u) solid #000; box-sizing: border-box; }
+html.m5win .m5sb.v { top: 0; bottom: calc(16 * var(--u)); right: 0; width: calc(16 * var(--u)); flex-direction: column; border-left: var(--u) solid #000; box-sizing: border-box; }
+html.m5win .m5sb .tr { position: relative; flex: 1 1 auto; background: #dddddd; box-shadow: inset var(--u) var(--u) 0 #b0b0b0; }
+html.m5win .m5sb.off .th { display: none; }
+html.m5win .m5sb .th { position: absolute; display: block; box-sizing: border-box; border: var(--u) solid #2d2d38; background: linear-gradient(90deg, #acacdb 0 var(--u), #9999f8 var(--u) calc(100% - 2 * var(--u)), #6060b3 calc(100% - 2 * var(--u))); }
+html.m5win .m5sb.v .th { left: 0; right: 0; height: calc(var(--z) * 100%); top: calc(var(--f) * (100% - var(--z) * 100%)); }
+html.m5win .m5sb.h .th { top: 0; bottom: 0; width: calc(var(--z) * 100%); left: calc(var(--f) * (100% - var(--z) * 100%)); background: linear-gradient(#acacdb 0 var(--u), #9999f8 var(--u) calc(100% - 2 * var(--u)), #6060b3 calc(100% - 2 * var(--u))); }
+html.m5win .m5sb .ar { flex: none; width: calc(15 * var(--u)); height: calc(15 * var(--u)); box-sizing: border-box; border-left: var(--u) solid #777; background: linear-gradient(135deg, #f8f8f8, #cfcfcf) center no-repeat; position: relative; }
+html.m5win .m5sb.v .ar { border-left: 0; border-top: var(--u) solid #777; }
+html.m5win .m5sb .ar:active { background: linear-gradient(135deg, #a8a8a8, #d8d8d8); }
+html.m5win .m5sb .ar::after { content: ''; position: absolute; inset: 0; background: center / calc(7 * var(--u)) calc(7 * var(--u)) no-repeat; }
+html.m5win .m5sb.h .a0::after { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='7'><path d='M5 0v7L1 3.5z'/></svg>"); }
+html.m5win .m5sb.h .a1::after { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='7'><path d='M2 0v7l4-3.5z'/></svg>"); }
+html.m5win .m5sb.v .a0::after { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='7'><path d='M0 5h7L3.5 1z'/></svg>"); }
+html.m5win .m5sb.v .a1::after { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='7'><path d='M0 2h7L3.5 6z'/></svg>"); }
+html.m5win .m5corner { position: absolute; right: 0; bottom: 0; width: calc(16 * var(--u)); height: calc(16 * var(--u)); z-index: 4; background: #dddddd; border-left: var(--u) solid #000; border-top: var(--u) solid #000; box-sizing: border-box; }
+/* (the globe, the bubble and Message History stand above the foot's scroll bar) */
+html.m5win #m5clk:not([hidden]) { bottom: calc(20 * var(--u)); }
+html.m5win #msg { bottom: calc(21 * var(--u)); }
+html.m5win #m5hist:not([hidden]) { right: calc(23 * var(--u)); bottom: calc(23 * var(--u)); }
