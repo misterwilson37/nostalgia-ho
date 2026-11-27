@@ -104,6 +104,12 @@ alone doesn't explain it, though a paid copy could still differ (the registratio
 - To read: `FUN_100601e0` (Scrap Ship Types), `FUN_10062c10` (Dismantle), `FUN_10074580` (the End Turn
   pass that carries the marks out), and whether any of them tests the registration / demo state.
 
+**In the remake (27 Nov 2026):** scrapping works in every skin with the 5.0.5 rules, and in `mac5` through 5.0.5's own Scrap Ship
+Types window (PPob 165: OK marks the chosen types and unmarks the rest, FUN_100601e0). Checked: a Fighter bought, its type marked,
+End Turn: the type dismantled ("Your “Dragon” ship type has been dismantled. 1 of this type scrapped for 499 metal."), the ship gone,
+its metal back. Why Jake's copy failed is still not read in the code (the marks may not have reached the End Turn there); the remake
+has nothing to reproduce unless the code shows a fault it would always make.
+
 ### M4. A ship with a nameless, impossible design: "one (0/514) Scout" (SEEN part01)
 
 - Shot `mac505-jake-part01` (a window grab, 5:04 PM, from the Mac session): Peter's fleet in a battle is
