@@ -168,7 +168,7 @@ function techBars(B) {
   const levels = [lv.range, lv.speed, lv.weapons, lv.shields, lv.mini];
   [...tb.querySelectorAll('.barrow')].forEach((r, i) => {
     r.classList.add('m5row'); r.style.top = U(5 + 14 * i);
-    const l = r.querySelector('.blabel'); if (l) { const n = TECH_NAMES[i] || l.textContent; l.textContent = TL(n) + (i < 5 && levels[i] != null ? ' (' + Math.floor(levels[i]) + ')' : ''); }
+    const l = r.querySelector('.blabel'); if (l) { const n = TECH_NAMES[i] || l.textContent; l.textContent = TL(n); if (i < 5 && levels[i] != null) { const lv = document.createElement('span'); lv.setAttribute('translate', 'no'); lv.textContent = ' (' + Math.floor(levels[i]) + ')'; l.append(lv); } }
     box.append(r);
   });
   box.append(ticks(133, 64, 5 + 14 * 6 - 7));
