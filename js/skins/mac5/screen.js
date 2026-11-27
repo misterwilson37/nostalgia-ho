@@ -38,7 +38,12 @@ function setM5Scale() {
 setM5Scale(); window.addEventListener('resize', setM5Scale);
 // Under a modal window the map window is inactive, as Mac OS 9 draws it (shots 015, 019): its title bar plain, the menus the window
 // doesn't take greyed (Edit and Help stay), the players' pop-ups and Message History's title greyed.
-new MutationObserver(() => de.classList.toggle('m5modal', !!document.querySelector('.scrim'))).observe(document.body, { childList: true });
+new MutationObserver(() => {
+  de.classList.toggle('m5modal', !!document.querySelector('.scrim'));
+  // (windows the page opens without asking the skin first: known by their contents, then dressed)
+  const w = document.querySelector('.scrim .win'); if (w && M5ON() && !w.classList.contains('m5dlg') && w.querySelector('.wbody > .prefs')) dress('prefs');
+  if (w && M5ON() && !w.classList.contains('m5dlg') && w.querySelector('form.autoplay505')) dress('auto');
+}).observe(document.body, { childList: true });
 T.m5 = M5;
 const M5ON = () => de.classList.contains('m5win') && !!(A() && A().G);
 
@@ -971,9 +976,39 @@ function dress(name) {
   w.classList.add('m5dlg', 'm5w-' + name);
   if (name === 'surrender' && !w.querySelector('.m5p4902')) { const f = w.querySelector('form'); if (f) f.prepend(elx('div', 'm5p4902')); }
   if (name === 'chat') { const b = w.querySelector('button[type=submit]'); if (b) b.textContent = TL('Send'); }
+  // Auto Play (PPob 159, shot 029): the page's form at the layout's places, in the window's 452 x 365: the Auto Play check box group at
+  // (46, 6), the two radio buttons, the two sliders side by side with their ends' words under them (no figures: the program shows none),
+  // the line, the "Turn Off When Something Interesting Happens" group, the message speed slider with "Seconds", 0 and 10 under it.
+  if (name === 'auto') {
+    const f = w.querySelector('form.autoplay505'); if (!f || f.classList.contains('m5auto')) return;
+    f.classList.add('m5auto'); f.style.width = U(452); f.style.height = U(365);
+    const fs = f.querySelector('fieldset'), put = (e, x, y, wd, h) => { if (!e) return; at(e, x, y, wd, h); e.classList.add('m5abs'); };
+    put(fs, 46, 6, 397, 304);
+    const modes = [...fs.querySelectorAll(':scope > label.chk')];
+    put(modes[0], 17, 31, 239, 18); put(fs.querySelector('.apsettings'), 40, 63, 300, 44); put(modes[1], 12, 111, 239, 18);
+    put(fs.querySelector(':scope > hr'), 25, 145, 350, 3);
+    const gb = elx('div', 'm5gbox'); fs.append(gb); put(gb, 14, 158, 360, 74);
+    put(modes[2], 22, 152, 330, 18); put(fs.querySelector(':scope > p.note'), 34, 186, 313, 28);
+    const ct = [...fs.querySelectorAll(':scope > label')].find(l => l.querySelector('input[name=every]'));
+    if (ct) { put(ct, 14, 249, 380, 44); const z = elx('span', 'm5z0', '0'), t = elx('span', 'm5z10', '10'); ct.append(z, t); } // (the page's figure already says "4 Seconds")
+    put(f.querySelector(':scope > .btns'), 276, 323, 155, 22);
+  }
+  // Preferences (PPob 139, shot 012): the program's part in its 429 x 300 at the layout's places; the remake's own options stay under the
+  // line, as they are (no 5.0.5 window has them)
+  if (name === 'prefs') {
+    const pr = w.querySelector('.prefs'); if (!pr || pr.querySelector('.m5prefs')) return;
+    const hr = pr.querySelector('hr.ngline'), box = elx('div', 'm5prefs'); box.style.width = U(429); box.style.height = U(300);
+    const kids = [...pr.children]; const upto = hr ? kids.indexOf(hr) : kids.length;
+    const part = kids.slice(0, upto); pr.insertBefore(box, pr.firstChild);
+    const fs = part.filter(e => e.matches('fieldset')), chks = part.filter(e => e.matches('label.chk'));
+    const sp = part.find(e => e.matches('.speedrow')), sx = part.find(e => e.matches('.sexrow')), bt = part.find(e => e.matches('.btns'));
+    const put = (e, x, y, wd, h) => { if (!e) return; box.append(e); at(e, x, y, wd, h); e.classList.add('m5abs'); };
+    put(fs[0], 10, 13, 238, 116); put(sp, 267, 19, 150, 60); put(sx, 267, 110, 150, 44); put(chks[0], 19, 143, 219, 16); put(chks[1], 19, 165, 219, 16); put(fs[1], 10, 192, 238, 48); put(bt, 255, 260, 160, 22);
+    part.forEach(e => { if (!box.contains(e)) box.append(e); });
+  }
 }
 const prevWindow = T.window;
-T.window = (name, ...args) => { if (mapOn() && ['dip', 'surrender', 'chat', 'give'].includes(name)) setTimeout(() => dress(name)); if (mapOn() && name === 'ranks' && rankWindow()) return true; if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; if (mapOn() && name === 'fleets' && fleetsWindow()) return true; if (mapOn() && name === 'group' && groupWindow(args[0])) return true; if (mapOn() && name === 'stars' && starsWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
+T.window = (name, ...args) => { if (mapOn() && ['dip', 'surrender', 'chat', 'give', 'prefs'].includes(name)) setTimeout(() => dress(name)); if (mapOn() && name === 'ranks' && rankWindow()) return true; if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; if (mapOn() && name === 'fleets' && fleetsWindow()) return true; if (mapOn() && name === 'group' && groupWindow(args[0])) return true; if (mapOn() && name === 'stars' && starsWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
 const line = (cls, text) => { const e = document.createElement('div'); e.className = cls; e.textContent = text; return e; };
 const span2 = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
 // the terraform / mine gauge at the box's left (FUN_100933f0, to read): green above for terraforming, blue below for mining, the red
