@@ -41,8 +41,8 @@ ${S} #menubar { left: ${u(4)}; top: ${u(4)}; width: ${u(632)}; height: ${u(38)};
 ${S} #menubar #title { display: block; left: 0; top: 0; height: ${u(19)}; box-sizing: border-box; padding: 0 ${u(38)} 0 ${u(19)}; border-bottom: ${u(1)} solid #000; color: var(--w31captext);
   background: ${SYS} left top / ${u(19)} ${u(18)} no-repeat, ${MINMAX} right top / ${u(38)} ${u(18)} no-repeat, var(--w31cap); font: ${u(13)}/${u(18)} "Win31 System", ${F}; white-space: nowrap; }
 ${S}:not(.w31-act-main) #menubar #title { background-color: #fff; color: #000; }
-/* (a dialog open over it takes the activation: the main caption goes white, as in every capture with a dialog up, win20-jake-vga16-shot0012, 0017, 0061 ...) */
-${S}:has(.scrim .win.w31dlg, .scrim.w31alert) #menubar #title { background-color: #fff; color: #000; }
+/* (a dialog open over it takes the activation: the main caption goes white, as in every capture with a dialog up, win20-jake-vga16-shot0012, 0017, 0037, 0061 ...) */
+${S}:has(.scrim .win.w31dlg) #menubar #title { background-color: #fff; color: #000; } /* (not under an alert: the caption stays active in shots 5, 25, 26) */
 ${S} #menubar .mbtn { font: ${u(13)}/${u(18)} "Win31 System", ${F}; height: ${u(18)}; padding: 0 ${u(8)}; color: #000; background: none; border: 0; border-radius: 0; }
 ${S} #menubar .mbtn:hover, ${S} #menubar .mbtn[aria-expanded="true"] { background: var(--w31hi, #000080); color: #fff; }
 ${S} #menubar > .menu:first-child { top: ${u(19)}; }
@@ -70,7 +70,7 @@ html .w31sysm button[disabled], html .w31sysm button[disabled]:hover { backgroun
 .w31sysm hr { grid-column: 1 / -1; width: 100%; border: 0; border-top: ${u(1)} solid #000; margin: ${u(3)} 0; }
 .w31sysm .k { white-space: nowrap; }
 .w31sysm u { text-decoration: underline; text-underline-offset: ${u(1)}; }
-#w31sysbox { position: absolute; left: 0; top: 0; width: ${u(18)}; height: ${u(18)}; padding: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: none; min-width: 0; min-height: 0; cursor: default; display: none; }
+#w31sysbox { position: absolute; left: ${u(4)}; top: ${u(4)}; z-index: 5; width: ${u(18)}; height: ${u(18)}; padding: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: none; min-width: 0; min-height: 0; cursor: default; display: none; }
 ${S} #w31sysbox { display: block; }
 #w31sysbox.on, .w31d .w31sys.on { background: ${svg(18, 18, [[0, 0, 18, 18, SHADE], [2, 7, 13, 3, WH], [3, 8, 11, 1, K], [3, 10, 13, 1, FACE], [15, 8, 1, 2, FACE]])} 0 0 / 100% 100% no-repeat; }
 .w31d .w31sys.on::before { display: none; }
@@ -251,7 +251,7 @@ function dlgSysMenu(box) {
   sysMenu(box, [['Move', 0, '', noop], ['Close', 0, 'Alt+F4', () => { if (h) h.close(); }]]);
 }
 function sysBox() {
-  const t = document.getElementById('menubar'); if (!t || document.getElementById('w31sysbox')) return; // (in the menu bar over the title's corner: the title's words are rewritten each year)
+  const t = document.getElementById('app'); if (!t || document.getElementById('w31sysbox')) return; // (in the screen over the caption's corner, 4, 4: the title's words are rewritten each year, and the menu bar's last child must stay Help)
   const b = document.createElement('button'); b.id = 'w31sysbox'; b.type = 'button'; b.setAttribute('aria-label', 'Control menu'); b.setAttribute('aria-haspopup', 'menu');
   b.addEventListener('click', (e) => { e.stopPropagation(); mainSysMenu(b); });
   t.append(b);

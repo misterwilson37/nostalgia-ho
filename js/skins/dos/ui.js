@@ -302,6 +302,8 @@ window.HOTHEME = {
     if (!frameOn()) return false;
     // (End Turn with colonies left short: the program's box 5060, its words and its buttons Cancel and Let 'em Die, captured (Jake's image0056, 0087))
     if (kind === 'underfunded' && !winOn()) return !!alertDos([tx('Warning! You are not spending enough money to support some of your colonies.  Do you really want to abandon them?')], [{ label: tx('Cancel') }, { label: tx('Let ’em Die'), fn: yes }]);
+    // (the Windows program's the same box, its words and Cancel, Let 'em Die with a straight quote: Jake's win20-jake-vga16-shot0025.png, 0029)
+    if (kind === 'underfunded') return !!alertDos([tx('Warning! You are not spending enough money to support some of your colonies.  Do you really want to abandon them?')], [{ label: tx('Cancel') }, { label: tx('Let ’em Die').replace(/’/g, "'"), def: true, fn: yes }]);
     return !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], winOn() ? [{ label: 'OK', def: true, fn: yes }, { label: 'Cancel' }] : [{ label: 'Cancel' }, { label: 'OK', fn: yes }]); // (DOS: Cancel first, as in its captured questions)
   },
   plainAlert(text) { return frameOn() && !winOn() ? !!alertDos([text], [{ label: 'OK', def: true }], { plain: true }) : false; }, // (the box without the mascot: MsgBox)
