@@ -133,6 +133,8 @@ window.HOMAC10_BUILD = (K) => {
     const chg = p.chg || {};
     q.text(`ΔMoney : ${money(chg.money || 0)}`, 9, 74);
     q.text(`ΔMetal:  ${nice(chg.metal || 0)}`, 9, 83);
+    // (a later ruleset's interest, 2.0 on: the remake's own line; 1.0 paid none)
+    if (!H().rules(g).noInterest && p.lastInterest) q.text(`Interest:  ${money(p.lastInterest)}`, 9, 98);
     // the bars
     q.text('0', x0 + 1, 12); q.text(SOME ? 'some' : 'all', 0, 12, K.G9, { center: x0 + L / 2 }); q.text('100', 0, 12, K.G9, { right: x0 + L });
     q.hline(x0, 265, 16); q.vline(x0, 16, HT);
@@ -274,12 +276,14 @@ window.HOMAC10_BUILD = (K) => {
     const ul = el('ul', { 'aria-label': 'Report Window' });
     let yr = null;
     const line = (t, o) => { const li = el('li', o || null); li.append(document.createTextNode(t)); li.setAttribute('translate', 'no'); ul.append(li); return li; };
+    const tx = (y) => { for (const t of txOf(g).filter(t => t.year === y)) { for (const l of t.lines) line(l); line(''); } };
     ms.forEach((m) => {
       const y = m.year != null ? m.year : g.year;
-      if (y !== yr) { if (yr != null) { line(`End of report for ${yr}.`); line(''); line(''); } line(`Report for new turn starting in ${y}.`); line(''); yr = y; }
+      if (y !== yr) { if (yr != null) { tx(yr); line(`End of report for ${yr}.`); line(''); line(''); } line(`Report for new turn starting in ${y}.`); line(''); yr = y; }
       const li = el('li', { class: 'click', tabindex: 0, onclick: () => a.reportAction(m) }); li.append(a.degText(H().say(g, m.text))); ul.append(li); line('');
     });
-    if (yr != null) line(`End of report for ${yr}.`);
+    if (yr == null) { yr = g.year; if (txOf(g).some(t => t.year === yr)) { line(`Report for new turn starting in ${yr}.`); line(''); } else yr = null; }
+    if (yr != null) { tx(yr); line(`End of report for ${yr}.`); }
     const bc = el('canvas', { class: 'cv12' }), bar = el('div', { class: 'rbar10', 'aria-hidden': 'true' }, bc);
     const grow = K.qdCanvas(16, 16, ''); grow.c.classList.add('grow10'); grow.c.setAttribute('aria-hidden', 'true');
     grow.rect(0, 0, 16, 16, '#000'); grow.rect(1, 1, 15, 15, '#fff'); grow.x.strokeStyle = '#000'; grow.x.strokeRect(3.5, 3.5, 6, 6); grow.rect(6, 6, 12, 12, '#fff'); grow.x.strokeRect(5.5, 5.5, 7, 7);
@@ -294,7 +298,7 @@ window.HOMAC10_BUILD = (K) => {
     bar.addEventListener('pointerdown', (e) => { const r = bc.getBoundingClientRect(), y = (e.clientY - r.top) * 91 / r.height; ul.scrollTop += y < 16 ? -12 : y > 75 ? 12 : y < 45 ? -ul.clientHeight : ul.clientHeight; paint(); });
     ul.addEventListener('scroll', () => { REP.top = ul.scrollTop; paint(); });
     K.wheel12(ul, (n) => { ul.scrollTop += 12 * n; paint(); }, () => ul.scrollHeight > ul.clientHeight);
-    const key = g.turn + ':' + ms.length;
+    const key = g.turn + ':' + ms.length + ':' + txOf(g).length;
     setTimeout(() => { if (REP.key === key && REP.top != null) ul.scrollTop = REP.top; else ul.scrollTop = ul.scrollHeight; REP.key = key; paint(); }, 0);
     return body;
   }
@@ -530,7 +534,7 @@ window.HOMAC10_BUILD = (K) => {
     const rs = field('rules'), dress = () => { const on = !rs || rs.value === '10'; box.style.display = on ? '' : 'none'; win.classList.toggle('mac10dlg', on && !opened); for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
     if (rs) rs.addEventListener('change', dress); dress();
   }
-  const window0 = window.HOMAC12 && window.HOMAC12.window, panel0 = window.HOMAC12 && window.HOMAC12.panel;
+  const window0 = window.HOMAC12 && window.HOMAC12.window, panel0 = window.HOMAC12 && window.HOMAC12.panel, youWon0 = window.HOMAC12 && window.HOMAC12.youWonLayout;
   function windows10(name, ...x) {
     if (G() && en()) {
       if (name === 'build' && build10(x[0])) return true;
@@ -538,6 +542,75 @@ window.HOMAC10_BUILD = (K) => {
       if ((name === 'split' || name === 'group' || name === 'organize') && G()) { const f = name === 'split' ? x[0] : (K.selFleet() && K.selFleet().star === x[0] ? K.selFleet() : G().fleets.find(f => f.owner === ME() && f.star === x[0] && f.to == null && !f.sat)); if (f && organize10(f)) return true; }
     }
     return window0 ? window0(name, ...x) : false;
+  }
+
+  // ---------- battles as text, and the alerts (pp. 30, 38-40) ----------
+  // "When you review a battle, a transcript will show up here" (the Report Window, p. 12); "A full text report of the battle will always be
+  // put in the Report Window whenever you review a battle" (p. 40); "If you lose a battle, you don't get a report about the last round of
+  // the battle, since your ships were destroyed before they could send in a final report" (p. 30). The words are the remake's own (the
+  // manual quotes none), from the battle's record. Kept with the game in this browser (localStorage), not in the game itself.
+  const TX = { rs: null, list: [] };
+  const txKey = (g) => 'ho5.mac10.tx.' + (g.rs >>> 0);
+  function txOf(g) {
+    if (!g) return [];
+    if (TX.rs !== g.rs) { TX.rs = g.rs; try { TX.list = JSON.parse(store.get(txKey(g)) || '[]'); } catch (e) { TX.list = []; } }
+    return TX.list;
+  }
+  function transcript(b) {
+    const g = G(), me = ME(), lst = txOf(g); if (!g || lst.some(t => t.id === b.id && t.duel === b.duel)) return;
+    const who = (o) => (o === me ? 'You' : (g.players[o] || {}).name || '?'), whose = (o) => (o === me ? 'your' : `${(g.players[o] || {}).name}’s`);
+    const unit = (i) => { const u = b.start[i] || {}, d = H().getDesign(g, u.o, u.did); return `${whose(u.o)} ${d ? d.name : 'ship'}`; };
+    const count = (o) => b.start.filter(u => u.o === o).length;
+    const L = [`Battle at ${g.stars[b.star].name} in ${b.year}.`, b.sides.map(o => `${who(o)}: ${count(o)} ship${count(o) === 1 ? '' : 's'}`).join(', ') + '.'];
+    const lostAll = b.sides.includes(me) && b.survivors && b.survivors[me] === 0 && count(me) > 0;
+    const rounds = lostAll ? b.rounds.slice(0, -1) : b.rounds;
+    rounds.forEach((evs, ri) => {
+      const shots = {}, kills = []; let hits = 0;
+      for (const ev of evs) { const o = ev.si >= 0 ? (b.start[ev.si] || {}).o : b.planetOwner; shots[o] = (shots[o] || 0) + 1; if (ev.p) hits++; else if (ev.k) kills.push(`${ev.si >= 0 ? unit(ev.si) : 'The planet'} destroyed ${unit(ev.ti)}.`); }
+      const sh = Object.keys(shots).map(o => `${+o === me ? 'you' : who(+o)} fired ${shots[o]}`).join(', ');
+      L.push(`Round ${ri + 1}: ${sh || 'no shots'}.` + (hits ? ` ${hits} hit the planet.` : '') + (kills.length ? ' ' + kills.join(' ') : ''));
+    });
+    if (lostAll) L.push('Your ships were destroyed before they could send in a final report.');
+    L.push(b.sides.map(o => `${who(o)} lost ${(b.lost || {})[o] || 0}`).join('; ') + '.');
+    lst.push({ id: b.id, duel: b.duel, year: b.year, lines: L }); while (lst.length > 60) lst.shift();
+    store.set(txKey(g), JSON.stringify(lst));
+  }
+  const battleWindow0 = window.HOMAC12 && window.HOMAC12.battleWindow;
+  function battle10(b, k) {
+    if (!K.own() || !en()) return battleWindow0 ? battleWindow0(b, k) : false;
+    transcript(b);
+    if (A().Prefs.m10graphic === false) { closed.delete('report'); hideAll = false; saveClosed(); A().renderPanel(); return true; }
+    const r = battleWindow0 ? battleWindow0(b, k) : false; A().renderPanel(); return r;
+  }
+  // An alert in 1.0's dialog frame (pp. 21-37): the words in Chicago, OK the default button. "Announce Events: Will inform you with dialogs
+  // about the most important events (besides battles) that occurred during turn update, like technology advances, new planets, and things
+  // like that" (p. 39): with it on, those reports come as these alerts, the rest only in the Report Window (1.0 had no report bubble: 1.2's).
+  // You Won and You Lost (later rulesets: 1.0 named no winner) come the same way. The alert's size and its lack of an icon are the remake's.
+  function alert10(text, done) {
+    const a = A(), el = a.el, W = 340;
+    const p = el('p', { style: `position:absolute;left:14px;top:12px;width:${W - 28}px;margin:0;font:15px/16px 'Mac Chicago 12', Chicago, sans-serif;color:#000;white-space:normal` });
+    p.append(a.degText(text)); p.setAttribute('translate', 'no');
+    const lines = Math.max(1, Math.ceil(text.length / 38)), Hh = 12 + 16 * lines + 46;
+    const ok = button('OK', [Hh - 32, W - 80, Hh - 13, W - 22], () => { a.closeModal(); if (done) done(); }, { def: true });
+    a.modal('', K.dlog20(W, Hh, ok, p), { cls: 'mac12 dl20w mac10dlg', label: text.slice(0, 60) });
+    setTimeout(() => ok.focus(), 0);
+    return true;
+  }
+  const important = (m) => !!(m.tech || m.big || /colonized|new colony|eliminated|won the game|has just become a profitable colony|destroyed your colony|supernova|has gone nova/i.test(String(m.text || '')));
+  const afterMsg0 = window.HOMAC12 && window.HOMAC12.afterMsg;
+  function afterMsg10(box, ctx) {
+    if (afterMsg0) afterMsg0(box, ctx);
+    const on = K.own() && en() && document.documentElement.classList.contains('mac10lay');
+    const card = box && box.querySelector('.card:not(.end):not(.waiting)'), m = ctx && ctx.inbox && ctx.inbox[ctx.idx];
+    // (the message area takes no room and no clicks while a report is passed by: html.mac10lay #msg.m10wait)
+    if (box) box.classList.toggle('m10wait', !!(on && card && m));
+    if (!on || !card || !m || card.dataset.m10) return;
+    card.dataset.m10 = '1';
+    const next = () => { if (card.isConnected) card.click(); };
+    const go = () => { if (important(m) && !m.battle) alert10(H().say(G(), m.text), next); else next(); };
+    // (a battle this report announces opens first, with Always Review Battles on: wait for it to close)
+    const wait = () => { if (document.querySelector('.scrim')) setTimeout(wait, 150); else go(); };
+    setTimeout(wait, 60);
   }
 
   // ---------- the menus ----------
@@ -574,7 +647,9 @@ window.HOMAC10_BUILD = (K) => {
       it('Announce Events', () => { P().showMsgs = P().showMsgs === false; A().savePrefs(); }, { ghost: noGame, checked: () => P().showMsgs !== false }),
       '-',
       // (the rules these three choose are the ruleset's, not the skin's: shown as they stand, dimmed)
-      it('Graphic Battles', () => {}, { ghost: () => true, checked: () => true }),
+      // (Graphic Battles: off, a battle reviewed is only its transcript in the Report Window, p. 40; where the skin draws the ruleset's battle
+      // window, rs.battlePanel; the others' battles are the remake's own, so it is dimmed there)
+      it('Graphic Battles', () => { P().m10graphic = P().m10graphic === false; A().savePrefs(); }, { ghost: () => noGame() || !H().rules(G()).battlePanel, checked: () => P().m10graphic !== false }),
       // (a ruleset's own choice where it has one: the 1.0 reconstruction's opts.scouts10; elsewhere what the ruleset does, dimmed)
       it('Scouts in New Fleets', () => { const g = G(); g.opts.scouts10 = g.opts.scouts10 === false; A().save(); }, { ghost: () => noGame() || !H().rules(G()).reconstructed, checked: () => !G() || G().opts.scouts10 !== false }),
       it('Spend On New Stars', () => {}, { ghost: () => true, checked: () => true }),
@@ -602,6 +677,11 @@ window.HOMAC10_BUILD = (K) => {
   return {
     drawStar,
     window: windows10,
+    battleWindow: battle10,
+    afterMsg: afterMsg10,
+    showMsgsPref: true, // (Announce Events off: the reports go only to the Report Window, as the page does for a version with that option)
+    quietNext: true, // (no "next message" click: 1.0's reports went by unseen, into the Report Window)
+    youWonLayout(kind, Y, done) { if (K.own() && en() && G()) return alert10(Y.text, done); const f = window.HOMAC12 && youWon0; return f ? f(kind, Y, done) : false; },
     // an ally's star (a later ruleset's alliances; 1.0 had none): a white ring over the picture, the remake's own (tools/skins/mac10_icons.py)
     allyAt: ({ x, y, view }) => (view.s / 2 >= 17 ? { x: Math.round(x - 14), y: Math.round(y - 21), w: 28, h: 8, small: false } : null),
     allyPic: () => (PIC.halo.complete && PIC.halo.naturalWidth ? PIC.halo : null),

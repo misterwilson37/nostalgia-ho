@@ -125,14 +125,29 @@ Any ruleset can be played in this skin. What 1.0 never had, it draws as follows.
   Options menus, shown only when the ruleset has them; 1.2's commands that 1.0 lacks (Set Battle Speed, List All Fleets, List All
   Explored Stars, Fix Spending) in the Ho! menu.
 
-**Still 1.2's or the remake's, with no 1.0 look (no figure shows them; each could be drawn in 1.0's style if wanted):**
+**Built from the manual's words (27 November 2026; the look of each is the remake's, as no figure shows it):**
+- **Announcements as alerts.** "Announce Events: Will inform you with dialogs about the most important events (besides battles) ...
+  like technology advances, new planets" (p. 39): a turn's technology advances, new colonies, colonies made profitable or lost,
+  eliminations, novas and the win come as alerts in 1.0's dialog frame (Chicago, OK as the default button, the screen not dimmed);
+  every other report goes straight to the Report Window, with no report bubble (1.2's). Announce Events off: no alerts at all. Which
+  reports count as "most important" is the remake's reading of the manual's examples.
+- **Battles as text.** "When you review a battle, a transcript will show up here" (the Report Window, p. 12); "A full text report of the
+  battle will always be put in the Report Window whenever you review a battle" (p. 40); with Graphic Battles off it is only that.
+  "If you lose a battle, you don't get a report about the last round of the battle, since your ships were destroyed before they could
+  send in a final report" (p. 30): a battle you lose has no last round in its transcript. The transcript's words are the remake's (who
+  fought, each round's shots and losses, the totals), kept with the game in the browser. Graphic Battles works wherever the skin draws
+  the ruleset's battle window (`rs.battlePanel`: 1.0, 1.2, 2.0, 3.0.1, 4.0.5); 5.0.5's and the remake's own rulesets draw their battles
+  in the remake's window, so there it stays dimmed.
+- **You Won / You Lost** (later rulesets; 1.0 named no winner) in the same alert.
+- **Interest** in the Budget window under a later economy (2.0 on), a line under ΔMetal. (3.0.1's and 4.0.5's Ship Savings are their
+  money: the Money line.)
+
+**Still 1.2's or the remake's, with no 1.0 look (no figure shows them):**
 - the **battle window** and the **ship pictures** in it (1.2's: 1.0 had graphic battles, p. 30, but the manual shows none), and the
   new ship classes (Tanker, Dreadnought, Biological, Decoy: stand-ins from later versions);
-- the **announcements** (1.2's report bubble at the map's foot; 1.0's "Announce Events" used dialogs, p. 39);
-- the **Budget window** under a later economy: no Ship Savings line (3.0.1, 4.0.5), interest or borrowing shown, only Money and Metal;
 - the windows for what 1.0 lacked: Players and alliances, Send Message, Give, Surrender, Dip Into Savings, Radical tech's hand, Auto
   Play, Preferences, the Halls of Fame and Shame, Master Points, ranks (1.2 skin's own windows, or the remake's dressed in 1.2's look);
-- **You Won / You Lost**, Name a Star (1.2's alerts; 1.0 had no winner);
+- Name a Star (1.2's window; 1.0 had no winner);
 - Armageddon's shake and the supernova flash (3.0.1, 4.0.5: only their own skins draw them);
 - the Fleet Window (named on p. 7, never shown);
 - the remake's own screens (the hot-seat cover, online play, the title's account).
