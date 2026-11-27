@@ -1,0 +1,19 @@
+{
+ "bm0.png": "07_windows_menu.png",
+ "bm1.png": "07_help_window.png",
+ "bm2.png": "08_colonized_planet_canopus.png",
+ "bm3.png": "09_star_map.png",
+ "bm4.png": "10_explored_planet_adhara.png",
+ "bm5.png": "11_unexplored_planet_mizar.png",
+ "bm6.png": "11_enemy_planet_merak.png",
+ "bm7.png": "12_report_window.png",
+ "bm8.png": "14_budget_window.png",
+ "bm9.png": "17_planet_window.png",
+ "bm10.png": "18_tech_spending_window.png",
+ "bm11.png": "21_ship_building_queue.png",
+ "bm12.png": "23_organizing_fleets.png",
+ "bm13.png": "34_create_new_galaxy.png",
+ "bm14.png": "37_compare_players.png",
+ "bm15.png": "38_options_menu.png",
+ "bm16.jpg": "cover.jpg"
+}

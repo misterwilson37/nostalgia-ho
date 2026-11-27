@@ -1,0 +1,89 @@
+{
+ "title": "Spaceward Ho! 1.0 Manual (Macintosh)",
+ "footer": "Spaceward Ho! Manual (Macintosh, 1990) &mdash; from Jake Wilson&rsquo;s own copy, bought from PC Games Vault (pcgamesvault.com), scanned at 300 dpi; the figures cut from the scans.",
+ "smart": true,
+ "imgscale": 2.5,
+ "front": "!fig cover.jpg | Cover of the Spaceward Ho! manual: the cowboy planet | center | w=420\n\n!raw <div class=\"credits\">\n<p><b class=\"big\"><i>Spaceward Ho!</i></b></p>\n<p>Multi-Player Strategy Game for Macintosh</p>\n<p><i>by Peter Commons and Joe Williams<br>Copyright &copy; 1990, Delta Tao Software, Inc.</i></p>\n<p class=\"sub\">This copy: Jake Wilson&rsquo;s, bought from PC Games Vault (pcgamesvault.com) and scanned by him.</p>\n</div>",
+ "contents": [
+  {
+   "items": [
+    "foreword",
+    "about-delta-tao",
+    "about-the-packaging",
+    "about-spaceward-ho",
+    "about-peter-commons",
+    "a-quick-summary-of-a-typical-game"
+   ],
+   "pages": {
+    "foreword": "p. 2",
+    "about-delta-tao": "p. 2",
+    "about-the-packaging": "p. 3",
+    "about-spaceward-ho": "p. 4",
+    "about-peter-commons": "p. 5",
+    "a-quick-summary-of-a-typical-game": "p. 5"
+   }
+  },
+  {
+   "group": "Playing the Game",
+   "items": [
+    "starting-a-new-game",
+    "the-windows",
+    "the-economy",
+    "building-ships",
+    "moving-ships",
+    "organizing-fleets",
+    "exploring-planets-temperature-and-gravity",
+    "colonizing-planets",
+    "strip-mining-planets",
+    "killing-enemy-planets",
+    "advancing-technology"
+   ],
+   "pages": {
+    "starting-a-new-game": "p. 6",
+    "the-windows": "p. 6",
+    "the-economy": "p. 19",
+    "building-ships": "p. 20",
+    "moving-ships": "p. 20",
+    "organizing-fleets": "p. 22",
+    "exploring-planets-temperature-and-gravity": "p. 22",
+    "colonizing-planets": "p. 24",
+    "strip-mining-planets": "p. 25",
+    "killing-enemy-planets": "p. 26",
+    "advancing-technology": "p. 26"
+   }
+  },
+  {
+   "group": "Reference",
+   "items": [
+    "designing-your-own-ships",
+    "reviewing-battles",
+    "playing-with-multiple-players",
+    "setting-up-a-new-galaxy",
+    "the-computer-players",
+    "comparing-players",
+    "zooming-in-and-out",
+    "the-options-menu",
+    "technical-support",
+    "recommended-reading",
+    "delta-tao-s-favorite-games",
+    "glossary",
+    "about-this-manual"
+   ],
+   "pages": {
+    "designing-your-own-ships": "p. 28",
+    "reviewing-battles": "p. 30",
+    "playing-with-multiple-players": "p. 31",
+    "setting-up-a-new-galaxy": "p. 33",
+    "the-computer-players": "p. 35",
+    "comparing-players": "p. 36",
+    "zooming-in-and-out": "p. 36",
+    "the-options-menu": "p. 38",
+    "technical-support": "p. 40",
+    "recommended-reading": "p. 41",
+    "delta-tao-s-favorite-games": "p. 42",
+    "glossary": "p. 42",
+    "about-this-manual": "p. 44"
+   }
+  }
+ ]
+}

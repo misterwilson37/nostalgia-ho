@@ -1,0 +1,54 @@
+body { margin: 0; background: #fbfaf6; color: #1d1d1b;
+  font: 16px/1.5 Georgia, 'Times New Roman', serif; }
+main { max-width: 42em; margin: 0 auto; padding: 1.25em 16px 3em; }
+nav.top { font: 13px/1.4 Verdana, Arial, sans-serif; margin-bottom: 1em; }
+nav.top a { margin-right: 1em; }
+.band { font: bold 13px/1.4 Verdana, Arial, sans-serif; color: #555;
+  border-bottom: 1px solid #ccc; padding-bottom: .4em; margin-bottom: .5em; }
+.band p { margin: 0; }
+h1 { font-size: 1.5em; line-height: 1.2; margin: .3em 0 .7em; }
+p { margin: 0 0 .75em; }
+p.center { text-align: center; }
+p.right { text-align: right; }
+a { color: #0a5a2a; }
+a.popup { text-decoration: underline dotted; }
+img { max-width: 100%; height: auto; vertical-align: middle; }
+img.left { float: left; margin: 0 1em .5em 0; }
+img.right { float: right; margin: 0 0 .5em 1em; }
+table { border-collapse: collapse; margin: 0 0 1em; }
+td { vertical-align: top; padding: .15em .8em .15em 0; }
+td p { margin: 0 0 .3em; }
+.tab { display: inline-block; width: 2em; }
+.big { font-size: 1.2em; }
+ul.contents { list-style: none; padding-left: 0; }
+ul.contents ul { list-style: none; padding-left: 1.4em; margin: .2em 0 .6em; }
+ul.contents > li > b { display: block; margin-top: .6em; }
+footer { clear: both; margin-top: 2em; font: 12px Verdana, Arial, sans-serif; color: #777; }
+@media (prefers-color-scheme: dark) {
+  body { background: #1b1b19; color: #e4e2da; }
+  a { color: #8fd3a5; }
+  .band { color: #aaa; border-color: #444; }
+}
+/* additions for the scanned-manual conversions (the rules above are 2.0-windows's, unchanged) */
+h2 { font-size: 1.2em; line-height: 1.2; font-style: italic; margin: 1.3em 0 .4em; }
+h3 { font-size: 1.05em; line-height: 1.2; font-style: italic; margin: 1.1em 0 .3em; }
+ul { margin: 0 0 .75em; }
+ul.contents small { color: #777; }
+b.ui { font: bold .86em/1 Chicago, Geneva, Verdana, Arial, sans-serif; letter-spacing: .01em; }
+dl.gloss { margin: 0 0 1em; }
+dl.gloss dt { font-weight: bold; margin-top: .6em; }
+dl.gloss dd { margin: 0 0 0 1.4em; }
+img.fig { image-rendering: auto; }
+.callouts { display: flex; flex-wrap: wrap; gap: .75em 1em; align-items: center; justify-content: center; margin: 0 0 1em; }
+.callouts > div { flex: 1 1 7.5em; font-size: .88em; }
+.callouts > div p { margin: 0 0 1em; }
+.callouts > div.l { text-align: right; }
+.callouts img { flex: 0 0 auto; }
+.note { font: 13px/1.45 Verdana, Arial, sans-serif; color: #555; border-left: 3px solid #ccc; padding-left: .8em; margin: 0 0 1em; }
+.credits { text-align: center; }
+.credits p { margin: 0 0 .5em; }
+@media (prefers-color-scheme: dark) {
+  .note { color: #aaa; border-color: #555; }
+  ul.contents small { color: #999; }
+  img { background: #fff; }
+}

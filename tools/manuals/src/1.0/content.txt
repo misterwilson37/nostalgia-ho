@@ -1,0 +1,489 @@
+=== foreword | Foreword
+
+When the Mac first came out, it was to be an appliance. It was small, so it could be parked innocuously in a kitchen, like a toaster. Apple envisioned a Macintosh in every home. Alas, it was not to be. Yet.
+
+We who did buy Macs for our homes wanted, among other things, to play games on them. Unfortunately, there has been a real shortage of quality Macintosh games from the beginning. There are a lot of good reasons for this, but the main one is this: Writing Mac games is a lot of work for very little money.
+
+It’s sad that a bad PC game makes more money than a good Mac game. We think a lot of this is a chicken and egg problem — There weren’t many good games for the Mac, so nobody bought a Mac to play games. Nobody buys Mac games, so nobody writes them.
+
+We love the Mac, and love computer games, so we decided to bite the bullet and write some games *for* the Mac. Even if our games don’t make a profit, they need to be done, just to spur the Mac into the homes, where it belongs. Besides, *we* wanted to play them. In this frame of mind, we wrote *Spaceward Ho!*.
+
+=== about-delta-tao | About Delta Tao
+
+Delta Tao is dedicated to developing amazingly great software for the Macintosh. We believe that the Mac is the greatest thing since the telephone, and we are out to prove it.
+
+Many people ask us why we chose the name “Delta Tao.” (In fact, people have asked about every name we’ve ever chosen - especially for our software. This probably makes sense because we generally choose pretty weird names.) We’ll now set the record straight. “Delta” is the symbol used by engineers around the world to signify change. One would refer to “Delta V” to mean “change in velocity.” We admit this is engineerspeak, but forgive us for a minute. We’re mostly engineers, so this makes sense, at least to us.
+
+“Tao” means “the Path,” or “the Way.” It is the big concept behind Taoism. We’re mostly Taoists around here, so this made sense too.
+
+Now, when you put these together, “Delta Tao” means “The Changing Path,” or “The Change in the Path.” We thought that this was almost a profound statement of direction, so we adopted it as a name.
+
+We want to stifle all rumors right now that this name may have evolved in any way from the name of our college fraternity, Delta Tau Sigma (at Caltech, if you must know). All such statements are completely unfounded, and any similarity in the names is entirely coincidental. Any references to a Mr. Dan Schwartz are also hereby disavowed.
+
+=== about-the-packaging | About the Packaging
+
+*Spaceward Ho!* comes in a thin box, without any fancy shrink wrap or glow in the dark stickers. The manual is thin, concise, and to the point. We did this on purpose. For one thing, big, heavy boxes cost more to produce. This makes our expenses higher, and means we either make even less money from each game or charge more for it. We didn’t like those options, so we made the box smaller. It is just the right size and thus doesn’t require any styrofoam popcorn or fluffy cardboard filler to make the box feel full.
+
+On top of that, we just hate shrink wrap and styrofoam for environmental reasons. We have avoided putting anything in the box that you’ll just throw away anyway. We *like* trees.
+
+Here’s an experiment. Buy 10 Macintosh products. Count how many have a lot of filler making the box look bigger. See how much smaller the box could be if the goal was not to simply have a bigger box. Call those companies and tell them to make their boxes smaller and to stop shrink wrapping them. See what they say.
+
+=== about-spaceward-ho | About *Spaceward Ho!*
+
+*Spaceward Ho!* is a game of space exploration and conquest for one to ten players. Each player controls the economy and military of a spacefaring race.
+
+The most important part of *Spaceward Ho!* is its simplicity. Controlling every aspect of an alien race could be very complicated and could get in the way of the fun of the game. Fun is our number one goal, and we have sacrificed realism at every turn when such a sacrifice could be made. If you want realism in space exploration, play “Let’s Cut NASA’s Budget” like they do in Congress every year.
+
+*Spaceward Ho!*’s name has gone through a lot of changes. When we first thought of the game, we called it *Star Command*. It turned out that that name was taken by Farallon — *Star Command* is software that controls Star networks. Peter called it *Space*, an abbreviation for what the rest of us called *Frontier MacSpace*. John Lade hit upon the cowboy planet idea somewhere along that time, and we liked it. We didn’t want to use *Frontier MacSpace* in real life, because we were considering porting it to the home video games. (Call us capitalists. Go ahead.) The week we *had* to know the name for printing reasons, we all brainstormed, and came up with several creative names. Feel free to pick the one you like best: *Corral the Stars*, *Space Cowboys of the 21st Century*, *Stellar Conquest*, *Stars and Spurs*, and, of course, *Spaceward Ho!*
+
+=== about-peter-commons | About Peter Commons
+
+“There’s nothing worse than a fanatic plant eater,” says Joe Williams of Delta Tao, “but this one sure can write a good game.” Peter says he’ll be happy to write games for the Mac as long as they pay the rent: “Spreadsheet writers can’t have as much fun debugging their code as I do.” In real life, Peter is pursuing a master’s degree in computer science at Stanford (*not* Caltech). Oh well, nobody’s perfect. *Spaceward Ho!* is Peter’s first major Mac application.
+
+=== a-quick-summary-of-a-typical-game | A Quick Summary of a Typical Game
+
+In a nutshell, the goal of *Spaceward Ho!* is to conquer the galaxy, or at least most of it. You start out on a populous planet that is perfectly suited for your race. You have just become capable of building your first interstellar space ships. So you build a couple of exploratory ships (we call such ships “scouts”) and send them to nearby stars. Some of the planets at these stars will be more habitable than others.
+
+Once you find a planet that is at least relatively like your home planet, you build a colony ship and go colonize it. Once there, you make the planet as habitable as possible (e.g. build domes to control the temperature) and then use it as a basis for further exploration and colonization. After a number of years the planet’s population will grow to the point that it will actually start making money, just like your home planet. Of course, if a planet is too unlike your home planet, the cost to support the population will always be more than the money made by that population, in which case the planet will never become profitable.
+
+Somewhere along the line, you will run into opposition. Depending on what was specified when the galaxy was created, there will be some number of human and computer players. They’re trying to conquer the galaxy, too. In addition to exploring and colonizing, you’ll need to defend yourself against the more aggressive of these alien races. You can do this by building defensive satellites at your colonies and by building fighters and attacking them — the old “the best defense is a good offense” strategy.
+
+Which brings us to the final element of the game. In addition to building ships and terraforming and mining planets, you can spend money on technology research. The first ships you build are capable of travelling to other stars, but they can’t go far, they’re pretty slow, they can’t attack or defend themselves very well, and they require a lot of metal to build. By spending money on research, you can make it possible to build better ships in the future. And as you might imagine, the better ship wins a battle.
+
+So, you may ask, when’s the game over? Good question. If you’ve killed off everyone else, you’ve probably won. We don’t think there’s a good answer to this question, so we’ve left it up to you. As long as the game’s interesting, keep playing.
+
+=== starting-a-new-game | Starting a New Game
+
+When *Spaceward Ho!* starts, you’ll be given a dialog which lets you start a new game or resume a saved one. Select “New Game.” A big dialog will come up asking you to set up your galaxy. For now, just give the game a name and click “OK.”
+
+=== the-windows | The Windows
+
+*Spaceward Ho!* has lots of windows. This is one way we let people with big screens use the whole thing, while making things reasonable for people with itty bitty screens. We let each person decide which windows he likes and wants to have open all the time. *Spaceward Ho!* automatically saves your window configuration when you quit and restores it the next time you play.
+
+## The Help Window
+
+One thing that will make *Spaceward Ho!* a lot easier to learn is the Help Window. It is our way of giving you a clue about what’s happening when you’re first learning the game. Here’s how it works: If you have questions about something you see on the screen, just point to that something and read the Help Window. Hopefully, it will tell you something brief, useful, and informative. After you’ve become familiar with the game, you’ll want to just leave the Help Window closed. Close it by clicking in its close box. You can open it by choosing “Help Window” from the “Windows” menu.
+
+!fig 07_windows_menu.png | The Windows Pull-Down Menu | center
+
+!fig 07_help_window.png | The Help Window | center
+
+For example, let’s say you’re wondering why the planet in the middle of your screen is wearing a cowboy hat. Just point the mouse at that dude, and read the Help Window.
+
+As of this writing, the Help Window didn’t help with the menus. Sorry, that’s a little trickier. All the menu items are explained in the manual, if you do have questions.
+
+## The Star Map
+
+The main window of *Spaceward Ho!* is the Star Map. It lets you see where you are, where you’ve been, where you can go. You use the Star Map to move ships, and to choose which planet to look at and deal with. You can zoom in and out of the Star Map to give yourself a better view.
+
+There are several kinds of stars you’ll see in the Star Map. Here they are.
+
+## A Colonized Planet
+
+!fig 08_colonized_planet_canopus.png | A Colonized Planet (Canopus) | center
+
+This is a planet where you have established a colony. If it’s a profitable planet, like your original system, it will be green (if you have color). If it’s red, that means it is taking a loss at the moment (meaning you have to put money into it to keep it alive), but given enough time and effort, it could be profitable someday. If it’s pink, that means it’s taking a loss now, and it always will, no matter how much money you throw at it. Generally, this means a planet that’s bigger than 2.0 G or smaller than 0.5 G.
+
+It’s good to have lots of colonized planets. The more profitable planets you have, the more money you make. The more money you make, the more you can spend on research. The higher your technology, the less likely you are to be overrun by an enemy - assuming you have built ships with that higher technology.
+
+Your colonies are the planets that look like good guys.
+
+If you put satellites up at any planet, it will have a circle around it in the star map to let you know it’s defended.
+
+!fig 09_star_map.png | The Star Map (Joe:Milky Way) | center
+
+In this Star Map, you own Canopus. You have explored Adhara, and have a fleet there. All of the other stars are unexplored, including Nasl, which looks funny because it is selected.
+
+The title of the window lets you know that your name is Joe, and that the Galaxy (also the file name) is the Milky Way.
+
+## An Explored Planet
+
+!fig 10_explored_planet_adhara.png | An Explored Planet (Adhara) | center
+
+This is a planet that you’ve explored recently, but have not established a colony at. Any planet with a dot next to it has at least one fleet there.
+
+## An Unexplored Planet
+
+!fig 11_unexplored_planet_mizar.png | An Unexplored Planet (Mizar) | center
+
+This is a planet that you’ve never been to, or that you haven’t been to for a long time. If it’s the latter, it will be a different color than it would if you had never been there at all, assuming you’re running on a color Macintosh.
+
+## An Enemy Planet
+
+!fig 11_enemy_planet_merak.png | An Enemy Planet (Merak) | center
+
+Any planet you lose a battle at becomes an enemy planet. Sometimes there will be no enemy ships or people there, as in when two scouts bump into each other and both die. Sometimes it will be a massive armada. You can get a feel for this by reviewing the battle. If you get a message like, “You were destroyed immediately,” that means there was a big, bad fleet there. Probably. If the battle with your scout was dead even, he probably just had a scout there, too. We’ll tell you about how to review battles later.
+
+Note that a planet will be displayed as an “enemy” until you send another fleet there and win a battle; in fact, you might send a fleet to an enemy planet and find no one there. All the information you have about planets is based on the last time you were there. If it has been a long time since you were at a given planet, the information about that planet may be inaccurate.
+
+Enemy planets look like a wide variety of bad guys.
+
+## The Report Window
+
+!fig 12_report_window.png | The Report Window | center
+
+The Report Window gives you a text copy of everything that happens during a turn. When you explore a star, its vital stats will show up here. When you colonize a planet, the Report Window will tell you so. When you review a battle, a transcript will show up here. It’s kind of a catchall for information.
+
+It’s a good idea to review the Report Window every turn, because it will tell you things which aren’t necessarily important enough for a dialog, like a battle, but which you should know. For example, if you queue up ships to be built at a certain star, but forget to budget money for shipbuilding, you’ll get a meaningful message telling you that you aren’t spending much money on ships. If you can’t build any more ships because you don’t have enough metal, you’ll get a message about that. Or, like our example, you’ll get a message telling you that you’re spending money, but aren’t building ships because the planet doesn’t have any more queued up. And so on.
+
+We’ve provided a couple shortcuts to help get at the fleets or planets mentioned in the Report Window. Using the mouse, select the name of a planet or fleet. *Spaceward Ho!* will automatically select that star or fleet and open the star and/or fleet window if they aren’t already open.
+
+If you’re feeling short on space but don’t want to forget to read the Report Window each turn, use the “Show Report Window” option in the “Options” menu. If checked, this will automatically open the Report Window at the beginning of each turn, even if you had closed it previously.
+
+## The Budget Window
+
+This is the window you use to set how much money each planet gets. It is very important. It tells you how much money you’re making, how much you have, what year it is, how many planets you have, how you’re spending your money, and stuff like that.
+
+The stuff on the left of the window is there solely for informative purposes. You can’t change it directly. (“I think I’ll just give myself some more money!”) The main thing you change is the bar chart on the right.
+
+## The Bar Charts
+
+The most important controls you have in *Spaceward Ho!* are your bar charts. They are what you use to divide up your spending and implement your strategy. Unlike bar charts you see on overheads during business presentations, you can actually change the bar charts in *Spaceward Ho!*.
+
+!fig 14_budget_window.png | The Budget Window | center
+
+For example, the Budget Window bar chart permits you to divide all the money you make each turn between each of your colonies and technology research. The bigger the bar to the right of a planet name, the greater the percent of your total budget that goes into that planet. Clicking the mouse in the area designated for the bar will lengthen/shorten the bar to where you clicked, adding or subtracting from other bars proportionally.
+
+Or, for example, if you want to spend the same amount on Tech and your planet, just click and drag directly on the Tech bar. As you move the mouse around, you’ll notice the Tech bar go up as the others go down, and down as the others go up. Set it so that your Tech bar and your colony bar are the same length.
+
+It is important not to get caught up in the actual number of dollars being spent in each area. We have gone through a great deal of effort to make sure that the game does reasonable things when you spend too much money in an area, and to warn you if you spend too little. Just try to get the vague things right, and don’t worry about the specifics.
+
+A lot of people asked us to give the actual percentages specified by the bar charts, and we did try playing it that way. Trust us, it subtracted from the fun of the game. It’s much, much better the way it is. Honest.
+
+Each of the bars in the Budget Window can be broken down into smaller bar charts. For example, click on the word “Tech” in the Budget Window. The Tech Window will pop up. This is a detailed, specific view of your Tech spending and isn’t worth anything by itself. Even if you spend 100% of your Tech money on Range Tech, this isn’t worth anything unless you’ve allocated some of your budget for Technology Research. A hundred percent of nothing is still nothing. We’ll tell you more about the Tech Window later.
+
+## Back to the Budget Window
+
+So, using the bar charts, you can determine what percentage of your income is to be spent on savings, technology, and any planets you own. In the picture, about 85% of the money is being spent on Canopus, while about 15% is being spent on Technology research.
+
+Savings is money that will be saved until next turn. Money will be saved automatically if you don’t spend it, too. For example, if you are spending all your money on Canopus for shipbuilding (like we are in the example), but you don’t have any ships queued at Canopus, the money will be saved for later. Any time money is saved like this, there will be a brief note about it in the Report Window. In general, don’t bother saving money unless you have a reason.
+
+You can click on the name of a star in the Budget Window to scroll the Star Map to that star and select it. If you double click on the star name, or the star itself in the Star Map, you will open up its Planet Window.
+
+When you have colonized a lot of stars, you’ll notice that your Budget Window gets long. You’ll end up having to scroll around in it to see all your planets. We helped with this problem with the “All” or “Some” feature. Basically, clicking on the word in the top middle of your Budget Window toggles you between whether you can see all of your planets or just the ones you spend money on. It turns out that late in the game that there are a lot of planets which you don’t spend any money on at all (e.g. profitable planets that are already well defended). Since you don’t really care about these “stable” planets, at least as far as money goes, just show *Some* of your planets. All the things you spend money on, or need to spend money on, will show up in the Budget Window, while those which are unbudgeted and self sufficient don’t.
+
+When you’re done with a turn, the Budget Window will let you know by putting “(done)” after the year. You’ll only see this if you’re in a game with more than one human player.
+
+## The Planet Window
+
+The Planet Window has a bar chart that shows how money you spend on a planet is subdivided between mining, terraforming, and shipbuilding. Again, don’t get too concerned about exactly what percent you’re spending on what item; just try to get the generalities right.
+
+Spending money on Terraforming will help modify a planet’s temperature to 72°F (perfect for your race). If a planet is already 72°, you won’t be able to spend money on terraforming. Spending money on Mining will mine some of the planet’s metal resources, making the metal available for shipbuilding. If a planet is out of metal, you won’t be able to mine it any more. Thus there is only one thing to spend money on at a completely terraformed and mined planet: shipbuilding.
+
+!fig 17_planet_window.png | The Planet Window (Canopus 20,14) | center
+
+And when you want to build ships, just spending money on shipbuilding at a planet isn’t enough. You still have to set up the shipbuilding queue. The shipbuilding queue is a list of the ships you want to build in the near future at a planet. To set up a queue, just choose “Build Ships...” from the “Ships” menu, and you’ll be able to schedule the next several ships. Read “Building Ships” for more specific information.
+
+The Income of a planet is how much extra money a planet puts into your total budget. If it’s a planet you’ve just colonized, this will be negative, meaning that you have to put money into it just to keep it alive. The closer a planet is to you home planet (which is 72° and 1.00 G), the more money-making potential it has. A planet with money-making potential won’t actually start making a profit, though, until it has a large population. Planets that are too unlike your home planet will never make a profit.
+
+## The Tech Spending Window
+
+!fig 18_tech_spending_window.png | The Tech Spending Window | center
+
+The Tech Spending Window is what you use to divide up the money allocated to Tech in the Budget Window. You may choose to research different technologies, depending on your strategy, philosophy, and the current game situation. For the most part, you don’t need to fool with this window much. Once you decide how you want to spend your research money, you can let it just divide up the money in the same ratios for the rest of the game. Or you can change it.
+
+In the example, Mini (miniaturization) spending is way up, and Speed spending is way down. Remember that the Tech Spending Window just divides up the Tech money, and doesn’t decide how much Tech money there is — that’s decided in the Budget Window.
+
+The Tech Spending Window will also tell you the current status of all your technologies (these are the numbers on the left). You can get this info when you create a new ship type, too.
+
+=== the-economy | The Economy
+
+The entire budget of the planet is represented by only two numbers: Money and Metal.
+
+Money represents energy, food, manufactured stuff — anything that can be replenished every year. If you can’t run out of it, it counts as Money.
+
+Metal represents things you find — metals, oil, uranium, that sort of thing. Anything you can run out of is Metal. There is a limited amount of Metal in the Galaxy. Controlling the Metal will be very important late in the game.
+
+You can spend money on lots of things: research, terraforming, mining, building ships, etc. The only thing you use metal for is building ships. The bigger the ship the more money and metal it takes to build one.
+
+That’s it for the economy. Most of your decisions will involve how you spend your money. If you ever spend more money than you need for something, the extra will be saved and can be used on the next turn.
+
+You can choose different ways to spend your money depending on your particular philosophy. The more money you spend on Tech research, the less you’ll have to develop planets. The more money you spend on planets, the less you’ll have for research. At least in the short term — having more profitable planets gives you more money in the long run. Of course, it also means more places to defend.
+
+Remember that every time a starship is destroyed, the Metal used to build it is gone forever. This means that as more and more ships are built, the stuff you build them out of disappears. Permanently. Towards the end of game, Metal tends to be very scarce, and therefore *very* valuable.
+
+=== building-ships | Building Ships
+
+You can build ships at any of your colonies. To do so, click on the planet where you want to build ships and select “Build Ships...” from the “Ships” menu. On the right will be a list of all the available ship types. On the left will be the list of queued ships. To add a ship to the queue, select the type of ship you want to build on the right and click the “Add” button. To remove a ship from the queue, click on the ship in the queue and click the “Delete” button.
+
+Once you’ve queued ships at a planet, don’t forget to spend money on the planet and to spend some of the planet’s money on shipbuilding. If you don’t, no ships will be built.
+
+If the top ship on the queue was not completed in one turn, you can find out how much was completed by looking at the %Done field in the “Build Ships...” dialog. If after three turns, a ship is only 5% done, you probably want to spend more money on it or it will be obsolete before it’s done...
+
+!fig 21_ship_building_queue.png | Ship Building Queue Dialog (Albireo) | center
+
+=== moving-ships | Moving Ships
+
+Ships can only be moved as part of a fleet. To move a fleet, first select the planet where the fleet is located. Then select the fleet you want to move in the Planet Window. Now click on the star where the fleet is located on the Star Map and drag to where you want the fleet to go. If the destination is reachable (either directly or by refueling along the way at colonies), the path will be shown by a solid line (or lines). Letting go of the mouse when pointing at a reachable destination orders that fleet to go to the specified star. If the destination cannot be reached, the path will be shown by a gray line. This line is for informational purposes only; a fleet will never accept those orders as they are “impossible.” To prevent a fleet from moving, click and hold on the planet where the fleet is located for at least a second. A fleets’ course cannot be changed while it’s between planets.
+
+=== organizing-fleets | Organizing Fleets
+
+Sometimes you may want to divide a fleet in pieces or put multiple fleets together. Any collection of fleets at a specific star can be organized in this fashion. To do so, select “Organize Fleets...” from the “Ships” menu.
+
+The “Organize Fleets” dialog works a lot like the “Font/DA Mover,” so if you’ve used that you’re in good shape. Here’s the deal:
+
+To create a new fleet, just click on the “New” Button under one of the ship columns. Select a ship, then use the arrow buttons to move it to a different fleet. You can choose the fleets by using the popup menus at the top of the ship list.
+
+!fig 23_organizing_fleets.png | Organizing Fleets Dialog | center
+
+=== exploring-planets-temperature-and-gravity | Exploring Planets: Temperature & Gravity
+
+At some stage you’ll want to leave your home planet and spend some effort exploring the nearby stars looking for other habitable planets. Each planet has two important characteristics: Temperature and Gravity.
+
+Temperature represents everything you can change about a star system, from the atmospheric content to the planetary ecology to whatever. Your home planet is 72°F. You can spend money on terraforming new planets you colonize which will make their temperature get closer to 72°. When the temperature reaches 72°, the planet is as good for your habitation as it’s going to get.
+
+Gravity represents everything you *can’t* change about a star system, from the output of the sun to the tidal forces of the moons. Some places just aren’t as habitable as others. Your home planet is 1.00 G, and the closer a planet is to that, the better off the population will be. In an normal game, planets bigger than 2.0 G or smaller than 0.5 G will never be able to make a profit and thus are not worth colonizing for the long term. Of course, metal being the scarce commodity it is, you shouldn’t balk at colonizing an inhospitable planet long enough to take all its metal.
+
+=== colonizing-planets | Colonizing Planets
+
+At some point or another you’ll find a nice, juicy planet that you’d like to keep. It will be something like 1.46 G and 198°. It will have 9,487 Metal, and you just won’t be able to resist.
+
+The first step is to build a Colony Ship of some sort, and send it there. Colony Ships are any ships you care to design which have the “Colony Ship” box checked in the “**Create New Ship Type**” dialog. Some Colony Ships may be heavily armed warships but still be Colony Ships. Anyway, build a Colony Ship and send it to the new planet.
+
+When it arrives, the report window will let you know that you’ve colonized a new planet. It’ll say something like, “Sixth Fleet has just colonized Sol. The population there is now 10.”
+
+You’ll notice at this point that in your Budget Window a new slot has been created with the name of the new star. You’ll also notice a black line in that window. That represents the minimum amount of money you’ll have to spend on the new planet to keep it alive.
+
+It takes a while for a planet to become profitable, even if it’s a very good planet. For decades, you’ll be pumping money in, terraforming the planet and watching the population grow from the tiny handful you start with into a booming, profitable economy which contributes to your Galactic Empire. The worse a planet is to start with, the longer it will take you to get it to make a profit.
+
+The more money you spend on Terraforming a planet, the faster it will grow. Unfortunately, even when the temperature is perfect, 72°, you probably still won’t have enough people there to really support the whole planet. Be patient, the population will grow. Mining and shipbuilding don’t really have any effect on how quickly the population grows.
+
+It costs a base of $7,500 dollars to support a planet. Since your home planet only produces about $20,000 per turn, you only have enough money to colonize two planets at a time to start with. At most. You probably will want to only colonize one, at least until it rounds the corner into profitability. Otherwise, you end up spending $15,000 just keeping your people alive, only leaving you with $5,000 to improve the planets, build ships, and research new technology.
+
+=== strip-mining-planets | Strip Mining Planets
+
+Sometimes you’ll find yourself short of metal. In this case, it’s often a good idea to colonize a planet that you know darned well won’t ever be able to make a profit, no matter how much you terraform it and how long you wait. Maybe it’s 4.5 G, or something. What you do in this case is colonize the planet, but adjust the planet’s spending so that you spend no money on Terraforming, and little or no money on Shipbuilding. Spend it all on Mining. Remember to spend quite a bit above the black line in the Budget Window, since that’s the money that’s available for Mining; everything up to the line just goes to supporting the colony.
+
+When you’ve taken as much metal as you want to from the planet, just stop spending money on it. Any Satellites you’ve built there will stay, but your colonists will be evacuated.
+
+Sometimes you may want to Strip Mine a planet just to keep an enemy from getting its metal.
+
+=== killing-enemy-planets | Killing Enemy Planets
+
+If you send a fleet to a planet an enemy has colonized, and your fleet destroys the enemy ships and satellites, it will go on to pound on the planet itself, killing off the population in great droves. The planet will put up a token resistance, but this is likely to only be enough to defend against exploratory forces. Against an invasion fleet, odds are good that the planet’s population will be completely eliminated. The enemy will no longer own the planet. You’ll be free to colonize it, or do whatever else you want. Of course, the enemy may be annoyed, and attempt to recapture it, so caution is a good idea.
+
+=== advancing-technology | Advancing Technology
+
+Researching new technologies is easy. You just spend money on Tech in the Player Window, and away you go. You can weight your research into certain areas by balancing your Technology budget in the Tech Spending Window, available from the “**Windows**” menu.
+
+## Range
+
+There are five different technologies in *Spaceward Ho!*. **Range** is simple: It’s how far a fleet can move before refueling. If a ship has a range of 6, it can go 3 spaces and come back to refuel, or it can go 6 spaces and be stranded when it gets there, unless you own the star you’re going to. When a ship’s Range is 10, it will be able to go 5 spaces and come back safely, or make one way trips of 10 spaces. That’s a long way, and it will let you make deep raids into enemy territory or explore planets on the fringes of the Galaxy.
+
+A fleet will automatically refuel any time it goes to a planet that you have owned for at least one turn. If you get ships stuck, you can send a Colony Ship to that planet, colonize it for a turn, and then have everybody leave.
+
+## Speed
+
+**Speed** is how fast a ship can go. If a ship has speed 1, it will take it five turns to move five spaces. If its speed is 3, it will make the trip in only two turns. It can be important for reacting quickly to enemy attack. A high speed technology can also allow you to explore new systems much faster than you would otherwise be able.
+
+## Weapons and Shields
+
+**Weapon** and **Shield** technologies determine how well a ship fights. The amount of damage you do is based upon the difference between your Weapon Tech and the defender’s Shield Tech. If your Weapon Tech is higher than the enemy’s Shield Tech, you’ll do a lot of damage each turn to his ship. If your Weapon Tech is less than the enemy’s Shield Tech, you’ll do little or no damage each turn. The greater the disparity the more/less damage you will do.
+
+For example, let’s say your ship has Weapon Tech 5. If you attack somebody who has Shield Tech 1, his shields will basically be ineffective against your weapons, and you’ll decimate him. If the defender has Shield Tech 5, you’ll damage his ship somewhat, but his shield will block the rest. If he has Shield Tech 8, your attack will be almost 100% blocked, and he’ll laugh at your puny attack.
+
+## Mini
+
+**Mini** (miniaturization) allows you to build ships for less metal but more money. Since metal can be a lot scarcer than money, building ships with high Mini Techs may be a good idea. Colonists can’t be miniaturized, so Mini has very little effect on Colony Ships.
+
+Which technologies you choose to develop are totally up to you, and will depend on your goals for that game. If you develop a high range tech, you’ll be able to reach many planets on the fringes of the galaxy that nobody else can reach, and can develop them without worrying about defending them. High weapons and shields are essential if you’re involved in combat, but remember, the technology alone isn’t enough. Having the capability of building high Weapon Tech spaceships means nothing in combat; having lots of high Weapon Tech spaceships in a battle does.
+
+Miniaturization becomes more and more important as the game goes on. In the early game, there is a lot of metal in the galaxy, and it’s relatively easy to come by. Late in the game, it may well be the limiting factor of your fleets’ sizes, and a high Mini will serve you well. Speed has a lot of advantages not immediately apparent. A fast counterstrike fleet can often catch and destroy an attacking enemy force after it has captured one of your planets. Usually the attacking force has to fly in a Colony Ship, colonize your ex-planet, and support it for a turn just so he/she can refuel his attacking fleet so it can leave. If you have fast ships, you can catch him there. If you have slow ships, he’ll get away unscathed.
+
+=== designing-your-own-ships | Designing your own Ships
+
+As your technology increases, you’ll want to start building more and more advanced ships, using these new technologies. It’s easy. Just choose “Create New Ship Type” from the “Ships” menu. It will bring up the Ship Design dialog. You just move the scroll bars around to set the qualities of the new ship. The rightmost side of the scroll bar is always whatever your current Tech level is.
+
+There are four major classes of ships: Colony Ships, Satellites, Scouts, and Fighters:
+
+## Colony Ships
+
+A Colony Ship is any ship that has “Colony Ship” checked in the Create New Ship Type dialog. It is important because it carries people and colonizes new stars for you. Colony Ships are also incredibly expensive both in Money and Metal. Colony Ships cost so much that you’ll want to build very few of them. That, and the fact that miniaturization doesn’t do them much good, will mean that you probably won’t want to use any Mini at all on your Colony Ships. Colony Ships are also the first thing the enemy will shoot at in a battle, so you’ll want to be careful with them, too.
+
+## Satellites
+
+Satellites are ships that don’t have engines. That means that either their Speed or their Range is zero. Probably both. Satellites are a cheap, effective means of defending your planets against enemy attack. The problem is they can’t move; they can only defend the planet where they were built.
+
+## Scouts and Fighters
+
+Scouts and Fighters are ships with engines that aren’t colony ships. The distinction between scouts and fighters is only in how you use them — there’s no reason why you can’t attack with a scout or explore with a fighter.
+
+What makes a scout a scout? Its name. A scout is any ship whose name begins with the word “Scout,” like “Scout 9” or “Scout Rhino.” The big difference between fighters and scouts is that you can have *Spaceward Ho!* automatically put each scout that is built into its very own fleet, so it can independently go flying off to explore. You do this by checking “Scouts in New Fleets” in the “Options” menu. Fighters (which you name things like “Fighter 5” and “Death Star”) automatically join the fleets at the stars where they’re built, as long as there is already a fighter of that type in the fleet.
+
+You can split up fighters, join scouts, or move ships around however you want by choosing “Organize Fleets” from the “Ships” menu. See the section on “Organizing Fleets” for details.
+
+## Development Cost
+
+It costs more to build the first one of a new ship type than all of the ones that come after it — it takes effort to work the kinks out and do testing. This is especially true with ships with high miniaturization. Just keep in mind that the development cost is a one time thing associated with every new ship type.
+
+## Scrapping Fleets And Ship Types
+
+Since, as the game progresses, metal is scarce and out of date ships are useless, you may find that ships you built at the beginning of the game are useless later on. You can actually recoup 75% of the metal from ships located at one of your colonies by either scrapping fleets (select “Scrap Current Fleet” from the “Ships” menu) or by scrapping an entire ship type (click on “Scrap Type” for a specific type in the “List Ship Types...” Dialog).
+
+When you mark a ship type or fleet for scrapping, it doesn’t actually *do* the scrapping until you end the turn. If you get cold feet before then, you can just go and uncheck the box.
+
+=== reviewing-battles | Reviewing Battles
+
+Sometimes your ships bump into other players’ ships. When this happens, they fight until one side is dead. Admittedly, this doesn’t make for easy peaceful coexistence, but this *is* a war game. Anyway, when you have a fight, you’ll want to know what the heck happened. There’s a couple of ways to find out. First, if you have “Always Review Battles” checked in the “Options” menu, you’ll get a summary of whatever battles just happened at the beginning of each turn.
+
+You can also select any star and review the last battle at that star by selecting “Review Battle at this Star” from the “Galaxy” menu. If there have been two or more battles at a star, you’ll only be able to see the most recent one.
+
+You can review the battles graphically or just as a report by checking or unchecking “Graphic Battles” in the “Options” menu. Non-graphic battles will appear as text in the Report Window. Graphic battles are not meant to show realistically how the battle went — just what happened. Showing animated ship-to-ship combat would be neat, but it’s not really what this game is all about.
+
+If you lose a battle, you don’t get a report about the last round of the battle, since your ships were destroyed before they could send in a final report. This means that if your fleet was destroyed in the first round, you’ll have no idea how many enemy ships were there — just that there were enough to annihilate you.
+
+=== playing-with-multiple-players | Playing with Multiple Players
+
+*Spaceward Ho!* is really designed to be played with lots of people. The unique “log-in” style of play lends itself to having the main game on a fileserver of some kind, with each player updating his turns on his own machine.
+
+Here’s how to do that if you have an AppleShare setup. Have someone create the Galaxy, with enough human slots for everybody who wants to play. Instead of leaving the Galaxy on your own disk, however, put it on a fileserver where everybody can get at it. Then have everyone open the game — one at a time, since the fileserver can only accommodate one person at a time.
+
+The multi-player game will look remarkably like a one player game. The main difference, of course, is some of those aliens you bump into are played by humans, who can be substantially more devious and cunning than the computer players. The other difference is that you will have to wait for other humans to complete their turns before you go on to the next turn. And AppleTalk is quite a bit slower than your local hard disk, so updating turns takes a little longer.
+
+If you don’t have AppleTalk or don’t have more than one Mac, you can still play a multi-player game — use one machine and take turns.
+
+## System 7.0
+
+The best way to play *Spaceward Ho!* involves using System 7.0, which isn’t generally available as this is being written. With System 7, you can set up any computer to be a computer *and* a fileserver. This lets someone create a game on his machine, and let others log on to it and play along. We have put in a couple of special features with this in mind.
+
+One of these is the “I’ll Update Turns” option. When you have someone playing the game on the fileserver, you’ll want that person to update the turns on his own machine, so you won’t have to pass all of the game information across the network. This is much faster, since hard disks are quite a bit quicker than networks. Anyway, in this case, just have the person who started the game select this option while everyone else turns it off. This will keep the turn from being updated across the network. When everybody has turned in his turn, the machine with the “I’ll Update Turns” option will update it, then everybody else will get the results.
+
+This option can also be handy when the people that are playing are on machines of different speeds, even if you don’t have System 7.0 yet. The guy on the Mac IIfx can update the turns, while everybody on their Mac Classic just lets him do it.
+
+=== setting-up-a-new-galaxy | Setting Up a New Galaxy
+
+The first thing to do in a game of *Spaceward Ho!* is create a new galaxy. You’ll have to decide how many players to play against, how good they’ll be, how big the galaxy is, and things like that. I’ll cover some of the options here.
+
+The Max number of human players is for use in a multi-player game. You’ll want to set it to 1 if you’re playing alone. If there are several players, make sure that the maximum you choose now is large enough for everyone to join in. Also note that new players can’t join after two turns have been processed.
+
+The number of computer players is pretty obvious: It’s the number of enemies that will occupy the galaxy with you. The more there are, the more resistance you’ll find.
+
+The number of stars determines how big the galaxy is. The bigger the galaxy, the more room there is for each player to roam. In a very small galaxy with a lot of players, the game will tend to be very heated and fast. In a large galaxy with only a few players, the game will develop for a long time before there’s any combat.
+
+The Map Style determines what general shape the Galaxy will have. Spiral galaxies tend to be the most even starts, with each player having an arm of the spiral to himself. Circle galaxies also start players off fairly evenly, buy the start is more random than that of the spiral. A Random galaxy has stars tossed down higgledy-piggledy, and can start any player out in an extremely good or bad position.
+
+!fig 34_create_new_galaxy.png | Create New Galaxy Dialog | center
+
+The Game Speed determines the pace of the game. In a fast game, each planet will make a lot more money, so you build ships much faster. Furthermore, the home planets start out with more metal. The *main* difference is in the number of planets you can colonize at a time. In the Normal game, that number is one, at least at the beginning. In the Fast game, you can often initially colonize five or more planets, which makes expansion much more rapid.
+
+We find the Normal game more interesting, since you have to constantly make decisions about how far to expand, and how fast. In the fast game, it is often best to simply expand as quickly as possible, no matter what. However, you have a better hope of finishing a fast game in a couple of hours.
+
+The Computer Skill determines how hard a game the computer players will give you. Smarter players will learn from their mistakes, will build larger fleets, will invest more heavily in Technology, and will expand faster.
+
+At first, even the Dumb computer players will prove to be very difficult opponents, but as your skill grows, you’ll find them unchallenging. Eventually, you may be able to defeat the Advanced players consistently. If so, give us a call and we’ll send you information on upgrades, as we will probably have improved the computer’s intelligence.
+
+=== the-computer-players | The Computer Players
+
+When you play *Spaceward Ho!* you can play against lots of people, lots of computers, or some mixture thereof. We recommend putting a couple of computer players in each game just to keep everyone guessing. It’s very difficult to tell exactly who is a computer and who is a human. The computer players will each adopt a unique strategy, just as each person will. Some will be happy to sit on their home planets, building satellites and researching new technologies. Some will be very aggressive, trying to expand very rapidly. Some will go for a high weapon and shield technology, and then come out after the rest of the Galaxy. All will do their best to avoid being conquered.
+
+The more intelligent computer players will adapt to your actions during a game, and will adapt their strategy to current situations. They tend to think on a more long-term scale than the less intelligent computer players, and will generally explore the galaxy faster and more efficiently (if that is their strategy). They will tend to accumulate larger fleets, and will be more difficult to defeat in a major battle. They will increase their Tech spending if they feel they are falling behind in the arms race.
+
+When you first sign on, you’ll be able to tell *Spaceward Ho!* how good to make the computer players. Expert computer players are likely to use a better strategy and be much more dangerous than dumb computer players.
+
+=== comparing-players | Comparing Players
+
+If you ever get the urge to see how you’re doing compared to the other players in the game, select “Compare Players...” from the “Galaxy” menu. You will get to see how some of your attributes (like Weapon Tech or income) compare to others.
+
+The “number of players in the game” will not include anyone who has been eliminated (whose income is 0).
+
+In a multiplayer game with a turn time limit, the “Compare Players...” dialog will tell you when the current turn will end.
+
+!fig 37_compare_players.png | Compare Players Dialog | center
+
+=== zooming-in-and-out | Zooming In and Out
+
+You can change the scale of the Star Map to give yourself a better view of the whole galaxy, or to look closely at some specific section of it. To do this, just choose “Zoom in” or “Zoom out” from the “Galaxy” menu. They are Command-minus and Command-plus, respectively. A lot of detail is lost when you zoom out all the way.
+
+=== the-options-menu | The Options Menu
+
+!fig 38_options_menu.png | The Options Menu | center
+
+Below is a summary of all the options available in the Options Menu.
+
+## Turn Always Done
+
+In a multiplayer game, if you’ve been completely destroyed, give up, or just don’t have anything to do for a couple turns, selecting “Turn Always Done” will allow the game to go on without your need to register you turn as done.
+
+## I’ll Update Turns
+
+In a multiplayer game, if some Macs are faster than others, you probably want the fast Macs to do the turn updates. Have the Macs that don’t want to update the turn deselect this option. If no one has this option checked, the game will never be updated...
+
+## Show Report Window
+
+This option forces the Report Window to be displayed at the beginning of every turn, even if you closed it before the end of the last one.
+
+## Spending Warnings
+
+Warns you when you end your turn if you’re not spending enough money to support some of your planets.
+
+## Always Review Battles
+
+Will cause you to automatically review all battles that happened during the turn update at the beginning of the next turn.
+
+## Announce Events
+
+Will inform you with dialogs about the most important events (besides battles) that occurred during turn update, like technology advances, new planets, and things like that.
+
+## Graphic Battles
+
+Lets you specify if you want to watch battles take place “graphically” or if you just want see the battle summary. A full text report of the battle will always be put in the Report Window whenever you review a battle.
+
+## Scouts in New Fleets
+
+Will put any new ship of a type beginning with the word “Scout” into its own unique fleet. Standard practice is to put new ships in fleets that have ships of the type being built (if such a fleet exists at the star where the ships were built).
+
+## Spend on New Stars
+
+Automatically spend enough money on newly colonized stars. Helpful if you’re about to colonize a new star but will be gone for a turn or so and have selected the “Always Done” option. This option doesn’t work as well if you colonize more than one star at a time, since sometimes you just plain won’t have enough money.
+
+## Sound
+
+Turn on and off sound effects.
+
+=== technical-support | Technical Support
+
+We think the single most important thing a software company provides (other than software) is Technical Support. We pride ourselves on being able to solve virtually any problem one might have with *Spaceward Ho!*, and lots of other problems as well. If you call us directly at (408) 730-9336 at reasonable California business hours and ask for tech support, we’ll be happy to help you with anything we can. It is also possible that you can get us at unreasonable hours, since we work hard and late, but we can’t guarantee it.
+
+Keep in mind that we’re understaffed, overworked, and appreciate brevity. If you can answer questions like “What version of the System and Finder are you running?” without checking, we’ll be ecstatic. If you call with questions like “What’s a Finder?” we’ll be peeved. Okay?
+
+If you ever have an urge to contact us in writing, our address is:
+
+Delta Tao Software, Inc. 760 Harvard Ave. Sunnyvale, CA 94087
+
+=== recommended-reading | Recommended Reading
+
+These are a couple of books that don’t have anything to do with Macintosh software, but we enjoy reading them time and time again. On top of that, we think they say something about the Delta Tao philosophy.
+
+- *The Tao of Pooh*, by Benjamin Hoff, Penguin Books, New York, 1982.
+- *Calvin and Hobbes*, by Bill Watterson, Andrews and McMeel, Kansas City, 1987.
+- *The Macintosh Way*, by Guy Kawasaki, Scott, Foresman and Company, Glenview, Illinois, 1989.
+- *The Art of War*, by Sun Tzu, various versions available.
+
+=== delta-tao-s-favorite-games | Delta Tao’s Favorite Games
+
+- *Strategic Conquest 3.0* — We have spent more time playing StratCon than all other Mac games combined. Especially good with two players AppleTalked together. We are very pleased to publish it.
+- *Dark Castle* and *Beyond Dark Castle* — Totally flawless games. Inventive action, terrific animation, wonderful sound effects. Challenging and humorous. The most professional Mac games we’ve seen.
+- *PlayMaker Football* — We hate to put this one in, since it’s copy protected. Those slimeballs. Unfortunately for us die-hard football coach wannabees, there is no other game which simulates real football half as well.
+
+=== glossary | Glossary
+
+::Current Resources | The money and metal currently available for use.
+::Enemy | Anybody that isn’t you. You have no formal allies in this game.
+::Gravity | Everything that can’t be changed about a star. A planet between 0.5 G and 2.0 G can be made profitable, if enough people are on it and it is fully *terraformed*. An ideal planet is 1.0 G. Each player has a different idea of what 1.0 G is.
+::Income Last Turn | The amount of money (ΔMoney) or metal (ΔMetal) you amassed last turn.
+::Metal | The sum of all nonrenewable resources.
+::Mini | The amount of shrinking a ship has. High Mini ships use less metal, but cost more money.
+::Money | The sum of all replenishable resources. You get money every turn from profitable planets.
+::Planet | The same thing as a star.
+::Range | How far a ship can reach without refueling. A Range 6 ship can go out 3 and back 3, or can go out 5 and be stuck.
+::Satellite | A ship that can’t move. Either its *Range* or its *Speed* (hopefully both) are zero.
+::Shield | Something that protects a ship. A Shield Tech 8 ship will prove invincible to a Weapon Tech 4 ship.
+::Speed | How fast a ship goes. A Speed 3 ship will take 2 turns to go to a star that is 5 units away.
+::Star | The same as a planet.
+::Temperature | Everything that can be changed about a star. The ideal temperature is 72°. Each player has a different idea of what 72° is.
+::Terraforming | Improving the temperature of a star. When a star is fully terraformed, its temperature is 72°.
+::Weapon | Something a ship shoots. A Weapon Tech 8 ship will cut through Shield Tech 4 ships like a hot knife through butter.
+
+=== about-this-manual | About This Manual
+
+This manual was written by Peter Commons and Joe Williams using FrameMaker software from Frame Technologies. The fonts are various styles of Garamond. The graphics for the cover were created in Color MacCheese and Michael’s Draw, and output on a LaserWriter IINT.

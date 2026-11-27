@@ -285,7 +285,7 @@ title screen the player's choice (else English), in New Game the one it has chos
 there and always complete. The hover help is translated too; the long documents (the
 version notes, patch notes and the four manuals) are translated too in French, German, Spanish and
 Turkish, the remake's own (`js/ui-text-notes-<code>.js`, `assets/manuals/<version>-<code>/`); only the
-Full Hoedown list stays English (`docs/translations.md`, "The remake's interface"). The Amiga skin starts in English like
+Full Hoedown list and the 1.0 manual (`assets/manuals/1.0/`, from Jake's own copy, bought from PC Games Vault) stay English (`docs/translations.md`, "The remake's interface"). The Amiga skin starts in English like
 every skin; its German (the Amiga's own words) is a choice, and it has its own words in
 every language.
 `node tools/ui-lang-audit.js` opens every skin in every language its versions offer and
@@ -617,7 +617,8 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `tools/notes-check.js`: fails when a version note or patch fix has no row in a language's
   `js/ui-text-notes-<code>.js`, or a row is stale or mis-filled (run it after editing
   `js/version-notes.js` or a ruleset's `fixes`)
-- `tools/manuals/`: the DOS 2.0 and Mac 3.0.1 manuals' sources and `build-manuals.py`; `translate/manualtr.py`
+- `tools/manuals/`: the DOS 2.0, Mac 3.0.1 and Mac 1.0 manuals' sources and `build-manuals.py` (`import-1.0.py` makes the
+  1.0 manual's sources from Jake's 300 dpi scans, provided by PC Games Vault, pcgamesvault.com); `translate/manualtr.py`
   builds the `-fr`, `-de`, `-es`, `-tr` manual folders from the tables in `docs/translations-notes/manuals/`
   (`docs/manuals/`, `docs/notes-and-manuals-integration.md`)
 - `tools/bundle.py`: builds `dist/spaceward-ho.html`, a single self-contained file with one

@@ -100,6 +100,14 @@ number worked out from a 1.0 figure and checked against something else), **GUESS
 Not in the rules: Turn Length's clock, joining a game until two turns have passed (the remake's people all start together), Spend On New
 Stars as a choice (1.2's automatic share is always on), Graphic Battles off.
 
+## The manual on the site
+
+The 1.0 manual itself is in the Help menu for 1.0 games (`assets/manuals/1.0/`, English only; `HOMANUALS['10']` in `js/help.js`). It is
+Jake's own copy, bought from PC Games Vault (pcgamesvault.com) and scanned by him at 300 dpi; the text is the transcription that came
+with the scans, the figures cut from the 300 dpi pages (`tools/manuals/import-1.0.py <scans> <bundle>`, then
+`python3 tools/manuals/build-manuals.py 1.0`). The 1.0 rules' hover help (`HOHELP_RULES['10']`, what the Help Window shows) quotes it
+for the Budget, Tech Spending and Planet Windows and for moving fleets; the rest is 1.2's.
+
 ## Not built
 
 - **The Fleet Window** (named on p. 7, never shown).

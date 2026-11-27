@@ -113,6 +113,13 @@ Object.assign(root.HOHELP_RULES['12'], {
   colonyBar: ['When you aren’t spending enough on your colonies to support them, the game asks before the turn ends: “Warning! You are not spending enough money to support your colonies. Do you really want to abandon them?” (“Let them die!” or Cancel).', 'the “Spending Warnings” box (DITL 5060)'],
   build: ['Spaceward Ho! allows you only 20 ship types at one time. To create another, first scrap an old type by checking its “Scrap” box in the List Ship Types box. It is scrapped when the turn is updated, and you can create the new type next turn.', 'the “Too Many Ship Types” box (DITL 3280)'],
 });
+// Spaceward Ho! 1.0 (Mac, 1990; the reconstruction, js/rules-10.js): its manual's own words (assets/manuals/1.0)
+root.HOHELP_RULES['10'] = Object.assign({}, root.HOHELP_RULES['12'], {
+  budget: ['This is the window you use to set how much money each planet gets. Clicking the mouse in the area designated for the bar will lengthen/shorten the bar to where you clicked, adding or subtracting from other bars proportionally.', 'The Budget Window, pp. 13-14'],
+  tech: ['The Tech Spending Window is what you use to divide up the money allocated to Tech in the Budget Window. Remember that it just divides up the Tech money, and doesn’t decide how much Tech money there is.', 'The Tech Spending Window, p. 18'],
+  planet: ['The Planet Window has a bar chart that shows how money you spend on a planet is subdivided between mining, terraforming, and shipbuilding. Don’t get too concerned about exactly what percent you’re spending on what item; just try to get the generalities right.', 'The Planet Window, p. 16'],
+  route: ['To move a fleet, first select the planet where the fleet is located. Then select the fleet you want to move in the Planet Window. Now click on the star where the fleet is located on the Star Map and drag to where you want the fleet to go.', 'Moving Ships, p. 20'],
+});
 // each ruleset's own manual, opened from the Help menu
 root.HOMANUALS = {
   // a version's manual in the game's language: { en: [path, name], fr: ..., de: ..., es: ..., tr: ... }. The name stays the
@@ -132,6 +139,8 @@ root.HOMANUALS = {
   // the printed Mac manual for 3.0 (the scan is titled 3.0.1); it has the
   // chapter on what changed from 2.0 to 3.0
   301: { en: ['assets/manuals/3.0.1/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'], fr: ['assets/manuals/3.0.1-fr/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'], de: ['assets/manuals/3.0.1-de/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'], es: ['assets/manuals/3.0.1-es/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'], tr: ['assets/manuals/3.0.1-tr/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'] },
+  // the 1.0 manual (Delta Tao, 1990): Jake's own copy, bought from PC Games Vault and scanned by him (tools/manuals/import-1.0.py); English only
+  10: { en: ['assets/manuals/1.0/index.html', 'Spaceward Ho! 1.0 manual (Mac)'] },
   // no 1.2F manual is in the archive; its rules are DOS 2.0's, so the DOS
   // 2.0 manual is the closest
   12: { en: ['assets/manuals/2.0-dos/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'], fr: ['assets/manuals/2.0-dos-fr/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'], de: ['assets/manuals/2.0-dos-de/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'], es: ['assets/manuals/2.0-dos-es/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'], tr: ['assets/manuals/2.0-dos-tr/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'] },
