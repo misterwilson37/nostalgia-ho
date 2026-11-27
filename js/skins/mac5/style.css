@@ -191,3 +191,45 @@ html.m5win .m5corner { position: absolute; right: 0; bottom: 0; width: calc(16 *
 html.m5win #m5clk:not([hidden]) { bottom: calc(20 * var(--u)); }
 html.m5win #msg { bottom: calc(21 * var(--u)); }
 html.m5win #m5hist:not([hidden]) { right: calc(23 * var(--u)); bottom: calc(23 * var(--u)); }
+/* Build Ships (PPob 137): 622 x 417, its panes where the PPob puts them */
+html.m5win .win.m5dlg { border: var(--u) solid #000; border-radius: 0; box-shadow: calc(2 * var(--u)) calc(2 * var(--u)) calc(6 * var(--u)) rgba(0,0,0,.5); background: #dddddd; padding: 0; max-width: none; max-height: none; }
+html.m5win .win.m5dlg > .wtitle { height: calc(20 * var(--u)); padding: 0; justify-content: center; font: bold calc(12 * var(--u)) / calc(20 * var(--u)) Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif;
+  background: repeating-linear-gradient(#f0f0f0 0 var(--u), #a8a8a8 var(--u) calc(2 * var(--u))) center / 100% calc(12 * var(--u)) no-repeat, #d8d8d8; border-bottom: var(--u) solid #777; }
+html.m5win .win.m5dlg > .wtitle span { background: #d8d8d8; padding: 0 calc(6 * var(--u)); }
+html.m5win .win.m5dlg > .wtitle .close { display: none; }
+html.m5win .win.m5dlg > .wbody { padding: 0; margin: 0; overflow: visible; }
+html.m5win .m5build { position: relative; width: calc(622 * var(--u)); height: calc(417 * var(--u)); font: bold calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; color: #000; }
+html.m5win .m5build > *, html.m5win .m5grp > * { position: absolute; box-sizing: border-box; }
+html.m5win .m5t { white-space: nowrap; font-weight: normal; }
+html.m5win .m5t.b { font-weight: bold; }
+html.m5win .m5t.r { text-align: right; }
+html.m5win .m5t.c { text-align: center; }
+html.m5win .m5t.dim { color: #8c8c8c; }
+html.m5win .m5blist { background: #c8c8f0; border: var(--u) solid #555; overflow-y: scroll; scrollbar-color: #bcbcbc #eeeeee; }
+html.m5win .m5brow { display: flex; flex-direction: column; align-items: center; width: 100%; min-height: calc(42 * var(--u)); padding: calc(2 * var(--u)) 0; margin: 0; border: 0 !important; border-bottom: var(--u) solid #bbb !important;
+  border-radius: 0 !important; box-shadow: none !important; background: #fff !important; font: calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; min-width: 0; }
+html.m5win .m5brow.on { background: #ccccff !important; }
+html.m5win .m5brow .shippic { height: calc(24 * var(--u)) !important; }
+html.m5win .m5shipv { display: flex; align-items: center; justify-content: center; }
+html.m5win .m5shipv .m5ship { height: calc(48 * var(--u)) !important; }
+html.m5win .m5name, html.m5win .m5n2 { border: var(--u) solid #555; box-shadow: inset var(--u) var(--u) 0 #aaa; background: #fff; font: calc(12 * var(--u)) / 1 Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif; padding: 0 calc(4 * var(--u)); border-radius: 0; }
+html.m5win .m5pop5 { appearance: none; -webkit-appearance: none; border: var(--u) solid #333; border-radius: calc(3 * var(--u)); padding: 0 calc(20 * var(--u)) 0 calc(6 * var(--u)); font: bold calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='14'><path d='M.5 0v14' stroke='%23777'/><path d='M5 5.5l3-3.5 3 3.5z M5 8.5l3 3.5 3-3.5z'/></svg>") right center / calc(16 * var(--u)) calc(14 * var(--u)) no-repeat, linear-gradient(#f4f4f4, #d4d4d4); }
+html.m5win .m5slid { -webkit-appearance: none; appearance: none; background: transparent; margin: 0; padding: 0; }
+html.m5win .m5slid::-webkit-slider-runnable-track { height: calc(5 * var(--u)); background: #bbb; border: var(--u) solid #666; border-radius: calc(3 * var(--u)); box-shadow: inset var(--u) var(--u) 0 #888; }
+html.m5win .m5slid::-webkit-slider-thumb { -webkit-appearance: none; width: calc(11 * var(--u)); height: calc(16 * var(--u)); margin-top: calc(-6 * var(--u)); border: var(--u) solid #333; border-radius: calc(2 * var(--u)); background: linear-gradient(90deg, #ccccff, #8080e0); }
+html.m5win .m5slid::-moz-range-track { height: calc(5 * var(--u)); background: #bbb; border: var(--u) solid #666; border-radius: calc(3 * var(--u)); }
+html.m5win .m5slid::-moz-range-thumb { width: calc(11 * var(--u)); height: calc(16 * var(--u)); border: var(--u) solid #333; border-radius: calc(2 * var(--u)); background: linear-gradient(90deg, #ccccff, #8080e0); }
+html.m5win .m5grp { margin: 0; padding: 0; border: var(--u) solid #888; box-shadow: var(--u) var(--u) 0 #fff, inset var(--u) var(--u) 0 #fff; border-radius: 0; }
+html.m5win .m5grp legend { position: absolute; left: calc(8 * var(--u)); top: calc(-6 * var(--u)); padding: 0 calc(3 * var(--u)); background: #dddddd; font: bold calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win .m5pile { image-rendering: pixelated; }
+html.m5win .m5chk { display: flex; align-items: center; gap: calc(4 * var(--u)); font: bold calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win .m5chk input { width: calc(12 * var(--u)); height: calc(12 * var(--u)); margin: 0; }
+html.m5win .m5btn { padding: 0 !important; min-width: 0; border: var(--u) solid #333 !important; border-radius: calc(4 * var(--u)) !important; box-shadow: inset var(--u) var(--u) 0 #fff, inset calc(-1 * var(--u)) calc(-1 * var(--u)) 0 #999 !important;
+  background: linear-gradient(#f8f8f8, #d4d4d4) !important; font: bold calc(12 * var(--u)) / 1 Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif !important; color: #000; }
+html.m5win .m5btn.def { box-shadow: 0 0 0 calc(2 * var(--u)) #dddddd, 0 0 0 calc(3 * var(--u)) #333, inset var(--u) var(--u) 0 #fff, inset calc(-1 * var(--u)) calc(-1 * var(--u)) 0 #999 !important; }
+html.m5win .m5btn:disabled { color: #999; }
+html.m5win .win.m5dlg { width: auto !important; min-width: 0; overflow: visible; }
+html.m5win .win.m5buildwin { width: calc(622 * var(--u) + 2 * var(--u)) !important; }
+html.m5win .win.m5dlg > .wtitle::after, html.m5win .win.m5dlg > .wtitle::before { display: none !important; }
+html.m5win .scrim { z-index: 60; }

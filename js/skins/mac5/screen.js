@@ -534,6 +534,164 @@ T.afterMsg = (box, info) => {
   const e = entry(m, info.idx + 1 < info.inbox.length); e.classList.add('m5bub');
   card.classList.add('m5card'); card.append(e);
 };
+// ---------- Build Ships (unit 7: PPob 137, LBuildShipsWindow) ----------
+// A modal window, 622 x 417, centred (shot 015). At the left the design list (LShipTypesDataBrowser 'stcv', 150 x 405): each design as
+// "Name (W/S) Type" over its picture, the chosen one on lavender. In the middle the figures (Dev Cost, Pro Cost, Metal Cost, Built,
+// In Service), the name, the Type pop-up (MENU 210) and the five tech sliders (Range ... Mini: minimum at the left, maximum at the right,
+// the value above). At the right the ship (LShipTypeView), Your Current Reserves (LHoPiles 'monB' / 'metB'), Number To Build (a field
+// with arrows, a slider from 0 to the maximum, "<max>", Allow Debt, the cost in money and metal) and Ship Build Capacity Left.
+// The figures are FUN_1009ab50's, worked out when the window opens and after every change (5.0.5 left them to the list's and sliders'
+// messages, so a window opened on the design already chosen showed the layout's "$100", "999", "<10>": Jake's issue M1, not kept):
+// Dev Cost the first ship's whole price (dimmed once one is built), Pro Cost and Metal Cost each further ship's; the maximum is the
+// lower of what the money allows (the savings, with Allow Debt the borrowing limit too; a design never built pays its Dev Cost for the
+// first) and what the metal allows, then no more than the colony's capacity left; the cost of n is Dev + (n - 1) Pro (or n Pro), n Metal.
+// The window opens on the design chosen last in this game, else the newest (FUN_10099420); with none, on a Scout at the best tech.
+const BUILD = { game: null, last: null };
+const TYPE_ORDER = ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio']; // (MENU 210)
+const KEYS5 = ['R', 'V', 'W', 'S', 'M'], LAB5 = ['Range:', 'Speed:', 'Weapons:', 'Shields:', 'Mini:'];
+const elx = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const at = (e, x, y, w, h) => { e.style.left = U(x); e.style.top = U(y); if (w != null) e.style.width = U(w); if (h != null) e.style.height = U(h); return e; };
+const inService = (g, pid, did) => g.fleets.reduce((n, f) => n + (f.owner === pid && f.ships && f.ships[did] ? f.ships[did] : 0), 0);
+function pile(kind, have, spend) {
+  // LHoPiles (FUN_100bdc74): a unit of max(have, 2,500,000 money or 100,000 metal) / 36; up to 36 pictures in three stacks (half, a
+  // third, the rest), each 3 above the last, the next stack 12 (then 11) to the right and 3 lower; the last ones (what the purchase spends)
+  // in the dimmed picture, the metal's 10 further right. PICT 4050 / 4051 (money), 4060 / 4061 (metal).
+  const c = document.createElement('canvas'); const W = kind ? 100 : 100, H = 72; c.width = W; c.height = H; c.className = 'm5pile';
+  const pics = kind ? ['p4060', 'p4061'] : ['p4050', 'p4051'];
+  const im = pics.map(n => { const i = new Image(); i.src = 'assets/skins/mac5/' + n + '.png'; return i; });
+  const draw = () => {
+    const x = c.getContext('2d'); x.clearRect(0, 0, W, H); if (!im[0].complete || !im[1].complete) return;
+    const unit = Math.ceil(Math.max(have, kind ? 100000 : 2500000) / 36);
+    const n = Math.min(36, Math.trunc(have / unit) + 1), k = spend > 0 ? Math.trunc(spend / unit) + 1 : 0;
+    let left = n - k, dim = false, ph = im[0].height, bx = 0, by = H - ph - 6, shift = 0;
+    const stacks = [Math.trunc(n / 2), Math.trunc(n / 3), n - Math.trunc(n / 2) - Math.trunc(n / 3)], offs = [[0, 0], [12, 3], [11, 3]];
+    stacks.forEach((cnt, si) => { bx += offs[si][0]; by += offs[si][1]; let y = by;
+      for (let i = 0; i < cnt; i++) { left--; if (left < 0 && !dim) { dim = true; if (kind) shift = 10; } x.drawImage(dim ? im[1] : im[0], bx + shift, y); y -= 3; } });
+  };
+  im.forEach(i => { i.onload = draw; }); draw(); c.redraw = draw;
+  return c;
+}
+function buildWindow(sid) {
+  const a = A(), g = a.G, p = a.me(), star = g.stars[sid];
+  if (!star || star.owner !== a.ME) return false;
+  if (BUILD.game !== g.gameId) { BUILD.game = g.gameId; BUILD.last = null; }
+  const live = () => p.designs.filter(d => !d.scrapped && H().canBuildType(g, p, d.type));
+  const types = TYPE_ORDER.filter(t => H().TYPES[t] && H().canBuildType(g, p, t));
+  const st = { spec: null, design: null, name: '', n: 1, debt: false };
+  const maxSpec = (type) => { const L = H().designLimits(g, p, type), sp = { type }; KEYS5.forEach(k => { sp[k] = Math.max(H().designMin(g, k, type), L[k] || 0); }); if (type === 'satellite') sp.R = 0; return sp; };
+  const pick = (d) => { st.design = d; st.spec = { type: d.type, R: d.R, V: d.V, W: d.W, S: d.S, M: d.M }; st.name = d.name; BUILD.last = d.id; };
+  { const ds = live(), last = ds.find(d => d.id === BUILD.last); if (last) pick(last); else if (ds.length) pick(ds[ds.length - 1]); else { st.spec = maxSpec('scout'); } }
+  const same = (d, sp) => d.type === sp.type && KEYS5.every(k => (d[k] | 0) === (sp[k] | 0));
+  const body = elx('div', 'm5build');
+  const list = at(elx('div', 'm5blist'), 6, 6, 150, 405);
+  const mid = (cls, text, x, y, w) => at(elx('span', 'm5t ' + cls, text), x, y, w, 14);
+  const lb = (t, x, y, w) => body.append(mid('r b', TL(t), x, y, w));
+  lb('Dev Cost:', 191, 9, 65); lb('Pro Cost:', 191, 29, 65); lb('Metal Cost:', 191, 49, 65); lb('Built:', 217, 67, 40); lb('In Service:', 192, 86, 65);
+  const devC = mid('b', '', 260, 9, 65), proC = mid('b', '', 260, 29, 65), metC = mid('b', '', 260, 49, 65), numB = mid('b', '', 261, 67, 30), numE = mid('b', '', 261, 86, 30);
+  body.append(devC, proC, metC, numB, numE);
+  const shipView = at(elx('div', 'm5shipv'), 355, 9, 240, 100);
+  const name = at(elx('input', 'm5name'), 166, 110, 180, 24); name.maxLength = 15; name.setAttribute('aria-label', TL('Ship type name'));
+  lb('Type:', 161, 142, 32);
+  const typeSel = at(elx('select', 'm5pop5'), 198, 141, 115, 16); typeSel.setAttribute('aria-label', TL('Type:'));
+  TYPE_ORDER.forEach(t => { if (!H().TYPES[t]) return; const o = new Option(TL(H().TYPES[t].name), t); o.disabled = !types.includes(t); typeSel.append(o); });
+  const sliders = KEYS5.map((k, i) => {
+    const y = 166 + 41 * i;
+    const l = mid('c b', '', 270 - (i === 4 ? 2 : i > 0 ? 1 : 0), y, 20), cap = mid('r b', TL(LAB5[i]).replace(/:$/, '') + ':', 215, y, 53);
+    const mn = mid('r b', '', 174, y + 18, 20), mx = mid('b', '', 317, y + 18, 20);
+    const r = at(elx('input', 'm5slid'), 198, y + 16, 115, 20); r.type = 'range'; r.setAttribute('aria-label', TL(LAB5[i]));
+    body.append(cap, l, mn, mx, r);
+    return { k, l, mn, mx, r };
+  });
+  const res = at(elx('fieldset', 'm5grp'), 355, 113, 240, 94); res.append(elx('legend', '', TL('Your Current Reserves:')));
+  const nb = at(elx('fieldset', 'm5grp'), 355, 210, 240, 120); nb.append(elx('legend', '', TL('Number To Build:')));
+  const n2 = at(elx('input', 'm5n2'), 21, 20 - 8, 50, 24); n2.inputMode = 'numeric'; n2.maxLength = 3; n2.setAttribute('aria-label', TL('Number To Build:'));
+  const nsl = at(elx('input', 'm5slid'), 94, 24 - 8, 85, 20); nsl.type = 'range'; nsl.min = 0; nsl.setAttribute('aria-label', TL('Number To Build:'));
+  const zero = at(elx('span', 'm5t b', '0'), 79, 25 - 8, 10, 14), maxn = at(elx('span', 'm5t b', ''), 185, 25 - 8, 40, 14);
+  const debtL = at(elx('label', 'm5chk'), 96, 51 - 8, 120, 16); const debt = elx('input'); debt.type = 'checkbox'; debtL.append(debt, elx('span', '', TL('Allow Debt')));
+  const mon = at(elx('span', 'm5t b', ''), 132, 78 - 8, 100, 14), met = at(elx('span', 'm5t b', ''), 132, 98 - 8, 100, 14);
+  nb.append(n2, nsl, zero, maxn, debtL, at(elx('span', 'm5t r b', TL('Money:')), 86 - 44, 78 - 8, 82, 14), mon, at(elx('span', 'm5t b', TL('Cost:')), 20, 88 - 8, 38, 14), at(elx('span', 'm5t r b', TL('Metal:')), 86 - 44, 98 - 8, 82, 14), met);
+  const bcapL = at(elx('span', 'm5t b', TL('Ship Build Capacity Left:')), 355, 335, 141, 15), bcap = at(elx('span', 'm5t b', ''), 500, 335, 92, 14);
+  const btn = (t, x, w, def) => { const b = at(elx('button', 'm5btn' + (def ? ' def' : ''), TL(t)), x, 383, w, 20); b.type = 'button'; return b; };
+  const maxO = btn('Max Out', 215, 80), cancel = btn('Cancel', 308, 69), bcont = btn('Build & Continue', 390, 130), build = btn('Build', 536, 69, true);
+  body.append(list, shipView, name, typeSel, res, nb, bcapL, bcap, maxO, cancel, bcont, build);
+  const money = (n) => a.money(n);
+  let maxNow = 0;
+  const figures = () => {
+    const sp = st.spec, d = live().find(x => same(x, sp)) || null; st.design = d;
+    const c = H().designCost(g, sp), dev = c.protoTotal != null ? c.protoTotal : c.money + c.proto, pro = c.money, mtl = c.metal, built = d ? d.built : 0;
+    devC.textContent = money(dev); devC.classList.toggle('dim', built > 0); body.querySelector('.m5t.r.b').classList.toggle('dim', built > 0);
+    proC.textContent = money(pro); metC.textContent = H().niceNum(mtl); numB.textContent = String(built); numE.textContent = String(d ? inService(g, a.ME, d.id) : 0);
+    // the most that can be built (FUN_1009ab50)
+    let cash = p.savings - (st.debt ? H().borrowLimit(g, p) : 0), byMoney = 0;
+    if (built === 0) { cash -= dev; if (cash >= 0) byMoney = 1; else cash = 0; }
+    byMoney += Math.trunc(Math.max(0, cash) / Math.max(1, pro));
+    const byMetal = mtl ? Math.trunc(p.metal / mtl) : 9999;
+    let mx = Math.max(0, Math.min(byMoney, byMetal));
+    // (capacity left: the colony's people, colony +0x0c, less the ships built there this turn, +0x10: js/rules-original.js yardRoom505;
+    // the engine's yardLeft counts by trying and stops at 9,999, so past that the figure is worked out from the people)
+    const yl = H().yardLeft(g, p, star), cap = yl ? (yl.left >= 9999 ? Math.max(0, Math.round(star.pop * 1000) - yl.built) : yl.left) : 9999; mx = Math.min(mx, cap);
+    if (d && d.scrap301) mx = 0;
+    maxNow = mx; bcap.textContent = yl ? H().niceNum(cap) : '';
+    nsl.max = String(mx); maxn.textContent = '<' + mx + '>'; nsl.disabled = n2.disabled = mx < 1;
+    if (st.n > mx) st.n = mx; if (st.n < 0) st.n = 0;
+    n2.value = String(st.n); nsl.value = String(st.n);
+    const cm = st.n > 0 ? (built === 0 ? dev + (st.n - 1) * pro : st.n * pro) : 0, cmt = st.n * mtl;
+    mon.textContent = money(cm); met.textContent = H().niceNum(cmt);
+    res.querySelectorAll('.m5pile').forEach(x => x.remove());
+    res.append(at(pile(0, Math.max(0, p.savings), cm), 26, 6, 100, 72), at(pile(1, Math.max(0, p.metal), cmt), 137, 6, 100, 72));
+    build.disabled = bcont.disabled = st.n < 1;
+    // the picture and the name
+    shipView.innerHTML = ''; if (a.shipImgEl) { const im = a.shipImgEl(sp, 48); im.classList.add('m5ship'); shipView.append(im); }
+    if (document.activeElement !== name) name.value = d ? d.name : st.name || '';
+    name.disabled = !!d;
+    typeSel.value = sp.type;
+    sliders.forEach(({ k, l, mn, mx: mxl, r }) => {
+      const L = H().designLimits(g, p, sp.type), lo = H().designMin(g, k, sp.type), hi = Math.max(lo, L[k] || lo);
+      const off = k === 'R' && sp.type === 'satellite';
+      r.min = String(lo); r.max = String(hi); r.value = String(sp[k] | 0); r.disabled = off || hi <= lo;
+      l.textContent = String(sp[k] | 0); mn.textContent = String(lo); mxl.textContent = String(hi);
+    });
+    // the list, the chosen design on lavender
+    list.innerHTML = '';
+    live().forEach(dd => {
+      const row = elx('button', 'm5brow' + (d && dd.id === d.id ? ' on' : '')); row.type = 'button';
+      row.append(elx('span', 'nm', `${dd.name} (${dd.W}/${dd.S}) ${TL(H().TYPES[dd.type].name)}`));
+      if (a.shipImgEl) row.append(a.shipImgEl(dd, 24));
+      row.addEventListener('click', () => { pick(dd); st.n = Math.min(Math.max(1, st.n), 999); figures(); });
+      list.append(row);
+    });
+  };
+  sliders.forEach(({ k, r }) => r.addEventListener('input', () => { st.spec = Object.assign({}, st.spec, { [k]: +r.value }); figures(); }));
+  typeSel.addEventListener('change', () => { st.spec = maxSpec(typeSel.value); st.name = ''; figures(); });
+  name.addEventListener('input', () => { st.name = name.value.trim(); });
+  n2.addEventListener('input', () => { st.n = Math.max(0, Math.min(maxNow, parseInt(n2.value, 10) || 0)); figures(); });
+  nsl.addEventListener('input', () => { st.n = +nsl.value; figures(); });
+  debt.addEventListener('change', () => { st.debt = debt.checked; figures(); });
+  maxO.addEventListener('click', () => { st.spec = maxSpec(st.spec.type); figures(); });
+  cancel.addEventListener('click', () => a.closeModal());
+  const buy = (stay) => {
+    const n = st.n; if (n < 1) return;
+    const lim = H().rules(g).maxDesigns, exists = live().find(x => same(x, st.spec));
+    if (lim && !exists && H().liveDesigns(p) >= lim) { a.toast(H().say(g, H().DATA.alerts[15] || 'Your assembly lines are full.')); return; }
+    const go = () => {
+      const spec = Object.assign({}, st.spec); if (!exists) spec.name = st.name || H().designName(g, p, spec.type);
+      const d = exists || H().findOrCreateDesign(g, p, spec);
+      const got = H().buildShips(g, a.ME, sid, d.id, n);
+      if (got) a.Sound.play(7006); else a.toast(TL('Not enough money or metal.'));
+      BUILD.last = d.id; pick(d); a.save(); a.renderPanel(); a.draw();
+      if (stay) { st.n = 1; figures(); } else a.closeModal();
+    };
+    // 10 or more Scouts or Tankers at once: the program asks first (FUN_1005cf40, alerts 36 and 37)
+    const MS = H().rules(g).manyShips, txt = st.spec.type === 'scout' ? H().DATA.alerts[35] : st.spec.type === 'tanker' ? H().DATA.alerts[36] : null;
+    if (MS && txt && n >= MS.at) a.confirmBox(H().say(g, txt), go); else go();
+  };
+  build.addEventListener('click', () => buy(false)); bcont.addEventListener('click', () => buy(true));
+  a.modal(TL('Build Ships'), body, { cls: 'm5dlg m5buildwin' });
+  figures();
+  return true;
+}
+const prevWindow = T.window;
+T.window = (name, ...args) => { if (mapOn() && name === 'build' && buildWindow(args[0])) return true; return prevWindow ? prevWindow(name, ...args) : false; };
 const line = (cls, text) => { const e = document.createElement('div'); e.className = cls; e.textContent = text; return e; };
 const span2 = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
 // the terraform / mine gauge at the box's left (FUN_100933f0, to read): green above for terraforming, blue below for mining, the red
