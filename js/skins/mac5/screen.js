@@ -92,12 +92,12 @@ T.menuLayout = {
     [lab('Give Money/Metal To…'), 'Galaxy/Give money or metal…'], [lab('Send Message To…'), 'Galaxy/Send a message…'], [lab('Surrender To…'), 'Galaxy/#9'], '-',
     [lab('Auto Play…'), 'Game/Auto play…'], [lab('Play One Turn For Me'), 'Game/Auto-play this turn'], '-',
     [lab('Armageddon…'), 'Galaxy/#10']],
-  Window: [[lab('Message History'), () => (A().openReports ? A().openReports() : null), null, null, noGame, '1'], [lab('Graph History'), 'Game/Players and history'], '-',
+  Window: [[lab('Message History'), () => T.m5history(), null, () => !!(document.getElementById('m5hist') && !document.getElementById('m5hist').hidden), noGame, '1'], [lab('Graph History'), 'Game/Players and history'], '-',
     [() => TL(infoOff() ? 'Show Information' : 'Hide Information'), () => setInfo(infoOff()), null, null, noGame],
     [() => TL(boxOff() ? 'Show Planet Info Box' : 'Hide Planet Info Box'), () => setBox(boxOff()), null, null, noGame, 'I'],
     [lab('Zoom In'), 'View/Zoom in'], [lab('Zoom Out'), 'View/Zoom out'], '-',
     [lab('Lobby Window'), () => {}, null, null, dim, 'Y'], [lab('Pre-Start Window'), () => {}, null, null, dim], [lab('Map Window'), () => {}, null, null, dim], '-',
-    [lab('Clean Up Windows'), () => { const a = A(); if (a && a.G) { a.UI.fitted = false; a.resize(); a.draw(); } }, null, null, noGame]],
+    [lab('Clean Up Windows'), () => { const w = document.getElementById('m5hist'); if (w) ['left', 'top', 'right', 'bottom'].forEach(k => { w.style[k] = ''; }); }, null, null, noGame]],
   Help: [[lab('About Balloon Help…'), () => {}, null, null, dim], [lab('Show Balloons'), () => {}, null, null, dim], '-', [lab('Spaceward Ho! Help'), 'Help/How to play']],
 };
 // the keys MENU 129-136 give the items the page already has (the layout's own items carry theirs above)
@@ -436,6 +436,66 @@ function clockTick() {
 }
 const prevAfterDraw2 = T.afterDraw;
 T.afterDraw = () => { if (prevAfterDraw2) prevAfterDraw2(); if (!mapOn()) { const g = document.getElementById('m5clk'); if (g) g.hidden = true; return; } globe(); clockTick(); if (!CLK.timer) CLK.timer = setInterval(clockTick, 1000); };
+// ---------- the reports (unit 5) ----------
+// One report is drawn by FUN_100b9530 wherever it shows: its picture (PICT 9000 + its kind, a player's hat, or a planet) at the left, its
+// words in Geneva 9 in the box from 54 to 200 (46 high), and for the new year (report 0x3f4) the year in the big digits of PICT 10000
+// ((173 + 26 d, 468), 24 x 29, 24 apart) in place of the words; "more..." (STR# 6001.31) under it while more reports follow.
+// The bubble (LHoMessageView, FUN_1009be84; PPob 136 'Hmsg', 221 x 80, 89 right of the globe and 2 below its top): PICT 10000
+// (466, 256)-(687, 336) blended through a round rect (12), the current report drawn 12 in and 7 down, in white; a click shows the next.
+// The Message History window (PPob 143, a floating window 223 x 408 at (4, 42); Window > Message History, ⌘1, ticked while shown): the
+// turn's reports one under another in black (LHoReportView 'rpvw' at (4, 4)), the newest last, with its scroll bar.
+const DIGITS = 'assets/skins/mac5/digits.png';
+const yearOf = (m) => { const t = String(m.text || ''); const y = m.icon === 'm9024' && m.quiet && t.match(/\b(\d{4})\b/); return y ? y[1] : null; };
+function entry(m, more) {
+  const a = A(), e = document.createElement('div'); e.className = 'm5rep';
+  const ic = a.msgIconEl ? a.msgIconEl(m) : null; if (ic) { ic.classList.add('m5ric'); e.append(ic); }
+  const y = yearOf(m);
+  if (y) { const d = document.createElement('div'); d.className = 'm5year'; d.setAttribute('aria-label', y);
+    for (const ch of y) { const i = document.createElement('i'); i.style.backgroundPosition = `calc(${-24 * +ch} * var(--u)) 0`; d.append(i); } e.append(d); }
+  else { const t = document.createElement('div'); t.className = 'm5rtext'; { const w = H().say(a.G, m.text); t.textContent = a.degText ? a.degText(w) : w; } e.append(t); }
+  if (more) { const mo = document.createElement('div'); mo.className = 'm5more'; mo.textContent = TL('more...'); e.append(mo); }
+  return e;
+}
+function history(inbox) {
+  const wrap = document.getElementById('mapwrap'); if (!wrap) return null;
+  let w = document.getElementById('m5hist');
+  if (!w) {
+    w = document.createElement('section'); w.id = 'm5hist'; w.setAttribute('aria-label', TL('Message History'));
+    const bar = document.createElement('div'); bar.className = 'm5wtitle'; bar.innerHTML = '<i class="m5close"></i><span></span><i class="m5wbox"></i>';
+    bar.querySelector('span').textContent = TL('Message History');
+    bar.querySelector('.m5close').addEventListener('click', () => { HIST.shown = false; w.hidden = true; });
+    const list = document.createElement('div'); list.className = 'm5hlist';
+    w.append(bar, list); document.getElementById('main').append(w);
+    dragBy(bar, w);
+  }
+  const list = w.querySelector('.m5hlist'); list.innerHTML = '';
+  inbox.forEach((m) => list.append(entry(m, false)));
+  w.hidden = !(HIST.shown && mapOn());
+  return w;
+}
+const HIST = { shown: true };
+// (a floating window moves by its title bar)
+function dragBy(bar, w) {
+  bar.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.m5close')) return; e.preventDefault();
+    const r = w.getBoundingClientRect(), p = w.offsetParent.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+    const mv = (ev) => { w.style.right = 'auto'; w.style.bottom = 'auto'; w.style.left = (ev.clientX - p.left - dx) + 'px'; w.style.top = (ev.clientY - p.top - dy) + 'px'; };
+    const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+  });
+}
+T.m5history = (on) => { HIST.shown = on == null ? !HIST.shown : !!on; const w = document.getElementById('m5hist'); if (w) w.hidden = !(HIST.shown && mapOn()); };
+const prevAfterMsg = T.afterMsg;
+T.afterMsg = (box, info) => {
+  if (prevAfterMsg) prevAfterMsg(box, info);
+  history(info.inbox || []);
+  if (!mapOn()) return;
+  // the bubble: the current report in 5.0.5's drawing, over the page's card (which keeps its click: the next report)
+  const card = box.querySelector('.card'); if (!card) return;
+  const m = (info.inbox || [])[info.idx]; if (!m) return;
+  const e = entry(m, info.idx + 1 < info.inbox.length); e.classList.add('m5bub');
+  card.classList.add('m5card'); card.append(e);
+};
 const line = (cls, text) => { const e = document.createElement('div'); e.className = cls; e.textContent = text; return e; };
 const span2 = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
 // the terraform / mine gauge at the box's left (FUN_100933f0, to read): green above for terraforming, blue below for mining, the red

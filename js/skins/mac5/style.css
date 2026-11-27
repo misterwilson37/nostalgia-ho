@@ -100,17 +100,7 @@ html.m5win .m5gbtns { position: absolute; left: calc(3 * var(--u)); top: calc(70
 html.m5win .m5bevel { width: calc(18 * var(--u)); height: calc(18 * var(--u)); padding: 0; border: var(--u) solid #666; border-radius: 0; background: linear-gradient(#f4f4f4, #c8c8c8) !important; box-shadow: none !important; }
 html.m5win .m5row .fill { background-image: none !important; }
 html.m5win .m5gbtns .m5bevel { min-width: 0 !important; margin: 0; }
-/* the reports (unit 5 to do: the Message History window, PPob 143, and the bubble LHoMessageView): for now the page's card, in a
-   floating window at the map's right, where shot 008 has Message History (227 x 395 at (770, 348)) */
-html.m5win #msg { position: absolute; left: auto; right: calc(18 * var(--u)); bottom: calc(18 * var(--u)); width: calc(227 * var(--u)); max-width: none;
-  background: #fff; border: var(--u) solid #2c2c33; box-shadow: calc(2 * var(--u)) calc(2 * var(--u)) calc(4 * var(--u)) rgba(0,0,0,.5); padding-top: calc(13 * var(--u)); }
-html.m5win #msg::before { content: 'Message History'; position: absolute; left: 0; right: 0; top: 0; height: calc(12 * var(--u)); border-bottom: var(--u) solid #777;
-  background: repeating-linear-gradient(#f0f0f0 0 var(--u), #a8a8a8 var(--u) calc(2 * var(--u))) center / 100% calc(8 * var(--u)) no-repeat, #d8d8d8;
-  font: bold calc(9 * var(--u)) / calc(12 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; text-align: center; }
-html.m5win #msg:empty { display: none; }
-html.m5win #msg .card { position: static; width: auto; max-width: none; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: #fff; padding: calc(4 * var(--u));
-  font: calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; }
-html.m5win #msg .card .icon { width: calc(40 * var(--u)); height: calc(40 * var(--u)); }
+
 html.m5win .m5row .track .grid { display: none !important; }
 html.m5win #mapwrap { min-width: 0; overflow: hidden; }
 html.m5win .m5gbtns .m5bevel { padding: 0 !important; width: calc(18 * var(--u)) !important; }
@@ -125,11 +115,6 @@ html.m5win .m5budget::-webkit-scrollbar-thumb, html.m5win .m5players::-webkit-sc
 html.m5win .m5pop { appearance: none; -webkit-appearance: none; padding-right: calc(24 * var(--u));
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='23' height='16'><path d='M.5 0v16' stroke='%23777'/><path d='M8 6.5l3.5-4 3.5 4z M8 9.5l3.5 4 3.5-4z' fill='%23000'/></svg>") right center / calc(23 * var(--u)) calc(16 * var(--u)) no-repeat, linear-gradient(#f2f2f2, #d6d6d6); }
 html.m5win #m5cap #title { position: static !important; inset: auto !important; transform: none !important; margin: 0 auto; max-width: 70%; overflow: hidden; text-overflow: ellipsis; }
-html.m5win #msg .card, html.m5win #msg .card:focus { border: 0 !important; outline: none; }
-html.m5win #msg .card p { font: inherit; margin: 0; }
-html.m5win #msg .card { position: relative !important; padding-bottom: calc(22 * var(--u)) !important; }
-html.m5win #msg .card .mbtns { position: absolute; right: calc(4 * var(--u)); bottom: calc(3 * var(--u)); margin: 0; }
-html.m5win #msg .card .count { position: absolute; left: calc(4 * var(--u)); bottom: calc(5 * var(--u)); }
 /* the Planet Info Box (FUN_10092300) */
 #m5info { display: none; }
 html.m5win #m5info:not([hidden]) { display: block; position: absolute; z-index: 3; height: calc(75 * var(--u)); pointer-events: none; border-radius: calc(6 * var(--u)); overflow: hidden;
@@ -154,3 +139,33 @@ html.m5win #m5clk .m5globe::before { content: ''; position: absolute; left: calc
   background: url("../../../assets/skins/mac5/clockwin.png") 0 0 / 100% 100%; image-rendering: pixelated; }
 html.m5win #m5clk .m5time { position: absolute; right: calc((83 - 55) * var(--u)); top: calc((63 - 9) * var(--u)); color: #54c83c; font: calc(9 * var(--u)) / 1 Geneva, "Lucida Grande", Verdana, sans-serif; }
 html.m5win #msg .clock { display: none !important; }
+/* the bubble (LHoMessageView): 221 x 80, 96 from the map's left (the globe's 7 + 89), 5 above its foot */
+html.m5win #msg { position: absolute; left: calc(96 * var(--u)); right: auto; bottom: calc(5 * var(--u)); top: auto; width: calc(221 * var(--u)); max-width: none; height: calc(80 * var(--u));
+  margin: 0; padding: 0; border: 0; box-shadow: none; background: none; transform: none; z-index: 3; }
+html.m5win #msg:empty { display: none; }
+html.m5win #msg .card.m5card { position: absolute !important; inset: 0; width: auto; max-width: none; height: auto; margin: 0; padding: 0 !important; border: 0 !important; border-radius: calc(6 * var(--u)) !important;
+  outline: none; box-shadow: none !important; background: url("../../../assets/skins/mac5/bubble.png") 0 0 / 100% 100% !important; image-rendering: pixelated; overflow: hidden; color: #fff; cursor: pointer; }
+html.m5win #msg .card.m5card > .icon, html.m5win #msg .card.m5card > .bigicon, html.m5win #msg .card.m5card > .jpg, html.m5win #msg .card.m5card > .mtext > p, html.m5win #msg .card.m5card .count { display: none !important; }
+html.m5win #msg .card.m5card > .mtext { position: absolute; right: calc(3 * var(--u)); bottom: calc(2 * var(--u)); width: auto; margin: 0; padding: 0; }
+html.m5win #msg .card.m5card .mbtns button { font-size: calc(9 * var(--u)) !important; padding: 0 calc(4 * var(--u)) !important; min-height: 0 !important; height: calc(14 * var(--u)); }
+/* one report as FUN_100b9530 draws it: the picture at the left, the words from 54 to 200, "more..." at 58 */
+html.m5win .m5rep { position: relative; height: calc(46 * var(--u)); font: calc(9 * var(--u)) / calc(10 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win .m5rep .m5ric { position: absolute; left: 0; top: 0; width: calc(48 * var(--u)) !important; height: calc(48 * var(--u)) !important; max-width: none; object-fit: contain; margin: 0; }
+html.m5win .m5rep .m5rtext { position: absolute; left: calc(54 * var(--u)); top: calc(1 * var(--u)); width: calc(146 * var(--u)); overflow: hidden; max-height: calc(46 * var(--u)); }
+html.m5win .m5rep .m5year { position: absolute; left: calc(54 * var(--u)); top: calc(8 * var(--u)); display: flex; }
+html.m5win .m5rep .m5year i { width: calc(24 * var(--u)); height: calc(29 * var(--u)); background: url("../../../assets/skins/mac5/digits.png") 0 0 / calc(240 * var(--u)) calc(29 * var(--u)); image-rendering: pixelated; }
+html.m5win .m5rep .m5more { position: absolute; left: 0; top: calc(50 * var(--u)); }
+html.m5win .m5bub { position: absolute; left: calc(12 * var(--u)); top: calc(7 * var(--u)); width: calc(200 * var(--u)); color: #fff; }
+html.m5win .m5bub .m5more { left: calc(54 * var(--u)); top: calc(48 * var(--u)); }
+/* Message History (PPob 143, 223 x 408): where Clean Up Windows puts it, the map's bottom right, 2 inside its scroll bars (shots 008-034:
+   right edge 998, foot 742; the program runs Clean Up when the map window is first activated, FUN_10062714's +0x181). Shot 006, a minute
+   earlier, still has it at WIND 143's (4, 42). */
+#m5hist { display: none; }
+html.m5win #m5hist:not([hidden]) { display: flex; flex-direction: column; position: absolute; right: calc(23 * var(--u)); bottom: calc(23 * var(--u)); width: calc(228 * var(--u)); height: calc(395 * var(--u)); max-height: calc(100% - 30 * var(--u)); z-index: 6;
+  background: #fff; border: var(--u) solid #2c2c33; box-shadow: calc(2 * var(--u)) calc(2 * var(--u)) calc(4 * var(--u)) rgba(0,0,0,.45); }
+html.m5win #m5hist .m5wtitle { position: relative; flex: none; height: calc(13 * var(--u)); border-bottom: var(--u) solid #555; cursor: move; text-align: center;
+  background: repeating-linear-gradient(#f0f0f0 0 var(--u), #a8a8a8 var(--u) calc(2 * var(--u))) center / 100% calc(7 * var(--u)) no-repeat, #d8d8d8; }
+html.m5win #m5hist .m5wtitle span { padding: 0 calc(4 * var(--u)); background: #d8d8d8; font: bold calc(10 * var(--u)) / calc(13 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; }
+html.m5win #m5hist .m5close { position: absolute; left: calc(3 * var(--u)); top: calc(2 * var(--u)); width: calc(9 * var(--u)); height: calc(9 * var(--u)); border: var(--u) solid #333; box-sizing: border-box; background: linear-gradient(135deg, #fff, #c4c4c4); cursor: pointer; }
+html.m5win #m5hist .m5wbox { position: absolute; right: calc(3 * var(--u)); top: calc(2 * var(--u)); width: calc(9 * var(--u)); height: calc(9 * var(--u)); border: var(--u) solid #333; box-sizing: border-box; background: linear-gradient(135deg, #fff, #c4c4c4); }
+html.m5win #m5hist .m5hlist { flex: 1; overflow-y: scroll; padding: calc(4 * var(--u)); color: #000; scrollbar-color: #bcbcbc #eeeeee; }
