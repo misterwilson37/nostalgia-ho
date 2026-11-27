@@ -1,8 +1,7 @@
 # 5.0.5 and Android 1.2.8: Jake's play-test issues (catalogue, 20 Nov 2026)
 
 A place to collect what Jake found playing the Mac 5.0.5 original (the full "cracked" copy, SheepShaver, Mac OS
-9.0.4) and the Android 1.2.8 original (a Fire tablet), 19 Nov 2026, with what his captures show. **Nothing here is
-fixed yet and nothing is decided.** Each item says whether it is a bug in the original (so a candidate for the
+9.0.4) and the Android 1.2.8 original (a Fire tablet), 19 Nov 2026, with what his captures show. **M1 settled 27 Nov (below); the rest not yet.** Each item says whether it is a bug in the original (so a candidate for the
 patch, `rs.fixes`) or something for the remake's own screens (modern conveniences), and what is still a guess.
 
 The rulesets: 5.0.5 is `original` (`js/rules-original.js`, skin `classic`); Android is `android`
@@ -59,6 +58,23 @@ recomputes, which fits "move a bar and it catches up".
 - Patch: always recalculate when the window opens and before Build; the remake's own window must never
   show placeholder numbers in either mode (unpatched can keep the "move a slider" quirk only if the code
   shows it is deterministic).
+
+**Read in the code (27 Nov 2026), and what the remake does.** The window's set-up, `FUN_10099420` (LBuildShipsWindow, called when it
+opens), fills the design list (`stcv`) from the player's designs (+0x1174), picks the row to show (the one chosen last time in
+this game, kept in a global that is reset to -1 when another game is open, else the newest design), selects it (`row + 5000`
+to the list) and copies that design's 0x3c-byte record (+0x1180) into the type view (`Hstv`) and redraws it; with no designs it
+sends itself 6005 and 6006 (type, Max Out) instead. The figures (`DevC` `ProC` `MetC` `numB` `numE` `maxn` `mony` `metl` `bcap`)
+are written by `FUN_1009ab50` alone, which the set-up never calls itself: it runs only from the messages the list and the sliders
+broadcast (virtual calls through `FUN_100de420`; which slot is which is not resolved in the decompile). So the figures depend on the
+list broadcasting a new selection when the window opens; PowerPlant's tables broadcast only when the selection changes, which fits
+"it opens on the design already selected, and the numbers stay the layout's until a slider moves". It is not shown to be
+deterministic (Jake: "sometimes it catches up"), so under the rule for the unpatched game (a bug of the original is kept only when
+the code proves it), **the remake does not reproduce it, patched or not**: the remake's Build window computes every figure when it
+opens and whenever anything changes, and lets any earlier design be built again (checked 27 Nov in `mac5` and `classic` with the
+5.0.5 rules: costs, metal, "plus $6,000 to build the prototype", every design's + / -). **For unit 7** (`docs/status-505.md`, PPob 137
+as 5.0.5's own window): fill the figures on opening, from the design the set-up picks (the last one chosen this game, else the
+newest), never the layout's placeholders. M2's "opens on Scout" is the same failure seen from the type view; M4 (the nameless
+0/514 design) stays a separate question for the code: the remake's designs always take their name and figures from the window.
 
 ### M2. Build Ships: always opens on Scout; earlier designs can't be built again (REPORTED; SEEN 015-016)
 

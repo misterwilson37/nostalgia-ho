@@ -49,7 +49,7 @@ So 5.0.5 is where 4.0.5 was on 19 Nov: the screen has to be built from its own l
 | 9 | Start-up: Startup Dialog (130/149), Create Individual Game (233, the OS 9 one) | 001-005 | |
 | 10 | Battles: Review Battle (141), the animation (beam, starburst, flares, "one dead"), face of the loser | 035-139 | |
 | 11 | End of game: You Won / Lost (150/151), Name a Star (156), Armageddon (152), Abandon Hope (158), supernova, conquest | 140-168 | |
-| 12 | Jake's issues: M1-M4 read in the code (bugs of the original: unpatched keeps them only if deterministic; the patch fixes); M5 fuel and colonists in the fleet label under modern conveniences | | |
+| 12 | Jake's issues: M1 settled 27 Nov (`docs/issues-505-android.md`: a fault of the original's window, not shown to be deterministic, so not reproduced; the remake's Build fills its figures on opening; unit 7 must too); M2-M4 read in the code (bugs of the original: unpatched keeps them only if deterministic; the patch fixes); M5 fuel and colonists in the fleet label under modern conveniences | | |
 | 13 | Wrap-up: real-play at four sizes, digests, human-play, ui-lang-audit, notes-check; screens beside captures for Jake | | |
 
 Method (Jake's 20 Nov lesson): put the whole screen, as it first loads, beside the capture before calling anything done; then each
