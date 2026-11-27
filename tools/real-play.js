@@ -275,7 +275,10 @@ async function playRun(browser, job, outDir, idx) {
     // ============ 2. select the colony on the map ============
     const starPoint = async (id) => G(async (id) => { document.getElementById('map').scrollIntoView({ block: 'center', inline: 'nearest' }); const v = HOVIEW(), c = document.getElementById('map').getBoundingClientRect(), s = HOAPI.G.stars[id], kx = c.width / v.mapW, ky = c.height / v.mapH; return { x: c.left + (v.view.ox + s.x * v.view.s) * kx, y: c.top + (v.view.oy + s.y * v.view.s) * ky }; }, id);
     // is a map point reachable: inside the window, and the map canvas is what is there
-    const mapHit = (x, y) => G(([x, y]) => { if (x < 2 || y < 2 || x > innerWidth - 2 || y > innerHeight - 2) return 'off-screen'; const h = document.elementFromPoint(x, y); if (h && h.id === 'map') return ''; return 'covered by ' + window.__rp.desc(h); }, [x, y]);
+    const mapHit = (x, y) => G(([x, y]) => { if (x < 2 || y < 2 || x > innerWidth - 2 || y > innerHeight - 2) return 'off-screen'; let h = document.elementFromPoint(x, y);
+      // (a floating window over the star, as 5.0.5's Message History: a person closes it by its close box, which the window names in data-rp-close)
+      { const fw = h && h.closest && h.closest('[data-rp-close]'); const cb = fw && fw.querySelector(fw.dataset.rpClose); if (cb) { cb.click(); h = document.elementFromPoint(x, y); } }
+      if (h && h.id === 'map') return ''; return 'covered by ' + window.__rp.desc(h); }, [x, y]);
     const clickStar = async (id, what, soft) => {
       const p = await starPoint(id); let m = await mapHit(p.x, p.y);
       if (m === 'off-screen') { await G((id) => { HOAPI.centerOn(id); HOAPI.draw(); }, id); await sleep(150); const q = await starPoint(id); p.x = q.x; p.y = q.y; m = await mapHit(p.x, p.y); } // (a person pans the map)

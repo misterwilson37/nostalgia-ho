@@ -123,7 +123,7 @@ T.leftoversIntoHo = () => true;
 T.menuName = (name) => TL(name);
 // Cancel Fleet Trip (Mcmd 5036): the selected fleet of yours, under way to another star, stays where it is
 function tripOf() { const f = fleetSel(); return f && f.dest != null && f.dest !== f.star ? f : null; }
-function cancelTrip() { const f = tripOf(); if (!f) return; f.dest = null; if (f.route) f.route = null; const a = A(); a.save(); a.renderPanel(); a.draw(); }
+function cancelTrip() { const f = tripOf(); if (!f) return; H().cancelMove(A().G, f); const a = A(); a.save(); a.renderPanel(); a.draw(); }
 
 // ---------- the information column ----------
 // LHoIncomeView (FUN_10098654): Geneva 9; the backdrop copied from PICT 10000 (520, 337)-(717, 377) (assets/skins/mac5/incbg.png);
@@ -501,7 +501,7 @@ function history(inbox) {
   const wrap = document.getElementById('mapwrap'); if (!wrap) return null;
   let w = document.getElementById('m5hist');
   if (!w) {
-    w = document.createElement('section'); w.id = 'm5hist'; w.setAttribute('aria-label', TL('Message History'));
+    w = document.createElement('section'); w.id = 'm5hist'; w.setAttribute('aria-label', TL('Message History')); w.dataset.rpClose = '.m5close'; // (tools/real-play.js closes it, as a person would, when it covers a star it needs)
     const bar = document.createElement('div'); bar.className = 'm5wtitle'; bar.innerHTML = '<i class="m5close"></i><span></span><i class="m5wbox"></i>';
     bar.querySelector('span').textContent = TL('Message History');
     bar.querySelector('.m5close').addEventListener('click', () => { HIST.shown = false; w.hidden = true; });
@@ -722,8 +722,81 @@ function scrapWindow() {
   a.modal(TL('Scrap Ship Types'), body, { cls: 'm5dlg m5scrapwin' });
   return true;
 }
+// ---------- the list windows (PPob 166 List All Fleets, PPob 145 Explored Stars) ----------
+// Both are Mac OS 9 list views (PowerPlant LDataBrowser) in a modal window 640 x 360, PICT 4900 (85 x 214) at the right and OK under it;
+// the sorted column's heading dark and its column shaded (shots 017, 022); a click on a heading sorts by it, again the other way.
+// List All Fleets (LListFleetsDataBrowser): Description, Fuel ("%d/%d"), People ("n/a" or colonists "%d/%d"), Where, Orders ("Stationed at
+// %s", "Departing %s for %s", "On the way to %s", each also "... via %s"); "Double-click a fleet to select it in the map view." under it.
+// Explored Stars (LExplStarsDataBrowser): Star (its picture), Name, Quality ("%2.1f", sorted first), Temp, Gravity, Metal, Info Date
+// ("Current" while it is this turn's, else the year it was seen). The words are the program's own strings.
+function listWindow(title, cols, rows, opt) {
+  const a = A(), W = opt.W || 640, H0 = 360;
+  const body = elx('div', 'm5build m5list'); body.style.width = U(W); body.style.height = U(H0);
+  const box = at(elx('div', 'm5lv'), opt.x || 8, opt.y || 8, opt.w || 540, opt.h || 320);
+  let sortBy = opt.sort || 0, desc = !!opt.desc;
+  const head = elx('div', 'm5lvh'), list = elx('div', 'm5lvb');
+  const draw = () => {
+    head.innerHTML = ''; list.innerHTML = '';
+    cols.forEach((c, i) => { const h = elx('button', 'm5lvc' + (i === sortBy ? ' on' : ''), TL(c.t)); h.type = 'button'; h.style.width = U(c.w); h.addEventListener('click', () => { if (sortBy === i) desc = !desc; else { sortBy = i; desc = !!cols[i].desc; } draw(); }); head.append(h); });
+    const key = cols[sortBy].key || ((r) => r.cells[sortBy]);
+    const rs = rows.slice().sort((x, y) => { const p = key(x), q = key(y); const v = typeof p === 'number' && typeof q === 'number' ? p - q : String(p).localeCompare(String(q)); return desc ? -v : v; });
+    rs.forEach(r => {
+      const row = elx('div', 'm5lvr'); if (r.tall) row.classList.add('tall');
+      r.cells.forEach((c, i) => { const td = elx('div', 'm5lvd' + (i === sortBy ? ' on' : '') + (cols[i].left ? ' l' : '')); td.style.width = U(cols[i].w); if (c instanceof Element) td.append(c); else td.textContent = c; row.append(td); });
+      if (r.go) { row.addEventListener('dblclick', () => { a.closeModal(); r.go(); }); row.addEventListener('click', () => { list.querySelectorAll('.m5lvr.sel').forEach(x => x.classList.remove('sel')); row.classList.add('sel'); }); }
+      list.append(row);
+    });
+  };
+  box.append(head, list); draw();
+  const pic = at(elx('div', 'm5pic4900'), opt.px || 551, opt.py || 8, 85, 214);
+  const ok = at(elx('button', 'm5btn def', TL('OK')), opt.okx || 562, 307, 69, 20); ok.type = 'button'; ok.addEventListener('click', () => a.closeModal());
+  body.append(box, pic, ok);
+  if (opt.note) body.append(at(elx('p', 'm5big', TL(opt.note)), 13, 333, 484, 22));
+  a.modal(TL(title), body, { cls: 'm5dlg m5listwin' });
+  return true;
+}
+// a fleet as 5.0.5 describes it (shots 017, 020: "one Sparrow (1/1) Scout"; with several designs STR# 6001.35 "Mixed Fleet")
+function desc505(g, f) {
+  const ids = Object.keys(f.ships || {}).filter(k => f.ships[k] > 0);
+  if (ids.length !== 1) return ids.length ? TL('Mixed Fleet') : TL('Empty Fleet');
+  const d = H().getDesign(g, f.owner, +ids[0]), n = f.ships[ids[0]], T0 = d && H().TYPES[d.type]; if (!d || !T0) return H().fleetText(g, f);
+  return `${n === 1 ? TL('one') : n} ${d.name} (${d.W}/${d.S}) ${TL(n === 1 ? T0.name : T0.plural)}`;
+}
+function fleetsWindow() {
+  const a = A(), g = a.G, me = a.ME; if (!g) return false;
+  const nm = (sid) => (sid != null && g.stars[sid] ? g.stars[sid].name : '');
+  const rows = g.fleets.filter(f => f.owner === me).map(f => {
+    const fuel = f.sat ? TL('n/a') : `${Math.floor(f.fuel)}/${H().fleetMaxRange(g, f)}`;
+    const cap = Object.keys(f.ships || {}).reduce((n, k) => { const d = H().getDesign(g, me, +k); return n + (d && d.type === 'colony' ? 10 * f.ships[k] : 0); }, 0);
+    const people = cap ? `${f.colonists || 0}/${cap}` : TL('n/a');
+    const via = f.path && f.path.length ? nm(f.path[f.path.length - 1]) : null;
+    // (the program's own templates, filled in the game's language: a.tl(template, ...))
+    const T5 = (t, ...v) => (a.tl ? a.tl(t, ...v) : v.reduce((x, y) => x.replace('%s', y), t));
+    let where = nm(f.star), orders;
+    if (f.to != null) { where = ''; orders = via ? T5('On the way to %s via %s', nm(f.to), via) : T5('On the way to %s', nm(f.to)); }
+    else if (f.dest != null) orders = via ? T5('Departing %s for %s via %s', nm(f.star), nm(f.dest), via) : T5('Departing %s for %s', nm(f.star), nm(f.dest));
+    else orders = T5('Stationed at %s', nm(f.star));
+    return { cells: [desc505(g, f), fuel, people, where, orders], go: () => { a.UI.selFleet = f.id; a.UI.sel = f.star != null ? f.star : f.to; a.renderPanel(); a.draw(); } };
+  });
+  return listWindow('List All Fleets', [{ t: 'Description', w: 175 }, { t: 'Fuel', w: 60 }, { t: 'People', w: 60 }, { t: 'Where', w: 85 }, { t: 'Orders', w: 145, left: true }], rows,
+    { note: 'Double-click a fleet to select it in the map view.' });
+}
+function starsWindow() {
+  const a = A(), g = a.G; if (!g || !a.exploredData) return false;
+  const X = a.exploredData(), yrs = (g.opts && +g.opts.yearsPerTurn) || 10;
+  const rows = X.seen.map(s => {
+    const k = X.rec(s), c = X.climate(s), q = X.q(s);
+    const lk = a.starLook ? a.starLook(s.id) : null, im = elx('img', 'm5lvpic'); im.alt = ''; const src = lk && (lk.pic || (a.IMG[lk.base])); if (src && src.src) im.src = src.src; else if (src && src.toDataURL) im.src = src.toDataURL();
+    const date = k.seen === g.turn || s.owner === a.ME ? TL('Current') : String(g.year - (g.turn - k.seen) * yrs);
+    // (Quality: the star's rating (FUN_100720d0) times a constant from the program's data, "%2.1f": shot 022's 10.0 for a home (rating 20)
+    // and 9.0 for Kamino (18) make it a half)
+    return { tall: true, cells: [im, s.name, (q * 0.5).toFixed(1), c ? c.t : '', c ? c.g : '', c ? c.m : '', date], q, go: () => { a.UI.sel = s.id; a.renderPanel(); a.draw(); } };
+  });
+  const cols = [{ t: 'Star', w: 62 }, { t: 'Name', w: 100 }, { t: 'Quality', w: 60, key: (r) => r.q, desc: true }, { t: 'Temp', w: 80 }, { t: 'Gravity', w: 65 }, { t: 'Metal', w: 65 }, { t: 'Info Date', w: 75 }];
+  return listWindow('Explored Stars', cols, rows, { x: 13, y: 12, w: 524, h: 334, px: 548, py: 13, okx: 557, sort: 2, desc: true });
+}
 const prevWindow = T.window;
-T.window = (name, ...args) => { if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
+T.window = (name, ...args) => { if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; if (mapOn() && name === 'fleets' && fleetsWindow()) return true; if (mapOn() && name === 'stars' && starsWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
 const line = (cls, text) => { const e = document.createElement('div'); e.className = cls; e.textContent = text; return e; };
 const span2 = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
 // the terraform / mine gauge at the box's left (FUN_100933f0, to read): green above for terraforming, blue below for mining, the red
