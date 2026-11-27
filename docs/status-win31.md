@@ -55,7 +55,7 @@ Sources (private repo `nostalgia-ho-sources`):
 | Print Map's alert | shot 67 | to compare | |
 | Status (Pass n for Player m) | image0069, 0073 | to compare | |
 | Event alert without a picture (5 ALERT_NOPIC) | none | open | |
-| Centred dialogs' byte alignment | | open | |
+| Dialogs' places and byte alignment | every dialog capture | done 27 Nov | Measured every captured dialog opened from a menu: the template's x, y put the client that many units (2 pixels each) from the owner's client corner (the main window's 4, 42; Rename's: List Ship Types'; Show Skills': Compare Players'), the frame 5 outside (24 above with a caption), and the left edge byte-aligned by (x + 4) & ~7. It gives About 120, 56; Battle Speed 152, 141; Auto Play 112, 97; Polling Time 120, 127; Build Ships 48, 63; Create New Ship Type 24, 73; List Ship Types 32, 57; Rename 72, 93; Organize 32, 73; Compare Players 32, 73; Send Message 32, 69; both lists 24, 40; File Open 8, 65; the won box 168, 93: every capture. dialog.js W.place, used by W.open unless o.at or o.centre (the licence window, centred by LICENSEEDLGPROC); they had all been centred. Not by the rule, as captured: the battle window (32, 19: from the screen's corner), Startup, Player Entry, New Player Registration and Create New Galaxy (centred and not byte-aligned: 163, 172, 91, 9), the alerts (centred by ALERTPICDLGPROC). The main caption now goes white while a dialog is up, as in every such capture. |
 
 ## Needs a shared file
 
