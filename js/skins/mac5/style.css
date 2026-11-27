@@ -274,3 +274,8 @@ html.m5win .m5gp .shippic { height: calc(30 * var(--u)) !important; pointer-even
 html.m5win .m5gn { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); min-width: calc(14 * var(--u)); padding: 0 calc(2 * var(--u)); background: #fff; border-radius: calc(3 * var(--u)); text-align: center; font-size: calc(9 * var(--u)); pointer-events: none; }
 html.m5win .m5grp.dim, html.m5win .m5grp.dim .m5t, html.m5win .m5grp.dim legend { color: #999; }
 html.m5win .m5sub legend { font-weight: normal; }
+/* a finished colony: its income in place of the bar (shot 090) */
+html.m5win .m5budget .m5row.txt .fill { display: none; }
+html.m5win .m5budget .m5row.txt .track::after { content: attr(data-evac); position: absolute; left: calc(3 * var(--u)); top: calc(-2 * var(--u)); color: #0000d4;
+  font: calc(9 * var(--u)) / calc(11 * var(--u)) Geneva, "Lucida Grande", Verdana, sans-serif; white-space: nowrap; }
+html.m5win .m5budget .m5row.txt.losing .track::after { color: #dd0806; }

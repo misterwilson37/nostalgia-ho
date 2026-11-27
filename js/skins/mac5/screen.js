@@ -208,6 +208,9 @@ function budgetBars(B) {
     r.style.setProperty('--bl', css(mix([179, 239, 212], [131, 131, 215])));
     r.style.setProperty('--bd', css(mix([70, 130, 55], [30, 30, 140])));
     if (st.abandon301 || st.abandon) { r.classList.add('evac'); const tr = r.querySelector('.track'); if (tr) tr.dataset.evac = TL('Evacuating'); }
+    // a colony with nothing left to terraform or mine: its income in place of the bar, at left + 3, blue, or red while it loses money
+    // (FUN_1008aff4's second pass: the row's text in the row's colour; shot 090: "Kamino $27,414", "Alhafera ($5,697)")
+    else if (tf && mf) { r.classList.add('txt'); const tr = r.querySelector('.track'); if (tr) tr.dataset.evac = A().money(inc); }
     cols.push(r);
   });
   const inner = document.createElement('div'); inner.className = 'm5binner';
