@@ -265,7 +265,10 @@ window.HOTHEME = {
   menuLayoutNow() { return menuLayoutDos(); },
   gameInfo(win) { return gameInfo(win); },
   licensee() { return licensee(); },
-  turnProgress(g, go) { if (winOn() && window.HOWIN31 && window.HOWIN31.status) window.HOWIN31.status(g, go); else go(); }, // (the Windows program's Status window while the turn is worked out: template 33) // (the licence lines' name and organisation: licensee below)
+  turnProgress(g, go) {
+    if (winOn() && playAloneWin(g, () => this.turnProgress(g, go))) return;
+    if (winOn() && window.HOWIN31 && window.HOWIN31.status) window.HOWIN31.status(g, go); else go();
+  }, // (the Windows program's Status window while the turn is worked out: template 33) // (the licence lines' name and organisation: licensee below)
   fleetList() { return fleetList(); },
   // the words of a ship type and of a number of ships, as the panes and the DOS look's windows write them (for the Windows look's dialogs, js/skins/dos/win31/dialogs.js):
   // caption "Patton (2/2) Fighter"; ships "one Patton (2/2) Fighter", "2 Patton (2/2) Fighters" (the program's fleet rows and its queue cells, captured)
@@ -438,6 +441,18 @@ const MENU_HOT = { 'About Ho!…': 0, 'New Game…': 0, 'Open Game…': 0, 'Clos
 // win20-orig-vga16-shipsmenu.png: it sets them from its strings, 354-361, which have no "&"; menus.txt's "&L", "&O", "&B", "&S", "He&re" never show)
 const WIN_HOT = Object.assign({}, MENU_HOT, { 'Give Overspending Warnings': 5, 'End Turn & Switch Players': 'End Turn & Switch Players'.indexOf('Switch') + 2, 'List Ship Types…': -1, 'Organize Ships…': -1, 'Scrap Current Fleet': -1, 'No Battles Here…': -1, 'Review Battle at': -1, 'Save Game': 0, 'Revert To Saved': 0,
   'New…': 0, 'Open…': 0, 'Save…': 0, 'Revert to Saved…': 0, 'Close…': 0, 'Page Setup…': 7, 'Print Map…': 0, 'Tech Spending Window': 0, 'Report Window': 0, 'Clean Up Windows': 0, 'Help on Ho!': 0 });
+// The Windows program's End Turn in 2000 (WINHO.EXE 1050:0fcd-10b2, read in the disassembly: Ghidra's C of FUN_1050_0d02 lost it): when the year-2000 turn is
+// done and the header's +0xc is still -1, unless the galaxy has 20 players, one human is asked ALERT 3230 (kind 1, "&Wait", "&Continue": "%s, do you want to play
+// alone, or wait for more humans to join?\n\n(Computer Opponents: %s)", Jake's win20-jake-vga16-shot0005.png); Continue (201) sets +0xc to 0 and the turn is
+// worked out, Wait leaves the turn undone, so End Turn asks again. (Two humans or more are asked ALERT 3070 instead: the remake's hot seat has its own hand-over.)
+// The same as Mac 3.0.1's ALRT 3230 (js/skins/mac12/ui.js playAlone301). Asked in the DOS ruleset only (the question is 2.0's); the answer is kept with the game.
+function playAloneWin(g, go) {
+  const a = window.HOAPI; if (!g || g.year !== 2000 || g.alone20 || g.players.length >= 20 || window.HO.rules(g).id !== 'dos') return false;
+  if (g.players.filter(p => p.human).length >= 2 || (a.me && !a.me())) return false;
+  const me = a.me(), comps = g.players.filter(p => !p.human).length;
+  return !!alertDos([`${me.name}, do you want to play alone, or wait for more humans to join?`, `(Computer Opponents: ${comps})`],
+    [{ label: 'Wait' }, { label: 'Continue', def: true, fn: () => { g.alone20 = true; go(); } }]);
+}
 // Print Map without a printer: the program's alert (captured, win20-jake-vga16-shot0067.png), the remake prints nothing
 function printMapAlert() { if (!(window.HOWIN31 && window.HOWIN31.printAlert && window.HOWIN31.printAlert())) window.HOAPI.toast('Unable to create printer device context'); }
 function hotMenus() {

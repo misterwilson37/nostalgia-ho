@@ -178,7 +178,9 @@ W.newGame = function (f) {
         const sel = field(G.sel), on = !!sel && sel.value === [...sel.options].map(o => o.value)[i], im = a.IMG['dos:i' + G.icons[i]];
         x.fillStyle = on ? green() : '#fff'; x.fillRect(0, 0, w, h);
         if (im && im.width) x.drawImage(im, Math.floor((w - 32) / 2), 3);
-        x.fillStyle = '#000'; x.font = "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif"; x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillText(tl(G.names[i]), w / 2, 47);
+        x.fillStyle = '#000'; x.font = "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif"; x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+        // (centred on a whole pixel: at a half pixel the bitmap font's strokes came out grey, captured all black: win20-jake-vga16-shot0002.png)
+        const t = tl(G.names[i]); x.fillText(t, Math.floor((w - x.measureText(t).width) / 2), 47);
       };
       pics[id] = painters[id];
     }));
@@ -850,8 +852,8 @@ D.sendMsg = function () {
   const paint = (c) => (x, w, h) => {
     x.clearRect(0, 0, w, h); if (!c) return;
     const im = c.icon && a.IMG[c.icon]; if (im && im.width) x.drawImage(im, Math.floor((w - 32) / 2), 2, 32, 32);
-    x.font = '11px ' + SANS; x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillStyle = c.off ? '#808080' : '#000';
-    x.fillText(c.name || '', Math.floor(w / 2), c.icon ? 43 : 28);
+    x.font = '11px ' + SANS; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillStyle = c.off ? '#808080' : '#000';
+    x.fillText(c.name || '', Math.floor((w - x.measureText(c.name || '').width) / 2), c.icon ? 43 : 28); // (on a whole pixel: a half one greys the bitmap font)
   };
   for (let k = 0; k < 4; k++) { rects[200 + k] = [104, 49 + 48 * k, 78, 48]; pics[200 + k] = (x, w, h) => paint(ch[k])(x, w, h); on[200 + k] = () => { if (ch[k]) { for (let j = k; j < 4; j++) ch[j] = null; step = k; refresh(); } }; }
   for (let i = 0; i < 20; i++) { rects[300 + i] = [209 + 57 * (i % 5), 49 + 48 * Math.floor(i / 5), 56, 47]; pics[300 + i] = (x, w, h) => paint(right[i])(x, w, h); on[300 + i] = () => { const c = right[i]; if (c && !c.off) { ch[step] = { id: c.id, i: c.i, name: c.name, icon: c.icon, kind: c.kind }; step = ch[1] && ch[1].i === 2 && step === 1 ? 2 : step + 1; refresh(); } }; }
