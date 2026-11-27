@@ -233,3 +233,17 @@ html.m5win .win.m5dlg { width: auto !important; min-width: 0; overflow: visible;
 html.m5win .win.m5buildwin { width: calc(622 * var(--u) + 2 * var(--u)) !important; }
 html.m5win .win.m5dlg > .wtitle::after, html.m5win .win.m5dlg > .wtitle::before { display: none !important; }
 html.m5win .scrim { z-index: 60; }
+/* Scrap Ship Types (PPob 165) */
+html.m5win .m5scrap { width: calc(359 * var(--u)); height: calc(354 * var(--u)); }
+html.m5win .m5slist { background: #fff; }
+html.m5win .m5big { margin: 0; font: calc(13 * var(--u)) / calc(16 * var(--u)) Charcoal, Chicago, "Lucida Grande", Geneva, sans-serif; font-weight: normal; }
+/* the map window inactive under a modal window (shots 015, 019) */
+html.m5win.m5modal #m5cap { background: #d8d8d8; }
+html.m5win.m5modal #m5cap .m5close, html.m5win.m5modal #m5cap .m5boxes { visibility: hidden; }
+html.m5win.m5modal #m5cap #title { color: #777; }
+html.m5win.m5modal #menubar .menu .mbtn:not(.logo) { color: #8c8c8c; }
+html.m5win.m5modal #menubar .menu:nth-child(3) .mbtn, html.m5win.m5modal #menubar .menu:last-of-type .mbtn { color: #000; }
+html.m5win.m5modal .m5pop { color: #8c8c8c; }
+html.m5win.m5modal #m5hist .m5wtitle { background: #d8d8d8; color: #777; }
+html.m5win.m5modal #m5hist .m5close, html.m5win.m5modal #m5hist .m5wbox { visibility: hidden; }
+html.m5win .scrim { background: none; }

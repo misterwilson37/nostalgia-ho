@@ -1592,6 +1592,9 @@ root.HOUI.add([
 ['Weapons vs. Other Players', 'Armes face aux autres joueurs', 'Waffen gegenüber anderen Spielern', 'Diğer Oyunculara Göre Silahlar', 'Armas frente a otros jugadores'],
 ['Shields vs. Other Players', 'Boucliers face aux autres joueurs', 'Schilde gegenüber anderen Spielern', 'Diğer Oyunculara Göre Kalkanlar', 'Escudos frente a otros jugadores'],
 ['Mini vs. Other Players', 'Mini face aux autres joueurs', 'Mini gegenüber anderen Spielern', 'Diğer Oyunculara Göre Mini', 'Mini frente a otros jugadores'],
+['Number In Existence:', 'Nombre existant :', 'Anzahl vorhanden:', 'Mevcut Sayı:', 'Número existente:'],
+['Select the ship types you would like to scrap.', 'Choisissez les types de vaisseaux à recycler.', 'Wählen Sie die Schiffstypen, die verschrottet werden sollen.', 'Hurdaya çıkarmak istediğiniz gemi tiplerini seçin.', 'Elija los tipos de nave que desea desguazar.'],
+['If any ships of that type exist, they will be scrapped at their current location during the next turn update.', 'S’il existe des vaisseaux de ce type, ils seront recyclés là où ils se trouvent lors de la prochaine mise à jour du tour.', 'Gibt es Schiffe dieses Typs, werden sie bei der nächsten Zugauswertung dort verschrottet, wo sie sich befinden.', 'Bu tipte gemi varsa, bir sonraki tur güncellemesinde bulundukları yerde hurdaya çıkarılırlar.', 'Si existen naves de ese tipo, se desguazarán donde estén en la próxima actualización del turno.'],
 // ---------- the Mac 1.0 reconstruction (js/rules-10.js): its New Game box and its edition's name ----------
 ['Number of stars', 'Nombre d’étoiles', 'Anzahl der Sterne', 'Yıldız sayısı', 'Número de estrellas'],
 ['Game speed', 'Vitesse du jeu', 'Spieltempo', 'Oyun hızı', 'Velocidad de juego'],

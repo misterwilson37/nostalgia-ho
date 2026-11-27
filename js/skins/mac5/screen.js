@@ -36,6 +36,9 @@ function setM5Scale() {
   if (s0 !== M5.s && a && a.G) { a.UI.fitted = false; a.resize(); a.renderPanel(); }
 }
 setM5Scale(); window.addEventListener('resize', setM5Scale);
+// Under a modal window the map window is inactive, as Mac OS 9 draws it (shots 015, 019): its title bar plain, the menus the window
+// doesn't take greyed (Edit and Help stay), the players' pop-ups and Message History's title greyed.
+new MutationObserver(() => de.classList.toggle('m5modal', !!document.querySelector('.scrim'))).observe(document.body, { childList: true });
 T.m5 = M5;
 const M5ON = () => de.classList.contains('m5win') && !!(A() && A().G);
 
@@ -690,8 +693,37 @@ function buildWindow(sid) {
   figures();
   return true;
 }
+// ---------- Scrap Ship Types (PPob 165, FUN_100601e0) ----------
+// A modal window, 359 x 354: at the left the design list (150 x 334), each "Name (W/S) Type", "Number In Existence: n" and its picture;
+// the chosen ones on lavender (a click chooses or unchooses: the list takes several); at the right its two lines (Txtr 200, the
+// application font at 13) and Cancel / OK. OK marks the chosen types and unmarks the rest (FUN_100601e0: design +0xc), so a marked type
+// and its ships go at the next update (FUN_10074580; js/rules-original.js flagScrapDesign). The window opens with the marked ones chosen.
+function scrapWindow() {
+  const a = A(), g = a.G, p = a.me(); if (!g || g.over) return false;
+  const live = p.designs.filter(d => !d.scrapped);
+  const chosen = new Set(live.filter(d => d.scrap301).map(d => d.id));
+  const body = elx('div', 'm5build m5scrap');
+  const list = at(elx('div', 'm5blist m5slist'), 6, 6, 150, 334);
+  live.forEach(d => {
+    const row = elx('button', 'm5brow'); row.type = 'button'; row.setAttribute('aria-pressed', String(chosen.has(d.id)));
+    row.append(elx('span', 'nm', `${d.name} (${d.W}/${d.S}) ${TL(H().TYPES[d.type].name)}`), elx('span', 'nm', TL('Number In Existence:') + ' ' + inService(g, a.ME, d.id)));
+    if (a.shipImgEl) row.append(a.shipImgEl(d, 24));
+    const paint = () => { row.classList.toggle('on', chosen.has(d.id)); row.setAttribute('aria-pressed', String(chosen.has(d.id))); };
+    row.addEventListener('click', () => { if (chosen.has(d.id)) chosen.delete(d.id); else chosen.add(d.id); paint(); });
+    paint(); list.append(row);
+  });
+  const t1 = at(elx('p', 'm5big', TL('Select the ship types you would like to scrap.')), 167, 12, 179, 39);
+  const t2 = at(elx('p', 'm5big', TL('If any ships of that type exist, they will be scrapped at their current location during the next turn update.')), 167, 61, 178, 91);
+  const cancel = at(elx('button', 'm5btn', TL('Cancel')), 181, 314, 69, 20), ok = at(elx('button', 'm5btn def', TL('OK')), 266, 314, 69, 20);
+  cancel.type = ok.type = 'button';
+  cancel.addEventListener('click', () => a.closeModal());
+  ok.addEventListener('click', () => { const rs = H().rules(g); live.forEach(d => rs.flagScrapDesign(g, p, d, chosen.has(d.id))); a.save(); a.closeModal(); a.renderPanel(); a.draw(); });
+  body.append(list, t1, t2, cancel, ok);
+  a.modal(TL('Scrap Ship Types'), body, { cls: 'm5dlg m5scrapwin' });
+  return true;
+}
 const prevWindow = T.window;
-T.window = (name, ...args) => { if (mapOn() && name === 'build' && buildWindow(args[0])) return true; return prevWindow ? prevWindow(name, ...args) : false; };
+T.window = (name, ...args) => { if (mapOn() && name === 'build' && buildWindow(args[0])) return true; if (mapOn() && name === 'types' && H().rules(A().G).flagScrapDesign && scrapWindow()) return true; return prevWindow ? prevWindow(name, ...args) : false; };
 const line = (cls, text) => { const e = document.createElement('div'); e.className = cls; e.textContent = text; return e; };
 const span2 = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
 // the terraform / mine gauge at the box's left (FUN_100933f0, to read): green above for terraforming, blue below for mining, the red
