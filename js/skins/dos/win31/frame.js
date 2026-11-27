@@ -70,7 +70,7 @@ html .w31sysm button[disabled], html .w31sysm button[disabled]:hover { backgroun
 .w31sysm hr { grid-column: 1 / -1; width: 100%; border: 0; border-top: ${u(1)} solid #000; margin: ${u(3)} 0; }
 .w31sysm .k { white-space: nowrap; }
 .w31sysm u { text-decoration: underline; text-underline-offset: ${u(1)}; }
-#w31sysbox { position: absolute; left: ${u(4)}; top: ${u(4)}; z-index: 5; width: ${u(18)}; height: ${u(18)}; padding: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: none; min-width: 0; min-height: 0; cursor: default; display: none; }
+#w31sysbox { position: absolute; left: ${u(4)}; top: ${u(4)}; z-index: 21; width: ${u(18)}; height: ${u(18)}; padding: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: none; min-width: 0; min-height: 0; cursor: default; display: none; }
 ${S} #w31sysbox { display: block; }
 #w31sysbox.on, .w31d .w31sys.on { background: ${svg(18, 18, [[0, 0, 18, 18, SHADE], [2, 7, 13, 3, WH], [3, 8, 11, 1, K], [3, 10, 13, 1, FACE], [15, 8, 1, 2, FACE]])} 0 0 / 100% 100% no-repeat; }
 .w31d .w31sys.on::before { display: none; }
