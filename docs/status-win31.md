@@ -75,8 +75,8 @@ Sources (private repo `nostalgia-ho-sources`):
 - **The program's small faces**, settled 28 Nov. Handle 0x5b39 (CreateFont "ROMAN", 8 pixels, 10c8:02ab) maps to the raster **Small Fonts 6 point**, because
   Windows' mapper prefers a raster font over the Roman stroke font: the battle groups' words now use it (js/skins/dos/win31/smallfont.js, from SMALLE.FON by
   tools/extract/win31-smallfont.py), 171 of shot 13's 173 pixels and none extra. The End Turn button's words are the **Roman stroke font** (a stroke renderer
-  covers 73-79 of shot 6's 81 pixels; GDI's exact rounding not reproduced), so English keeps the capture's pixels and other languages plain text. Not done:
-  the close-zoom star names in Small Fonts (the map code takes a CSS font: it needs Small Fonts as a web font, which needs fontTools, not installed here).
+  covers 73-79 of shot 6's 81 pixels; GDI's exact rounding not reproduced), so English keeps the capture's pixels and other languages plain text. The star names are white and, at the 9-pixel zoom, in Small Fonts
+  too (28 Nov, through the map's T.mapName hook; tools/extract/ttf_pixels.py can also make it a web font, not needed).
 - **The New Game dialogs** (Startup, Create New Galaxy, Player Entry, New Player Registration) live in the remake's title page and New Game window,
   with the remake's own choices beside or under them, so they are not where the program centres them.
 
@@ -94,7 +94,6 @@ Sources (private repo `nostalgia-ho-sources`):
    pixels, the hidden side's two lines at the program's 155, 95, New Game's "Writing New Game File..." Status window; and the battle window's place, which the
    placement rule had moved twice (now its own 32, 19). The audit's 4 gaps left: Close's empty main window (skipped, Jake 28 Nov), a letter flashing an ALERTBOX
    button (optional), star names in the small face at the 9-pixel zoom (waits on the font), one bevel helper with no caller found.
-4. Done 28 Nov: the battle groups' words in Small Fonts 6 point (see Kept differences). Left: the close-zoom star names (needs a Small Fonts web font: run a
-   fontTools tool where fontTools is installed).
+4. Done 28 Nov: the battle groups' words in Small Fonts 6 point; the star names white, and in Small Fonts at the 9-pixel zoom.
 5. Done 28 Nov: pictures in 16 colours (see Kept differences).
 6. Not captured, so not checked: Organize Ships with more than four piles, Page Setup, the Printing box (docs/missing-screenshots.md).
