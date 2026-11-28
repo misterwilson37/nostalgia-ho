@@ -289,6 +289,13 @@ window.HOTHEME = {
   mapBg: /\bos-(dos|win31)\b/.test(document.documentElement.className) ? '#000' : undefined, // (the program's map is plain black, in DOS and in Windows)
   bgStars: /\bos-(dos|win31)\b/.test(document.documentElement.className) ? false : undefined,
   mapFont(n) { return winOn() ? '11px ' + WSANS : frameOn() ? "12px 'DOS Geneva 9'" : null; },
+  // The Windows program's star names (FUN_1088_0fb5): white, centred under the star by DrawText; at the 9-pixel cell in its small font (handle 0x5b39: Small Fonts
+  // 6 point, js/skins/dos/win31/smallfont.js, drawn on whole pixels), at 12 and 17 in MS Sans Serif (mapFont above)
+  mapNameStyle(cx) { if (winOn()) cx.fillStyle = '#fff'; },
+  mapName(cx, o) {
+    if (!winOn() || !window.HOWIN31 || !window.HOWIN31.smallText || !atZoomD(1)) return false;
+    window.HOWIN31.smallText(cx, o.s.name, o.x, o.y + o.ps / 2 + 11, '#fff', 'center'); return true;
+  },
   alertBox(paras) { return frameOn() ? alertDos(paras, [{ label: 'OK', def: true }]) : null; },
   youWonLayout(kind, Y, done) { return frameOn() ? youWonDos(kind, Y, done) : false; },
   nameStarLayout(f, o) { return winOn() && window.HOWIN31 && window.HOWIN31.nameStar ? window.HOWIN31.nameStar(f, o) : frameOn() ? nameStarDos(f, o) : false; },

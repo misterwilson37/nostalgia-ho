@@ -4,7 +4,7 @@
 Scout", 171 of its 173 pixels and none more (docs/status-win31.md). Read straight from the .FON's FNT resource (no font tools needed); the six
 Turkish letters from the Turkish Windows 3.11's SMALLE.FON at their Windows-1254 places, as tools/extract/winfon.py does for the other fonts.
 
-    python3 -I tools/extract/win31-smallfont.py <folder with win31-fon and win31-turkish-fon>     (the private repo's originals/fonts/windows)
+    python3 -I tools/extract/win31-smallfont.py <folder with win31-fon and win31-turkish-fon> [--ttf]     (the private repo's originals/fonts/windows)
 """
 import json
 import os
@@ -85,7 +85,7 @@ def main(src):
         o.write('// Made by tools/extract/win31-smallfont.py from Windows 3.1\'s setup disks (the Turkish letters from the Turkish Windows 3.11\'s); do not edit.\n')
         o.write('// g[character] = [advance, row 0 bits, row 1 bits, ...]: bit x is the pixel x from the left; h rows, the baseline under row asc - 1.\n')
         o.write('(function (root) {\n\'use strict\';\nconst W = root.HOWIN31 = root.HOWIN31 || {};\n')
-        o.write('W.smallFont = { h: %d, asc: %d, g: %s };\n' % (f['h'], f['asc'], json.dumps(table, ensure_ascii=False, separators=(',', ':'))))
+        o.write('W.smallFont = { h: %d, asc: %d, g: %s };\n' % (f['h'], f['asc'], json.dumps(table, ensure_ascii=True, separators=(',', ':'))))
         o.write('''// W.smallText(ctx, text, x, y, colour, align): the words with their baseline at y, left of x (or centred on it, or ending at it), whole pixels in the
 // context's own units; a character the font lacks is drawn as the font's own default (its "?"). Returns the width.
 W.smallText = function (x, text, h, v, colour, align) {
@@ -104,7 +104,16 @@ W.smallText = function (x, text, h, v, colour, align) {
 })(typeof window !== 'undefined' ? window : globalThis);
 ''')
     print(OUT, len(table), 'characters')
+    # --ttf: the same glyphs as a web font too (tools/extract/ttf_pixels.py; font-size 10px = 1:1), for text the page draws with a CSS font. Checked in Chromium:
+    # 218 of its 219 characters pixel for pixel as the table (the soft hyphen, which browsers do not draw, apart). Not used by the page today: the map's star names
+    # go through T.mapName and W.smallText instead (whole pixels).
+    if '--ttf' not in sys.argv:
+        return
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import ttf_pixels
+    ttf = os.path.join(ROOT, 'assets', 'skins', 'dos', 'fonts', 'win31-smallfonts6.ttf')
+    print(ttf, ttf_pixels.write(ttf, 'Win31 Small Fonts', {c: (v[0], v[1:]) for c, v in table.items()}, f['h'], f['asc']), 'bytes')
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main([a for a in sys.argv[1:] if not a.startswith('--')][0])
