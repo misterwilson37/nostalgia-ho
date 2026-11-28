@@ -69,8 +69,11 @@ Sources (private repo `nostalgia-ho-sources`):
 - **Pictures in 16 colours.** Jake's captures are the 16-colour VGA display; the remake shows every picture (planets, ships, the won and lost boxes,
   Create New Galaxy's buttons) in its 256 colours, as the program shows them in 256-colour mode (its README's recommended one). Windows' VGA mapping of
   a 256-colour bitmap is a fixed function but not nearest-colour (Dense: 688 of 1,024 pixels agree with nearest-colour), and it was not worked out.
-- **The program's small face** (the End Turn button's words, the battle groups' words) is not Small Fonts 7 (SMALLE.FON read: its E is a pixel wider)
-  and is not identified; the End Turn button's English words are drawn from the capture's pixels.
+- **The program's small faces**, settled 28 Nov. Handle 0x5b39 (CreateFont "ROMAN", 8 pixels, 10c8:02ab) maps to the raster **Small Fonts 6 point**, because
+  Windows' mapper prefers a raster font over the Roman stroke font: the battle groups' words now use it (js/skins/dos/win31/smallfont.js, from SMALLE.FON by
+  tools/extract/win31-smallfont.py), 171 of shot 13's 173 pixels and none extra. The End Turn button's words are the **Roman stroke font** (a stroke renderer
+  covers 73-79 of shot 6's 81 pixels; GDI's exact rounding not reproduced), so English keeps the capture's pixels and other languages plain text. Not done:
+  the close-zoom star names in Small Fonts (the map code takes a CSS font: it needs Small Fonts as a web font, which needs fontTools, not installed here).
 - **The New Game dialogs** (Startup, Create New Galaxy, Player Entry, New Player Registration) live in the remake's title page and New Game window,
   with the remake's own choices beside or under them, so they are not where the program centres them.
 
@@ -88,10 +91,8 @@ Sources (private repo `nostalgia-ho-sources`):
    pixels, the hidden side's two lines at the program's 155, 95, New Game's "Writing New Game File..." Status window; and the battle window's place, which the
    placement rule had moved twice (now its own 32, 19). The audit's 4 gaps left: Close's empty main window (skipped, Jake 28 Nov), a letter flashing an ALERTBOX
    button (optional), star names in the small face at the 9-pixel zoom (waits on the font), one bevel helper with no caller found.
-4. The small face (battle groups' words, close-zoom star names, End Turn in every language) is found: the program's CreateFont calls at 10c8:025d-0360
-   (disassembled) make seven fonts, and handle 0x5b39 is 8 point, weight 100, face "ROMAN": Windows 3.1's Roman stroke font (ROMAN.FON, private repo
-   originals/fonts/windows/win31-fon). Selected by the battle window, the panes, the map's star names and the bubble's text routine. To do: read its strokes and draw
-   them as GDI does, checked against the End Turn and battle-label pixels.
+4. Done 28 Nov: the battle groups' words in Small Fonts 6 point (see Kept differences). Left: the close-zoom star names (needs a Small Fonts web font: run a
+   fontTools tool where fontTools is installed).
 5. Pictures in 16 colours: the VGA driver's mapping worked out from the captures' colour pairs (a "COLORINF.ASM rgb_to_ipc" table offered from elsewhere got
    221 of 903 certain pixels wrong: not used).
 6. Not captured, so not checked: Organize Ships with more than four piles, Page Setup, the Printing box (docs/missing-screenshots.md).
