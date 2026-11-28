@@ -66,9 +66,12 @@ Sources (private repo `nostalgia-ho-sources`):
 
 ## Kept differences (whole-look)
 
-- **Pictures in 16 colours.** Jake's captures are the 16-colour VGA display; the remake shows every picture (planets, ships, the won and lost boxes,
-  Create New Galaxy's buttons) in its 256 colours, as the program shows them in 256-colour mode (its README's recommended one). Windows' VGA mapping of
-  a 256-colour bitmap is a fixed function but not nearest-colour (Dense: 688 of 1,024 pixels agree with nearest-colour), and it was not worked out.
+- **Pictures in 16 colours: done 28 Nov.** With the look's "16 colours (VGA)" choice every picture is shown as Windows 3.1's VGA driver showed it: each
+  colour on the nearest of the 16 colours the VGA's DAC holds (the EGA palette), compared in the DAC's 6-bit units, the first of Windows' order on a tie.
+  Worked out from the captures: all 438 colours of the won, lost, About and Startup pictures (196,186 pixels) as captured; the won picture differs from shot 37
+  only under the mouse pointer (126 of 22,499 pixels). js/skins/dos/ui.js pictures16 recolours the page's picture table in place, and undoes it for 256 colours
+  and the DOS look. Kept: the 16 colours are shown in Windows' own values (navy 0, 0, 128 ...), as this look's frame is, where Jake's DOSBox shows its DAC's
+  (0, 0, 170 ...).
 - **The program's small faces**, settled 28 Nov. Handle 0x5b39 (CreateFont "ROMAN", 8 pixels, 10c8:02ab) maps to the raster **Small Fonts 6 point**, because
   Windows' mapper prefers a raster font over the Roman stroke font: the battle groups' words now use it (js/skins/dos/win31/smallfont.js, from SMALLE.FON by
   tools/extract/win31-smallfont.py), 171 of shot 13's 173 pixels and none extra. The End Turn button's words are the **Roman stroke font** (a stroke renderer
@@ -93,6 +96,5 @@ Sources (private repo `nostalgia-ho-sources`):
    button (optional), star names in the small face at the 9-pixel zoom (waits on the font), one bevel helper with no caller found.
 4. Done 28 Nov: the battle groups' words in Small Fonts 6 point (see Kept differences). Left: the close-zoom star names (needs a Small Fonts web font: run a
    fontTools tool where fontTools is installed).
-5. Pictures in 16 colours: the VGA driver's mapping worked out from the captures' colour pairs (a "COLORINF.ASM rgb_to_ipc" table offered from elsewhere got
-   221 of 903 certain pixels wrong: not used).
+5. Done 28 Nov: pictures in 16 colours (see Kept differences).
 6. Not captured, so not checked: Organize Ships with more than four piles, Page Setup, the Printing box (docs/missing-screenshots.md).

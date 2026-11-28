@@ -561,6 +561,43 @@ function crossW(x, h, v) {
   const N = 34; x.fillStyle = win16(['#800000'])[0];
   for (let y = 0; y < N; y++) { const a = Math.max(0, y - 2), b = Math.min(N - 1, y + 1); x.fillRect(h + a, v + y, b - a + 1, 1); x.fillRect(h + N - 1 - b, v + y, b - a + 1, 1); }
 }
+// The pictures in 16 colours (the Windows look's "16 colours (VGA)" choice): Windows 3.1's VGA driver shows a 256-colour bitmap by putting each colour on the
+// nearest of the 16 colours the VGA's DAC holds (the EGA palette: the dark ones at 42 of 63, the bright ones 63 with 21 in the other channels, the greys 21
+// and 42), compared in the DAC's own 6-bit units (the 8-bit value >> 2), the first of Windows' order on a tie. Worked out from Jake's captures: every one of the
+// 438 colours of the won, lost, About and Startup pictures (win20-jake-vga16-shot0037, 0050, 0057, 0001; 196,186 pixels) as captured, no dithering. Shown in
+// Windows' own values for those 16 (navy 0, 0, 128 ...), as the rest of this look's frame. Done to every picture of the page's table (HOAPI.IMG) in place, and
+// undone for 256 colours and the DOS look.
+const VGA_WIN = [[0, 0, 0], [128, 0, 0], [0, 128, 0], [128, 128, 0], [0, 0, 128], [128, 0, 128], [0, 128, 128], [192, 192, 192], [128, 128, 128], [255, 0, 0], [0, 255, 0], [255, 255, 0], [0, 0, 255], [255, 0, 255], [0, 255, 255], [255, 255, 255]];
+const VGA_DAC = [[0, 0, 0], [42, 0, 0], [0, 42, 0], [42, 42, 0], [0, 0, 42], [42, 0, 42], [0, 42, 42], [42, 42, 42], [21, 21, 21], [63, 21, 21], [21, 63, 21], [63, 63, 21], [21, 21, 63], [63, 21, 63], [21, 63, 63], [63, 63, 63]];
+const VGA_MEMO = new Map();
+function vga16(r, g, b) {
+  const key = (r << 16) | (g << 8) | b; let i = VGA_MEMO.get(key);
+  if (i == null) { const v = [r >> 2, g >> 2, b >> 2]; let e0 = 1e9; i = 0; VGA_DAC.forEach((d, k) => { const e = (v[0] - d[0]) ** 2 + (v[1] - d[1]) ** 2 + (v[2] - d[2]) ** 2; if (e < e0) { e0 = e; i = k; } }); VGA_MEMO.set(key, i); }
+  return VGA_WIN[i];
+}
+const pics16 = { on: false, pending: 0 };
+function pictures16() {
+  const a = window.HOAPI, de = document.documentElement; if (!a || !a.IMG) return;
+  const on = winOn() && !de.classList.contains('w31-256');
+  let changed = false;
+  for (const im of Object.values(a.IMG)) {
+    if (!im || !im.src || typeof im.src !== 'string') continue;
+    if (on && !im._src256) {
+      if (!im.complete || !im.naturalWidth) continue; // (looked at again when it has loaded)
+      try {
+        const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+        const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
+        for (let k = 0; k < p.length; k += 4) { if (!p[k + 3]) continue; const q = vga16(p[k], p[k + 1], p[k + 2]); p[k] = q[0]; p[k + 1] = q[1]; p[k + 2] = q[2]; }
+        x.putImageData(d, 0, 0); im._src256 = im.src; pics16.pending++; im.addEventListener('load', () => { if (--pics16.pending === 0) redraw16(); }, { once: true }); im.src = c.toDataURL(); changed = true;
+      } catch (e) { /* (a picture the page may not read stays as it is) */ }
+    } else if (!on && im._src256) { pics16.pending++; im.addEventListener('load', () => { if (--pics16.pending === 0) redraw16(); }, { once: true }); im.src = im._src256; delete im._src256; changed = true; }
+  }
+  pics16.on = on;
+  return changed;
+}
+function redraw16() { const a = window.HOAPI; if (a && a.G && a.renderPanel) { a.renderPanel(); a.draw(); } }
+new MutationObserver(() => pictures16()).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+setInterval(pictures16, 1000); // (pictures that load later: a new skin's, a ruleset's)
 // The bolt's three colours in the DOS program, by the shooting group's Weapons (Mac 2.0.1 DrawLaserBlast @d3e20: the middle line at hue (W - 1) x 4000,
 // full value; the lines 1 and 2 to each side 7500 and 15000 further round at values 45000 and 25000; the DOS program's palette puts them on these,
 // measured on its battles, W 1 to 5: battles/v20dos-orig-battle01..06, and 9: Jake's image0134). Between and past those, not captured, the hue is interpolated.
