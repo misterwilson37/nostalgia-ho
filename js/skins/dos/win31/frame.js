@@ -111,7 +111,11 @@ ${S} .dosbar.v { left: ${u(375)}; top: 0; width: ${u(17)}; height: ${u(293)}; }
 ${S} .dosbar.h { left: 0; top: ${u(293)}; width: ${u(375)}; height: ${u(17)}; }
 ${S} #panel .doslow { height: ${u(85)}; border-bottom: 0; box-shadow: inset ${u(-1)} 0 0 #000; font: ${u(11)} ${F}; }
 ${S} .dosroster { top: ${u(3)}; width: ${u(75)}; }
-${S} .dosroster .rrow { gap: ${u(2)}; padding-left: ${u(9)}; height: ${u(16)}; }
+${S} .dosroster .rrow { gap: ${u(2)}; padding-left: ${u(9)}; height: ${u(18)}; position: relative; } /* (rows 18 apart: shot 39's four players) */
+/* an eliminated player (FUN_1088_2a6b): the face crossed out by a 2-pixel black pen, corner to corner of the face's rectangle grown by one, 18 x 18 (its pixels as
+   shot 39 has them, the same over Elizabeth's, Sue's and Wendy's faces); the row is not dimmed */
+${S} .dosroster .rrow.out { opacity: 1; }
+${S} .dosroster .rx { position: absolute; left: ${u(8)}; top: 0; width: ${u(18)}; height: ${u(18)}; pointer-events: none; background: ${svg(18, 18, [[0, 0, 2, 1, K], [16, 0, 2, 1, K], [0, 1, 3, 1, K], [15, 1, 3, 1, K], [0, 2, 4, 1, K], [14, 2, 4, 1, K], [1, 3, 4, 1, K], [13, 3, 4, 1, K], [2, 4, 4, 1, K], [12, 4, 4, 1, K], [3, 5, 4, 1, K], [11, 5, 4, 1, K], [4, 6, 4, 1, K], [10, 6, 4, 1, K], [5, 7, 8, 1, K], [6, 8, 6, 1, K], [7, 9, 4, 1, K], [6, 10, 6, 1, K], [5, 11, 8, 1, K], [4, 12, 4, 1, K], [10, 12, 4, 1, K], [3, 13, 4, 1, K], [11, 13, 4, 1, K], [2, 14, 4, 1, K], [12, 14, 4, 1, K], [1, 15, 4, 1, K], [13, 15, 4, 1, K], [0, 16, 4, 1, K], [14, 16, 4, 1, K], [0, 17, 3, 1, K], [15, 17, 3, 1, K]])} 0 0 / 100% 100% no-repeat; }
 ${S} #panel .dosbudget { left: ${u(92)}; width: ${u(131)}; }
 ${S} #panel .dosbudget::before { left: ${u(53)}; top: ${u(15)}; }
 ${S} #panel .dosbudget h3.dosstrip { margin: 0 0 0 ${u(54)}; height: ${u(15)}; width: ${u(77)}; font: bold ${u(8)}/${u(12)} Arial, sans-serif; align-items: flex-start; padding-top: ${u(3)}; box-sizing: border-box; }

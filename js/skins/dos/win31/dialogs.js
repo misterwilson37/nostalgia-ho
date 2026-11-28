@@ -677,6 +677,20 @@ W.status = function (g, go) {
   };
   setTimeout(step, 40);
 };
+// New Game's Status window (FUN_1050_01c4: string 1025, "Writing New Game File...", AX 0x401 at 1050:02f9, while the new galaxy's file is written): template 33 where End
+// Turn's opens, the bar filled a player at a time (as Mac 2.0.1's same window, the remake's js/skins/mac12/ui.js beforeFirstTurn), then the first turn.
+W.statusNew = function (g, go) {
+  const a = root.HOAPI, tl = (t) => (a.tl ? a.tl(t) : t), n = Math.max(1, g.players.length); if (!W.templates) return false;
+  let i = 0;
+  const bar = (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.fillStyle = document.documentElement.classList.contains('w31-256') ? '#008200' : '#00aa55'; x.fillRect(1, 1, Math.round((w - 2) * i / n), h - 2); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(0.5, 0.5, w - 1, h - 1); };
+  const dlg = W.open(33, { title: 'Spaceward Ho! Status', label: 'Spaceward Ho! Status', text: { 100: tl('Writing New Game File...') }, pics: { 101: bar }, at: [W.snap(222), 54] });
+  if (!dlg) return false;
+  dlg.el.setAttribute('aria-busy', 'true');
+  const b = dlg.get('101');
+  const step = () => { if (!dlg.el.isConnected) return go(); if (++i > n) { a.closeModal(); go(); return; } if (b && b.w31) b.w31.repaint(); setTimeout(step, 40); };
+  setTimeout(step, 40);
+  return true;
+};
 // #23 NOTIFY1 (NOTIFYDLGPROC; FUN_1008_0788: CreateDialog, modeless, with "Closing Game..." while the game file is closed, FUN_1050_0d02: File, Close and opening
 // another game; captured, frames grabbed while it showed: win20-orig-vga16-closing.png): WS_DLGFRAME without a caption: a black line, four of navy and a black line
 // round the 224 x 44 client (measured), the words centred (static 100). The remake: the DOS look's Closing Game window's place (js/skins/dos/ui.js closingGameDos,

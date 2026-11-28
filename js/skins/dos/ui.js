@@ -265,6 +265,8 @@ window.HOTHEME = {
   menuLayoutNow() { return menuLayoutDos(); },
   gameInfo(win) { return gameInfo(win); },
   licensee() { return licensee(); },
+  // (the Windows program's Status window "Writing New Game File..." while a new galaxy is written: js/skins/dos/win31/dialogs.js statusNew)
+  beforeFirstTurn(go) { const g = window.HOAPI.G; return !!(winOn() && g && window.HOWIN31 && window.HOWIN31.statusNew && window.HO.rules(g).id === 'dos' && window.HOWIN31.statusNew(g, go)); },
   turnProgress(g, go) {
     if (winOn() && playAloneWin(g, () => this.turnProgress(g, go))) return;
     if (winOn() && window.HOWIN31 && window.HOWIN31.status) window.HOWIN31.status(g, go); else go();
@@ -553,6 +555,12 @@ function win16(cols, bolt) {
   const near = (c) => { const v = rgb(c); let b = WIN16[0], d = 1e9; for (const p of WIN16) { const e = (p[0] - v[0]) ** 2 + (p[1] - v[1]) ** 2 + (p[2] - v[2]) ** 2; if (e < d) { d = e; b = p; } } return `rgb(${b.join(',')})`; };
   const out = cols.map(near); if (bolt) out[2] = out[1]; return out;
 }
+// The Windows program's cross over a beaten side's face (FUN_1018_2590: two lines with a 2-pixel pen of 128, 0, 0, the face's rectangle grown by one): 34 x 34, its
+// pixels as Jake's win20-jake-vga16-shot0049.png has them (the same pen pattern as the players pane's, frame.js .rx), the colour through the 16 colours (170, 0, 85 there)
+function crossW(x, h, v) {
+  const N = 34; x.fillStyle = win16(['#800000'])[0];
+  for (let y = 0; y < N; y++) { const a = Math.max(0, y - 2), b = Math.min(N - 1, y + 1); x.fillRect(h + a, v + y, b - a + 1, 1); x.fillRect(h + N - 1 - b, v + y, b - a + 1, 1); }
+}
 // The bolt's three colours in the DOS program, by the shooting group's Weapons (Mac 2.0.1 DrawLaserBlast @d3e20: the middle line at hue (W - 1) x 4000,
 // full value; the lines 1 and 2 to each side 7500 and 15000 further round at values 45000 and 25000; the DOS program's palette puts them on these,
 // measured on its battles, W 1 to 5: battles/v20dos-orig-battle01..06, and 9: Jake's image0134). Between and past those, not captured, the hue is interpolated.
@@ -606,10 +614,10 @@ function battleDos(b, k) {
   let stop = false, skip = false, done = false, btn, d, S1 = U;
   const onBtn = () => { if (done) a.closeModal(); else skip = true; };
   if (win) {
-    const dlg = window.HOWIN31.open(7, { label: 'Summary of battle', client: [446, 358], text: { 2: 'Skip' }, on: { 2: onBtn }, close: () => a.closeModal() });
+    const dlg = window.HOWIN31.open(7, { label: 'Summary of battle', client: [446, 358], at: [32, 19], text: { 2: 'Skip' }, on: { 2: onBtn }, close: () => a.closeModal() }); // (its frame at 32, 19: the template's x, y from the screen's corner, not the main window's: captured, shots 13-60)
     d = dlg.el; btn = dlg.get('2'); S1 = parseFloat(getComputedStyle(d).getPropertyValue('--wu')) || U;
     Object.assign(c.style, { background: '#000', position: 'absolute', left: '0', top: '0', width: 'calc(446 * var(--wu))', height: 'calc(358 * var(--wu))' }); Hh = 358;
-    d.querySelector('.w31client').prepend(c); d.style.transform = 'translate(calc(-60 * var(--wu)), calc(-37 * var(--wu)))'; // (placed by the template's x, y, not centred)
+    d.querySelector('.w31client').prepend(c);
   }
   c.width = Math.round(W * S1 * dpr * 1); c.height = Math.round(Hh * S1 * dpr);
   if (!win) dAt(c, 5, 5, W, Hh);
@@ -652,7 +660,7 @@ function battleDos(b, k) {
   const paintHead = () => { x.fillStyle = '#000'; x.fillRect(0, 0, W, Hh); drawStars(); text(P0.head[0], win ? 219 : 220, 34, true, true); text(P0.head[1], win ? 219 : 220, 50, true, true); [0, 1].forEach(ci => { if (owners[ci] != null) face(owners[ci], ci); }); };
   const roundLabel = (n) => { x.fillStyle = '#000'; x.fillRect(190, 263, 80, 21); text(tx('Round %d').replace('%d', n), 198, win ? 280 : 277, true); }; // (DOS: 3 higher, image0033)
   paintHead();
-  [0, 1].forEach(ci => { if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || '', win ? 150 : 159, win ? 100 : 116, true); text(L.destroyed || '', win ? 150 : 159, win ? 116 : 132, true); /* (DOS: at 164, 112 and 128 of the window, the glyphs' tops: Jake's image0058, 0063, 0170) */ skip = true; } else cols[ci].forEach(drawGroup); });
+  [0, 1].forEach(ci => { if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || '', win ? 155 : 159, win ? 117 : 116, true); text(L.destroyed || '', win ? 155 : 159, win ? 133 : 132, true); /* (Windows: TextOut at 155, 95 and 155, 95 + 16 of the client, cell tops, FUN_1018_1f67 at 1018:1fd0-2024: the System font's baselines 13 lower, and this canvas draws 9 higher) */ /* (DOS: at 164, 112 and 128 of the window, the glyphs' tops: Jake's image0058, 0063, 0170) */ skip = true; } else cols[ci].forEach(drawGroup); });
   const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
   const cellOf = (ev, shooter) => shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti));
   const pxLine = (h0, v0, h1, v1, col) => { x.fillStyle = col; let dx = Math.abs(h1 - h0), dy = -Math.abs(v1 - v0), sx = h0 < h1 ? 1 : -1, sy = v0 < v1 ? 1 : -1, e = dx + dy;
@@ -699,7 +707,7 @@ function battleDos(b, k) {
     pop = fPop; done = true; paintHead(); roundLabel(Math.max(1, b.rounds.length));
     [0, 1].forEach(ci => { if (!hidden[ci]) cols[ci].forEach(drawGroup); });
     [0, 1].forEach(ci => { const o = owners[ci]; if (o == null) return; const left = b.start.some((u, i) => alive[i] && u.o === o) || (b.planetOwner === o && pop > 0.0005);
-      if (!left) { const [h, v] = FACE[ci]; x.strokeStyle = '#8a0000'; x.lineWidth = 2; x.beginPath(); x.moveTo(h + 1, v + 1); x.lineTo(h + 33, v + 32); x.moveTo(h + 1, v + 32); x.lineTo(h + 33, v + 1); x.stroke(); } });
+      if (!left) { const [h, v] = FACE[ci]; if (winOn()) crossW(x, h - 1, v - 1); else { x.strokeStyle = '#8a0000'; x.lineWidth = 2; x.beginPath(); x.moveTo(h + 1, v + 1); x.lineTo(h + 33, v + 32); x.moveTo(h + 1, v + 32); x.lineTo(h + 33, v + 1); x.stroke(); } } });
     const P = rs.battlePanel(g, b, { alive, hurt, pop, over: true, won }, ME);
     (P.end || []).forEach((t, i) => text(t, 217.5, i ? 172 : 156, true, true));
     const im = pic(won ? 'd3500' : 'd3510'); if (im) x.drawImage(im, 183, 184, 74, 74);
@@ -1129,7 +1137,9 @@ function rosterDos() {
   for (const p of g.players.filter(x => x.human || g.turn > 0)) {
     const im = a.IMG[p.id === a.ME ? 'white0_0' : 'bad' + (p.face || 0) + '_0'], done = !p.human || (g.done || []).includes(p.id);
     const row = a.el('div', { class: 'rrow' + (p.alive ? '' : ' out') }, im ? a.el('img', { src: im.src, alt: '', width: 16, height: 16 }) : a.el('span'), a.el('span', { class: 'rname', translate: 'no' }, p.name));
-    if (g.turn > 0 && p.alive && done) row.prepend(a.el('span', { class: 'rdone', translate: 'no' }, '\u2713'));
+    // (the Windows program ticks an eliminated player too, and crosses out the face: FUN_1088_2a6b, Jake's win20-jake-vga16-shot0039.png; the DOS look dims the row)
+    if (g.turn > 0 && (p.alive || winOn()) && done) row.prepend(a.el('span', { class: 'rdone', translate: 'no' }, '\u2713'));
+    if (!p.alive && winOn()) row.append(a.el('span', { class: 'rx', 'aria-hidden': 'true' }));
     box.append(row);
   }
   return box;
