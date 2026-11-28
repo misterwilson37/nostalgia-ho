@@ -41,7 +41,7 @@ Sources (private repo `nostalgia-ho-sources`):
 | End Turn button | `win20-jake-vga16-main-endturn` | done 27 Nov | Pixel for pixel with shot 6 (0 of 1,683 pixels differ, at 247, 44, 51 x 33): one cyan row and the dark cyan corners under it, the stepped dark foot (it had two cyan rows and a square foot), and the English words as the capture's pixels: the program's small face is not Small Fonts 7 (SMALLE.FON read: its E is a pixel wider) and is otherwise unidentified, and our MS Sans Serif at 10 pixels came out blurred and a row high. Other languages keep the words as text. |
 | Build Ships (shipbuilding queue) | shots 12, 14 | done 27 Nov | Beside shot 12 at first load: frame (48, 63 to 581, 404, as captured), words, the list of types, the three queue cells, Cancel, OK. It had been centred (see the byte-alignment row). The capture's queue holds a ship; the remake's opens empty in a new game (Jake had queued one). |
 | Create New Ship Type | shots 17, 18, 28 | done 27 Nov | Beside shot 17: frame 24, 73 to 543, 368 as captured; the five bars (a one-value bar keeps its thumb at the start: captured in chunk 3), Class, costs, buttons. |
-| Battle window | shots 13, 15, 16, 19-24, 30-36, 45-49, 60 | done (25 Nov) | Compared on 25 Nov with Jake's shots 13-60 (docs/win20-findings.md, "Battles from Jake's Windows 3.1 game"): the window at 32, 19 (from the screen's corner), the bolts in the 16 colours, the planet and satellites, the words. Not re-run this session (a battle needs a played game); kept: the groups' words in Geneva 9, the program's are Windows' Small Fonts (unidentified face, see End Turn). |
+| Battle window | shots 13, 15, 16, 19-24, 30-36, 45-49, 60 | done (25 Nov; 28 Nov) | Compared on 25 Nov with Jake's shots 13-60 (docs/win20-findings.md, "Battles from Jake's Windows 3.1 game"): the window at 32, 19 (from the screen's corner), the bolts in the 16 colours, the planet and satellites, the words. Not re-run this session (a battle needs a played game); kept: the groups' words in Geneva 9, the program's are Windows' Small Fonts (unidentified face, see End Turn). |
 | Warnings (underfunded colonies, fuel) | shots 25, 26, 29 | done 27 Nov | Beside shots 25 and 26. Fixed: the underfunded colonies' box had OK and Cancel in this look; now the program's Cancel and Let 'em Die (straight quote, as captured), the box's width following. The fuel alert matches (words, mascot, OK). The main caption stays active under an alert, as captured. |
 | Copy protection (28 REGISTER) | shot 27 | not built | The remake asks no copy protection in any skin (docs/win20-findings.md, chunk 5a). |
 | You won the galaxy (3 ALERT_CPIC) | shot 37 | done 27 Nov | Beside shot 37 at its place (168, 93: the template's place by the rule above), the words, the button. The picture: HOCOLOR.DLL's own 5040 and 5050 are pixel for pixel the DOS skin's d5040 and d5050 (0 of 22,499 pixels differ: read with tools/extract/windlg.py), so the box already shows the Windows program's bitmap; the capture's looks different because it is the 16-colour display's mapping of it (see Create New Galaxy). |
@@ -84,8 +84,14 @@ Sources (private repo `nostalgia-ho-sources`):
 
 1. Jake's look at the preview: the menus, the bubble, the system menu, the dialogs' places.
 2. "Needs a shared file" above (the main session or Jake).
-3. The display audit's 8 gaps left (`node tools/display-audit.js win20 --gaps`, each row says what differs): an eliminated player's face crossed out in the
-   players pane (the remake dims the row), the battle window's cross in the 16 colours, the battle's "You have no information." lines (17 px high), New Game's
-   "Writing New Game File..." Status window, Close's empty main window, star names in the small face at the 9-pixel zoom, a plain letter flashing an
-   ALERTBOX button, one bevel helper with no caller found. The other 53 of the 61 rows were attributed 27 Nov (38 matched, 23 notShown, 682 internal in all).
-4. Not captured, so not checked: Organize Ships with more than four piles, Page Setup, the Printing box (docs/missing-screenshots.md).
+3. Done 28 Nov (commit 2e1b1f6): eliminated players crossed out (shot 39; ticked too, rows 18 apart), the battle's cross through the 16 colours on shot 49's
+   pixels, the hidden side's two lines at the program's 155, 95, New Game's "Writing New Game File..." Status window; and the battle window's place, which the
+   placement rule had moved twice (now its own 32, 19). The audit's 4 gaps left: Close's empty main window (skipped, Jake 28 Nov), a letter flashing an ALERTBOX
+   button (optional), star names in the small face at the 9-pixel zoom (waits on the font), one bevel helper with no caller found.
+4. The small face (battle groups' words, close-zoom star names, End Turn in every language) is found: the program's CreateFont calls at 10c8:025d-0360
+   (disassembled) make seven fonts, and handle 0x5b39 is 8 point, weight 100, face "ROMAN": Windows 3.1's Roman stroke font (ROMAN.FON, private repo
+   originals/fonts/windows/win31-fon). Selected by the battle window, the panes, the map's star names and the bubble's text routine. To do: read its strokes and draw
+   them as GDI does, checked against the End Turn and battle-label pixels.
+5. Pictures in 16 colours: the VGA driver's mapping worked out from the captures' colour pairs (a "COLORINF.ASM rgb_to_ipc" table offered from elsewhere got
+   221 of 903 certain pixels wrong: not used).
+6. Not captured, so not checked: Organize Ships with more than four piles, Page Setup, the Printing box (docs/missing-screenshots.md).
